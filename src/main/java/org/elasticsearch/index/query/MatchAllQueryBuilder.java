@@ -19,20 +19,30 @@
 
 package org.elasticsearch.index.query;
 
+import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.Query;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.inject.Inject;
+import org.elasticsearch.common.io.stream.StreamInput;
+import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.common.io.stream.Streamable;
+import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentParser;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * A query that matches on all documents.
  *
  *
  */
-public class MatchAllQueryBuilder extends BaseQueryBuilder implements BoostableQueryBuilder<MatchAllQueryBuilder> {
+public class MatchAllQueryBuilder extends BaseQueryBuilder implements Streamable, BoostableQueryBuilder<MatchAllQueryBuilder> {
 
     private String normsField;
 
-    private float boost = -1;
+    private float boost = 1.0f;
 
     /**
      * Field used for normalization factor (document boost). Defaults to no field.
@@ -52,15 +62,111 @@ public class MatchAllQueryBuilder extends BaseQueryBuilder implements BoostableQ
         return this;
     }
 
+    /**
+     * @return the boost factor
+     */
+    float getBoost() {
+        return this.boost;
+    }
+
     @Override
     public void doXContent(XContentBuilder builder, Params params) throws IOException {
         builder.startObject(MatchAllQueryParser.NAME);
-        if (boost != -1) {
+        if (boost != 1.0f) {
             builder.field("boost", boost);
         }
         if (normsField != null) {
             builder.field("norms_field", normsField);
         }
         builder.endObject();
+    }
+
+    public Query toQuery() {
+        if (boost == 1.0f) {
+            return Queries.newMatchAllQuery();
+        }
+
+        //LUCENE 4 UPGRADE norms field is not supported anymore need to find another way or drop the functionality
+        //MatchAllDocsQuery query = new MatchAllDocsQuery(normsField);
+        MatchAllDocsQuery query = new MatchAllDocsQuery();
+        query.setBoost(boost);
+        return query;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = super.hashCode();
+        hash = maybeHashcode(hash, boost);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        MatchAllQueryBuilder other = (MatchAllQueryBuilder) obj;
+        return Objects.equals(boost, other.boost);
+    }
+
+    /**
+     * Return a prime (31) times the staring hash and object's hash, if non-null
+     */
+    private int maybeHashcode(int startingHash, Object obj) {
+        return 31 * startingHash + ((obj == null) ? 0 : obj.hashCode());
+    }
+
+    @Override
+    public void readFrom(StreamInput in) throws IOException {
+        this.boost = in.readFloat();
+    }
+
+    @Override
+    public void writeTo(StreamOutput out) throws IOException {
+        out.writeFloat(this.boost);
+    }
+
+    public static class MatchAllQueryParser implements QueryParser {
+
+        public static final String NAME = "match_all";
+
+        @Inject
+        public MatchAllQueryParser() {
+        }
+
+        @Override
+        public String[] names() {
+            return new String[]{NAME, Strings.toCamelCase(NAME)};
+        }
+
+        public static MatchAllQueryBuilder fromXContent(QueryParseContext parseContext) throws IOException {
+            MatchAllQueryBuilder query = new MatchAllQueryBuilder();
+            XContentParser parser = parseContext.parser();
+
+            String currentFieldName = null;
+
+            XContentParser.Token token;
+            while (((token = parser.nextToken()) != XContentParser.Token.END_OBJECT && token != XContentParser.Token.END_ARRAY)) {
+                if (token == XContentParser.Token.FIELD_NAME) {
+                    currentFieldName = parser.currentName();
+                } else if (token.isValue()) {
+                    if ("boost".equals(currentFieldName)) {
+                        query.boost = parser.floatValue();
+                    } else {
+                        throw new QueryParsingException(parseContext.index(), "[match_all] query does not support [" + currentFieldName + "]");
+                    }
+                }
+            }
+            return query;
+        }
+
+        @Override
+        public Query parse(QueryParseContext parseContext) throws IOException, QueryParsingException {
+            return fromXContent(parseContext).toQuery();
+        }
     }
 }
