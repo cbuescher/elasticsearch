@@ -143,7 +143,7 @@ public class MatchAllQueryBuilder extends BaseQueryBuilder implements Streamable
             return new String[]{NAME, Strings.toCamelCase(NAME)};
         }
 
-        public static MatchAllQueryBuilder fromXContent(QueryParseContext parseContext) throws IOException {
+        public MatchAllQueryBuilder fromXContent(QueryParseContext parseContext) throws IOException {
             MatchAllQueryBuilder query = new MatchAllQueryBuilder();
             XContentParser parser = parseContext.parser();
 

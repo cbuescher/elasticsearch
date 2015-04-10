@@ -42,4 +42,6 @@ public interface QueryParser {
      */
     @Nullable
     Query parse(QueryParseContext parseContext) throws IOException, QueryParsingException;
+
+    // later this: BaseQueryBuilder fromXContent(QueryParseContext parseContext) throws IOException, QueryParsingException;
 }

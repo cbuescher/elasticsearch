@@ -19,17 +19,22 @@
 
 package org.elasticsearch.index.query;
 
+import org.apache.lucene.search.Query;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentType;
 
+import java.io.IOException;
+
 /**
  *
  */
-public interface QueryBuilder extends ToXContent {
+public interface QueryBuilder extends ToXContent { // later Streamable also
 
     BytesReference buildAsBytes() throws ElasticsearchException;
 
     BytesReference buildAsBytes(XContentType contentType) throws ElasticsearchException;
+    
+    // later: Query toQuery();
 }
