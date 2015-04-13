@@ -20,6 +20,7 @@
 package org.elasticsearch.index.query;
 
 import com.google.common.collect.Lists;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.sandbox.queries.FuzzyLikeThisQuery;
 import org.apache.lucene.search.Query;
@@ -46,7 +47,7 @@ import java.util.List;
  * }
  * </pre>
  */
-public class FuzzyLikeThisQueryParser implements QueryParser {
+public class FuzzyLikeThisQueryParser extends BaseQueryParser {
 
     public static final String NAME = "flt";
     private static final ParseField FUZZINESS = Fuzziness.FIELD.withDeprecation("min_similarity");

@@ -81,7 +81,7 @@ public class MatchAllQueryBuilder extends BaseQueryBuilder implements Streamable
         builder.endObject();
     }
 
-    public Query toQuery() {
+    public Query toQuery(QueryParseContext parseContext) {
         if (boost == 1.0f) {
             return Queries.newMatchAllQuery();
         }
@@ -166,7 +166,7 @@ public class MatchAllQueryBuilder extends BaseQueryBuilder implements Streamable
 
         @Override
         public Query parse(QueryParseContext parseContext) throws IOException, QueryParsingException {
-            return fromXContent(parseContext).toQuery();
+            return fromXContent(parseContext).toQuery(parseContext);
         }
     }
 }

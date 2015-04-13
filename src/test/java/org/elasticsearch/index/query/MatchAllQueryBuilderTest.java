@@ -141,7 +141,7 @@ public class MatchAllQueryBuilderTest extends ElasticsearchTestCase {
     public void testToQuery() throws IOException {
         context.reset(parser);
         MatchAllQueryBuilder newMatchAllQuery = new MatchAllQueryBuilder.MatchAllQueryParser().fromXContent(context);
-        Query query = newMatchAllQuery.toQuery();
+        Query query = newMatchAllQuery.toQuery(context);
         // compare these
         assertThat(query.getBoost(), is(testQuery.getBoost()));
     }

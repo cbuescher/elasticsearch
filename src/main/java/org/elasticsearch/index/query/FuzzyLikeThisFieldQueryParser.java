@@ -45,7 +45,7 @@ import java.io.IOException;
  * }
  * </pre>
  */
-public class FuzzyLikeThisFieldQueryParser implements QueryParser {
+public class FuzzyLikeThisFieldQueryParser extends BaseQueryParser {
 
     public static final String NAME = "flt_field";
     private static final Fuzziness DEFAULT_FUZZINESS = Fuzziness.fromSimilarity(0.5f);

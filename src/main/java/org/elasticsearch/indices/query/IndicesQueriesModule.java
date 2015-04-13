@@ -76,7 +76,7 @@ public class IndicesQueriesModule extends AbstractModule {
         qpBinders.addBinding().to(IdsQueryParser.class).asEagerSingleton();
         qpBinders.addBinding().to(MatchAllQueryBuilder.MatchAllQueryParser.class).asEagerSingleton();
         qpBinders.addBinding().to(QueryStringQueryParser.class).asEagerSingleton();
-        qpBinders.addBinding().to(BoostingQueryParser.class).asEagerSingleton();
+        qpBinders.addBinding().to(BoostingQueryBuilder.BoostingQueryParser.class).asEagerSingleton();
         qpBinders.addBinding().to(BoolQueryParser.class).asEagerSingleton();
         qpBinders.addBinding().to(TermQueryParser.class).asEagerSingleton();
         qpBinders.addBinding().to(TermsQueryParser.class).asEagerSingleton();
