@@ -64,8 +64,7 @@ public class RangeQueryBuilderTest extends BaseQueryTestCase<RangeQueryBuilder> 
             query.from(new DateTime(System.currentTimeMillis() - randomIntBetween(0, 1000000)).toString());
             query.to(new DateTime(System.currentTimeMillis() + randomIntBetween(0, 1000000)).toString());
             // Create timestamp option only then we have a date mapper, otherwise we could trigger exception.
-            // We should have a mapper when we added at least one type in setup.
-            if (getCurrentTypes().length > 0) {
+            if (createContext().mapperService().smartNameFieldType(DATE_FIELD_NAME) != null) {
                 if (randomBoolean()) {
                     query.timeZone(TIMEZONE_IDS.get(randomIntBetween(0, TIMEZONE_IDS.size() - 1)));
                 }
