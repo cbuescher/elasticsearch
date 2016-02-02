@@ -31,6 +31,7 @@ import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.PhraseQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.lucene.all.AllTermQuery;
 import org.elasticsearch.common.lucene.search.MultiPhrasePrefixQuery;
 import org.elasticsearch.index.search.MatchQuery;
@@ -251,5 +252,29 @@ public class MultiMatchQueryBuilderTests extends AbstractQueryTestCase<MultiMatc
         assertEquals(json, 3, parsed.fields().size());
         assertEquals(json, MultiMatchQueryBuilder.Type.MOST_FIELDS, parsed.type());
         assertEquals(json, Operator.OR, parsed.operator());
+    }
+
+    /**
+     * based on #16169, the "message" level here is wrong and should trigger an exception
+     */
+    public void testIncorrectJson16169() throws IOException {
+        String json =
+                "{\n" +
+                "   \"multi_match\": {" +
+                "       \"message\": {" +
+                "           \"fields\": [ \"title\" ]," +
+                "           \"operator\": \"or\"," +
+                "           \"query\": \"ellis \"," +
+                "           \"zero_terms_query\": \"all\"" +
+                "        }" +
+                "   }" +
+                "}";
+
+        try {
+            parseQuery(json);
+            fail("Parsing Exception expected");
+        } catch (ParsingException e) {
+            assertEquals("[multi_match] unknown token [START_OBJECT] after [message]", e.getMessage());
+        }
     }
 }
