@@ -20,6 +20,7 @@
 package org.elasticsearch.search.sort;
 
 import org.elasticsearch.common.Nullable;
+import org.elasticsearch.index.query.EmptyQueryBuilder;
 import org.elasticsearch.index.query.IdsQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -38,15 +39,17 @@ public class RandomSortDataGenerator {
         @SuppressWarnings("rawtypes")
         QueryBuilder nested = null;
         while (nested == null || nested.equals(original)) {
-            switch (ESTestCase.randomInt(2)) {
+            switch (ESTestCase.randomInt(3)) {
             case 0:
                 nested = new MatchAllQueryBuilder();
                 break;
             case 1:
                 nested = new IdsQueryBuilder();
                 break;
-            default:
             case 2:
+                nested = new EmptyQueryBuilder();
+            default:
+            case 3:
                 nested = new TermQueryBuilder(ESTestCase.randomAsciiOfLengthBetween(1, 10), ESTestCase.randomDouble());
                 break;
             }

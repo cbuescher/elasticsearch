@@ -75,7 +75,7 @@ public abstract class AbstractSortTestCase<T extends SortBuilder<T>> extends EST
 
     protected static NamedWriteableRegistry namedWriteableRegistry;
 
-    private static final int NUMBER_OF_TESTBUILDERS = 20;
+    private static final int NUMBER_OF_TESTBUILDERS = 200;
     static IndicesQueriesRegistry indicesQueriesRegistry;
     private static ScriptService scriptService;
 

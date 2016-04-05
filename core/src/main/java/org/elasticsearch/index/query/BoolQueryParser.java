@@ -52,15 +52,15 @@ public class BoolQueryParser implements QueryParser<BoolQueryBuilder> {
         float boost = AbstractQueryBuilder.DEFAULT_BOOST;
         String minimumShouldMatch = null;
 
-        final List<QueryBuilder> mustClauses = new ArrayList<>();
-        final List<QueryBuilder> mustNotClauses = new ArrayList<>();
-        final List<QueryBuilder> shouldClauses = new ArrayList<>();
-        final List<QueryBuilder> filterClauses = new ArrayList<>();
+        final List<QueryBuilder<?>> mustClauses = new ArrayList<>();
+        final List<QueryBuilder<?>> mustNotClauses = new ArrayList<>();
+        final List<QueryBuilder<?>> shouldClauses = new ArrayList<>();
+        final List<QueryBuilder<?>> filterClauses = new ArrayList<>();
         String queryName = null;
 
         String currentFieldName = null;
         XContentParser.Token token;
-        QueryBuilder query;
+        QueryBuilder<?> query;
         while ((token = parser.nextToken()) != XContentParser.Token.END_OBJECT) {
             if (token == XContentParser.Token.FIELD_NAME) {
                 currentFieldName = parser.currentName();
@@ -70,20 +70,28 @@ public class BoolQueryParser implements QueryParser<BoolQueryBuilder> {
                 switch (currentFieldName) {
                 case MUST:
                     query = parseContext.parseInnerQueryBuilder();
-                    mustClauses.add(query);
+                    if ((query instanceof EmptyQueryBuilder) == false) {
+                        mustClauses.add(query);
+                    }
                     break;
                 case SHOULD:
                     query = parseContext.parseInnerQueryBuilder();
-                    shouldClauses.add(query);
+                    if ((query instanceof EmptyQueryBuilder) == false) {
+                        shouldClauses.add(query);
+                    }
                     break;
                 case FILTER:
                     query = parseContext.parseInnerQueryBuilder();
-                    filterClauses.add(query);
+                    if ((query instanceof EmptyQueryBuilder) == false) {
+                        filterClauses.add(query);
+                    }
                     break;
                 case MUST_NOT:
                 case MUSTNOT:
                     query = parseContext.parseInnerQueryBuilder();
-                    mustNotClauses.add(query);
+                    if ((query instanceof EmptyQueryBuilder) == false) {
+                        mustNotClauses.add(query);
+                    }
                     break;
                 default:
                     throw new ParsingException(parser.getTokenLocation(), "[bool] query does not support [" + currentFieldName + "]");
@@ -93,20 +101,28 @@ public class BoolQueryParser implements QueryParser<BoolQueryBuilder> {
                     switch (currentFieldName) {
                     case MUST:
                         query = parseContext.parseInnerQueryBuilder();
-                        mustClauses.add(query);
+                        if ((query instanceof EmptyQueryBuilder) == false) {
+                            mustClauses.add(query);
+                        }
                         break;
                     case SHOULD:
                         query = parseContext.parseInnerQueryBuilder();
-                        shouldClauses.add(query);
+                        if ((query instanceof EmptyQueryBuilder) == false) {
+                            shouldClauses.add(query);
+                        }
                         break;
                     case FILTER:
                         query = parseContext.parseInnerQueryBuilder();
-                        filterClauses.add(query);
+                        if ((query instanceof EmptyQueryBuilder) == false) {
+                            filterClauses.add(query);
+                        }
                         break;
                     case MUST_NOT:
                     case MUSTNOT:
                         query = parseContext.parseInnerQueryBuilder();
-                        mustNotClauses.add(query);
+                        if ((query instanceof EmptyQueryBuilder) == false) {
+                            mustNotClauses.add(query);
+                        }
                         break;
                     default:
                         throw new ParsingException(parser.getTokenLocation(), "bool query does not support [" + currentFieldName + "]");
@@ -131,16 +147,16 @@ public class BoolQueryParser implements QueryParser<BoolQueryBuilder> {
             }
         }
         BoolQueryBuilder boolQuery = new BoolQueryBuilder();
-        for (QueryBuilder queryBuilder : mustClauses) {
+        for (QueryBuilder<?> queryBuilder : mustClauses) {
             boolQuery.must(queryBuilder);
         }
-        for (QueryBuilder queryBuilder : mustNotClauses) {
+        for (QueryBuilder<?> queryBuilder : mustNotClauses) {
             boolQuery.mustNot(queryBuilder);
         }
-        for (QueryBuilder queryBuilder : shouldClauses) {
+        for (QueryBuilder<?> queryBuilder : shouldClauses) {
             boolQuery.should(queryBuilder);
         }
-        for (QueryBuilder queryBuilder : filterClauses) {
+        for (QueryBuilder<?> queryBuilder : filterClauses) {
             boolQuery.filter(queryBuilder);
         }
         boolQuery.boost(boost);
