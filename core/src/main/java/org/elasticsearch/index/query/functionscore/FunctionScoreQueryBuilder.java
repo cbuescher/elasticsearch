@@ -215,7 +215,7 @@ public class FunctionScoreQueryBuilder extends AbstractQueryBuilder<FunctionScor
     /**
      * Returns the boost mode, meaning how the combined result of score functions will influence the final score together with the sub query
      * score.
-     * 
+     *
      * @see CombineFunction
      */
     public CombineFunction boostMode() {
@@ -477,7 +477,7 @@ public class FunctionScoreQueryBuilder extends AbstractQueryBuilder<FunctionScor
                     // getScoreFunction will throw.
                     ScoreFunctionBuilder<?> scoreFunction = scoreFunctionsRegistry
                             .getScoreFunction(currentFieldName, parseContext.parseFieldMatcher(), parseContext.parser().getTokenLocation())
-                            .fromXContent(parseContext, parser);
+                            .fromXContent(parseContext);
                     filterFunctionBuilders.add(new FunctionScoreQueryBuilder.FilterFunctionBuilder(scoreFunction));
                 }
             } else if (token == XContentParser.Token.START_ARRAY) {
@@ -487,7 +487,7 @@ public class FunctionScoreQueryBuilder extends AbstractQueryBuilder<FunctionScor
                         handleMisplacedFunctionsDeclaration(parser.getTokenLocation(), errorString);
                     }
                     functionArrayFound = true;
-                    currentFieldName = parseFiltersAndFunctions(scoreFunctionsRegistry, parseContext, parser, filterFunctionBuilders);
+                    currentFieldName = parseFiltersAndFunctions(scoreFunctionsRegistry, parseContext, filterFunctionBuilders);
                 } else {
                     throw new ParsingException(parser.getTokenLocation(), "failed to parse [{}] query. array [{}] is not supported",
                             NAME, currentFieldName);
@@ -555,7 +555,8 @@ public class FunctionScoreQueryBuilder extends AbstractQueryBuilder<FunctionScor
     }
 
     private static String parseFiltersAndFunctions(ScoreFunctionsRegistry scoreFunctionsRegistry, QueryParseContext parseContext,
-            XContentParser parser, List<FunctionScoreQueryBuilder.FilterFunctionBuilder> filterFunctionBuilders) throws IOException {
+            List<FunctionScoreQueryBuilder.FilterFunctionBuilder> filterFunctionBuilders) throws IOException {
+        XContentParser parser = parseContext.parser();
         String currentFieldName = null;
         XContentParser.Token token;
         while ((token = parser.nextToken()) != XContentParser.Token.END_ARRAY) {
@@ -580,7 +581,7 @@ public class FunctionScoreQueryBuilder extends AbstractQueryBuilder<FunctionScor
                                         scoreFunction.getName(), currentFieldName);
                             }
                             scoreFunction = scoreFunctionsRegistry.getScoreFunction(currentFieldName, parseContext.parseFieldMatcher(),
-                                    parseContext.parser().getTokenLocation()).fromXContent(parseContext, parser);
+                                    parseContext.parser().getTokenLocation()).fromXContent(parseContext);
                         }
                     } else if (token.isValue()) {
                         if (parseContext.parseFieldMatcher().match(currentFieldName, WEIGHT_FIELD)) {

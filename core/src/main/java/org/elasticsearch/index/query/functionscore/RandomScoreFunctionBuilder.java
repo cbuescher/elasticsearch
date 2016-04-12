@@ -143,8 +143,8 @@ public class RandomScoreFunctionBuilder extends ScoreFunctionBuilder<RandomScore
         return Long.hashCode(value);
     }
 
-    public static RandomScoreFunctionBuilder fromXContent(QueryParseContext parseContext, XContentParser parser)
-            throws IOException, ParsingException {
+    public static RandomScoreFunctionBuilder fromXContent(QueryParseContext parseContext) throws IOException, ParsingException {
+        XContentParser parser = parseContext.parser();
         RandomScoreFunctionBuilder randomScoreFunctionBuilder = new RandomScoreFunctionBuilder();
         String currentFieldName = null;
         XContentParser.Token token;
