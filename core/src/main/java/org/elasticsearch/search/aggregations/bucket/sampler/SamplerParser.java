@@ -23,6 +23,7 @@ import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.search.aggregations.Aggregator;
+
 import java.io.IOException;
 
 /**
@@ -36,9 +37,9 @@ public class SamplerParser implements Aggregator.Parser {
     }
 
     @Override
-    public SamplerAggregatorBuilder parse(String aggregationName, XContentParser parser, QueryParseContext context)
-            throws IOException {
+    public SamplerAggregatorBuilder parse(String aggregationName, QueryParseContext context) throws IOException {
 
+        XContentParser parser = context.parser();
         XContentParser.Token token;
         String currentFieldName = null;
         Integer shardSize = null;

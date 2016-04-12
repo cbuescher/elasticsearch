@@ -35,9 +35,9 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.index.Index;
 import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.indices.query.IndicesQueriesRegistry;
+import org.elasticsearch.search.DocValueFormat;
 import org.elasticsearch.search.SearchModule;
 import org.elasticsearch.search.SearchShardTarget;
-import org.elasticsearch.search.DocValueFormat;
 import org.elasticsearch.search.aggregations.InternalAggregation;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.aggregations.bucket.significant.heuristics.ChiSquare;
@@ -253,7 +253,7 @@ public class SignificanceHeuristicTests extends ESTestCase {
             parseContext.reset(stParser);
             parseContext.parseFieldMatcher(ParseFieldMatcher.STRICT);
             stParser.nextToken();
-            new SignificantTermsParser(heuristicParserMapper, registry).parse("testagg", stParser, parseContext);
+            new SignificantTermsParser(heuristicParserMapper, registry).parse("testagg", parseContext);
             fail();
         } catch (ElasticsearchParseException e) {
             assertTrue(e.getMessage().contains(expectedError));
@@ -277,7 +277,7 @@ public class SignificanceHeuristicTests extends ESTestCase {
         parseContext.parseFieldMatcher(ParseFieldMatcher.STRICT);
         stParser.nextToken();
         SignificantTermsAggregatorBuilder aggregatorFactory = (SignificantTermsAggregatorBuilder) new SignificantTermsParser(
-                heuristicParserMapper, registry).parse("testagg", stParser, parseContext);
+                heuristicParserMapper, registry).parse("testagg", parseContext);
         stParser.nextToken();
         assertThat(aggregatorFactory.getBucketCountThresholds().getMinDocCount(), equalTo(200L));
         assertThat(stParser.currentToken(), equalTo(null));

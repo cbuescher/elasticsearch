@@ -204,7 +204,7 @@ public class AggregatorParsers {
                                 pipelineAggregatorFactory = pipelineAggregatorParser.parse(aggregationName, parseContext);
                             }
                         } else {
-                            aggFactory = aggregatorParser.parse(aggregationName, parser, parseContext);
+                            aggFactory = aggregatorParser.parse(aggregationName, parseContext);
                         }
                     }
                 } else {

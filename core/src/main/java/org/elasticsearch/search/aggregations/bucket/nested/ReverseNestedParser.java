@@ -22,6 +22,7 @@ import org.elasticsearch.common.ParsingException;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.query.QueryParseContext;
 import org.elasticsearch.search.aggregations.Aggregator;
+
 import java.io.IOException;
 
 /**
@@ -35,8 +36,8 @@ public class ReverseNestedParser implements Aggregator.Parser {
     }
 
     @Override
-    public ReverseNestedAggregatorBuilder parse(String aggregationName, XContentParser parser,
-            QueryParseContext context) throws IOException {
+    public ReverseNestedAggregatorBuilder parse(String aggregationName, QueryParseContext context) throws IOException {
+        XContentParser parser = context.parser();
         String path = null;
 
         XContentParser.Token token;

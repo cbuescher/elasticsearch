@@ -27,6 +27,7 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptParameterParser;
 import org.elasticsearch.script.ScriptParameterParser.ScriptParameterValue;
 import org.elasticsearch.search.aggregations.Aggregator;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,8 +53,8 @@ public class ScriptedMetricParser implements Aggregator.Parser {
     }
 
     @Override
-    public ScriptedMetricAggregatorBuilder parse(String aggregationName, XContentParser parser,
-            QueryParseContext context) throws IOException {
+    public ScriptedMetricAggregatorBuilder parse(String aggregationName, QueryParseContext context) throws IOException {
+        XContentParser parser = context.parser();
         Script initScript = null;
         Script mapScript = null;
         Script combineScript = null;
