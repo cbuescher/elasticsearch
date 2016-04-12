@@ -77,7 +77,7 @@ public class RestReindexAction extends AbstractBaseReindexRestHandler<ReindexReq
             builder.map(source);
             parser = parser.contentType().xContent().createParser(builder.bytes());
             context.queryParseContext.reset(parser);
-            search.source().parseXContent(parser, context.queryParseContext, context.aggParsers, context.suggesters);
+            search.source().parseXContent(context.queryParseContext, context.aggParsers, context.suggesters);
         };
 
         ObjectParser<IndexRequest, Void> destParser = new ObjectParser<>("dest");

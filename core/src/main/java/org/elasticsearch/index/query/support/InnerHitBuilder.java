@@ -82,7 +82,7 @@ public final class InnerHitBuilder extends ToXContentToBytes implements Writeabl
             try {
                 List<ScriptField> scriptFields = new ArrayList<>();
                 for (XContentParser.Token token = p.nextToken(); token != END_OBJECT; token = p.nextToken()) {
-                    scriptFields.add(new ScriptField(p, c));
+                    scriptFields.add(new ScriptField(c));
                 }
                 i.setScriptFields(scriptFields);
             } catch (IOException e) {

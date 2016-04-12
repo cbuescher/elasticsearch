@@ -104,7 +104,7 @@ public final class SearchSourceBuilder extends ToXContentToBytes implements Writ
     public static SearchSourceBuilder fromXContent(XContentParser parser, QueryParseContext context, AggregatorParsers aggParsers,
             Suggesters suggesters) throws IOException {
         SearchSourceBuilder builder = new SearchSourceBuilder();
-        builder.parseXContent(parser, context, aggParsers, suggesters);
+        builder.parseXContent(context, aggParsers, suggesters);
         return builder;
     }
 
@@ -981,8 +981,8 @@ public final class SearchSourceBuilder extends ToXContentToBytes implements Writ
      * different defaults than a regular SearchSourceBuilder would have and use
      * {@link #fromXContent(XContentParser, QueryParseContext, AggregatorParsers, Suggesters)} if you have normal defaults.
      */
-    public void parseXContent(XContentParser parser, QueryParseContext context, AggregatorParsers aggParsers, Suggesters suggesters)
-        throws IOException {
+    public void parseXContent(QueryParseContext context, AggregatorParsers aggParsers, Suggesters suggesters) throws IOException {
+        XContentParser parser = context.parser();
 
         XContentParser.Token token = parser.currentToken();
         String currentFieldName = null;
@@ -1032,7 +1032,7 @@ public final class SearchSourceBuilder extends ToXContentToBytes implements Writ
                 } else if (context.parseFieldMatcher().match(currentFieldName, SCRIPT_FIELDS_FIELD)) {
                     scriptFields = new ArrayList<>();
                     while ((token = parser.nextToken()) != XContentParser.Token.END_OBJECT) {
-                        scriptFields.add(new ScriptField(parser, context));
+                        scriptFields.add(new ScriptField(context));
                     }
                 } else if (context.parseFieldMatcher().match(currentFieldName, INDICES_BOOST_FIELD)) {
                     indexBoost = new ObjectFloatHashMap<String>();
@@ -1280,7 +1280,8 @@ public final class SearchSourceBuilder extends ToXContentToBytes implements Writ
             this.ignoreFailure = ignoreFailure;
         }
 
-        public ScriptField(XContentParser parser, QueryParseContext context) throws IOException {
+        public ScriptField(QueryParseContext context) throws IOException {
+            XContentParser parser = context.parser();
             boolean ignoreFailure = false;
             String scriptFieldName = parser.currentName();
             Script script = null;
@@ -1375,6 +1376,7 @@ public final class SearchSourceBuilder extends ToXContentToBytes implements Writ
         }
     }
 
+    @Override
     public int hashCode() {
         return Objects.hash(aggregations, explain, fetchSourceContext, fieldDataFields, fieldNames, from,
                 highlightBuilder, indexBoost, innerHitsBuilder, minScore, postQueryBuilder, queryBuilder, rescoreBuilders, scriptFields,
