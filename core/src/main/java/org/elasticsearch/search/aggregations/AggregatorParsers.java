@@ -201,7 +201,7 @@ public class AggregatorParsers {
                                 throw new ParsingException(parser.getTokenLocation(),
                                         "Could not find aggregator type [" + fieldName + "] in [" + aggregationName + "]");
                             } else {
-                                pipelineAggregatorFactory = pipelineAggregatorParser.parse(aggregationName, parser, parseContext);
+                                pipelineAggregatorFactory = pipelineAggregatorParser.parse(aggregationName, parseContext);
                             }
                         } else {
                             aggFactory = aggregatorParser.parse(aggregationName, parser, parseContext);
