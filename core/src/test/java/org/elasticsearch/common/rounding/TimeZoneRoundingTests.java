@@ -19,6 +19,8 @@
 
 package org.elasticsearch.common.rounding;
 
+import com.carrotsearch.randomizedtesting.annotations.Repeat;
+
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.test.ESTestCase;
 import org.joda.time.DateTime;
@@ -210,20 +212,63 @@ public class TimeZoneRoundingTests extends ESTestCase {
     /**
      * randomized test on TimeUnitRounding with random time units and time zone offsets
      */
+    @Repeat(iterations=1000)
     public void testTimeZoneRoundingRandom() {
         for (int i = 0; i < 1000; ++i) {
             DateTimeUnit timeUnit = randomTimeUnit();
-            TimeZoneRounding rounding;
-            int timezoneOffset = randomIntBetween(-23, 23);
-            rounding = new TimeZoneRounding.TimeUnitRounding(timeUnit, DateTimeZone.forOffsetHours(timezoneOffset));
-            long date = Math.abs(randomLong() % ((long) 10e11));
+            DateTimeZone timezone = randomDateTimeZone();
+            TimeZoneRounding rounding = new TimeZoneRounding.TimeUnitRounding(timeUnit, timezone);
+            long date = Math.abs(randomLong() % (2 * (long) 10e11)); // 1970-01-01T00:00:00Z - 2033-05-18T05:33:20.000+02:00
+            if (randomBoolean()) {
+                nastyDate(date, timezone, timeUnit.field(timezone).getDurationField().getUnitMillis());
+            }
+
             final long roundedDate = rounding.round(date);
             final long nextRoundingValue = rounding.nextRoundingValue(roundedDate);
-            assertThat("Rounding should be idempotent", roundedDate, equalTo(rounding.round(roundedDate)));
-            assertThat("Rounded value smaller or equal than unrounded, regardless of timezone", roundedDate, lessThanOrEqualTo(date));
-            assertThat("NextRounding value should be greater than date", nextRoundingValue, greaterThan(roundedDate));
-            assertThat("NextRounding value should be a rounded date", nextRoundingValue, equalTo(rounding.round(nextRoundingValue)));
+            long dateBetween = roundedDate + Math.abs((randomLong() % (nextRoundingValue - roundedDate)));
+            assert roundedDate <= dateBetween && dateBetween <= nextRoundingValue;
+
+            //try {
+                assertThat("Rounding should be idempotent", roundedDate, equalTo(rounding.round(roundedDate)));
+                assertThat("Rounded value smaller or equal than unrounded, regardless of timezone", roundedDate, lessThanOrEqualTo(date));
+                assertThat("NextRounding value should be greater than date", nextRoundingValue, greaterThan(roundedDate));
+                assertThat("NextRounding value should be a rounded date", nextRoundingValue, equalTo(rounding.round(nextRoundingValue)));
+
+                assertThat("Any point between should round down to roundedDate", rounding.round(dateBetween), equalTo(roundedDate));
+                assertThat("Any point between should round up to nextRoundingValue", rounding.nextRoundingValue(dateBetween),
+                        equalTo(nextRoundingValue));
+            //} catch (AssertionError e) {
+//                System.out.println(e.getMessage());
+//                System.out.println(tabbed(timezone, timeUnit,  new DateTime(date, timezone),
+//                        new DateTime(roundedDate, timezone),
+//                        new DateTime(dateBetween, timezone), new DateTime(nextRoundingValue, timezone)));
+//                System.out.println(new DateTime(rounding.nextRoundingValue(dateBetween), timezone));
+//                badZones.add(timezone + ": " + timeUnit);
+//                //rounding.round(dateBetween);
+//            }
         }
+    }
+
+    /**
+     * To be even more nasty, go to a transition in the selected time zone.
+     * In one third of the cases stay there, otherwise go half a unit back or forth
+     */
+    private static long nastyDate(long initialDate, DateTimeZone timezone, long unitMillis) {
+        // of forth
+        long date = timezone.nextTransition(initialDate);
+        if (randomBoolean()) {
+            return date + (randomLong() % unitMillis);  // positive and negative offset possible
+        } else {
+            return date;
+        }
+    }
+
+    private static String tabbed(Object... strings) {
+        StringBuilder builder = new StringBuilder();
+        for (Object s : strings) {
+            builder.append(s.toString() + "\t");
+        }
+        return builder.toString();
     }
 
     /**
@@ -239,7 +284,7 @@ public class TimeZoneRoundingTests extends ESTestCase {
         TimeZoneRounding rounding = new TimeZoneRounding.TimeUnitRounding(unit, timezone);
         // move the random date to transition for timezones that have offset change due to dst transition
         long nextTransition = timezone.nextTransition(Math.abs(randomLong() % ((long) 10e11)));
-        final long millisPerUnit = unit.field().getDurationField().getUnitMillis();
+        final long millisPerUnit = unit.field(DateTimeZone.UTC).getDurationField().getUnitMillis();
         // start ten units before transition
         long roundedDate = rounding.round(nextTransition - (10 * millisPerUnit));
         while (roundedDate < nextTransition + 10 * millisPerUnit) {
