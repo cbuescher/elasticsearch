@@ -222,6 +222,9 @@ public abstract class TimeZoneRounding extends Rounding {
             long roundedUTC;
             if (isInDSTGap(rounded) == false) {
                 roundedUTC  = timeZone.convertLocalToUTC(rounded, true, utcMillis);
+                if (timeZone.getOffset(utcMillis) != timeZone.getOffset(roundedUTC)) {
+                    roundedUTC = timeZone.previousTransition(utcMillis) + 1;
+                }
             } else {
                 /*
                  * Edge case where the rounded local time is illegal and landed
@@ -279,10 +282,15 @@ public abstract class TimeZoneRounding extends Rounding {
 
         @Override
         public long nextRoundingValue(long time) {
-            long timeLocal = time;
-            timeLocal = timeZone.convertUTCToLocal(time);
-            long next = timeLocal + interval;
-            return timeZone.convertLocalToUTC(next, false);
+            assert time == round(time); // should always be a valid rounded key
+            // stay in utc if timezone is fixed or we don't change time zone offset
+            if (timeZone.isFixed() || (timeZone.getOffset(time) == timeZone.getOffset(time + interval))) {
+                if (timeZone.previousTransition(time) + 1  == time) {
+                    return round(time + interval);
+                }
+                return time + interval;
+            }
+            return round(time + interval);
         }
 
         @Override

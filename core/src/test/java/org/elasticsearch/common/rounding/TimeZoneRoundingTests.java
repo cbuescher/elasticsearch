@@ -319,33 +319,100 @@ public class TimeZoneRoundingTests extends ESTestCase {
         assertThat(rounding.round(time("2016-03-28T13:00:00+02:00")), isDate(time("2016-03-28T12:00:00+02:00"), tz));
     }
 
+    public void testThisIsReasonForRoundingAdjustment2() {
+        {
+            long interval = 8460000;
+            System.out.println(interval / (1000 * 60));
+            DateTimeZone tz = DateTimeZone.forID("America/Nassau");
+            TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
+            for (long date = DateTime.parse("1977-10-30T00:00:00.00-04:00").getMillis(); date < DateTime
+                    .parse("1977-10-30T06:00:00.000-05:00").getMillis(); date += 8460000 / 16) {
+                long rounded = rounding.round(date);
+                long next = rounding.nextRoundingValue(rounded);
+                System.out.print(new DateTime(date, tz) + " | " + date + " | " + new DateTime(rounded, tz) + " | " + rounded + " | "
+                        + new DateTime(next, tz) + " | " + next + " | ");
+                if (next > date) {
+                    System.out.println();
+                } else {
+                    System.out.println("*");
+                }
+            }
+        }
+
+        {
+            long interval = 2220000;
+            System.out.println(interval / (1000 * 60));
+            DateTimeZone tz = DateTimeZone.forID("America/Kentucky/Louisville");
+            TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
+            for (long date = DateTime.parse("2010-11-07T00:00:00-04:00").getMillis(); date < DateTime
+                    .parse("2010-11-07T04:00:00-05:00").getMillis(); date += interval / 4) {
+                long rounded = rounding.round(date);
+                long next = rounding.nextRoundingValue(rounded);
+                System.out.print(new DateTime(date, tz) + " | " + date + " | " + new DateTime(rounded, tz) + " | " + rounded + " | "
+                        + new DateTime(next, tz) + " | " + next + " | ");
+                if (next > date) {
+                    System.out.println();
+                } else {
+                    System.out.println("*");
+                }
+            }
+        }
+    }
+
     /**
      * randomized test on {@link TimeIntervalRounding} with random interval and time zone offsets
      */
     public void testIntervalRoundingRandom() {
-        for (int i = 0; i < 1000; i++) {
-            TimeUnit unit = randomFrom(new TimeUnit[] {TimeUnit.MINUTES, TimeUnit.HOURS, TimeUnit.DAYS});
+        {
+            long interval = 6480000;
+            System.out.println(interval / (1000 * 60));
+            DateTimeZone tz = DateTimeZone.forID("Australia/Lindeman");
+            TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
+            for (long date = DateTime.parse("1990-03-04T00:00:00+10:00").getMillis(); date < DateTime
+                    .parse("1990-03-04T05:00:00+11:00").getMillis(); date += interval / 8) {
+                long rounded = rounding.round(date);
+                long next = rounding.nextRoundingValue(rounded);
+                System.out.print(new DateTime(date, tz) + " | " + date + " | " + new DateTime(rounded, tz) + " | " + rounded + " | "
+                        + new DateTime(next, tz) + " | " + next + " | ");
+                if (rounded == rounding.round(next - 1)) {
+                    System.out.println();
+                } else {
+                    System.out.println("*");
+                }
+            }
+        }
+
+        for (int i = 0; i < 5000000; i++) {
+            TimeUnit unit = randomFrom(new TimeUnit[] {TimeUnit.MINUTES}); //, TimeUnit.HOURS, TimeUnit.DAYS});
             long interval = unit.toMillis(randomIntBetween(1, 365));
             DateTimeZone tz = randomDateTimeZone();
             TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
             long date = Math.abs(randomLong() % (2 * (long) 10e11)); // 1970-01-01T00:00:00Z - 2033-05-18T05:33:20.000+02:00
+            final long roundedDate = rounding.round(date);
+            final long nextRoundingValue = rounding.nextRoundingValue(roundedDate);
             try {
-                final long roundedDate = rounding.round(date);
-                final long nextRoundingValue = rounding.nextRoundingValue(roundedDate);
                 assertThat("Rounding should be idempotent", roundedDate, equalTo(rounding.round(roundedDate)));
                 assertThat("Rounded value smaller or equal than unrounded", roundedDate, lessThanOrEqualTo(date));
                 assertThat("Values smaller than rounded value should round further down", rounding.round(roundedDate - 1),
                         lessThan(roundedDate));
 
-                if (tz.isFixed()) {
-                    assertThat("NextRounding value should be greater than date", nextRoundingValue, greaterThan(roundedDate));
-                    assertThat("NextRounding value should be interval from rounded value", nextRoundingValue - roundedDate,
-                            equalTo(interval));
-                    assertThat("NextRounding value should be a rounded date", nextRoundingValue,
-                            equalTo(rounding.round(nextRoundingValue)));
+                assertThat("NextRounding value should be greater than date", nextRoundingValue, greaterThan(roundedDate));
+                assertThat("NextRounding value should be a rounded date", nextRoundingValue, equalTo(rounding.round(nextRoundingValue)));
+                assertThat("Values smaller than NextRounding value round back to previous rounded date", roundedDate,
+                        equalTo(rounding.round(nextRoundingValue - 1)));
+                if (tz.isFixed() || tz.getOffset(roundedDate) == tz.getOffset(nextRoundingValue)) {
+                    if (tz.previousTransition(roundedDate) + 1  != roundedDate) {
+                        assertThat("NextRounding value should be interval from rounded value", nextRoundingValue - roundedDate,
+                                equalTo(interval));
+                    }
+                } else {
+//                    assertThat("For DST, bucket width should be less than interval", nextRoundingValue - roundedDate,
+//                            lessThan(interval));
                 }
             } catch (AssertionError e) {
                 logger.error("Rounding error at {}, timezone {}, interval: {},", new DateTime(date, tz), tz, interval);
+                logger.error("expected {} but was {}", new DateTime(roundedDate, tz),
+                        new DateTime(rounding.round(nextRoundingValue - 1), tz));
                 throw e;
             }
         }
