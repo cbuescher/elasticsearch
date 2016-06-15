@@ -223,20 +223,26 @@ public abstract class TimeZoneRounding extends Rounding {
             if (isInDSTGap(rounded) == false) {
                 roundedUTC  = timeZone.convertLocalToUTC(rounded, true, utcMillis);
                 if (timeZone.getOffset(utcMillis) != timeZone.getOffset(roundedUTC)) {
-                    roundedUTC = timeZone.previousTransition(utcMillis) + 1;
+                    roundedUTC = previousTransition(utcMillis);
                 }
             } else {
                 /*
                  * Edge case where the rounded local time is illegal and landed
-                 * in a DST gap. In this case, we choose 1ms tick after the
-                 * transition date. We don't want the transition date itself
-                 * because those dates, when rounded themselves, fall into the
-                 * previous interval. This would violate the invariant that the
-                 * rounding operation should be idempotent.
+                 * in a DST gap.
                  */
-                roundedUTC = timeZone.previousTransition(utcMillis) + 1;
+                roundedUTC = previousTransition(utcMillis);
             }
             return roundedUTC;
+        }
+
+        private long previousTransition(long instance) {
+            /**
+             * We choose 1ms tick after the transition date. We don't want the
+             * transition date itself because those dates, when rounded
+             * themselves, fall into the previous interval. This would violate
+             * the invariant that the rounding operation should be idempotent.
+             */
+            return timeZone.previousTransition(instance) + 1;
         }
 
         /**
@@ -284,13 +290,17 @@ public abstract class TimeZoneRounding extends Rounding {
         public long nextRoundingValue(long time) {
             assert time == round(time); // should always be a valid rounded key
             // stay in utc if timezone is fixed or we don't change time zone offset
-            if (timeZone.isFixed() || (timeZone.getOffset(time) == timeZone.getOffset(time + interval))) {
-                if (timeZone.previousTransition(time) + 1  == time) {
+            if (timeZone.isFixed()) {
+                return time + interval;
+            }
+            if ((timeZone.getOffset(time) == timeZone.getOffset(time + interval))) {
+                if (time == previousTransition(time)) {
                     return round(time + interval);
                 }
                 return time + interval;
+            } else {
+                return previousTransition(time + interval);
             }
-            return round(time + interval);
         }
 
         @Override

@@ -357,18 +357,13 @@ public class TimeZoneRoundingTests extends ESTestCase {
                 }
             }
         }
-    }
 
-    /**
-     * randomized test on {@link TimeIntervalRounding} with random interval and time zone offsets
-     */
-    public void testIntervalRoundingRandom() {
         {
             long interval = 6480000;
             System.out.println(interval / (1000 * 60));
             DateTimeZone tz = DateTimeZone.forID("Australia/Lindeman");
             TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
-            for (long date = DateTime.parse("1990-03-04T00:00:00+10:00").getMillis(); date < DateTime
+            for (long date = DateTime.parse("1990-03-04T02:34:30+11:00").getMillis(); date < DateTime
                     .parse("1990-03-04T05:00:00+11:00").getMillis(); date += interval / 8) {
                 long rounded = rounding.round(date);
                 long next = rounding.nextRoundingValue(rounded);
@@ -381,13 +376,18 @@ public class TimeZoneRoundingTests extends ESTestCase {
                 }
             }
         }
+    }
 
+    /**
+     * randomized test on {@link TimeIntervalRounding} with random interval and time zone offsets
+     */
+    public void testIntervalRoundingRandom() {
         for (int i = 0; i < 5000000; i++) {
-            TimeUnit unit = randomFrom(new TimeUnit[] {TimeUnit.MINUTES}); //, TimeUnit.HOURS, TimeUnit.DAYS});
+            TimeUnit unit = randomFrom(new TimeUnit[] { TimeUnit.MINUTES , TimeUnit.HOURS, TimeUnit.DAYS});
             long interval = unit.toMillis(randomIntBetween(1, 365));
             DateTimeZone tz = randomDateTimeZone();
             TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
-            long date = Math.abs(randomLong() % (2 * (long) 10e11)); // 1970-01-01T00:00:00Z - 2033-05-18T05:33:20.000+02:00
+            long date = Math.abs(randomLong() % (2 * (long) 10e11)); // 1970-01-01T00:00:00Z  - 2033-05-18T05:33:20.000+02:00
             final long roundedDate = rounding.round(date);
             final long nextRoundingValue = rounding.nextRoundingValue(roundedDate);
             try {
@@ -400,14 +400,12 @@ public class TimeZoneRoundingTests extends ESTestCase {
                 assertThat("NextRounding value should be a rounded date", nextRoundingValue, equalTo(rounding.round(nextRoundingValue)));
                 assertThat("Values smaller than NextRounding value round back to previous rounded date", roundedDate,
                         equalTo(rounding.round(nextRoundingValue - 1)));
-                if (tz.isFixed() || tz.getOffset(roundedDate) == tz.getOffset(nextRoundingValue)) {
-                    if (tz.previousTransition(roundedDate) + 1  != roundedDate) {
-                        assertThat("NextRounding value should be interval from rounded value", nextRoundingValue - roundedDate,
-                                equalTo(interval));
-                    }
-                } else {
-//                    assertThat("For DST, bucket width should be less than interval", nextRoundingValue - roundedDate,
-//                            lessThan(interval));
+                assertThat("Bucket width should be less than or equal to interval", nextRoundingValue - roundedDate,
+                        lessThanOrEqualTo(interval));
+                if (tz.getOffset(roundedDate - 1) == tz.getOffset(nextRoundingValue)) {
+                    // for fixed time zone and if we are not crossing DST transitions, we can even assert interval width exactly
+                    assertThat("NextRounding value should be interval from rounded value", nextRoundingValue - roundedDate,
+                            equalTo(interval));
                 }
             } catch (AssertionError e) {
                 logger.error("Rounding error at {}, timezone {}, interval: {},", new DateTime(date, tz), tz, interval);
