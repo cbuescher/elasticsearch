@@ -290,16 +290,19 @@ public abstract class TimeZoneRounding extends Rounding {
         public long nextRoundingValue(long time) {
             assert time == round(time); // should always be a valid rounded key
             // stay in utc if timezone is fixed or we don't change time zone offset
-            if (timeZone.isFixed() || timeZone.getOffset(time) == timeZone.getOffset(time + interval)) {
+            if (timeZone.isFixed() || timeZone.getOffset(time - 1) == timeZone.getOffset(time + interval)) {
                 return time + interval;
             } else {
-                long next = roundKey(time + interval);
-                if (next == time) {
-                    next = roundKey(time +  2 * interval);
-                    // this ocassionally can be too far
-                    if (roundKey(next - 1) != time) {
-                        next = roundKey(next - 1);
-                    }
+                long offsetDiff = Math.abs(timeZone.getOffset(time + interval) - timeZone.getOffset(time));
+                long correction = (offsetDiff > interval) ? interval : offsetDiff;
+                long next = roundKey(time + interval + correction);
+//                if (next == time) {
+//                    next = roundKey(time +  interval + correction);
+//                    // this ocassionally can be too far
+//                }
+                long roundAgain = roundKey(next - 1);
+                if (roundAgain != time) {
+                    System.out.println(interval + " | " + correction + " | " +  (roundAgain - time - interval) + " " + (roundAgain > time));
                 }
                 return next;
             }
