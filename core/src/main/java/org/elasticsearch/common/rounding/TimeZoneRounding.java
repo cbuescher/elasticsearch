@@ -222,6 +222,7 @@ public abstract class TimeZoneRounding extends Rounding {
             long roundedUTC;
             if (isInDSTGap(rounded) == false) {
                 roundedUTC  = timeZone.convertLocalToUTC(rounded, true, utcMillis);
+                // check if we crossed DST transition, in this case we want the last rounded value before the transition
                 if (timeZone.getOffset(utcMillis) != timeZone.getOffset(roundedUTC)) {
                     roundedUTC = roundKey(timeZone.previousTransition(utcMillis));
                 }
@@ -230,19 +231,10 @@ public abstract class TimeZoneRounding extends Rounding {
                  * Edge case where the rounded local time is illegal and landed
                  * in a DST gap.
                  */
-                roundedUTC = previousTransition(utcMillis);
+                roundedUTC = roundKey(timeZone.previousTransition(utcMillis));
+                //roundedUTC = previousTransition(utcMillis);
             }
             return roundedUTC;
-        }
-
-        private long previousTransition(long instance) {
-            /**
-             * We choose 1ms tick after the transition date. We don't want the
-             * transition date itself because those dates, when rounded
-             * themselves, fall into the previous interval. This would violate
-             * the invariant that the rounding operation should be idempotent.
-             */
-            return timeZone.previousTransition(instance) + 1;
         }
 
         /**
@@ -289,23 +281,44 @@ public abstract class TimeZoneRounding extends Rounding {
         @Override
         public long nextRoundingValue(long time) {
             assert time == round(time); // should always be a valid rounded key
-            // stay in utc if timezone is fixed or we don't change time zone offset
-            if (timeZone.isFixed() || timeZone.getOffset(time - 1) == timeZone.getOffset(time + interval)) {
-                return time + interval;
+            long next;
+            long targetInstant = time + interval;
+            if (timeZone.isFixed() || timeZone.getOffset(time) == timeZone.getOffset(targetInstant)) {
+                // the default, if time zone offset doesn't change in next interval, we only need to add interval
+                next = targetInstant;
             } else {
-                long offsetDiff = Math.abs(timeZone.getOffset(time + interval) - timeZone.getOffset(time));
-                long correction = (offsetDiff > interval) ? interval : offsetDiff;
-                long next = roundKey(time + interval + correction);
-//                if (next == time) {
-//                    next = roundKey(time +  interval + correction);
-//                    // this ocassionally can be too far
-//                }
-                long roundAgain = roundKey(next - 1);
-                if (roundAgain != time) {
-                    System.out.println(interval + " | " + correction + " | " +  (roundAgain - time - interval) + " " + (roundAgain > time));
+                int offsetOrigin = timeZone.getOffset(time);
+                int offsetTarget = timeZone.getOffset(targetInstant);
+                next = nextDateAdjusted(targetInstant, offsetOrigin, offsetTarget);
+                // we might have crossed another transition here.
+                if (timeZone.getOffset(next) != offsetTarget) {
+                    next = nextDateAdjusted(time + 2 * interval, offsetOrigin, timeZone.getOffset(next));
                 }
-                return next;
             }
+            return next;
+        }
+
+        private long nextDateAdjusted(long targetInstant, int offsetOrigin, int offsetTarget) {
+            long next;
+            long transition = timeZone.previousTransition(targetInstant) + 1;
+            int diff = offsetTarget - offsetOrigin;
+            // rounding locations are shifted by 'diff' in new time zone
+            next = targetInstant - diff;
+            assert new TimeIntervalRounding(interval, DateTimeZone.forOffsetMillis(offsetTarget)).round(next) == next;
+            if (next >= transition) {
+                long correction = (next - transition) / interval;
+                next = next - correction * interval;
+                assert next >= transition;
+            } else {
+                long correction = (transition - next) / interval;
+                if ((transition - next) % interval > 0) {
+                    correction++;
+                }
+                next = next + correction * interval;
+                assert next >= transition;
+            }
+            assert next - transition <= interval;
+            return next;
         }
 
         @Override
