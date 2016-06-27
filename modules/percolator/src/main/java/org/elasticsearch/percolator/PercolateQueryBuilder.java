@@ -359,6 +359,11 @@ public class PercolateQueryBuilder extends AbstractQueryBuilder<PercolateQueryBu
                     "indexed document [{}/{}/{}] couldn't be found", indexedDocumentIndex, indexedDocumentType, indexedDocumentId
             );
         }
+        if(getResponse.isSourceEmpty()) {
+            throw new IllegalArgumentException(
+                "indexed document [" + indexedDocumentIndex + "/" + indexedDocumentType + "/" + indexedDocumentId + "] source disabled"
+            );
+        }
         return new PercolateQueryBuilder(field, documentType, getResponse.getSourceAsBytesRef());
     }
 
@@ -369,7 +374,7 @@ public class PercolateQueryBuilder extends AbstractQueryBuilder<PercolateQueryBu
         }
 
         if (document == null) {
-            throw new IllegalStateException("nothing to percolator");
+            throw new IllegalStateException("no document to percolate");
         }
 
         MapperService mapperService = context.getMapperService();
@@ -420,10 +425,11 @@ public class PercolateQueryBuilder extends AbstractQueryBuilder<PercolateQueryBu
                         "] to be of type [percolator], but is of type [" + fieldType.typeName() + "]");
             }
             PercolatorFieldMapper.PercolatorFieldType pft = (PercolatorFieldMapper.PercolatorFieldType) fieldType;
+            PercolateQuery.QueryStore queryStore = createStore(pft, context, mapUnmappedFieldsAsString);
             PercolateQuery.Builder builder = new PercolateQuery.Builder(
-                    documentType, createStore(pft, context, mapUnmappedFieldsAsString), document, docSearcher
+                    documentType, queryStore, document, docSearcher
             );
-            builder.extractQueryTermsQuery(pft.getExtractedTermsField(), pft.getUnknownQueryFieldName());
+            builder.extractQueryTermsQuery(pft.getExtractedTermsField(), pft.getExtractionResultFieldName());
             return builder.build();
         } else {
             Query percolateTypeQuery = new TermQuery(new Term(TypeFieldMapper.NAME, MapperService.PERCOLATOR_LEGACY_TYPE_NAME));

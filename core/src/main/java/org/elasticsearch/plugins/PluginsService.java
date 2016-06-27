@@ -41,9 +41,11 @@ import org.elasticsearch.common.settings.Setting.Property;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.SettingsModule;
 import org.elasticsearch.index.IndexModule;
+import org.elasticsearch.indices.analysis.AnalysisModule;
 import org.elasticsearch.script.NativeScriptFactory;
 import org.elasticsearch.script.ScriptContext;
 import org.elasticsearch.script.ScriptEngineService;
+import org.elasticsearch.script.ScriptModule;
 import org.elasticsearch.threadpool.ExecutorBuilder;
 
 import java.io.IOException;
@@ -206,8 +208,13 @@ public class PluginsService extends AbstractComponent {
                 }
                 Class moduleClass = method.getParameterTypes()[0];
                 if (!Module.class.isAssignableFrom(moduleClass)) {
-                    logger.warn("Plugin: {} implementing onModule by the type is not of Module type {}", pluginEntry.v1().getName(), moduleClass);
-                    continue;
+                    if (method.getDeclaringClass() == Plugin.class) {
+                        // These are still part of the Plugin class to point the user to the new implementations
+                        continue;
+                    }
+                    throw new RuntimeException(
+                            "Plugin: [" + pluginEntry.v1().getName() + "] implements onModule taking a parameter that isn't a Module ["
+                                    + moduleClass.getSimpleName() + "]");
                 }
                 list.add(new OnModuleReference(moduleClass, method));
             }
