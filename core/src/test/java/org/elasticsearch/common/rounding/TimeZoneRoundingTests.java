@@ -19,7 +19,6 @@
 
 package org.elasticsearch.common.rounding;
 
-import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.rounding.TimeZoneRounding.TimeIntervalRounding;
 import org.elasticsearch.common.rounding.TimeZoneRounding.TimeUnitRounding;
 import org.elasticsearch.common.unit.TimeValue;
@@ -32,8 +31,6 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.ISODateTimeFormat;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -327,10 +324,53 @@ public class TimeZoneRoundingTests extends ESTestCase {
      * randomized test on {@link TimeIntervalRounding} with random interval and time zone offsets
      */
     public void testIntervalRoundingRandom() {
-        for (int i = 0; i < 1000; i++) {
+//        {
+//            long date1 = DateTime.parse("1982-01-30T14:34:24.137+04:00").getMillis();
+//            long interval = TimeUnit.DAYS.toMillis(randomIntBetween(316, 316));
+//            DateTimeZone tz = DateTimeZone.forOffsetHours(4);
+//            TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
+//            for (long date = date1 - 3 * interval; date < date1 + 3 * interval; date += interval / 8) {
+//                long rounded = rounding.round(date);
+//                System.out.println(new DateTime(date, tz) + ", " + date + "| " + new DateTime(rounded, tz) + ", " + rounded);
+//                assertThat(rounding.round(rounded), isDate(rounded,tz));
+//            }
+//            System.out.println("----");
+//            tz = DateTimeZone.forOffsetHours(5);
+//            rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
+//            for (long date = date1 - 3 * interval; date < date1 + 3 * interval; date += interval / 8) {
+//                long rounded = rounding.round(date);
+//                System.out.println(new DateTime(date, tz) + ", " + date + "| " + new DateTime(rounded, tz) + ", " + rounded);
+//                assertThat(rounding.round(rounded), isDate(rounded,tz));
+//            }
+//            System.out.println("----");
+//            tz = DateTimeZone.forID("Asia/Baku");
+//            rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
+//            for (long date = date1 - 3 * interval; date < date1 + 3 * interval; date += interval / 8) {
+//                long rounded = rounding.round(date);
+//                System.out.println(new DateTime(date, tz) + ", " + date + "| " + new DateTime(rounded, tz) + ", " + rounded);
+//                assertThat(rounding.round(rounded), isDate(rounded,tz));
+//            }
+//        }
+
+        {
+            long date = DateTime.parse("1982-01-30T14:34:24.137+04:00").getMillis();
+            System.out.println(date);
+            long interval = TimeUnit.DAYS.toMillis(randomIntBetween(316, 316));
+            DateTimeZone tz = DateTimeZone.forID("Asia/Baku");
+            TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
+            long previous = tz.previousTransition(date);
+            System.out.println(new DateTime(previous, tz) + ", " + previous);
+            long rounded = rounding.round(date);
+            System.out.println(new DateTime(rounded, tz) + ", " + rounded);
+            assertThat(rounding.round(rounded), isDate(rounded,tz));
+        }
+
+        for (int i = 0; i < 1000000; i++) {
             TimeUnit unit = randomFrom(new TimeUnit[] {TimeUnit.MINUTES, TimeUnit.HOURS, TimeUnit.DAYS});
-            long interval = unit.toMillis(randomIntBetween(1, 365));
-            DateTimeZone tz = randomDateTimeZone();
+            long interval = unit.toMillis(randomIntBetween(316, 316));
+            //long interval = unit.toMillis(randomIntBetween(1, 365));
+            DateTimeZone tz = DateTimeZone.forID("Asia/Baku");
+            //DateTimeZone tz = randomDateTimeZone();
             TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
             long mainDate = Math.abs(randomLong() % (2 * (long) 10e11)); // 1970-01-01T00:00:00Z - 2033-05-18T05:33:20.000+02:00
             if (randomBoolean()) {
@@ -348,52 +388,36 @@ public class TimeZoneRoundingTests extends ESTestCase {
                             lessThan(roundedDate));
                     assertThat("Rounding should be >= previous rounding value", roundedDate, greaterThanOrEqualTo(previousRoundedValue));
 
-                    if (tz.isFixed()) {
-                        assertThat("NextRounding value should be greater than date", nextRoundingValue, greaterThan(roundedDate));
-                        assertThat("NextRounding value should be interval from rounded value", nextRoundingValue - roundedDate,
-                                equalTo(interval));
-                        assertThat("NextRounding value should be a rounded date", nextRoundingValue,
-                                equalTo(rounding.round(nextRoundingValue)));
+                if (tz.isFixed()) {
+                    assertThat("NextRounding value should be greater than date", nextRoundingValue, greaterThan(roundedDate));
+                    assertThat("NextRounding value should be interval from rounded value", nextRoundingValue - roundedDate,
+                            equalTo(interval));
+                    assertThat("NextRounding value should be a rounded date", nextRoundingValue,
+                            equalTo(rounding.round(nextRoundingValue)));
+                } else {
+                    // lets check a few things about next rounding value
+                    int offsetRounded = tz.getOffset(roundedDate);
+                    int offsetIntervalAway = tz.getOffset(roundedDate + interval);
+                    if (offsetRounded != offsetIntervalAway) {
+//                        logger.error("date {}, rounded: {}, offsetRounded: {}, offsetIntervalAway: {}", new DateTime(date, tz), new DateTime(roundedDate, tz),
+//                                offsetRounded, offsetIntervalAway);
+                        // there shouldn't be a rounded value between roundedDate and next transition
+                        long transition = tz.nextTransition(roundedDate);
+                        if (tz.getOffset(roundedDate) == tz.getOffset(roundedDate-1)) {
+                            assertThat(rounding.round(transition - 1), isDate(roundedDate, tz));
+                        }
+                        // there should be a rounded value between next transition and next + interval
+                        if (tz.getOffset(roundedDate) == tz.getOffset(roundedDate-1)) {
+                            assertThat(rounding.round(transition + interval - 1), greaterThan(transition));
+                        }
                     }
-                    previousRoundedValue = roundedDate;
-                } catch (AssertionError e) {
-                    logger.error("Rounding error at {}, timezone {}, interval: {},", new DateTime(date, tz), tz, interval);
-                    throw e;
                 }
+            } catch (AssertionError e) {
+                logger.error("Rounding error at {}, timezone {}, interval: {},", new DateTime(date, tz), tz, interval);
+                throw e;
             }
         }
-    }
-
-    /**
-     * Test that rounded values are always greater or equal to last rounded value if date is increasing.
-     * The example covers an interval around 2011-10-30T02:10:00+01:00, time zone CET, interval: 2700000ms
-     */
-    public void testIntervalRoundingMonotonic_CET() {
-        long interval = TimeUnit.MINUTES.toMillis(45);
-        DateTimeZone tz = DateTimeZone.forID("CET");
-        TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
-        List<Tuple<String, String>> expectedDates = new ArrayList<Tuple<String, String>>();
-        // first date is the date to be rounded, second the expected result
-        expectedDates.add(new Tuple<>("2011-10-30T01:40:00.000+02:00", "2011-10-30T01:30:00.000+02:00"));
-        expectedDates.add(new Tuple<>("2011-10-30T02:02:30.000+02:00", "2011-10-30T01:30:00.000+02:00"));
-        expectedDates.add(new Tuple<>("2011-10-30T02:25:00.000+02:00", "2011-10-30T02:15:00.000+02:00"));
-        expectedDates.add(new Tuple<>("2011-10-30T02:47:30.000+02:00", "2011-10-30T02:15:00.000+02:00"));
-        expectedDates.add(new Tuple<>("2011-10-30T02:10:00.000+01:00", "2011-10-30T02:15:00.000+02:00"));
-        expectedDates.add(new Tuple<>("2011-10-30T02:32:30.000+01:00", "2011-10-30T02:15:00.000+01:00"));
-        expectedDates.add(new Tuple<>("2011-10-30T02:55:00.000+01:00", "2011-10-30T02:15:00.000+01:00"));
-        expectedDates.add(new Tuple<>("2011-10-30T03:17:30.000+01:00", "2011-10-30T03:00:00.000+01:00"));
-
-        long previousDate = Long.MIN_VALUE;
-        for (Tuple<String, String> dates : expectedDates) {
-                final long roundedDate = rounding.round(time(dates.v1()));
-                assertThat(roundedDate, isDate(time(dates.v2()), tz));
-                assertThat(roundedDate, greaterThanOrEqualTo(previousDate));
-                previousDate = roundedDate;
         }
-        // here's what this means for interval widths
-        assertEquals(TimeUnit.MINUTES.toMillis(45), time("2011-10-30T02:15:00.000+02:00") - time("2011-10-30T01:30:00.000+02:00"));
-        assertEquals(TimeUnit.MINUTES.toMillis(60), time("2011-10-30T02:15:00.000+01:00") - time("2011-10-30T02:15:00.000+02:00"));
-        assertEquals(TimeUnit.MINUTES.toMillis(45), time("2011-10-30T03:00:00.000+01:00") - time("2011-10-30T02:15:00.000+01:00"));
     }
 
     /**
