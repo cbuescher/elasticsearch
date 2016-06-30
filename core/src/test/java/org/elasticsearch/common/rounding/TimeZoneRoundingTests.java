@@ -19,6 +19,7 @@
 
 package org.elasticsearch.common.rounding;
 
+import org.elasticsearch.common.collect.Tuple;
 import org.elasticsearch.common.rounding.TimeZoneRounding.TimeIntervalRounding;
 import org.elasticsearch.common.rounding.TimeZoneRounding.TimeUnitRounding;
 import org.elasticsearch.common.unit.TimeValue;
@@ -31,6 +32,8 @@ import org.joda.time.DateTimeConstants;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.ISODateTimeFormat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -412,12 +415,41 @@ public class TimeZoneRoundingTests extends ESTestCase {
                         }
                     }
                 }
-            } catch (AssertionError e) {
-                logger.error("Rounding error at {}, timezone {}, interval: {},", new DateTime(date, tz), tz, interval);
-                throw e;
             }
         }
         }
+    }
+
+    /**
+     * Test that rounded values are always greater or equal to last rounded value if date is increasing.
+     * The example covers an interval around 2011-10-30T02:10:00+01:00, time zone CET, interval: 2700000ms
+     */
+    public void testIntervalRoundingMonotonic_CET() {
+        long interval = TimeUnit.MINUTES.toMillis(45);
+        DateTimeZone tz = DateTimeZone.forID("CET");
+        TimeZoneRounding rounding = new TimeZoneRounding.TimeIntervalRounding(interval, tz);
+        List<Tuple<String, String>> expectedDates = new ArrayList<Tuple<String, String>>();
+        // first date is the date to be rounded, second the expected result
+        expectedDates.add(new Tuple<>("2011-10-30T01:40:00.000+02:00", "2011-10-30T01:30:00.000+02:00"));
+        expectedDates.add(new Tuple<>("2011-10-30T02:02:30.000+02:00", "2011-10-30T01:30:00.000+02:00"));
+        expectedDates.add(new Tuple<>("2011-10-30T02:25:00.000+02:00", "2011-10-30T02:15:00.000+02:00"));
+        expectedDates.add(new Tuple<>("2011-10-30T02:47:30.000+02:00", "2011-10-30T02:15:00.000+02:00"));
+        expectedDates.add(new Tuple<>("2011-10-30T02:10:00.000+01:00", "2011-10-30T02:15:00.000+02:00"));
+        expectedDates.add(new Tuple<>("2011-10-30T02:32:30.000+01:00", "2011-10-30T02:15:00.000+01:00"));
+        expectedDates.add(new Tuple<>("2011-10-30T02:55:00.000+01:00", "2011-10-30T02:15:00.000+01:00"));
+        expectedDates.add(new Tuple<>("2011-10-30T03:17:30.000+01:00", "2011-10-30T03:00:00.000+01:00"));
+
+        long previousDate = Long.MIN_VALUE;
+        for (Tuple<String, String> dates : expectedDates) {
+                final long roundedDate = rounding.round(time(dates.v1()));
+                assertThat(roundedDate, isDate(time(dates.v2()), tz));
+                assertThat(roundedDate, greaterThanOrEqualTo(previousDate));
+                previousDate = roundedDate;
+        }
+        // here's what this means for interval widths
+        assertEquals(TimeUnit.MINUTES.toMillis(45), time("2011-10-30T02:15:00.000+02:00") - time("2011-10-30T01:30:00.000+02:00"));
+        assertEquals(TimeUnit.MINUTES.toMillis(60), time("2011-10-30T02:15:00.000+01:00") - time("2011-10-30T02:15:00.000+02:00"));
+        assertEquals(TimeUnit.MINUTES.toMillis(45), time("2011-10-30T03:00:00.000+01:00") - time("2011-10-30T02:15:00.000+01:00"));
     }
 
     /**

@@ -145,14 +145,13 @@ public abstract class BaseAggregationTestCase<AB extends AbstractAggregationBuil
                 b.bind(NamedWriteableRegistry.class).toInstance(namedWriteableRegistry);
             },
             settingsModule,
-            new IndicesModule(namedWriteableRegistry) {
-
+            new IndicesModule(namedWriteableRegistry, Collections.emptyList()) {
                 @Override
                 protected void configure() {
                     bindMapperExtension();
                 }
             },
-            new SearchModule(settings, namedWriteableRegistry) {
+            new SearchModule(settings, namedWriteableRegistry, false) {
                 @Override
                 protected void configureSearch() {
                     // Skip me

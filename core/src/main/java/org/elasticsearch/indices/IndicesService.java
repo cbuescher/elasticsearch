@@ -412,10 +412,12 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService>
     }
 
     /**
-     * This method verifies that the given {@link IndexMetaData} holds sane values to create an {@link IndexService}. This method will throw an
-     * exception if the creation fails. The created {@link IndexService} will not be registered and will be closed immediately.
+     * This method verifies that the given {@code metaData} holds sane values to create an {@link IndexService}.
+     * This method tries to update the meta data of the created {@link IndexService} if the given {@code metaDataUpdate} is different from the given {@code metaData}.
+     * This method will throw an exception if the creation or the update fails.
+     * The created {@link IndexService} will not be registered and will be closed immediately.
      */
-    public synchronized void verifyIndexMetadata(final NodeServicesProvider nodeServicesProvider, IndexMetaData metaData) throws IOException {
+    public synchronized void verifyIndexMetadata(final NodeServicesProvider nodeServicesProvider, IndexMetaData metaData, IndexMetaData metaDataUpdate) throws IOException {
         final List<Closeable> closeables = new ArrayList<>();
         try {
             IndicesFieldDataCache indicesFieldDataCache = new IndicesFieldDataCache(settings, new IndexFieldDataCache.Listener() {});
@@ -425,12 +427,15 @@ public class IndicesService extends AbstractLifecycleComponent<IndicesService>
             // this will also fail if some plugin fails etc. which is nice since we can verify that early
             final IndexService service = createIndexService("metadata verification", nodeServicesProvider,
                 metaData, indicesQueryCache, indicesFieldDataCache, Collections.emptyList());
+            closeables.add(() -> service.close("metadata verification", false));
             for (ObjectCursor<MappingMetaData> typeMapping : metaData.getMappings().values()) {
                 // don't apply the default mapping, it has been applied when the mapping was created
                 service.mapperService().merge(typeMapping.value.type(), typeMapping.value.source(),
                     MapperService.MergeReason.MAPPING_RECOVERY, true);
             }
-            closeables.add(() -> service.close("metadata verification", false));
+            if (metaData.equals(metaDataUpdate) == false) {
+                service.updateMetaData(metaDataUpdate);
+            }
         } finally {
             IOUtils.close(closeables);
         }

@@ -219,7 +219,7 @@ public class RelocationIT extends ESIntegTestCase {
             for (int i = 0; i < 10; i++) {
                 try {
                     logger.info("--> START search test round {}", i + 1);
-                    SearchHits hits = client().prepareSearch("test").setQuery(matchAllQuery()).setSize((int) indexer.totalIndexedDocs()).setNoStoredFields().execute().actionGet().getHits();
+                    SearchHits hits = client().prepareSearch("test").setQuery(matchAllQuery()).setSize((int) indexer.totalIndexedDocs()).setNoFields().execute().actionGet().getHits();
                     ranOnce = true;
                     if (hits.totalHits() != indexer.totalIndexedDocs()) {
                         int[] hitIds = new int[(int) indexer.totalIndexedDocs()];
@@ -479,7 +479,7 @@ public class RelocationIT extends ESIntegTestCase {
         indexRandom(true, docs);
         numDocs *= 2;
 
-        logger.info(" --> waiting for relocation to complete", numDocs);
+        logger.info(" --> waiting for relocation to complete");
         ensureGreen("test");// move all shards to the new node (it waits on relocation)
         final int numIters = randomIntBetween(10, 20);
         for (int i = 0; i < numIters; i++) {

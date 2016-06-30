@@ -118,7 +118,7 @@ public class TemplateQueryParserTests extends ESTestCase {
                     b.bind(CircuitBreakerService.class).to(NoneCircuitBreakerService.class);
                 },
                 settingsModule,
-                new SearchModule(settings, new NamedWriteableRegistry()) {
+                new SearchModule(settings, new NamedWriteableRegistry(), false) {
                     @Override
                     protected void configureSearch() {
                         // skip so we don't need transport
@@ -129,21 +129,16 @@ public class TemplateQueryParserTests extends ESTestCase {
 
         AnalysisService analysisService = createAnalysisService(idxSettings, settings);
         SimilarityService similarityService = new SimilarityService(idxSettings, Collections.emptyMap());
-        MapperRegistry mapperRegistry = new IndicesModule(new NamedWriteableRegistry()).getMapperRegistry();
+        MapperRegistry mapperRegistry = new IndicesModule(new NamedWriteableRegistry(), Collections.emptyList()).getMapperRegistry();
         MapperService mapperService = new MapperService(idxSettings, analysisService, similarityService, mapperRegistry, () ->
             contextFactory.get());
         IndicesFieldDataCache cache = new IndicesFieldDataCache(settings, new IndexFieldDataCache.Listener() {});
-        IndexFieldDataService indexFieldDataService =new IndexFieldDataService(idxSettings, cache, injector.getInstance(CircuitBreakerService.class), mapperService);
+        IndexFieldDataService indexFieldDataService = new IndexFieldDataService(idxSettings, cache, injector.getInstance(CircuitBreakerService.class), mapperService);
         BitsetFilterCache bitsetFilterCache = new BitsetFilterCache(idxSettings, new BitsetFilterCache.Listener() {
             @Override
-            public void onCache(ShardId shardId, Accountable accountable) {
-
-            }
-
+            public void onCache(ShardId shardId, Accountable accountable) {}
             @Override
-            public void onRemoval(ShardId shardId, Accountable accountable) {
-
-            }
+            public void onRemoval(ShardId shardId, Accountable accountable) {}
         });
         IndicesQueriesRegistry indicesQueriesRegistry = injector.getInstance(IndicesQueriesRegistry.class);
         contextFactory =  () -> new QueryShardContext(idxSettings, bitsetFilterCache, indexFieldDataService, mapperService,

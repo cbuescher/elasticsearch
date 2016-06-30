@@ -86,7 +86,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.elasticsearch.test.ClusterServiceUtils.createClusterService;
 import static org.elasticsearch.test.ClusterServiceUtils.setState;
@@ -140,13 +139,13 @@ public class SearchSourceBuilderTests extends ESTestCase {
                     b.bind(ScriptService.class).toInstance(scriptModule.getScriptService());
                 },
                 settingsModule,
-                new IndicesModule(namedWriteableRegistry) {
+                new IndicesModule(namedWriteableRegistry, Collections.emptyList()) {
                     @Override
                     protected void configure() {
                         bindMapperExtension();
                     }
                 },
-                new SearchModule(settings, namedWriteableRegistry) {
+                new SearchModule(settings, namedWriteableRegistry, false) {
                     @Override
                     protected void configureSearch() {
                         // Skip me
@@ -208,7 +207,7 @@ public class SearchSourceBuilderTests extends ESTestCase {
             builder.minScore(randomFloat() * 1000);
         }
         if (randomBoolean()) {
-            builder.timeout(new TimeValue(randomIntBetween(1, 100), randomFrom(TimeUnit.values())));
+            builder.timeout(TimeValue.parseTimeValue(randomTimeValue(), null, "timeout"));
         }
         if (randomBoolean()) {
             builder.terminateAfter(randomIntBetween(1, 100000));
@@ -222,12 +221,12 @@ public class SearchSourceBuilderTests extends ESTestCase {
             for (int i = 0; i < fieldsSize; i++) {
                 fields.add(randomAsciiOfLengthBetween(5, 50));
             }
-            builder.storedFields(fields);
+            builder.fields(fields);
         }
         if (randomBoolean()) {
             int fieldDataFieldsSize = randomInt(25);
             for (int i = 0; i < fieldDataFieldsSize; i++) {
-                builder.docValueField(randomAsciiOfLengthBetween(5, 50));
+                builder.fieldDataField(randomAsciiOfLengthBetween(5, 50));
             }
         }
         if (randomBoolean()) {
@@ -456,7 +455,7 @@ public class SearchSourceBuilderTests extends ESTestCase {
 
     public void testEqualsAndHashcode() throws IOException {
         SearchSourceBuilder firstBuilder = createSearchSourceBuilder();
-        assertFalse("source builder is equal to null", firstBuilder.equals(null));
+        assertNotNull("source builder is equal to null", firstBuilder);
         assertFalse("source builder is equal to incompatible type", firstBuilder.equals(""));
         assertTrue("source builder is not equal to self", firstBuilder.equals(firstBuilder));
         assertThat("same source builder's hashcode returns different values if called multiple times", firstBuilder.hashCode(),
@@ -601,7 +600,7 @@ public class SearchSourceBuilderTests extends ESTestCase {
         final String query = "{ \"query\": { \"match_all\": {}}, \"timeout\": \"" + timeout + "\"}";
         try (XContentParser parser = XContentFactory.xContent(query).createParser(query)) {
             final SearchSourceBuilder builder = SearchSourceBuilder.fromXContent(createParseContext(parser), aggParsers, suggesters);
-            assertThat(builder.timeoutInMillis(), equalTo(TimeValue.parseTimeValue(timeout, null, "timeout").millis()));
+            assertThat(builder.timeout(), equalTo(TimeValue.parseTimeValue(timeout, null, "timeout")));
         }
     }
 
