@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="shortcut icon" href="assets/favicon.ico">
+
+  <title>Elasticsearch Nightly Benchmarks</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="assets/css/Supernice.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="assets/css/navbar-fixed-top.css" rel="stylesheet">
+
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+</head>
+
+<body>
+
+<!-- Fixed navbar -->
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand active" href="#">Elasticsearch Nightly Benchmarks</a>
+    </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li><a href="geonames/index.html">Geonames</a></li>
+		<li><a href="geopoint/index.html">Geopoint</a></li>
+		<li><a href="percolator/index.html">Percolator</a></li>
+		<li><a href="pmc/index.html">PMC</a></li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+    <h3>Overview</h3>
+      <div class="panel panel-default">
+        <!--
+          <div class="panel-heading">
+            <h3 class="panel-title">Info</h3>
+          </div>
+          -->
+        <div class="panel-body">
+          <p>On this page are the results of the Elasticsearch nightly benchmarks based on the <a href="https://github.com/elastic/elasticsearch">master</a>
+            branch as of that point in time. The Apache Software Foundation also provides a similar page for the <a
+              href="https://people.apache.org/~mikemccand/lucenebench/">Lucene nightly benchmarks</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+	<div class="col-md-12">
+    <h3>Benchmarking Methodology</h3>
+    <p>All benchmarks are run by <a href="https://github.com/elastic/rally">Rally</a> against the <a href="https://github.com/elastic/elasticsearch/tree/master/">Elasticsearch master branch</a> as of that date. Currently the benchmark driver and the benchmark candidate are located on the same machine (Will change in the near future so Rally runs on a dedicated machine and Elasticsearch runs on a dedicated machine).</p>
+
+    <p>The benchmarks are intentionally not scalability benchmarks but rather show the performance characteristics of Elasticsearch for a single node (or at most two-nodes) and are mainly intended to help the development team spot performance regressions.</p>
+	</div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-12">
+    <h3>Benchmarking Environment</h3>
+    <p>All benchmarks are run on a bare metal machine with the following specifications:</p>
+    <ul>
+    	<li>CPU: <a href="http://ark.intel.com/products/88196/Intel-Core-i7-6700-Processor-8M-Cache-up-to-4_00-GHz">Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz</a></li>
+    	<li>RAM: 32 GB</li>
+    	<li>SSD: two Crucial MX200 (software RAID 0)</li>
+    	<li>OS: Linux Kernel version 4.4.0-28</li>
+    <ul>
+    <div>
+  </div>
+</div> <!-- /container -->
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+</body>
+</html>

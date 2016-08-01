@@ -1,0 +1,108 @@
+{
+  "trigger": {
+    "schedule": {
+      "interval": "1d"
+    }
+  },
+  "input": {
+    "search": {
+      "request": {
+        "indices": "rally-*",
+        "types": "metrics",
+        "body": {
+          "query": {
+            "bool": {
+              "filter": {
+                "range": {
+                  "trial-timestamp": {
+                    "gte": "now-1w"
+                  }
+                }
+              }
+            }
+          },
+          "size": 0,
+          "aggs": {
+            "environments": {
+              "terms": {
+                "field": "environment"
+              },
+              "aggs": {
+                "tracks": {
+                  "terms": {
+                    "field": "track"
+                  },
+                  "aggs": {
+                    "setups": {
+                      "terms": {
+                        "field": "track-setup",
+                        "size": 50
+                      },
+                      "aggs": {
+                        "names": {
+                          "terms": {
+                            "field": "name",
+                            "size": 50
+                          },
+                          "aggs": {
+                            "series": {
+                              "date_histogram": {
+                                "field": "trial-timestamp",
+                                "interval": "day"
+                              },
+                              "aggs": {
+                                "avg": {
+                                  "avg": {
+                                    "field": "value"
+                                  }
+                                }
+                              }
+                            },
+                            "series_stats": {
+                              "extended_stats": {
+                                "field": "value",
+                                "sigma": 3
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "extract": [
+        "aggregations.environments.buckets"
+      ]
+    }
+  },
+  "condition": {
+    "script": {
+      "file": "analytics_condition"
+    }
+  },
+  "transform": {
+    "script": {
+      "file": "analytics_transform"
+    }
+  },
+  "actions": {
+    "log": {
+      "logging": {
+        "text": "{{#ctx.payload.alerts}}{{title}} on {{date}}: [{{value}}] is {{descriptor1}} than 3 std dev {{descriptor2}} threshold: [{{threshold}}]{{/ctx.payload.alerts}}"
+      }
+    },
+    "email_to_slack": {
+      "throttle_period": "15m",
+      "email": {
+        "to": "n4v5x6r1i1s7i1k7@elastic.slack.com",
+        "subject": "Encountered {{ctx.payload.alerts.length}} alerts",
+        "body": "{{#ctx.payload.alerts}}{{title}} is [{{value}}] ({{descriptor1}} than 3 std dev) {{descriptor2}} threshold of [{{threshold}}] on {{date}}{{/ctx.payload.alerts}}\r\n"
+      }
+    }
+  }
+}
