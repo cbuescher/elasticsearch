@@ -19,9 +19,6 @@
 
 package org.elasticsearch.index.analysis;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.LegacyNumericTokenStream;
 import org.apache.lucene.analysis.ar.ArabicAnalyzer;
 import org.apache.lucene.analysis.bg.BulgarianAnalyzer;
 import org.apache.lucene.analysis.br.BrazilianAnalyzer;
@@ -53,7 +50,6 @@ import org.apache.lucene.analysis.ro.RomanianAnalyzer;
 import org.apache.lucene.analysis.ru.RussianAnalyzer;
 import org.apache.lucene.analysis.sv.SwedishAnalyzer;
 import org.apache.lucene.analysis.th.ThaiAnalyzer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.tr.TurkishAnalyzer;
 import org.apache.lucene.analysis.util.CharArraySet;
 import org.apache.lucene.util.Version;
@@ -70,7 +66,6 @@ import java.io.Reader;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -177,7 +172,11 @@ public class Analysis {
         }
         List<String> pathLoadedWords = getWordList(env, settings, name);
         if (pathLoadedWords != null) {
-            return resolveNamedWords(pathLoadedWords, namedWords, ignoreCase);
+            if (pathLoadedWords.size() == 0 || (pathLoadedWords.size() == 1 && "_none_".equals(pathLoadedWords.get(0)))) {
+                return CharArraySet.EMPTY_SET;
+            } else {
+                return resolveNamedWords(pathLoadedWords, namedWords, ignoreCase);
+            }
         }
         return defaultWords;
     }

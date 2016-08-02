@@ -182,6 +182,80 @@ public class AnalysisModuleTests extends ModuleTestCase {
         IllegalStateException ise = expectThrows(IllegalStateException.class, () -> getAnalysisService(newRegistry, settings));
         assertEquals("alias [default] is already used by [foobar]", ise.getMessage());
     }
+
+    public void testOverwriteStopwords() throws IOException {
+        Settings settings = Settings.builder()
+            .put("index.analysis.analyzer.foobar.type", "english")
+            .put(IndexMetaData.SETTING_VERSION_CREATED, VersionUtils.randomVersion(random()))
+            .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
+            .build();
+        AnalysisRegistry newRegistry = getNewRegistry(settings);
+        AnalysisService analysisService = getAnalysisService(newRegistry, settings);
+        Analyzer analyzer = analysisService.analyzer("foobar").analyzer();
+        assertThat(analyzer, instanceOf(EnglishAnalyzer.class));
+        assertEquals(33, ((EnglishAnalyzer) analyzer).getStopwordSet().size());
+
+        settings = Settings.builder()
+                .put("index.analysis.analyzer.foobar.type", "english")
+                .put("index.analysis.analyzer.foobar.stopwords", "one")
+                .put(IndexMetaData.SETTING_VERSION_CREATED, VersionUtils.randomVersion(random()))
+                .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
+                .build();
+        newRegistry = getNewRegistry(settings);
+        analysisService = getAnalysisService(newRegistry, settings);
+        analyzer = analysisService.analyzer("foobar").analyzer();
+        assertThat(analyzer, instanceOf(EnglishAnalyzer.class));
+        assertEquals(1, ((EnglishAnalyzer) analyzer).getStopwordSet().size());
+
+        settings = Settings.builder()
+                .put("index.analysis.analyzer.foobar.type", "english")
+                .putArray("index.analysis.analyzer.foobar.stopwords", "foo", "bar")
+                .put(IndexMetaData.SETTING_VERSION_CREATED, VersionUtils.randomVersion(random()))
+                .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
+                .build();
+        newRegistry = getNewRegistry(settings);
+        analysisService = getAnalysisService(newRegistry, settings);
+        analyzer = analysisService.analyzer("foobar").analyzer();
+        assertThat(analyzer, instanceOf(EnglishAnalyzer.class));
+        assertEquals(2, ((EnglishAnalyzer) analyzer).getStopwordSet().size());
+
+        settings = Settings.builder()
+                .put("index.analysis.analyzer.foobar.type", "english")
+                .put("index.analysis.analyzer.foobar.stopwords", "_none_")
+                .put(IndexMetaData.SETTING_VERSION_CREATED, VersionUtils.randomVersion(random()))
+                .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
+                .build();
+        newRegistry = getNewRegistry(settings);
+        analysisService = getAnalysisService(newRegistry, settings);
+        analyzer = analysisService.analyzer("foobar").analyzer();
+        assertThat(analyzer, instanceOf(EnglishAnalyzer.class));
+        assertEquals(0, ((EnglishAnalyzer) analyzer).getStopwordSet().size());
+
+        settings = Settings.builder()
+                .put("index.analysis.analyzer.foobar.type", "english")
+                .putArray("index.analysis.analyzer.foobar.stopwords", "_none_")
+                .put(IndexMetaData.SETTING_VERSION_CREATED, VersionUtils.randomVersion(random()))
+                .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
+                .build();
+        newRegistry = getNewRegistry(settings);
+        analysisService = getAnalysisService(newRegistry, settings);
+        analyzer = analysisService.analyzer("foobar").analyzer();
+        assertThat(analyzer, instanceOf(EnglishAnalyzer.class));
+        assertEquals(0, ((EnglishAnalyzer) analyzer).getStopwordSet().size());
+
+        settings = Settings.builder()
+                .put("index.analysis.analyzer.foobar.type", "english")
+                .putArray("index.analysis.analyzer.foobar.stopwords")
+                .put(IndexMetaData.SETTING_VERSION_CREATED, VersionUtils.randomVersion(random()))
+                .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
+                .build();
+        newRegistry = getNewRegistry(settings);
+        analysisService = getAnalysisService(newRegistry, settings);
+        analyzer = analysisService.analyzer("foobar").analyzer();
+        assertThat(analyzer, instanceOf(EnglishAnalyzer.class));
+        assertEquals(0, ((EnglishAnalyzer) analyzer).getStopwordSet().size());
+    }
+
     public void testVersionedAnalyzers() throws Exception {
         String yaml = "/org/elasticsearch/index/analysis/test1.yml";
         Settings settings2 = Settings.builder()
