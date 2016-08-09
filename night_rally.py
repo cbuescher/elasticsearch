@@ -44,12 +44,11 @@ defaults = {
     "geonames": ("append-no-conflicts", "defaults"),
     "percolator": ("append-no-conflicts", "4gheap"),
     "geopoint": ("append-no-conflicts", "defaults"),
-    "pmc": ("append-no-conflicts", "defaults")
+    "pmc": ("append-no-conflicts", "4gheap")
 }
 
 config = {
     "root.dir": "%s/.rally/benchmarks" % os.getenv("HOME"),
-    "log.root.dir": "logs",
     "report.base.dir": "reports"
 }
 
@@ -92,12 +91,14 @@ def run(tracks, effective_start_date):
     _configure_rally()
     _run_rally(effective_start_date, tracks)
 
+
 def _configure_rally():
     root = os.path.dirname(os.path.realpath(__file__))
     source = "%s/resources/rally-nightly.ini" % root
     destination = "%s/.rally/rally-nightly.ini" % os.getenv("HOME")
     logger.info("Copying rally configuration from [%s] to [%s]" % (source, destination))
     shutil.copyfile(source, destination)
+
 
 def _run_rally( effective_start_date, tracks):
     ts = date_for_cmd_param(effective_start_date)
