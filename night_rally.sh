@@ -53,4 +53,5 @@ fi
 python3  ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="`date -u "+%Y-%m-%d %H:%M:%S"`"
 
 echo "Uploading results to $S3_ROOT_BUCKET"
-s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
+#s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
+aws s3 cp --recursive --acl "public-read" "~/.rally/benchmarks/reports/out/" "${S3_ROOT_BUCKET}/"
