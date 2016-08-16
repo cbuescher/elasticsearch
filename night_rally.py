@@ -32,11 +32,11 @@ tracks["geopoint"] = [
 ]
 
 tracks["pmc"] = [
-    ["append-no-conflicts", "defaults"],
+    #["append-no-conflicts", "defaults"],
     ["append-no-conflicts", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts", "two_nodes"]
+    #["append-no-conflicts", "two_nodes"]
 ]
 
 # default challenge / car per track
@@ -136,27 +136,24 @@ def v(d, k):
 #################################################
 
 METRICS_TO_KEY = {
-    "Median Indexing Throughput.*": "median_indexing_throughput",
-    "Median CPU usage \(index\).*": "cpu_usage",
-    "Total Young Gen GC.*": "young_gen_gc",
-    "Total Old Gen GC.*": "old_gen_gc",
-    "Indexing time.*": "indexing_time",
-    "Refresh time.*": "refresh_time",
-    "Flush time.*": "flush_time",
-    "Merge time.*": "merge_time",
-    "Merge throttle time.*": "merge_throttle_time",
-    "Segment count.*": "segment_count",
-    "Index size.*": "index_size",
-    "Totally written.*": "totally_written",
-    "Indices Stats\(99.0 percentile\).*": "latency_indices_stats_p99",
-    "Nodes Stats\(99.0 percentile\).*": "latency_nodes_stats_p99",
+    "Median Throughput": "median_indexing_throughput",
+    "Total Young Gen GC": "young_gen_gc",
+    "Total Old Gen GC": "old_gen_gc",
+    "Indexing time": "indexing_time",
+    "Refresh time": "refresh_time",
+    "Flush time": "flush_time",
+    "Merge time": "merge_time",
+    "Merge throttle time": "merge_throttle_time",
+    "Segment count": "segment_count",
+    "Index size": "index_size",
+    "Totally written": "totally_written",
     "Heap used for segments.*": "mem_segments",
     "Heap used for doc values.*": "mem_doc_values",
-    "Heap used for terms.*": "mem_terms",
-    "Heap used for norms.*": "mem_norms",
-    "Heap used for points.*": "mem_points",
-    "Heap used for stored fields.*": "mem_fields",
-    "Query latency.*\(99.0 percentile\)": "query_latency_p99",
+    "Heap used for terms": "mem_terms",
+    "Heap used for norms": "mem_norms",
+    "Heap used for points": "mem_points",
+    "Heap used for stored fields": "mem_fields",
+    "99.0th percentile latency": "query_latency_p99",
     "Merge time \(.*": "merge_time_parts"
 }
 
@@ -170,6 +167,47 @@ def is_default_setup(default_setup, current_setup):
 
 def is_multi_valued(metric_key):
     return metric_key in ["query_latency_p99", "merge_time_parts"]
+
+
+def is_indexing_operation(op_name):
+    return op_name.startswith("index") and not op_name.endswith("stats")
+
+
+def key_for(metric_pattern, metric_key, metric_name, op_name):
+    if re.match(metric_pattern, metric_name):
+        if metric_key == "median_indexing_throughput":
+            if is_indexing_operation(op_name):
+                return metric_key
+            else:
+                return None
+        elif metric_key == "query_latency_p99":
+            if op_name == "index-stats":
+                return "latency_indices_stats_p99"
+            elif op_name == "node-stats":
+                return "latency_nodes_stats_p99"
+            elif is_indexing_operation(op_name) or op_name == "force-merge":
+                return None
+        return metric_key
+    return None
+
+
+def extract_metrics(source_report):
+    metrics = {}
+    for row in csv.reader(source_report):
+        for metric_pattern, metric_key in METRICS_TO_KEY.items():
+            metric_name = row[0]
+            op_name = row[1]
+            metric_value = row[2]
+
+            final_key = key_for(metric_pattern, metric_key, metric_name, op_name)
+            if final_key:
+                if is_multi_valued(final_key):
+                    if final_key not in metrics:
+                        metrics[final_key] = []
+                    metrics[final_key].append(metric_value)
+                else:
+                    metrics[final_key] = metric_value
+    return metrics
 
 
 def report(effective_start_date, tracks, default_setup_per_track):
@@ -195,25 +233,14 @@ def report(effective_start_date, tracks, default_setup_per_track):
             current_is_default = is_default_setup(default_setup_per_track[track], setup)
             report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv" % (root_dir, report_root_dir, timestamp, track, challenge, car)
 
-            metrics = {}
-
             if not os.path.isfile(report_path):
                 logger.warn("[%s] does not exist. Skipping track [%s], challenge [%s], car [%s]."
                             % (report_path, track, challenge, car))
                 continue
 
             with open(report_path) as csvfile:
-                for row in csv.reader(csvfile):
-                    for metric_pattern, metric_key in METRICS_TO_KEY.items():
-                        if re.match(metric_pattern, row[0]):
-                            if is_multi_valued(metric_key):
-                                if metric_key not in metrics:
-                                    metrics[metric_key] = []
-                                metrics[metric_key].append(row[1])
-                            else:
-                                metrics[metric_key] = row[1]
+                metrics = extract_metrics(csvfile)
 
-            # Date,Defaults,Defaults (4G heap),Fast,FastUpdate
             if "segment_count" in metrics:
                 segment_count_metrics.append(metrics["segment_count"])
 
