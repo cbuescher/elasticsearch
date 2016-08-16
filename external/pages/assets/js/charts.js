@@ -1,7 +1,7 @@
 var chartingLib = {
       createOpts: function(title, labelsDiv, yLabel) {
         return { "title": title,
-            "colors": ["#00BFB3", "#FED10A", "#0078A0", "#DF4998", "#93C90E", "#00A9E5"],
+            "colors": ["#00BFB3", "#FED10A", "#0078A0", "#DF4998", "#93C90E", "#00A9E5", "#222", "#AAA", "#777"],
             "axisLabelColor": "#555",
             "axisLineColor": "#555",
             "labelsUTC": false,
