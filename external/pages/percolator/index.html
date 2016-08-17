@@ -28,15 +28,28 @@
 var charts = {
   init: function() {
     var annotationSource = false;
-    chartingLib.renderChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', 'indexing_throughput_annotations.json');
-    chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', annotationSource);
-    chartingLib.renderChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', annotationSource);
-    chartingLib.renderChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', annotationSource);
-    chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', annotationSource);
-    chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', annotationSource);
-    chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', annotationSource);
-    chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', annotationSource);
-    chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', annotationSource);
+
+    charts.indexingThroughput = chartingLib.renderChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', 'indexing_throughput_annotations.json');
+    charts.totalTimes = chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', annotationSource);
+    charts.segmentMemory = chartingLib.renderChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', annotationSource);
+    charts.cpuUsage = chartingLib.renderChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', annotationSource)
+    charts.diskUsage = chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', annotationSource),
+    charts.segmentCounts = chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', annotationSource),
+    charts.queryLatency = chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', annotationSource),
+    charts.statsLatency = chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', annotationSource),
+    charts.gcTimes = chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', annotationSource)
+
+    chartingLib.synchronize([
+      charts.indexingThroughput,
+      charts.totalTimes,
+      charts.segmentMemory,
+      charts.cpuUsage,
+      charts.diskUsage,
+      charts.segmentCounts,
+      charts.queryLatency,
+      charts.statsLatency,
+      charts.gcTimes
+    ]);
   }
 }
   </script>
@@ -91,14 +104,18 @@ var charts = {
   <div class="row">
     <div class="col-md-12">
     <h3>Overview</h3>
-    <p>This benchmark executes the <a href="https://github.com/elastic/rally-tracks/blob/master/percolator/track.json">percolator track</a> with Rally (see a <a href="../index.html">more detailed explanation of our benchmarking methodology</a>).</p>
+      <p>The purpose of this benchmark is to evaluate the performance of percolator queries in Elasticsearch. As we are mainly interested in search performance we don't run a lot of variations of indexing as we do in the other benchmarks but only append documents and also run on a 4 GB heap (the default settings don't work for this benchmark). For more details please refer to the <a href="https://github.com/elastic/rally-tracks/blob/master/percolator/track.json">percolator track specification</a> and have a look at our <a href="../index.html">benchmarking methodology</a>).</p>
     </div>
   </div>
-  
+
   <div class="row">
-    <div class="col-md-12">
-		<h3>Results</h3>
-	</div>
+    <div class="col-md-6">
+      <h3>Results</h3>
+      <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>Hint</strong> Click and drag to zoom. Double-click to zoom out.
+      </div>
+    </div>
   </div>
 
   <div class="row">

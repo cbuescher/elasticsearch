@@ -16,6 +16,7 @@ var chartingLib = {
             "drawPoints": true,
             "pointSize": 3,
             "gridLineColor": "#BBB"
+            //"strokePattern": [5, 10]
         }
     },
 
@@ -31,5 +32,15 @@ var chartingLib = {
               g.setAnnotations(json);
             });
           });
+          return g;
+      },
+
+      synchronize: function(graphs) {
+        var sync = Dygraph.synchronize(graphs, {
+            selection: false,
+            zoom: true,
+            // synchronize x-axis only
+            range: false
+        });
       }
 };

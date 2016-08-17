@@ -70,6 +70,19 @@
   </div>
 
   <div class="row">
+    <div class="col-md-12">
+      <h3>Benchmarks</h3>
+      <ul>
+        <li><a href="geonames/index.html">Geonames</a>: for evaluating the performance of structured data.</li>
+        <li><a href="geopoint/index.html">Geopoint</a>: for evaluating the performance of geo queries.</li>
+        <li><a href="percolator/index.html">Percolator</a>: for evaluating the performance of percolation queries.</li>
+        <li><a href="pmc/index.html">PMC</a>: for evaluating the performance of full text search.</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="row">
 	<div class="col-md-12">
     <h3>Benchmarking Methodology</h3>
     <p>All benchmarks are run by <a href="https://github.com/elastic/rally">Rally</a> against the <a href="https://github.com/elastic/elasticsearch/tree/master/">Elasticsearch master branch</a> as of that date. Currently the benchmark driver and the benchmark candidate are located on the same machine (Will change in the near future so Rally runs on a dedicated machine and Elasticsearch runs on a dedicated machine).</p>
@@ -87,7 +100,7 @@
     	<li>RAM: 32 GB</li>
     	<li>SSD: two Crucial MX200 (software RAID 0)</li>
     	<li>OS: Linux Kernel version 4.4.0-28</li>
-    <ul>
+    </ul>
     <div>
   </div>
 </div> <!-- /container -->

@@ -28,15 +28,28 @@
 var charts = {
   init: function() {
     var annotationSource = false;
-    chartingLib.renderChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', 'indexing_throughput_annotations.json');
-    chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', annotationSource);
-    chartingLib.renderChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', annotationSource);
-    chartingLib.renderChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', annotationSource);
-    chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', annotationSource);
-    chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', annotationSource);
-    chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', annotationSource);
-    chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', annotationSource);
-    chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', annotationSource);
+
+    charts.indexingThroughput = chartingLib.renderChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', 'indexing_throughput_annotations.json');
+    charts.totalTimes = chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', annotationSource);
+    charts.segmentMemory = chartingLib.renderChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', annotationSource);
+    charts.cpuUsage = chartingLib.renderChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', annotationSource)
+    charts.diskUsage = chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', annotationSource),
+    charts.segmentCounts = chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', annotationSource),
+    charts.queryLatency = chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', annotationSource),
+    charts.statsLatency = chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', annotationSource),
+    charts.gcTimes = chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', annotationSource)
+
+    chartingLib.synchronize([
+      charts.indexingThroughput,
+      charts.totalTimes,
+      charts.segmentMemory,
+      charts.cpuUsage,
+      charts.diskUsage,
+      charts.segmentCounts,
+      charts.queryLatency,
+      charts.statsLatency,
+      charts.gcTimes
+    ]);
   }
 }
   </script>
@@ -90,15 +103,25 @@ var charts = {
 <div class="container">
   <div class="row">
     <div class="col-md-12">
-    <h3>Overview</h3>
-    <p>This benchmark executes the <a href="https://github.com/elastic/rally-tracks/blob/master/pmc/track.json">PMC track</a> with Rally (see a <a href="../index.html">more detailed explanation of our benchmarking methodology</a>).</p>
+      <h3>Overview</h3>
+      <p>The PMC data set contains scientific papers from <a href="https://www.ncbi.nlm.nih.gov/pmc/">PubMed Central &reg;</a> (PMC). We use it to evaluate the performance of Elasticsearch for full-text content. We run the following variations (which we call "challenges" in Rally):</p>
+      <ul>
+        <li><strong>Append</strong>: Indexes the whole document corpus using Elasticsearch default settings. We only adjust the number of replicas as we benchmark a single node cluster and Rally will only start the benchmark if the cluster turns green. Document ids are unique so all index operations are append only. After that a couple of queries are run in parallel by multiple clients.</li>
+        <li><strong>Append Fast</strong>: Indexes the whole document corpus using a setup that will lead to a larger indexing throughput than the default settings. Document ids are unique so all index operations are append only.</li>
+        <li><strong>Id Conflicts</strong>: Indexes the whole document corpus using a setup that will lead to a larger indexing throughput than the default settings. Rally will produce duplicate ids in 25% of all documents (not configurable) so we can simulate a scenario with appends most of the time and some updates in between.</li>
+      </ul>
+      <p>The benchmarks are run either for an out of the box configuration of Elasticsearch ("default settings") or with a larger heap of 4GB ("4g heap"). For more details please refer to the <a href="https://github.com/elastic/rally-tracks/blob/master/pmc/track.json">PMC track specification</a> and have a look at our <a href="../index.html">benchmarking methodology</a>).</p>
     </div>
   </div>
-  
+
   <div class="row">
-    <div class="col-md-12">
-		<h3>Results</h3>
-	</div>
+    <div class="col-md-6">
+      <h3>Results</h3>
+      <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>Hint</strong> Click and drag to zoom. Double-click to zoom out.
+      </div>
+    </div>
   </div>
 
   <div class="row">
