@@ -1,3 +1,5 @@
+import datetime
+import os
 import unittest
 
 if __name__ == "__main__" and __package__ is None:
@@ -127,7 +129,101 @@ Max Throughput,painless_static,2.2175969605297623,ops/s
 100th percentile service time,painless_static,13.649789999817585,ms"""
 
 
-class TestReporting(unittest.TestCase):
+class RecordingSystemCall:
+    def __init__(self, return_value):
+        self.calls = []
+        self.return_value = return_value
+
+    def __call__(self, *args, **kwargs):
+        self.calls.append(*args)
+        return self.return_value
+
+
+class NightRallyTests(unittest.TestCase):
+    def test_run_two_challenges_successfully(self):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = {"geonames": [
+            ["append-no-conflicts", "defaults"],
+            ["append-no-conflicts", "4gheap"]
+        ]}
+        start_date = datetime.datetime(2016, 1, 1)
+        night_rally._run_rally(start_date, tracks, system_call)
+        self.assertEqual(2, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --configuration-name=nightly --pipeline=from-sources-complete --quiet --revision \"@2016-01-01T00:00:00Z\" "
+                "--effective-start-date \"2016-01-01 00:00:00\" --track=geonames --challenge=append-no-conflicts --car=defaults "
+                "--report-format=csv "
+                "--report-file=%s/.rally/benchmarks/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv"
+                % os.getenv("HOME"),
+                "rally --configuration-name=nightly --pipeline=from-sources-skip-build --quiet --revision \"@2016-01-01T00:00:00Z\" "
+                "--effective-start-date \"2016-01-01 00:00:00\" --track=geonames --challenge=append-no-conflicts --car=4gheap "
+                "--report-format=csv "
+                "--report-file=%s/.rally/benchmarks/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/4gheap/report.csv"
+                % os.getenv("HOME")]
+            ,
+            system_call.calls
+        )
+
+    def test_run_two_tracks_successfully(self):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = {"geonames": [
+            ["append-no-conflicts", "defaults"],
+        ],
+            "percolator": [
+                ["append-no-conflicts", "4gheap"],
+            ]
+        }
+        start_date = datetime.datetime(2016, 10, 1)
+        night_rally._run_rally(start_date, tracks, system_call)
+        self.assertEqual(2, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --configuration-name=nightly --pipeline=from-sources-complete --quiet --revision \"@2016-10-01T00:00:00Z\" "
+                "--effective-start-date \"2016-10-01 00:00:00\" --track=geonames --challenge=append-no-conflicts --car=defaults "
+                "--report-format=csv "
+                "--report-file=%s/.rally/benchmarks/reports/rally/2016-10-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv"
+                % os.getenv("HOME"),
+                "rally --configuration-name=nightly --pipeline=from-sources-skip-build --quiet --revision \"@2016-10-01T00:00:00Z\" "
+                "--effective-start-date \"2016-10-01 00:00:00\" --track=percolator --challenge=append-no-conflicts --car=4gheap "
+                "--report-format=csv "
+                "--report-file=%s/.rally/benchmarks/reports/rally/2016-10-01-00-00-00/percolator/append-no-conflicts/4gheap/report.csv"
+                % os.getenv("HOME")]
+            ,
+            system_call.calls
+        )
+
+    def test_run_continues_on_error(self):
+        system_call = RecordingSystemCall(return_value=True)
+
+        tracks = {"geonames": [
+            ["append-no-conflicts", "defaults"],
+        ],
+            "percolator": [
+                ["append-no-conflicts", "4gheap"],
+            ]
+        }
+        start_date = datetime.datetime(2016, 10, 1)
+        night_rally._run_rally(start_date, tracks, system_call)
+        self.assertEqual(2, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --configuration-name=nightly --pipeline=from-sources-complete --quiet --revision \"@2016-10-01T00:00:00Z\" "
+                "--effective-start-date \"2016-10-01 00:00:00\" --track=geonames --challenge=append-no-conflicts --car=defaults "
+                "--report-format=csv "
+                "--report-file=%s/.rally/benchmarks/reports/rally/2016-10-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv"
+                % os.getenv("HOME"),
+                "rally --configuration-name=nightly --pipeline=from-sources-skip-build --quiet --revision \"@2016-10-01T00:00:00Z\" "
+                "--effective-start-date \"2016-10-01 00:00:00\" --track=percolator --challenge=append-no-conflicts --car=4gheap "
+                "--report-format=csv "
+                "--report-file=%s/.rally/benchmarks/reports/rally/2016-10-01-00-00-00/percolator/append-no-conflicts/4gheap/report.csv"
+                % os.getenv("HOME")]
+            ,
+            system_call.calls
+        )
+
     def test_extract_metrics(self):
         metrics = night_rally.extract_metrics(EXAMPLE_REPORT.split("\n"))
 
