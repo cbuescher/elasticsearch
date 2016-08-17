@@ -7,6 +7,7 @@ import re
 import os
 import shutil
 import logging
+import fileinput
 
 tracks = collections.OrderedDict()
 
@@ -66,7 +67,7 @@ formatter.converter = time.gmtime
 ch.setFormatter(formatter)
 logging.root.addHandler(ch)
 
-logger = logging.getLogger("night_rally.config")
+logger = logging.getLogger("night_rally")
 
 
 def date_for_cmd_param(d):
@@ -93,14 +94,19 @@ def run(tracks, effective_start_date):
 
 
 def _configure_rally():
+    user_home = os.getenv("HOME")
     root = os.path.dirname(os.path.realpath(__file__))
     source = "%s/resources/rally-nightly.ini" % root
-    destination = "%s/.rally/rally-nightly.ini" % os.getenv("HOME")
+    destination = "%s/.rally/rally-nightly.ini" % user_home
     logger.info("Copying rally configuration from [%s] to [%s]" % (source, destination))
     shutil.copyfile(source, destination)
+    # materialize current user home
+    with fileinput.input(files=destination, inplace=True) as f:
+        for line in f:
+            print(line.replace("~", user_home))
 
 
-def _run_rally( effective_start_date, tracks):
+def _run_rally(effective_start_date, tracks, system=os.system):
     ts = date_for_cmd_param(effective_start_date)
     revision_ts = to_iso8601(effective_start_date)
 
@@ -115,7 +121,7 @@ def _run_rally( effective_start_date, tracks):
             report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv" % (root_dir, report_root_dir,
                                                                   date_for_path(effective_start_date), track,
                                                                   challenge, car)
-            if os.system(
+            if system(
                 "rally --configuration-name=nightly --pipeline={6} --quiet --revision \"@{0}\" --effective-start-date \"{1}\" "
                 "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}"
                     .format(revision_ts, ts, track, challenge, car, report_path, pipeline)):
@@ -215,6 +221,9 @@ def report(effective_start_date, tracks, default_setup_per_track):
     Publishes all data from the provided trial run.
 
     :param effective_start_date: A timestamp for which we should publish data.
+    :param tracks: A hash of all tracks that have been run and their challenges.
+    :param default_setup_per_track: A hash of the default challenge / car per track.
+
     """
     timestamp = date_for_path(effective_start_date)
     # this timestamp gets used in the report files
