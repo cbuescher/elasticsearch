@@ -5,6 +5,7 @@ import time
 import csv
 import re
 import os
+import errno
 import shutil
 import logging
 import fileinput
@@ -87,6 +88,20 @@ def to_iso8601(d):
     """
     return "{:%Y-%m-%dT%H:%M:%SZ}".format(d)
 
+def ensure_dir(directory):
+    """
+    Ensure that the provided directory and all of its parent directories exist.
+    This function is safe to execute on existing directories (no op).
+
+    :param directory: The directory to create (if it does not exist).
+    """
+    try:
+        # avoid a race condition by trying to create the checkout directory
+        os.makedirs(directory)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
 
 def run(tracks, effective_start_date):
     _configure_rally()
@@ -99,6 +114,7 @@ def _configure_rally():
     source = "%s/resources/rally-nightly.ini" % root
     destination = "%s/.rally/rally-nightly.ini" % user_home
     logger.info("Copying rally configuration from [%s] to [%s]" % (source, destination))
+    ensure_dir("%s/.rally" % user_home)
     shutil.copyfile(source, destination)
     # materialize current user home
     with fileinput.input(files=destination, inplace=True) as f:
