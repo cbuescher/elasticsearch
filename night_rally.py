@@ -88,6 +88,7 @@ def to_iso8601(d):
     """
     return "{:%Y-%m-%dT%H:%M:%SZ}".format(d)
 
+
 def ensure_dir(directory):
     """
     Ensure that the provided directory and all of its parent directories exist.
@@ -103,7 +104,7 @@ def ensure_dir(directory):
             raise
 
 
-def run(tracks, effective_start_date):
+def run(tracks, effective_start_date, override_src_dir):
     _configure_rally()
     _run_rally(effective_start_date, tracks)
 
@@ -122,9 +123,14 @@ def _configure_rally():
             print(line.replace("~", user_home))
 
 
-def _run_rally(effective_start_date, tracks, system=os.system):
+def _run_rally(effective_start_date, tracks, override_src_dir, system=os.system):
     ts = date_for_cmd_param(effective_start_date)
     revision_ts = to_iso8601(effective_start_date)
+
+    if override_src_dir is not None:
+        override = " --override-src-dir=%s" % override_src_dir
+    else:
+        override = ""
 
     root_dir = config["root.dir"]
     report_root_dir = config["report.base.dir"]
@@ -139,8 +145,8 @@ def _run_rally(effective_start_date, tracks, system=os.system):
                                                                   challenge, car)
             if system(
                 "rally --configuration-name=nightly --pipeline={6} --quiet --revision \"@{0}\" --effective-start-date \"{1}\" "
-                "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}"
-                    .format(revision_ts, ts, track, challenge, car, report_path, pipeline)):
+                "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}"
+                    .format(revision_ts, ts, track, challenge, car, report_path, pipeline, override)):
                 logger.error("Failed to run track [%s]. Please check the logs." % track)
             # after we've executed the first benchmark, there is no reason to build again from sources
             pipeline = "from-sources-skip-build"
@@ -337,6 +343,10 @@ def parse_args():
         help="Passes this date as start date to Rally (format: %Y-%m-%d %H:%M:%S). Needed for consistent results for multiple trial runs",
         required=True,
         type=lambda s: datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S"))
+    parser.add_argument(
+        "--override-src-dir",
+        help=argparse.SUPPRESS,
+        default=None)
 
     return parser.parse_args()
 
@@ -344,7 +354,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    run(tracks, args.effective_start_date)
+    run(tracks, args.effective_start_date, args.override_src_dir)
     report(args.effective_start_date, tracks, defaults)
 
 

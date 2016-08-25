@@ -28,7 +28,27 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-if [ "$1" == "--self-update" ]
+
+SELF_UPDATE=NO
+
+for i in "$@"
+do
+case $i in
+    --override-src-dir=*)
+    OVERRIDE_SRC_DIR="${i#*=}"
+    shift # past argument=value
+    ;;
+    --self-update)
+    SELF_UPDATE=YES
+    shift # past argument with no value
+    ;;
+    *)
+    echo "unknown"        # unknown option
+    ;;
+esac
+done
+
+if [ ${SELF_UPDATE} == YES ]
 then
     pushd . >/dev/null 2>&1
     cd ${NIGHT_RALLY_HOME} >/dev/null 2>&1
@@ -49,8 +69,16 @@ then
     popd >/dev/null 2>&1
 fi
 
+if [ -n "${OVERRIDE_SRC_DIR}" ]
+then
+	NIGHT_RALLY_OVERRIDE="--override-src-dir=${OVERRIDE_SRC_DIR}"
+else
+	NIGHT_RALLY_OVERRIDE=""
+fi
+
+
 # We invoke it currently with the current (UTC) timestamp. This determines the version to checkout
-python3  ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="`date -u "+%Y-%m-%d %H:%M:%S"`"
+python3  ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="`date -u "+%Y-%m-%d %H:%M:%S"`" ${NIGHT_RALLY_OVERRIDE}
 
 echo "Uploading results to $S3_ROOT_BUCKET"
 #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
