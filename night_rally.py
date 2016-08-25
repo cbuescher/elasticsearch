@@ -106,7 +106,7 @@ def ensure_dir(directory):
 
 def run(tracks, effective_start_date, override_src_dir):
     _configure_rally()
-    _run_rally(effective_start_date, tracks)
+    _run_rally(effective_start_date, tracks, override_src_dir)
 
 
 def _configure_rally():
