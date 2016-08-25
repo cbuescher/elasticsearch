@@ -17,7 +17,7 @@ set -e
 
 
 S3_ROOT_BUCKET="s3://elasticsearch-benchmarks.elastic.co"
-
+LOCAL_REPORT_ROOT="${HOME}/.rally/benchmarks/reports/out/"
 
 # see http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
@@ -76,10 +76,13 @@ else
 	NIGHT_RALLY_OVERRIDE=""
 fi
 
+# We need to pull down the current state of all reports from the S3 bucket as night_rally might be run on different nodes each day
+echo "Syncing previous results from $S3_ROOT_BUCKET"
+aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_ROOT}"
 
 # We invoke it currently with the current (UTC) timestamp. This determines the version to checkout
 python3  ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="`date -u "+%Y-%m-%d %H:%M:%S"`" ${NIGHT_RALLY_OVERRIDE}
 
 echo "Uploading results to $S3_ROOT_BUCKET"
 #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
-aws s3 cp --recursive --acl "public-read" "~/.rally/benchmarks/reports/out/" "${S3_ROOT_BUCKET}/"
+aws s3 sync --acl "public-read" "${LOCAL_REPORT_ROOT}" "${S3_ROOT_BUCKET}/"
