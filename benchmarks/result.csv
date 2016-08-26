@@ -1,0 +1,56 @@
+Metric,Value
+Min Indexing Throughput [docs/s],38556.0
+Median Indexing Throughput [docs/s],44566.58333333333
+Max Indexing Throughput [docs/s],48244.0
+Indexing time [min],30.72458333333333
+Merge time [min],7.18975
+Refresh time [min],2.3497833333333333
+Flush time [min],1.2546
+Merge throttle time [min],1.3034166666666667
+Query latency default (90.0 percentile) [ms],54.36155014038086
+Query latency default (99.0 percentile) [ms],73.54597908020052
+Query latency default (100.0 percentile) [ms],135.98109436035156
+Query latency term (90.0 percentile) [ms],1.802869987487793
+Query latency term (99.0 percentile) [ms],2.0635323977470406
+Query latency term (100.0 percentile) [ms],2.1558499336242676
+Query latency phrase (90.0 percentile) [ms],2.4050144672393805
+Query latency phrase (99.0 percentile) [ms],2.8553510928154013
+Query latency phrase (100.0 percentile) [ms],3.282254934310913
+Query latency country_agg_uncached (90.0 percentile) [ms],263.99256286621096
+Query latency country_agg_uncached (99.0 percentile) [ms],301.94572845458987
+Query latency country_agg_uncached (100.0 percentile) [ms],302.1258850097656
+Query latency country_agg_cached (90.0 percentile) [ms],2.2271822214126584
+Query latency country_agg_cached (99.0 percentile) [ms],5.126538918019618
+Query latency country_agg_cached (100.0 percentile) [ms],252.0946044921875
+Query latency scroll (90.0 percentile) [ms],23.321646308898927
+Query latency scroll (99.0 percentile) [ms],24.782226085662845
+Query latency scroll (100.0 percentile) [ms],25.958951950073242
+Query latency expression (90.0 percentile) [ms],381.54732055664067
+Query latency expression (99.0 percentile) [ms],385.22566650390627
+Query latency expression (100.0 percentile) [ms],385.9678039550781
+Query latency painless_static (90.0 percentile) [ms],540.9335327148438
+Query latency painless_static (99.0 percentile) [ms],546.2719622802734
+Query latency painless_static (100.0 percentile) [ms],549.9568481445312
+Query latency painless_dynamic (90.0 percentile) [ms],525.440496826172
+Query latency painless_dynamic (99.0 percentile) [ms],556.6867095947267
+Query latency painless_dynamic (100.0 percentile) [ms],575.1890869140625
+Median CPU usage (index) [%],957.1499938964844
+Median CPU usage (stats) [%],150.35000228881836
+Median CPU usage (search) [%],352.5000010172526
+Total Young Gen GC [s],11.273
+Total Old Gen GC [s],1.535
+Index size [GB],3.279082341119647
+Totally written [GB],16.861427307128906
+Heap used for segments [MB],21.234503746032715
+Heap used for doc values [MB],0.10956192016601562
+Heap used for terms [MB],19.60907554626465
+Heap used for norms [MB],0.07666015625
+Heap used for points [MB],0.7714815139770508
+Heap used for stored fields [MB],0.667724609375
+Segment count,97
+Indices Stats(90.0 percentile) [ms],3.9261399745941166
+Indices Stats(99.0 percentile) [ms],4.425495061874392
+Indices Stats(100.0 percentile) [ms],4.847516059875488
+Nodes Stats(90.0 percentile) [ms],4.01015009880066
+Nodes Stats(99.0 percentile) [ms],4.911499872207657
+Nodes Stats(100.0 percentile) [ms],7.960392951965332

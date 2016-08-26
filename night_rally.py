@@ -185,6 +185,10 @@ METRICS_TO_KEY = {
     "Merge time \(.*": "merge_time_parts"
 }
 
+META_METRICS_TO_KEY = {
+    "Elasticsearch source revision": "source_revision"
+}
+
 
 def is_default_setup(default_setup, current_setup):
     current_challenge, current_car = current_setup
@@ -218,6 +222,11 @@ def key_for(metric_pattern, metric_key, metric_name, op_name):
         return metric_key
     return None
 
+def meta_key_for(metric_pattern, metric_key, metric_name):
+    if re.match(metric_pattern, metric_name):
+        return metric_key
+    return None
+
 
 def extract_metrics(source_report):
     metrics = {}
@@ -236,6 +245,22 @@ def extract_metrics(source_report):
                 else:
                     metrics[final_key] = metric_value
     return metrics
+
+def extract_meta_metrics(source_meta_report):
+    meta_metrics = {}
+    for row in csv.reader(source_meta_report):
+        for metric_pattern, metric_key in META_METRICS_TO_KEY.items():
+            metric_name = row[0]
+            metric_value = row[1]
+            final_key = meta_key_for(metric_pattern, metric_key, metric_name)
+            if final_key:
+                if is_multi_valued(final_key):
+                    if final_key not in meta_metrics:
+                        meta_metrics[final_key] = []
+                    meta_metrics[final_key].append(metric_value)
+                else:
+                    meta_metrics[final_key] = metric_value
+    return meta_metrics
 
 
 def report(effective_start_date, tracks, default_setup_per_track):
@@ -263,6 +288,7 @@ def report(effective_start_date, tracks, default_setup_per_track):
             challenge, car = setup
             current_is_default = is_default_setup(default_setup_per_track[track], setup)
             report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv" % (root_dir, report_root_dir, timestamp, track, challenge, car)
+            meta_report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv.meta" % (root_dir, report_root_dir, timestamp, track, challenge, car)
 
             if not os.path.isfile(report_path):
                 logger.warn("[%s] does not exist. Skipping track [%s], challenge [%s], car [%s]."
@@ -325,6 +351,15 @@ def report(effective_start_date, tracks, default_setup_per_track):
             if "merge_time_parts" in metrics:
                 with open("%s/merge_parts.csv" % output_report_path, "a") as f:
                     f.write("%s,%s\n" % (report_timestamp, ",".join(metrics["merge_time_parts"])))
+
+
+
+            with open(meta_report_path) as csvfile:
+                meta_metrics = extract_meta_metrics(csvfile)
+
+            if "source_revision" in metrics:
+                with open("%s/source_revision.csv" % output_report_path, "a") as f:
+                    f.write("%s,%s\n" % (report_timestamp, ",".join(metrics["source_revision"])))
 
         if len(segment_count_metrics) > 0:
             with open("%s/segment_counts.csv" % output_report_path, "a") as f:

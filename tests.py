@@ -128,6 +128,8 @@ Max Throughput,painless_static,2.2175969605297623,ops/s
 99.0th percentile service time,painless_static,13.627798499919663,ms
 100th percentile service time,painless_static,13.649789999817585,ms"""
 
+EXAMPLE_META_REPORT = """Name,Value
+Elasticsearch source revision,247cafe"""
 
 class RecordingSystemCall:
     def __init__(self, return_value):
@@ -249,6 +251,10 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual("8.948227400155709", metrics["latency_indices_stats_p99"])
         self.assertEqual("8.401418720027323", metrics["latency_nodes_stats_p99"])
         self.assertEqual(["260", "362", "327", "7", "306", "553", "12", "13"], metrics["query_latency_p99"])
+
+    def test_extract_meta_metrics(self):
+        metrics = night_rally.extract_meta_metrics(EXAMPLE_META_REPORT.split("\n"))
+        self.assertEqual("247cafe", metrics["source_revision"])
 
 
 if __name__ == '__main__':
