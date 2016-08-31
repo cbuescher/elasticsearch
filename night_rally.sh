@@ -80,6 +80,10 @@ fi
 echo "Syncing previous results from $S3_ROOT_BUCKET"
 aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_ROOT}"
 
+# Night Rally is *always* the master for assets
+echo "Copying most recent assets to ${LOCAL_REPORT_ROOT}"
+cp -R ${NIGHT_RALLY_HOME}/external/pages/ ${LOCAL_REPORT_ROOT}
+
 # We invoke it currently with the current (UTC) timestamp. This determines the version to checkout
 python3  ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="`date -u "+%Y-%m-%d %H:%M:%S"`" ${NIGHT_RALLY_OVERRIDE}
 
