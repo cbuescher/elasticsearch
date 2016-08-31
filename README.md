@@ -1,6 +1,6 @@
 ## Night Rally
 
-Night Rally is a set of driver scripts for running nightly macrobenchmarks for Elasticsearch. The macrobenchmarks themselves are executed by [Rally](https://github.com/elastic/rally).
+Night Rally is a set of driver scripts for [running nightly macrobenchmarks for Elasticsearch](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic). The macrobenchmarks themselves are executed by [Rally](https://github.com/elastic/rally) and [publishing the results](https://elasticsearch-benchmarks.elastic.co/).
 
 ### Prerequisites
 
