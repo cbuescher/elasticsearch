@@ -38,7 +38,7 @@ var charts = {
     charts.segmentCounts = chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', annotationSource),
     charts.queryLatency = chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', annotationSource),
     charts.statsLatency = chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', annotationSource),
-    charts.gcTimes = chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', annotationSource)
+    charts.gcTimes = chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', 'gc_times_annotations.json')
 
 
     chartingLib.synchronize([
