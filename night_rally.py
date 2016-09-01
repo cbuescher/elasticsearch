@@ -104,12 +104,7 @@ def ensure_dir(directory):
             raise
 
 
-def run(tracks, effective_start_date, override_src_dir):
-    _configure_rally()
-    _run_rally(effective_start_date, tracks, override_src_dir)
-
-
-def _configure_rally():
+def configure_rally():
     user_home = os.getenv("HOME")
     root = os.path.dirname(os.path.realpath(__file__))
     source = "%s/resources/rally-nightly.ini" % root
@@ -123,9 +118,10 @@ def _configure_rally():
             print(line.replace("~", user_home))
 
 
-def _run_rally(effective_start_date, tracks, override_src_dir, system=os.system):
+def run_rally(effective_start_date, tracks, override_src_dir, system=os.system):
     ts = date_for_cmd_param(effective_start_date)
     revision_ts = to_iso8601(effective_start_date)
+    rally_failure = False
 
     if override_src_dir is not None:
         override = " --override-src-dir=%s" % override_src_dir
@@ -147,9 +143,11 @@ def _run_rally(effective_start_date, tracks, override_src_dir, system=os.system)
                 "rally --configuration-name=nightly --pipeline={6} --quiet --revision \"@{0}\" --effective-start-date \"{1}\" "
                 "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}"
                     .format(revision_ts, ts, track, challenge, car, report_path, pipeline, override)):
+                rally_failure = True
                 logger.error("Failed to run track [%s]. Please check the logs." % track)
             # after we've executed the first benchmark, there is no reason to build again from sources
             pipeline = "from-sources-skip-build"
+    return rally_failure
 
 
 def v(d, k):
@@ -222,6 +220,7 @@ def key_for(metric_pattern, metric_key, metric_name, op_name):
         return metric_key
     return None
 
+
 def meta_key_for(metric_pattern, metric_key, metric_name):
     if re.match(metric_pattern, metric_name):
         return metric_key
@@ -245,6 +244,7 @@ def extract_metrics(source_report):
                 else:
                     metrics[final_key] = metric_value
     return metrics
+
 
 def extract_meta_metrics(source_meta_report):
     meta_metrics = {}
@@ -352,14 +352,12 @@ def report(effective_start_date, tracks, default_setup_per_track):
                 with open("%s/merge_parts.csv" % output_report_path, "a") as f:
                     f.write("%s,%s\n" % (report_timestamp, ",".join(metrics["merge_time_parts"])))
 
-
-
             with open(meta_report_path) as csvfile:
                 meta_metrics = extract_meta_metrics(csvfile)
 
-            if "source_revision" in metrics:
+            if "source_revision" in meta_metrics:
                 with open("%s/source_revision.csv" % output_report_path, "a") as f:
-                    f.write("%s,%s\n" % (report_timestamp, ",".join(metrics["source_revision"])))
+                    f.write("%s,%s\n" % (report_timestamp, ",".join(meta_metrics["source_revision"])))
 
         if len(segment_count_metrics) > 0:
             with open("%s/segment_counts.csv" % output_report_path, "a") as f:
@@ -389,8 +387,11 @@ def parse_args():
 def main():
     args = parse_args()
 
-    run(tracks, args.effective_start_date, args.override_src_dir)
+    configure_rally()
+    rally_failure = run_rally(args.effective_start_date, tracks, args.override_src_dir)
     report(args.effective_start_date, tracks, defaults)
+    if rally_failure:
+        exit(1)
 
 
 if __name__ == "__main__":
