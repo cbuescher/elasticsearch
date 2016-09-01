@@ -1,6 +1,38 @@
-[{
-	"series": "Append / default settings",
-	"x": "2000-01-01",
-	"shortText": "A",
-	"text": "Template for an annotation"
-}]
+[
+  {
+    "series": "Append / default settings",
+    "x": "2016-08-31 10:45:12",
+    "shortText": "A",
+    "text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2016-08-31 10:45:12",
+    "shortText": "A",
+    "text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)"
+  },
+  {
+    "series": "Append Fast / 4G heap",
+    "x": "2016-08-31 10:45:12",
+    "shortText": "A",
+    "text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)"
+  },
+  {
+    "series": "Id Conflicts / 4G heap",
+    "x": "2016-08-31 10:45:12",
+    "shortText": "A",
+    "text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)"
+  },
+  {
+    "series": "Append / 2 nodes",
+    "x": "2016-08-31 10:45:12",
+    "shortText": "A",
+    "text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)"
+  },
+  {
+    "series": "Append / Verbose Index Writer",
+    "x": "2016-08-31 10:45:12",
+    "shortText": "A",
+    "text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)"
+  }
+]
