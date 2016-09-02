@@ -81,8 +81,9 @@ echo "Syncing previous results from $S3_ROOT_BUCKET"
 aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_ROOT}"
 
 # Night Rally is *always* the master for assets
-echo "Copying most recent assets to ${LOCAL_REPORT_ROOT}"
-cp -R ${NIGHT_RALLY_HOME}/external/pages/ ${LOCAL_REPORT_ROOT}
+ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/*"
+echo "Copying most recent assets from ${ASSET_SOURCE} to ${LOCAL_REPORT_ROOT}"
+cp -R ${ASSET_SOURCE} ${LOCAL_REPORT_ROOT}
 
 
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
