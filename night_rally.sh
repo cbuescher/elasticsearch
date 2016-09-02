@@ -92,6 +92,9 @@ python3  ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="`date -u "+%
 set -e
 exit_code=$?
 
+echo "Killing any lingering Rally processes"
+killall -q esrally
+
 echo "Uploading results to $S3_ROOT_BUCKET"
 #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
 aws s3 sync --acl "public-read" "${LOCAL_REPORT_ROOT}" "${S3_ROOT_BUCKET}/"
