@@ -1,6 +1,26 @@
-[{
-	"series": "Append / default settings",
-	"x": "2000-01-01",
-	"shortText": "A",
-	"text": "Template for an annotation"
-}]
+[
+	{
+		"series": "Polygon",
+		"x": "2016-09-02 09:57:12",
+		"shortText": "C",
+		"text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)."
+	},
+	{
+		"series": "Bounding Box",
+		"x": "2016-09-02 09:57:12",
+		"shortText": "C",
+		"text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)."
+	},
+	{
+		"series": "Distance",
+		"x": "2016-09-02 09:57:12",
+		"shortText": "C",
+		"text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)."
+	},
+	{
+		"series": "Distance Range",
+		"x": "2016-09-02 09:57:12",
+		"shortText": "C",
+		"text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)."
+	}
+]

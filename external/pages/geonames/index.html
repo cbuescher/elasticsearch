@@ -30,7 +30,7 @@ var charts = {
     var annotationSource = false;
 
     charts.indexingThroughput = chartingLib.renderChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', 'indexing_throughput_annotations.json');
-    charts.totalTimes = chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', annotationSource);
+    charts.totalTimes = chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', 'indexing_total_times_annotations.json');
     charts.mergeParts = chartingLib.renderChart('merge_parts', 'Merge Times, By Part', 'Time [min]', annotationSource);
     charts.segmentMemory = chartingLib.renderChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', annotationSource);
     charts.cpuUsage = chartingLib.renderChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', 'indexing_cpu_usage_annotations.json')

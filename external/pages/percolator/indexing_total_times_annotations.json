@@ -1,6 +1,6 @@
 [{
-	"series": "Append / default settings",
-	"x": "2000-01-01",
-	"shortText": "A",
-	"text": "Template for an annotation"
+	"series": "Indexing time (min)",
+	"x": "2016-09-02 09:57:12",
+	"shortText": "B",
+	"text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)."
 }]
