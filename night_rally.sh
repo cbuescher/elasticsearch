@@ -30,12 +30,18 @@ NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
 SELF_UPDATE=NO
+# We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
+START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 
 for i in "$@"
 do
 case ${i} in
     --override-src-dir=*)
     OVERRIDE_SRC_DIR="${i#*=}"
+    shift # past argument=value
+    ;;
+    --override-effective-start-date=*)
+    START_DATE="${i#*=}"
     shift # past argument=value
     ;;
     --self-update)
@@ -88,8 +94,7 @@ cp -R ${ASSET_SOURCE} ${LOCAL_REPORT_ROOT}
 
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
 set +e
-# We invoke it currently with the current (UTC) timestamp. This determines the version to checkout
-python3  ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="`date -u "+%Y-%m-%d %H:%M:%S"`" ${NIGHT_RALLY_OVERRIDE}
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE}
 set -e
 exit_code=$?
 
