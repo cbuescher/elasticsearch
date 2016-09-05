@@ -1,7 +1,7 @@
 [
   {
     "series": "GC young gen (sec)",
-    "x": "2016-08-24 08:41:08",
+    "x": "2016-08-25 08:41:08",
     "shortText": "A",
     "text": "Set default min heap equal to default max heap (#20080)"
   },
