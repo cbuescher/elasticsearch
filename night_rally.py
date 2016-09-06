@@ -38,7 +38,7 @@ tracks["pmc"] = [
     ["append-no-conflicts", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    #["append-no-conflicts", "two_nodes"]
+    ["append-no-conflicts", "two_nodes"]
 ]
 
 # default challenge / car per track
