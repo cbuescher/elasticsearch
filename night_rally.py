@@ -1,14 +1,14 @@
 import argparse
 import collections
-import datetime
-import time
 import csv
-import re
-import os
+import datetime
 import errno
-import shutil
-import logging
 import fileinput
+import logging
+import os
+import re
+import shutil
+import time
 
 tracks = collections.OrderedDict()
 
@@ -139,6 +139,7 @@ def run_rally(effective_start_date, tracks, override_src_dir, system=os.system):
             report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv" % (root_dir, report_root_dir,
                                                                   date_for_path(effective_start_date), track,
                                                                   challenge, car)
+            start = time.perf_counter()
             if system(
                 "rally --configuration-name=nightly --pipeline={6} --quiet --revision \"@{0}\" --effective-start-date \"{1}\" "
                 "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}"
@@ -147,6 +148,9 @@ def run_rally(effective_start_date, tracks, override_src_dir, system=os.system):
                 logger.error("Failed to run track [%s]. Please check the logs." % track)
             # after we've executed the first benchmark, there is no reason to build again from sources
             pipeline = "from-sources-skip-build"
+            stop = time.perf_counter()
+            logger.info("Finished running on track [%s] with challenge [%s] and car [%s] in [%f] seconds." % (
+                track, challenge, car, (stop - start)))
     return rally_failure
 
 
