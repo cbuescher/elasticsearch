@@ -300,7 +300,6 @@ public class IndicesService extends AbstractLifecycleComponent
                     if (indexShardStats == null) {
                         continue;
                     }
-
                     if (statsByShard.containsKey(indexService.index()) == false) {
                         statsByShard.put(indexService.index(), arrayAsArrayList(indexShardStats));
                     } else {
@@ -322,6 +321,7 @@ public class IndicesService extends AbstractLifecycleComponent
         }
 
         return new IndexShardStats(indexShard.shardId(),
+                                   flags,
                                    new ShardStats[] {
                                        new ShardStats(indexShard.routingEntry(),
                                                       indexShard.shardPath(),

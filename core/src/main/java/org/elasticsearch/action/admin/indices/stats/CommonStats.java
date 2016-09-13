@@ -19,6 +19,7 @@
 
 package org.elasticsearch.action.admin.indices.stats;
 
+import org.elasticsearch.Version;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
@@ -101,14 +102,15 @@ public class CommonStats implements Writeable, ToXContentFragment {
     @Nullable
     public RecoveryStats recoveryStats;
 
+    private final CommonStatsFlags flags;
+
     public CommonStats() {
         this(CommonStatsFlags.NONE);
     }
 
     public CommonStats(CommonStatsFlags flags) {
-        CommonStatsFlags.Flag[] setFlags = flags.getFlags();
-
-        for (CommonStatsFlags.Flag flag : setFlags) {
+        this.flags = flags;
+        for (CommonStatsFlags.Flag flag : flags.getFlags()) {
             switch (flag) {
                 case Docs:
                     docs = new DocsStats();
@@ -168,8 +170,8 @@ public class CommonStats implements Writeable, ToXContentFragment {
     }
 
     public CommonStats(IndicesQueryCache indicesQueryCache, IndexShard indexShard, CommonStatsFlags flags) {
-        CommonStatsFlags.Flag[] setFlags = flags.getFlags();
-        for (CommonStatsFlags.Flag flag : setFlags) {
+        this.flags = flags;
+        for (CommonStatsFlags.Flag flag : flags.getFlags()) {
             switch (flag) {
                 case Docs:
                     docs = indexShard.docStats();
@@ -229,6 +231,11 @@ public class CommonStats implements Writeable, ToXContentFragment {
     }
 
     public CommonStats(StreamInput in) throws IOException {
+        if (in.getVersion().onOrAfter(Version.V_7_0_0_alpha1)) {
+            flags = new CommonStatsFlags(in);
+        } else {
+            flags = CommonStatsFlags.ALL;
+        }
         docs = in.readOptionalStreamable(DocsStats::new);
         store = in.readOptionalStreamable(StoreStats::new);
         indexing = in.readOptionalStreamable(IndexingStats::new);
@@ -249,6 +256,9 @@ public class CommonStats implements Writeable, ToXContentFragment {
 
     @Override
     public void writeTo(StreamOutput out) throws IOException {
+        if (out.getVersion().onOrAfter(Version.V_7_0_0_alpha1)) {
+            flags.writeTo(out);
+        }
         out.writeOptionalStreamable(docs);
         out.writeOptionalStreamable(store);
         out.writeOptionalStreamable(indexing);
@@ -397,6 +407,10 @@ public class CommonStats implements Writeable, ToXContentFragment {
         } else {
             recoveryStats.add(stats.getRecoveryStats());
         }
+    }
+
+    public CommonStatsFlags getFlags() {
+        return this.flags;
     }
 
     @Nullable

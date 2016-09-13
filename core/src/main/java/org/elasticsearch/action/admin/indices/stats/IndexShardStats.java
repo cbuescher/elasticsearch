@@ -21,24 +21,36 @@ package org.elasticsearch.action.admin.indices.stats;
 
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
-import org.elasticsearch.common.io.stream.Streamable;
+import org.elasticsearch.common.io.stream.Writeable;
 import org.elasticsearch.index.shard.ShardId;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public class IndexShardStats implements Iterable<ShardStats>, Streamable {
+public class IndexShardStats implements Iterable<ShardStats>, Writeable {
 
     private ShardId shardId;
 
     private ShardStats[] shards;
 
-    private IndexShardStats() {}
+    private final CommonStatsFlags flags;
 
-    public IndexShardStats(ShardId shardId, ShardStats[] shards) {
+
+    public IndexShardStats(ShardId shardId, CommonStatsFlags flags, ShardStats[] shards) {
         this.shardId = shardId;
         this.shards = shards;
+        this.flags = flags;
+    }
+
+    private IndexShardStats(StreamInput in) throws IOException {
+        shardId = ShardId.readShardId(in);
+        int shardSize = in.readVInt();
+        shards = new ShardStats[shardSize];
+        for (int i = 0; i < shardSize; i++) {
+            shards[i] = ShardStats.readShardStats(in);
+        }
+        flags = new CommonStatsFlags(in);
     }
 
     public ShardId getShardId() {
@@ -61,41 +73,19 @@ public class IndexShardStats implements Iterable<ShardStats>, Streamable {
     private CommonStats total = null;
 
     public CommonStats getTotal() {
-        if (total != null) {
-            return total;
+        if (total == null) {
+            total = ShardStats.calculateTotalStats(shards, flags);
         }
-        CommonStats stats = new CommonStats();
-        for (ShardStats shard : shards) {
-            stats.add(shard.getStats());
-        }
-        total = stats;
-        return stats;
+        return total;
     }
 
     private CommonStats primary = null;
 
     public CommonStats getPrimary() {
-        if (primary != null) {
-            return primary;
+        if (primary == null) {
+            primary = ShardStats.calculatePrimaryStats(shards, flags);
         }
-        CommonStats stats = new CommonStats();
-        for (ShardStats shard : shards) {
-            if (shard.getShardRouting().primary()) {
-                stats.add(shard.getStats());
-            }
-        }
-        primary = stats;
-        return stats;
-    }
-
-    @Override
-    public void readFrom(StreamInput in) throws IOException {
-        shardId = ShardId.readShardId(in);
-        int shardSize = in.readVInt();
-        shards = new ShardStats[shardSize];
-        for (int i = 0; i < shardSize; i++) {
-            shards[i] = ShardStats.readShardStats(in);
-        }
+        return primary;
     }
 
     @Override
@@ -105,12 +95,11 @@ public class IndexShardStats implements Iterable<ShardStats>, Streamable {
         for (ShardStats stats : shards) {
             stats.writeTo(out);
         }
+        flags.writeTo(out);
     }
 
     public static IndexShardStats readIndexShardStats(StreamInput in) throws IOException {
-        IndexShardStats indexShardStats = new IndexShardStats();
-        indexShardStats.readFrom(in);
-        return indexShardStats;
+        return new IndexShardStats(in);
     }
 
 }

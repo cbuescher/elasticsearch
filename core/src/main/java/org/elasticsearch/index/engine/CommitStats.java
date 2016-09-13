@@ -55,7 +55,6 @@ public final class CommitStats implements Streamable, ToXContentFragment {
         return in.readOptionalStreamable(CommitStats::new);
     }
 
-
     public Map<String, String> getUserData() {
         return userData;
     }
