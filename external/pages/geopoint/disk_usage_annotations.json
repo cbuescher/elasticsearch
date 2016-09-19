@@ -1,6 +1,6 @@
 [{
-	"series": "Append / default settings",
-	"x": "2000-01-01",
-	"shortText": "A",
-	"text": "Template for an annotation"
+	"series": "Total bytes written",
+	"x": "2016-09-14 01:01:59",
+	"shortText": "F",
+	"text": "Dimensional points use offline sorting which spill to disk"
 }]
