@@ -14,11 +14,11 @@ tracks = collections.OrderedDict()
 
 tracks["geonames"] = [
     ["append-no-conflicts", "defaults"],
-    ["append-no-conflicts", "4gheap"],
+    ["append-no-conflicts-index-only", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts", "two_nodes"],
-    ["append-no-conflicts", "verbose_iw"]
+    ["append-no-conflicts-index-only", "two_nodes"],
+    ["append-no-conflicts-index-only", "verbose_iw"]
 ]
 
 tracks["percolator"] = [
@@ -27,18 +27,19 @@ tracks["percolator"] = [
 
 tracks["geopoint"] = [
     ["append-no-conflicts", "defaults"],
-    ["append-no-conflicts", "4gheap"],
+    ["append-no-conflicts-index-only", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts", "two_nodes"]
+    ["append-no-conflicts-index-only", "two_nodes"]
 ]
 
 tracks["pmc"] = [
+    # TODO dm: Check whether we can reactivate this combination
     #["append-no-conflicts", "defaults"],
     ["append-no-conflicts", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts", "two_nodes"]
+    ["append-no-conflicts-index-only", "two_nodes"]
 ]
 
 # default challenge / car per track
