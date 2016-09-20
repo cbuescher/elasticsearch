@@ -36,7 +36,7 @@ var charts = {
     charts.diskUsage = chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', annotationSource),
     charts.segmentCounts = chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', 'segment_counts_annotations.json'),
     charts.queryLatency = chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', 'search_latency_queries_annotations.json'),
-    charts.statsLatency = chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', annotationSource),
+    charts.statsLatency = chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', 'search_latency_stats_annotations.json'),
     charts.gcTimes = chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', 'gc_times_annotations.json')
 
     chartingLib.synchronize([

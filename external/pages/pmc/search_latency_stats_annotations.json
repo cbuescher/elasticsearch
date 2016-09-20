@@ -1,6 +1,14 @@
-[{
-	"series": "Append / default settings",
-	"x": "2000-01-01",
-	"shortText": "A",
-	"text": "Template for an annotation"
-}]
+[
+	{
+		"series": "Indices stats (msec)",
+		"x": "2016-09-01 07:40:00",
+		"shortText": "G",
+		"text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)"
+	},
+	{
+		"series": "Nodes stats (msec)",
+		"x": "2016-09-01 07:40:00",
+		"shortText": "G",
+		"text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now)"
+	}
+]
