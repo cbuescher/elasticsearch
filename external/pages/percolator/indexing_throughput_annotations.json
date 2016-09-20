@@ -1,6 +1,6 @@
 [{
-	"series": "Append / default settings",
-	"x": "2000-01-01",
-	"shortText": "A",
-	"text": "Template for an annotation"
+	"series": "Append / 4G heap",
+	"x": "2016-09-20 01:01:49",
+	"shortText": "C",
+	"text": "Changed benchmarking approach: 8 client threads (before), 8 client processes (now). Indexing metrics were missing previously."
 }]
