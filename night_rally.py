@@ -34,8 +34,7 @@ tracks["geopoint"] = [
 ]
 
 tracks["pmc"] = [
-    # TODO dm: Check whether we can reactivate this combination
-    #["append-no-conflicts", "defaults"],
+    ["append-no-conflicts", "defaults"],
     ["append-no-conflicts", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
@@ -288,6 +287,7 @@ def report(effective_start_date, tracks, default_setup_per_track):
 
         segment_count_metrics = []
         indexing_throughput_metrics = []
+        meta_metrics = None
 
         for setup in setups:
             challenge, car = setup
@@ -360,9 +360,9 @@ def report(effective_start_date, tracks, default_setup_per_track):
             with open(meta_report_path) as csvfile:
                 meta_metrics = extract_meta_metrics(csvfile)
 
-            if "source_revision" in meta_metrics:
-                with open("%s/source_revision.csv" % output_report_path, "a") as f:
-                    f.write("%s,%s\n" % (report_timestamp, meta_metrics["source_revision"]))
+        if meta_metrics and "source_revision" in meta_metrics:
+            with open("%s/source_revision.csv" % output_report_path, "a") as f:
+                f.write("%s,%s\n" % (report_timestamp, meta_metrics["source_revision"]))
 
         if len(segment_count_metrics) > 0:
             with open("%s/segment_counts.csv" % output_report_path, "a") as f:
