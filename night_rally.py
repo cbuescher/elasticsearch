@@ -41,12 +41,17 @@ tracks["pmc"] = [
     ["append-no-conflicts-index-only", "two_nodes"]
 ]
 
+tracks["nyc_taxis"] = [
+    ["append-no-conflicts", "4gheap"]
+]
+
 # default challenge / car per track
 defaults = {
     "geonames": ("append-no-conflicts", "defaults"),
     "percolator": ("append-no-conflicts", "4gheap"),
     "geopoint": ("append-no-conflicts", "defaults"),
-    "pmc": ("append-no-conflicts", "4gheap")
+    "pmc": ("append-no-conflicts", "4gheap"),
+    "nyc_taxis": ("append-no-conflicts", "4gheap")
 }
 
 config = {
