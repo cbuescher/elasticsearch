@@ -88,5 +88,65 @@
 		"x": "2016-09-16 01:00:43",
 		"shortText": "H",
 		"text": "Complete Elasticsearch logger names (#20457)"
+	},
+	{
+		"series": "Append / default settings",
+		"x": "2016-09-22 01:01:52",
+		"shortText": "I",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Append / 4G heap",
+		"x": "2016-09-22 01:01:52",
+		"shortText": "I",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Append Fast / 4G heap",
+		"x": "2016-09-22 01:01:52",
+		"shortText": "I",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Id Conflicts / 4G heap",
+		"x": "2016-09-22 01:01:52",
+		"shortText": "I",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Append / 2 nodes",
+		"x": "2016-09-22 01:01:52",
+		"shortText": "I",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Append / default settings",
+		"x": "2016-09-23 01:00:43",
+		"shortText": "J",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Append / 4G heap",
+		"x": "2016-09-23 01:00:43",
+		"shortText": "J",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Append Fast / 4G heap",
+		"x": "2016-09-23 01:00:43",
+		"shortText": "J",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Id Conflicts / 4G heap",
+		"x": "2016-09-23 01:00:43",
+		"shortText": "J",
+		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Append / 2 nodes",
+		"x": "2016-09-23 01:00:43",
+		"shortText": "J",
+		"text": "Benchmarks scheduled on a less powerful machine"
 	}
 ]

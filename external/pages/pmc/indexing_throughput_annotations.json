@@ -1,6 +1,68 @@
-[{
-	"series": "Id Conflicts / 4G heap",
-	"x": "2016-09-08 01:10:48",
-	"shortText": "E",
-	"text": "Switch from sequential to random conflicts"
-}]
+[
+  {
+    "series": "Id Conflicts / 4G heap",
+    "x": "2016-09-08 01:10:48",
+    "shortText": "E",
+    "text": "Switch from sequential to random conflicts"
+  },
+  {
+    "series": "Append / default settings",
+    "x": "2016-09-22 01:01:52",
+    "shortText": "I",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2016-09-22 01:01:52",
+    "shortText": "I",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Append Fast / 4G heap",
+    "x": "2016-09-22 01:01:52",
+    "shortText": "I",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Id Conflicts / 4G heap",
+    "x": "2016-09-22 01:01:52",
+    "shortText": "I",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Append / 2 nodes",
+    "x": "2016-09-22 01:01:52",
+    "shortText": "I",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Append / default settings",
+    "x": "2016-09-23 01:00:43",
+    "shortText": "J",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2016-09-23 01:00:43",
+    "shortText": "J",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Append Fast / 4G heap",
+    "x": "2016-09-23 01:00:43",
+    "shortText": "J",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Id Conflicts / 4G heap",
+    "x": "2016-09-23 01:00:43",
+    "shortText": "J",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Append / 2 nodes",
+    "x": "2016-09-23 01:00:43",
+    "shortText": "J",
+    "text": "Benchmarks scheduled on a less powerful machine"
+  }
+]
