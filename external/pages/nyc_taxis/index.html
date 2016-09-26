@@ -36,7 +36,6 @@ var charts = {
     charts.diskUsage = chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', annotationSource),
     charts.segmentCounts = chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', 'segment_counts_annotations.json'),
     charts.queryLatency = chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', 'search_latency_queries_annotations.json'),
-    charts.statsLatency = chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', 'search_latency_stats_annotations.json'),
     charts.gcTimes = chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', 'gc_times_annotations.json')
 
     chartingLib.synchronize([
@@ -47,7 +46,6 @@ var charts = {
       charts.diskUsage,
       charts.segmentCounts,
       charts.queryLatency,
-      charts.statsLatency,
       charts.gcTimes
     ]);
   }
@@ -188,16 +186,6 @@ var charts = {
     <div class="col-md-10 col-md-pull-2">
       <a name="search_latency_queries" id="search_latency_queries"></a>
       <div id="chart_search_latency_queries" class="benchmark-chart"></div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-2 col-md-push-10">
-      <div id="chart_search_latency_stats_labels"></div>
-    </div>
-    <div class="col-md-10 col-md-pull-2">
-      <a name="search_latency_stats" id="search_latency_stats"></a>
-      <div id="chart_search_latency_stats" class="benchmark-chart"></div>
     </div>
   </div>
 
