@@ -27,13 +27,17 @@
   <script type="text/javascript">
 var charts = {
   init: function() {
+    charts.toggleCompare($("#checkToggleCompare")[0]);
+  },
+
+  showResults: function() {
     var annotationSource = false;
 
     charts.indexingThroughput = chartingLib.renderChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', 'indexing_throughput_annotations.json');
-    charts.totalTimes = chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', annotationSource);
+    charts.totalTimes = chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', 'indexing_total_times_annotations.json');
     charts.segmentMemory = chartingLib.renderChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', annotationSource);
     charts.cpuUsage = chartingLib.renderChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', 'indexing_cpu_usage_annotations.json')
-    charts.diskUsage = chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', annotationSource),
+    charts.diskUsage = chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', 'disk_usage_annotations.json'),
     charts.segmentCounts = chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', 'segment_counts_annotations.json'),
     charts.queryLatency = chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', 'search_latency_queries_annotations.json'),
     charts.gcTimes = chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', 'gc_times_annotations.json')
@@ -48,6 +52,28 @@ var charts = {
       charts.queryLatency,
       charts.gcTimes
     ]);
+  },
+
+  compare: function() {
+    // workaround for a deficiency in dygraphs bar charts and CSV data sources
+    var versions = ["1.7.5", "2.4.1", "5.0.0-beta1", "master"];
+
+    charts.indexingThroughput = chartingLib.renderBarChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', versions);
+    charts.totalTimes = chartingLib.renderBarChart('indexing_total_times', 'Total times', 'Time [min]', versions);
+    charts.segmentMemory = chartingLib.renderBarChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', versions);
+    charts.cpuUsage = chartingLib.renderBarChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', versions)
+    charts.diskUsage = chartingLib.renderBarChart('disk_usage', 'Index disk usage', '[GB]', versions),
+    charts.segmentCounts = chartingLib.renderBarChart('segment_counts', 'Index segment counts', 'Segment count', versions),
+    charts.queryLatency = chartingLib.renderBarChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', versions),
+    charts.gcTimes = chartingLib.renderBarChart('gc_times', 'GC times', 'Total GC runtime [s]', versions)
+  },
+
+  toggleCompare: function(e) {
+    if (e.checked) {
+      this.compare();
+    } else {
+      this.showResults();
+    }
   }
 }
   </script>
@@ -114,6 +140,10 @@ var charts = {
       <div class="alert alert-success alert-dismissible" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <strong>Hint</strong> Click a data point to see the diff between it and the previous race.
+      </div>
+      <div>
+        <input type="checkbox" id="checkToggleCompare" onClick="charts.toggleCompare(this)">
+        <label for="checkToggleCompare"> Show comparison across major versions</label>
       </div>
     </div>
   </div>
