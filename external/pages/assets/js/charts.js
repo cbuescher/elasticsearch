@@ -72,18 +72,21 @@ var chartingLib = {
         var ctx = e.drawingContext;
         var sets = e.allSeriesPoints;
         var y_bottom = e.dygraph.toDomYCoord(0);
+        var bar_width = 5.0
 
-        // Find the minimum separation between x-values.
-        // This determines the bar width.
-        var min_sep = Infinity;
-        for (var j = 0; j < sets.length; j++) {
-            var points = sets[j];
-            for (var i = 1; i < points.length; i++) {
-                var sep = points[i].canvasx - points[i - 1].canvasx;
-                if (sep < min_sep) min_sep = sep;
+        if (sets.length > 1) {
+            // Find the minimum separation between x-values.
+            // This determines the bar width.
+            var min_sep = Infinity;
+            for (var j = 0; j < sets.length; j++) {
+                var points = sets[j];
+                for (var i = 1; i < points.length; i++) {
+                    var sep = points[i].canvasx - points[i - 1].canvasx;
+                    if (sep < min_sep) min_sep = sep;
+                }
             }
-        }
-        var bar_width = Math.max(Math.floor(2.0 / 3 * min_sep), 5.0);
+            bar_width = Math.max(Math.floor(2.0 / 3 * min_sep), bar_width);
+         }
 
         var fillColors = [];
         var strokeColors = g.getColors();
@@ -102,7 +105,7 @@ var chartingLib = {
             for (var i = 0; i < sets[j].length; i++) {
                 var p = sets[j][i];
                 var center_x = p.canvasx;
-                var x_left = center_x - (bar_width / 2) * (1 - j / (sets.length - 1));
+                var x_left = center_x - (bar_width / 2) * (1 - j / Math.max(sets.length - 1, 1));
 
                 ctx.fillRect(x_left, p.canvasy,
                     bar_width / sets.length, y_bottom - p.canvasy);
