@@ -41,12 +41,12 @@ To add an annotation, just find the right `*_annotation.json` file and add an an
 
 If you're finished, commit and push the change to `master` and the annotation will be shown after the next benchmark run.
  
- #### Add a new track
+#### Add a new track
  
- For this three steps are needed:
- 
- 1. Copy a directory in `external/pages` and adjust the names accordingly.
- 2. Adjust the menu structure in all other files (if this happens more often, we should think about using a template engine for that...) 
- 3. Add your track and the challenges to run in the `tracks` hash in `night_rally.py`
- 
- If you're finished, please submit a PR. After the PR is merged, the new track will show up after the next benchmark.
+For this three steps are needed:
+
+1. Copy a directory in `external/pages` and adjust the names accordingly.
+2. Adjust the menu structure in all other files (if this happens more often, we should think about using a template engine for that...)
+3. Add your track and the challenges to run in the `tracks` hash in `night_rally.py`
+
+If you're finished, please submit a PR. After the PR is merged, the new track will show up after the next benchmark.
