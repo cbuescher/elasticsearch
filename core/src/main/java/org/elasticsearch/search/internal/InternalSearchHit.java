@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -270,7 +271,6 @@ public class InternalSearchHit implements SearchHit {
         return sourceAsString();
     }
 
-    @SuppressWarnings({"unchecked"})
     @Override
     public Map<String, Object> sourceAsMap() throws ElasticsearchParseException {
         if (source == null) {
@@ -687,7 +687,7 @@ public class InternalSearchHit implements SearchHit {
                 if (sortValue == null) {
                     out.writeByte((byte) 0);
                 } else {
-                    Class type = sortValue.getClass();
+                    Class<?> type = sortValue.getClass();
                     if (type == String.class) {
                         out.writeByte((byte) 1);
                         out.writeString((String) sortValue);
@@ -797,6 +797,25 @@ public class InternalSearchHit implements SearchHit {
             }
             builder.endObject();
             return builder;
+        }
+
+        @Override
+        public final boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            InternalNestedIdentity other = (InternalNestedIdentity) obj;
+            return Objects.equals(field, other.field) &&
+                    Objects.equals(offset, other.offset) &&
+                    Objects.equals(child, other.child);
+        }
+
+        @Override
+        public final int hashCode() {
+            return Objects.hash(field, offset, child);
         }
 
         public static class Fields {
