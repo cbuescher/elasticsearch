@@ -154,7 +154,12 @@ var chartingLib = {
                             return v
                         }
                     }
-                }
+                },
+                "y": {
+                    "valueFormatter": function(y) {
+                            return +(Math.round(y + "e+2")  + "e-2");
+                        }
+                    }
             },
             "legend": "always",
             "valueFormatter": function(x, opts, seriesName, dygraph, row, col) {
