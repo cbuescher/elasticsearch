@@ -86,6 +86,8 @@ var chartingLib = {
                 }
             }
             bar_width = Math.max(Math.floor(2.0 / 3 * min_sep), bar_width);
+         } else {
+            bar_width = bar_width = 50.0
          }
 
         var fillColors = [];
