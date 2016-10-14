@@ -273,10 +273,11 @@ def extract_meta_metrics(source_meta_report):
 
 
 def write_report(file_name, line):
-    with open(file_name) as f:
+    with open(file_name, "a") as f:
         f.write(line)
 
 
+# TODO dm: We must write "master" here...
 def replace_last_line(file_name, new_last_line):
     with open(file_name, "r+") as f:
         lines = f.readlines()
