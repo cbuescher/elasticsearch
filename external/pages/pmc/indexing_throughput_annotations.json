@@ -24,12 +24,6 @@
     "text": "Benchmarks scheduled on a less powerful machine"
   },
   {
-    "series": "Id Conflicts / 4G heap",
-    "x": "2016-09-22 01:01:52",
-    "shortText": "I",
-    "text": "Benchmarks scheduled on a less powerful machine"
-  },
-  {
     "series": "Append / 2 nodes",
     "x": "2016-09-22 01:01:52",
     "shortText": "I",
@@ -54,15 +48,15 @@
     "text": "Benchmarks scheduled on a less powerful machine"
   },
   {
-    "series": "Id Conflicts / 4G heap",
+    "series": "Append / 2 nodes",
     "x": "2016-09-23 01:00:43",
     "shortText": "J",
     "text": "Benchmarks scheduled on a less powerful machine"
   },
   {
-    "series": "Append / 2 nodes",
-    "x": "2016-09-23 01:00:43",
-    "shortText": "J",
-    "text": "Benchmarks scheduled on a less powerful machine"
+    "series": "Id Conflicts / 4G heap",
+    "x": "2016-10-14 06:25:54",
+    "shortText": "K",
+    "text": "Random conflicts were all within the first bulk (too many conflicts)"
   }
 ]

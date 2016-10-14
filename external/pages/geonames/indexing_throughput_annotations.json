@@ -64,5 +64,11 @@
     "x": "2016-09-20 01:01:49",
     "shortText": "E",
     "text": "Switch from sequential to random conflicts"
+  },
+  {
+    "series": "Id Conflicts / 4G heap",
+    "x": "2016-10-14 06:25:54",
+    "shortText": "K",
+    "text": "Random conflicts were all within the first bulk (too many conflicts)"
   }
 ]
