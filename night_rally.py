@@ -10,6 +10,8 @@ import re
 import shutil
 import time
 
+default_branch_name = "master"
+
 tracks = collections.OrderedDict()
 
 tracks["geonames"] = [
@@ -272,16 +274,15 @@ def extract_meta_metrics(source_meta_report):
     return meta_metrics
 
 
-def write_report(file_name, line):
+def write_report(file_name, timestamp, data):
     with open(file_name, "a") as f:
-        f.write(line)
+        f.write("%s,%s" % (timestamp, data))
 
 
-# TODO dm: We must write "master" here...
-def replace_last_line(file_name, new_last_line):
+def replace_last_line(file_name, data, branch=default_branch_name):
     with open(file_name, "r+") as f:
         lines = f.readlines()
-        lines[-1] = new_last_line
+        lines[-1] = "%s,%s" % (branch, data)
         f.seek(0)
         f.writelines(lines)
         f.truncate()
@@ -331,57 +332,55 @@ def report(effective_start_date, tracks, default_setup_per_track):
                 indexing_throughput_metrics.append(metrics["median_indexing_throughput"])
 
             if current_is_default and "cpu_usage" in metrics:
-                cpu_usage = "%s,%s\n" % (report_timestamp, metrics["cpu_usage"])
-                write_report("%s/indexing_cpu_usage.csv" % output_report_path, cpu_usage)
+                cpu_usage = "%s\n" % metrics["cpu_usage"]
+                write_report("%s/indexing_cpu_usage.csv" % output_report_path, report_timestamp, cpu_usage)
                 replace_last_line("%s/indexing_cpu_usage_comparison.csv" % output_report_path, cpu_usage)
 
             if current_is_default and ("young_gen_gc" in metrics or "old_gen_gc" in metrics):
-                gc_times = "%s,%s,%s\n" % (report_timestamp, v(metrics, "young_gen_gc"), v(metrics, "old_gen_gc"))
-                write_report("%s/gc_times.csv" % output_report_path, gc_times)
+                gc_times = "%s,%s\n" % (v(metrics, "young_gen_gc"), v(metrics, "old_gen_gc"))
+                write_report("%s/gc_times.csv" % output_report_path, report_timestamp, gc_times)
                 replace_last_line("%s/gc_times_comparison.csv" % output_report_path, gc_times)
 
             if current_is_default and ("latency_indices_stats_p99" in metrics or "latency_nodes_stats_p99" in metrics):
-                stats_latency = "%s,%s,%s\n" % (report_timestamp, v(metrics, "latency_indices_stats_p99"), v(metrics, "latency_nodes_stats_p99"))
-                write_report("%s/search_latency_stats.csv" % output_report_path, stats_latency)
+                stats_latency = "%s,%s\n" % (v(metrics, "latency_indices_stats_p99"), v(metrics, "latency_nodes_stats_p99"))
+                write_report("%s/search_latency_stats.csv" % output_report_path, report_timestamp, stats_latency)
                 replace_last_line("%s/search_latency_stats_comparison.csv" % output_report_path, stats_latency)
 
             if current_is_default and "mem_segments" in metrics:
                 # Date,Total heap used (MB),Doc values (MB),Terms (MB),Norms (MB),Stored fields (MB),Points (MB)
-                total_memory = "%s,%s,%s,%s,%s,%s,%s\n" % (report_timestamp,
-                                                           v(metrics, "mem_segments"),
-                                                           v(metrics, "mem_doc_values"),
-                                                           v(metrics, "mem_terms"),
-                                                           v(metrics, "mem_norms"),
-                                                           v(metrics, "mem_fields"),
-                                                           v(metrics, "mem_points"))
-                write_report("%s/segment_total_memory.csv" % output_report_path, total_memory)
+                total_memory = "%s,%s,%s,%s,%s,%s\n" % (v(metrics, "mem_segments"),
+                                                        v(metrics, "mem_doc_values"),
+                                                        v(metrics, "mem_terms"),
+                                                        v(metrics, "mem_norms"),
+                                                        v(metrics, "mem_fields"),
+                                                        v(metrics, "mem_points"))
+                write_report("%s/segment_total_memory.csv" % output_report_path, report_timestamp, total_memory)
                 replace_last_line("%s/segment_total_memory_comparison.csv" % output_report_path, total_memory)
 
             if current_is_default and "indexing_time" in metrics:
                 # Date,Indexing time (min),Merge time (min),Refresh time (min),Flush time (min),Merge throttle time (min)
-                total_times = "%s,%s,%s,%s,%s,%s\n" % (report_timestamp,
-                                         v(metrics, "indexing_time"),
-                                         v(metrics, "merge_time"),
-                                         v(metrics, "refresh_time"),
-                                         v(metrics, "flush_time"),
-                                         v(metrics, "merge_throttle_time"))
-                write_report("%s/indexing_total_times.csv" % output_report_path, total_times)
+                total_times = "%s,%s,%s,%s,%s\n" % (v(metrics, "indexing_time"),
+                                                    v(metrics, "merge_time"),
+                                                    v(metrics, "refresh_time"),
+                                                    v(metrics, "flush_time"),
+                                                    v(metrics, "merge_throttle_time"))
+                write_report("%s/indexing_total_times.csv" % output_report_path, report_timestamp, total_times)
                 replace_last_line("%s/indexing_total_times_comparison.csv" % output_report_path, total_times)
 
             if current_is_default and ("index_size" in metrics or "totally_written" in metrics):
                 # Date,Final index size,Total bytes written
-                disk_usage = "%s,%s,%s\n" % (report_timestamp, v(metrics, "index_size"), v(metrics, "totally_written"))
-                write_report("%s/disk_usage.csv" % output_report_path, disk_usage)
+                disk_usage = "%s,%s\n" % (v(metrics, "index_size"), v(metrics, "totally_written"))
+                write_report("%s/disk_usage.csv" % output_report_path, report_timestamp, disk_usage)
                 replace_last_line("%s/disk_usage_comparison.csv" % output_report_path, disk_usage)
 
             if current_is_default and "query_latency_p99" in metrics:
-                query_latency = "%s,%s\n" % (report_timestamp, ",".join(metrics["query_latency_p99"]))
-                write_report("%s/search_latency_queries.csv" % output_report_path, query_latency)
+                query_latency = "%s\n" % ",".join(metrics["query_latency_p99"])
+                write_report("%s/search_latency_queries.csv" % output_report_path, report_timestamp, query_latency)
                 replace_last_line("%s/search_latency_queries_comparison.csv" % output_report_path, query_latency)
 
             if "merge_time_parts" in metrics:
-                merge_parts = "%s,%s\n" % (report_timestamp, ",".join(metrics["merge_time_parts"]))
-                write_report("%s/merge_parts.csv" % output_report_path, merge_parts)
+                merge_parts = "%s\n" % ",".join(metrics["merge_time_parts"])
+                write_report("%s/merge_parts.csv" % output_report_path, report_timestamp, merge_parts)
                 replace_last_line("%s/merge_parts.csv" % output_report_path, merge_parts)
 
             with open(meta_report_path) as csvfile:
@@ -392,13 +391,13 @@ def report(effective_start_date, tracks, default_setup_per_track):
                 f.write("%s,%s\n" % (report_timestamp, meta_metrics["source_revision"]))
 
         if len(segment_count_metrics) > 0:
-            segment_counts = "%s,%s\n" % (report_timestamp, ",".join(segment_count_metrics))
-            write_report("%s/segment_counts.csv" % output_report_path, segment_counts)
+            segment_counts = "%s\n" % ",".join(segment_count_metrics)
+            write_report("%s/segment_counts.csv" % output_report_path, report_timestamp, segment_counts)
             replace_last_line("%s/segment_counts_comparison.csv" % output_report_path, segment_counts)
 
         if len(indexing_throughput_metrics) > 0:
-            indexing_throughput = "%s,%s\n" % (report_timestamp, ",".join(indexing_throughput_metrics))
-            write_report("%s/indexing_throughput.csv" % output_report_path, indexing_throughput)
+            indexing_throughput = "%s\n" % ",".join(indexing_throughput_metrics)
+            write_report("%s/indexing_throughput.csv" % output_report_path, report_timestamp, indexing_throughput)
             replace_last_line("%s/indexing_throughput_comparison.csv" % output_report_path, indexing_throughput)
 
 
