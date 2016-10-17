@@ -111,24 +111,29 @@ def ensure_dir(directory):
             raise
 
 
-def configure_rally():
+def configure_rally(dry_run):
     user_home = os.getenv("HOME")
     root = os.path.dirname(os.path.realpath(__file__))
     source = "%s/resources/rally-nightly.ini" % root
     destination = "%s/.rally/rally-nightly.ini" % user_home
     logger.info("Copying rally configuration from [%s] to [%s]" % (source, destination))
-    ensure_dir("%s/.rally" % user_home)
-    shutil.copyfile(source, destination)
-    # materialize current user home
-    with fileinput.input(files=destination, inplace=True) as f:
-        for line in f:
-            print(line.replace("~", user_home))
+    if not dry_run:
+        ensure_dir("%s/.rally" % user_home)
+        shutil.copyfile(source, destination)
+        # materialize current user home
+        with fileinput.input(files=destination, inplace=True) as f:
+            for line in f:
+                print(line.replace("~", user_home))
 
 
-def run_rally(effective_start_date, tracks, override_src_dir, system=os.system):
+def run_rally(effective_start_date, tracks, override_src_dir, dry_run, system=os.system):
     ts = date_for_cmd_param(effective_start_date)
     revision_ts = to_iso8601(effective_start_date)
     rally_failure = False
+    if dry_run:
+        runner = logger.info
+    else:
+        runner = system
 
     if override_src_dir is not None:
         override = " --override-src-dir=%s" % override_src_dir
@@ -147,7 +152,7 @@ def run_rally(effective_start_date, tracks, override_src_dir, system=os.system):
                                                                   date_for_path(effective_start_date), track,
                                                                   challenge, car)
             start = time.perf_counter()
-            if system(
+            if runner(
                 "rally --configuration-name=nightly --pipeline={6} --quiet --revision \"@{0}\" --effective-start-date \"{1}\" "
                 "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}"
                     .format(revision_ts, ts, track, challenge, car, report_path, pipeline, override)):
@@ -413,6 +418,11 @@ def parse_args():
         "--override-src-dir",
         help=argparse.SUPPRESS,
         default=None)
+    parser.add_argument(
+        "--dry-run",
+        help="Does not do anything, just outputs",
+        default=False,
+        action="store_true")
 
     return parser.parse_args()
 
@@ -420,8 +430,8 @@ def parse_args():
 def main():
     args = parse_args()
 
-    configure_rally()
-    rally_failure = run_rally(args.effective_start_date, tracks, args.override_src_dir)
+    configure_rally(args.dry_run)
+    rally_failure = run_rally(args.effective_start_date, tracks, args.override_src_dir, args.dry_run)
     report(args.effective_start_date, tracks, defaults)
     if rally_failure:
         exit(1)
