@@ -19,6 +19,7 @@
 package org.elasticsearch.search.fetch.subphase.highlight;
 
 import com.carrotsearch.randomizedtesting.generators.RandomPicks;
+
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.Version;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -29,6 +30,7 @@ import org.elasticsearch.cluster.metadata.IndexMetaData;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
@@ -63,7 +65,6 @@ import static org.elasticsearch.index.query.QueryBuilders.boostingQuery;
 import static org.elasticsearch.index.query.QueryBuilders.commonTermsQuery;
 import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.existsQuery;
-import static org.elasticsearch.index.query.QueryBuilders.fuzzyQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchPhrasePrefixQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchPhraseQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
@@ -2438,7 +2439,7 @@ public class HighlighterSearchIT extends ESIntegTestCase {
             .setSource("field1", "this is a test", "field2", "The quick brown fox jumps over the lazy dog! Second sentence.").get();
         refresh();
         logger.info("--> highlighting and searching on field2");
-        SearchSourceBuilder source = searchSource().query(fuzzyQuery("field2", "quck"))
+        SearchSourceBuilder source = searchSource().query(matchQuery("field2", "quck").fuzziness(Fuzziness.AUTO))
                 .highlighter(highlight().field("field2"));
         SearchResponse searchResponse = client().prepareSearch("test").setSource(source).get();
 

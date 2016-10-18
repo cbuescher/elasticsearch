@@ -140,6 +140,7 @@ public class SearchModuleTests extends ModuleTestCase {
                 singletonList(registersDupeFetchSubPhase)));
 
         SearchPlugin registersDupeQuery = new SearchPlugin() {
+            @Override
             public List<SearchPlugin.QuerySpec<?>> getQueries() {
                 return singletonList(new QuerySpec<>(TermQueryBuilder.NAME, TermQueryBuilder::new, TermQueryBuilder::fromXContent));
             }
@@ -148,6 +149,7 @@ public class SearchModuleTests extends ModuleTestCase {
                 singletonList(registersDupeQuery)));
 
         SearchPlugin registersDupeAggregation = new SearchPlugin() {
+            @Override
             public List<AggregationSpec> getAggregations() {
                 return singletonList(new AggregationSpec(TermsAggregationBuilder.NAME, TermsAggregationBuilder::new, new TermsParser()));
             }
@@ -156,6 +158,7 @@ public class SearchModuleTests extends ModuleTestCase {
                 singletonList(registersDupeAggregation)));
 
         SearchPlugin registersDupePipelineAggregation = new SearchPlugin() {
+            @Override
             public List<PipelineAggregationSpec> getPipelineAggregations() {
                 return singletonList(new PipelineAggregationSpec(
                         DerivativePipelineAggregationBuilder.NAME,
@@ -228,6 +231,7 @@ public class SearchModuleTests extends ModuleTestCase {
 
     public void testRegisterAggregation() {
         SearchModule module = new SearchModule(Settings.EMPTY, false, singletonList(new SearchPlugin() {
+            @Override
             public List<AggregationSpec> getAggregations() {
                 return singletonList(new AggregationSpec("test", TestAggregationBuilder::new, TestAggregationBuilder::fromXContent));
             }
@@ -238,6 +242,7 @@ public class SearchModuleTests extends ModuleTestCase {
 
     public void testRegisterPipelineAggregation() {
         SearchModule module = new SearchModule(Settings.EMPTY, false, singletonList(new SearchPlugin() {
+            @Override
             public List<PipelineAggregationSpec> getPipelineAggregations() {
                 return singletonList(new PipelineAggregationSpec("test",
                         TestPipelineAggregationBuilder::new, TestPipelineAggregator::new, TestPipelineAggregationBuilder::fromXContent));
@@ -256,7 +261,6 @@ public class SearchModuleTests extends ModuleTestCase {
             "exists",
             "field_masking_span",
             "function_score",
-            "fuzzy",
             "geo_bounding_box",
             "geo_distance",
             "geo_distance_range",

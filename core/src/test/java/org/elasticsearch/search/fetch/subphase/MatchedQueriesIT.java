@@ -20,6 +20,7 @@
 package org.elasticsearch.search.fetch.subphase;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -251,7 +252,7 @@ public class MatchedQueriesIT extends ESIntegTestCase {
         }
     }
 
-    public void testFuzzyQuerySupportsName() {
+    public void testFuzzyMatchQuerySupportsName() {
         createIndex("test1");
         ensureGreen();
 
@@ -259,7 +260,7 @@ public class MatchedQueriesIT extends ESIntegTestCase {
         refresh();
 
         SearchResponse searchResponse = client().prepareSearch()
-                .setQuery(QueryBuilders.fuzzyQuery("title", "titel1").queryName("fuzzy")).get();
+                .setQuery(QueryBuilders.matchQuery("title", "titel1").fuzziness(Fuzziness.AUTO).queryName("fuzzy")).get();
         assertHitCount(searchResponse, 1L);
 
         for (SearchHit hit : searchResponse.getHits()) {

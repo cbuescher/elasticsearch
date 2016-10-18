@@ -76,8 +76,6 @@ include::wildcard-query.asciidoc[]
 
 include::regexp-query.asciidoc[]
 
-include::fuzzy-query.asciidoc[]
-
 include::type-query.asciidoc[]
 
 include::ids-query.asciidoc[]

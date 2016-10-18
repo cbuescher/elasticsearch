@@ -46,7 +46,6 @@ import static org.elasticsearch.index.query.QueryBuilders.constantScoreQuery;
 import static org.elasticsearch.index.query.QueryBuilders.disMaxQuery;
 import static org.elasticsearch.index.query.QueryBuilders.existsQuery;
 import static org.elasticsearch.index.query.QueryBuilders.functionScoreQuery;
-import static org.elasticsearch.index.query.QueryBuilders.fuzzyQuery;
 import static org.elasticsearch.index.query.QueryBuilders.geoBoundingBoxQuery;
 import static org.elasticsearch.index.query.QueryBuilders.geoDistanceQuery;
 import static org.elasticsearch.index.query.QueryBuilders.geoDistanceRangeQuery;
@@ -137,10 +136,6 @@ public class QueryDSLDocumentationTests extends ESTestCase {
         functionScoreQuery(functions);
     }
 
-    public void testFuzzy() {
-        fuzzyQuery("name", "kimchy");
-    }
-
     public void testGeoBoundingBox() {
         geoBoundingBoxQuery("pin.location").setCorners(40.73, -74.1, 40.717, -73.99);
     }
@@ -164,7 +159,7 @@ public class QueryDSLDocumentationTests extends ESTestCase {
     }
 
     public void testGeoPolygon() {
-        List<GeoPoint> points = new ArrayList<GeoPoint>();
+        List<GeoPoint> points = new ArrayList<>();
         points.add(new GeoPoint(40, -70));
         points.add(new GeoPoint(30, -80));
         points.add(new GeoPoint(20, -90));
