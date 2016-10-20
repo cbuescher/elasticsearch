@@ -10,8 +10,6 @@ import re
 import shutil
 import time
 
-default_branch_name = "master"
-
 tracks = collections.OrderedDict()
 
 tracks["geonames"] = [
@@ -126,7 +124,7 @@ def configure_rally(dry_run):
                 print(line.replace("~", user_home))
 
 
-def run_rally(effective_start_date, tracks, override_src_dir, dry_run, system=os.system):
+def run_rally(effective_start_date, tracks, override_src_dir, dry_run, root_dir, system=os.system):
     ts = date_for_cmd_param(effective_start_date)
     revision_ts = to_iso8601(effective_start_date)
     rally_failure = False
@@ -140,7 +138,6 @@ def run_rally(effective_start_date, tracks, override_src_dir, dry_run, system=os
     else:
         override = ""
 
-    root_dir = config["root.dir"]
     report_root_dir = config["report.base.dir"]
 
     pipeline = "from-sources-complete"
@@ -284,16 +281,25 @@ def write_report(file_name, timestamp, data):
         f.write("%s,%s" % (timestamp, data))
 
 
-def replace_last_line(file_name, data, branch=default_branch_name):
+def insert_comparison_data(file_name, data, release_name):
     with open(file_name, "r+") as f:
         lines = f.readlines()
-        lines[-1] = "%s,%s" % (branch, data)
+        new_lines = []
+        found = False
+        for line in lines:
+            if line.startswith(release_name):
+                new_lines.append("%s,%s" % (release_name, data))
+                found = True
+            else:
+                new_lines.append(line)
+        if not found:
+            new_lines.append("%s,%s" % (release_name, data))
         f.seek(0)
-        f.writelines(lines)
+        f.writelines(new_lines)
         f.truncate()
 
 
-def report(effective_start_date, tracks, default_setup_per_track):
+def report(effective_start_date, tracks, default_setup_per_track, release_name, root_dir, compare_mode):
     """
     Publishes all data from the provided trial run.
 
@@ -305,12 +311,10 @@ def report(effective_start_date, tracks, default_setup_per_track):
     timestamp = date_for_path(effective_start_date)
     # this timestamp gets used in the report files
     report_timestamp = date_for_cmd_param(effective_start_date)
+    report_root_dir = config["report.base.dir"]
 
     for track, setups in tracks.items():
-        root_dir = config["root.dir"]
-        report_root_dir = config["report.base.dir"]
         output_report_path = "%s/%s/out/%s" % (root_dir, report_root_dir, track)
-
         segment_count_metrics = []
         indexing_throughput_metrics = []
         meta_metrics = None
@@ -338,18 +342,21 @@ def report(effective_start_date, tracks, default_setup_per_track):
 
             if current_is_default and "cpu_usage" in metrics:
                 cpu_usage = "%s\n" % metrics["cpu_usage"]
-                write_report("%s/indexing_cpu_usage.csv" % output_report_path, report_timestamp, cpu_usage)
-                replace_last_line("%s/indexing_cpu_usage_comparison.csv" % output_report_path, cpu_usage)
+                if not compare_mode:
+                    write_report("%s/indexing_cpu_usage.csv" % output_report_path, report_timestamp, cpu_usage)
+                insert_comparison_data("%s/indexing_cpu_usage_comparison.csv" % output_report_path, cpu_usage, release_name)
 
             if current_is_default and ("young_gen_gc" in metrics or "old_gen_gc" in metrics):
                 gc_times = "%s,%s\n" % (v(metrics, "young_gen_gc"), v(metrics, "old_gen_gc"))
-                write_report("%s/gc_times.csv" % output_report_path, report_timestamp, gc_times)
-                replace_last_line("%s/gc_times_comparison.csv" % output_report_path, gc_times)
+                if not compare_mode:
+                    write_report("%s/gc_times.csv" % output_report_path, report_timestamp, gc_times)
+                insert_comparison_data("%s/gc_times_comparison.csv" % output_report_path, gc_times, release_name)
 
             if current_is_default and ("latency_indices_stats_p99" in metrics or "latency_nodes_stats_p99" in metrics):
                 stats_latency = "%s,%s\n" % (v(metrics, "latency_indices_stats_p99"), v(metrics, "latency_nodes_stats_p99"))
-                write_report("%s/search_latency_stats.csv" % output_report_path, report_timestamp, stats_latency)
-                replace_last_line("%s/search_latency_stats_comparison.csv" % output_report_path, stats_latency)
+                if not compare_mode:
+                    write_report("%s/search_latency_stats.csv" % output_report_path, report_timestamp, stats_latency)
+                insert_comparison_data("%s/search_latency_stats_comparison.csv" % output_report_path, stats_latency, release_name)
 
             if current_is_default and "mem_segments" in metrics:
                 # Date,Total heap used (MB),Doc values (MB),Terms (MB),Norms (MB),Stored fields (MB),Points (MB)
@@ -359,8 +366,9 @@ def report(effective_start_date, tracks, default_setup_per_track):
                                                         v(metrics, "mem_norms"),
                                                         v(metrics, "mem_fields"),
                                                         v(metrics, "mem_points"))
-                write_report("%s/segment_total_memory.csv" % output_report_path, report_timestamp, total_memory)
-                replace_last_line("%s/segment_total_memory_comparison.csv" % output_report_path, total_memory)
+                if not compare_mode:
+                    write_report("%s/segment_total_memory.csv" % output_report_path, report_timestamp, total_memory)
+                insert_comparison_data("%s/segment_total_memory_comparison.csv" % output_report_path, total_memory, release_name)
 
             if current_is_default and "indexing_time" in metrics:
                 # Date,Indexing time (min),Merge time (min),Refresh time (min),Flush time (min),Merge throttle time (min)
@@ -369,41 +377,48 @@ def report(effective_start_date, tracks, default_setup_per_track):
                                                     v(metrics, "refresh_time"),
                                                     v(metrics, "flush_time"),
                                                     v(metrics, "merge_throttle_time"))
-                write_report("%s/indexing_total_times.csv" % output_report_path, report_timestamp, total_times)
-                replace_last_line("%s/indexing_total_times_comparison.csv" % output_report_path, total_times)
+                if not compare_mode:
+                    write_report("%s/indexing_total_times.csv" % output_report_path, report_timestamp, total_times)
+                insert_comparison_data("%s/indexing_total_times_comparison.csv" % output_report_path, total_times, release_name)
 
             if current_is_default and ("index_size" in metrics or "totally_written" in metrics):
                 # Date,Final index size,Total bytes written
                 disk_usage = "%s,%s\n" % (v(metrics, "index_size"), v(metrics, "totally_written"))
-                write_report("%s/disk_usage.csv" % output_report_path, report_timestamp, disk_usage)
-                replace_last_line("%s/disk_usage_comparison.csv" % output_report_path, disk_usage)
+                if not compare_mode:
+                    write_report("%s/disk_usage.csv" % output_report_path, report_timestamp, disk_usage)
+                insert_comparison_data("%s/disk_usage_comparison.csv" % output_report_path, disk_usage, release_name)
 
             if current_is_default and "query_latency_p99" in metrics:
                 query_latency = "%s\n" % ",".join(metrics["query_latency_p99"])
-                write_report("%s/search_latency_queries.csv" % output_report_path, report_timestamp, query_latency)
-                replace_last_line("%s/search_latency_queries_comparison.csv" % output_report_path, query_latency)
+                if not compare_mode:
+                    write_report("%s/search_latency_queries.csv" % output_report_path, report_timestamp, query_latency)
+                insert_comparison_data("%s/search_latency_queries_comparison.csv" % output_report_path, query_latency, release_name)
 
             if "merge_time_parts" in metrics:
                 merge_parts = "%s\n" % ",".join(metrics["merge_time_parts"])
-                write_report("%s/merge_parts.csv" % output_report_path, report_timestamp, merge_parts)
-                replace_last_line("%s/merge_parts.csv" % output_report_path, merge_parts)
+                if not compare_mode:
+                    write_report("%s/merge_parts.csv" % output_report_path, report_timestamp, merge_parts)
+                insert_comparison_data("%s/merge_parts.csv" % output_report_path, merge_parts, release_name)
 
-            with open(meta_report_path) as csvfile:
-                meta_metrics = extract_meta_metrics(csvfile)
+            if not compare_mode:
+                with open(meta_report_path) as csvfile:
+                    meta_metrics = extract_meta_metrics(csvfile)
 
-        if meta_metrics and "source_revision" in meta_metrics:
-            with open("%s/source_revision.csv" % output_report_path, "a") as f:
-                f.write("%s,%s\n" % (report_timestamp, meta_metrics["source_revision"]))
+                if meta_metrics and "source_revision" in meta_metrics:
+                    with open("%s/source_revision.csv" % output_report_path, "a") as f:
+                        f.write("%s,%s\n" % (report_timestamp, meta_metrics["source_revision"]))
 
         if len(segment_count_metrics) > 0:
             segment_counts = "%s\n" % ",".join(segment_count_metrics)
-            write_report("%s/segment_counts.csv" % output_report_path, report_timestamp, segment_counts)
-            replace_last_line("%s/segment_counts_comparison.csv" % output_report_path, segment_counts)
+            if not compare_mode:
+                write_report("%s/segment_counts.csv" % output_report_path, report_timestamp, segment_counts)
+            insert_comparison_data("%s/segment_counts_comparison.csv" % output_report_path, segment_counts, release_name)
 
         if len(indexing_throughput_metrics) > 0:
             indexing_throughput = "%s\n" % ",".join(indexing_throughput_metrics)
-            write_report("%s/indexing_throughput.csv" % output_report_path, report_timestamp, indexing_throughput)
-            replace_last_line("%s/indexing_throughput_comparison.csv" % output_report_path, indexing_throughput)
+            if not compare_mode:
+                write_report("%s/indexing_throughput.csv" % output_report_path, report_timestamp, indexing_throughput)
+            insert_comparison_data("%s/indexing_throughput_comparison.csv" % output_report_path, indexing_throughput, release_name)
 
 
 def parse_args():
@@ -419,20 +434,38 @@ def parse_args():
         help=argparse.SUPPRESS,
         default=None)
     parser.add_argument(
+        "--override-root-dir",
+        help=argparse.SUPPRESS,
+        default=None)
+    parser.add_argument(
         "--dry-run",
-        help="Does not do anything, just outputs",
+        help="Does not do anything, just output",
         default=False,
         action="store_true")
+    parser.add_argument(
+        "--mode",
+        help="In which mode to run?",
+        default="full",
+        choices=["full", "comparison"])
+    # TODO dm: Add a parameter to replace a release (-> for updates)
+    parser.add_argument(
+        "--release",
+        help="Specify release string to use for comparison reports",
+        default="master")
 
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+    rally_failure = False
+    compare_mode = args.mode == "comparison"
 
-    configure_rally(args.dry_run)
-    rally_failure = run_rally(args.effective_start_date, tracks, args.override_src_dir, args.dry_run)
-    report(args.effective_start_date, tracks, defaults)
+    root_dir = config["root.dir"] if not args.override_root_dir else args.override_root_dir
+    if not compare_mode:
+        configure_rally(args.dry_run)
+        rally_failure = run_rally(args.effective_start_date, tracks, args.override_src_dir, args.dry_run, root_dir)
+    report(args.effective_start_date, tracks, defaults, args.release, root_dir, compare_mode)
     if rally_failure:
         exit(1)
 
