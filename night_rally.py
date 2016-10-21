@@ -335,10 +335,14 @@ def report(effective_start_date, tracks, default_setup_per_track, release_name, 
 
             if "segment_count" in metrics:
                 segment_count_metrics.append(metrics["segment_count"])
+            else:
+                segment_count_metrics.append("")
 
             # Beware: this one is one column per series!
             if "median_indexing_throughput" in metrics:
                 indexing_throughput_metrics.append(metrics["median_indexing_throughput"])
+            else:
+                indexing_throughput_metrics.append("")
 
             if current_is_default and "cpu_usage" in metrics:
                 cpu_usage = "%s\n" % metrics["cpu_usage"]
