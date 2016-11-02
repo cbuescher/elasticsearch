@@ -1,6 +1,5 @@
 import collections
 import datetime
-import os
 import unittest
 
 if __name__ == "__main__" and __package__ is None:
@@ -151,20 +150,21 @@ class NightRallyTests(unittest.TestCase):
             ["append-no-conflicts", "4gheap"]
         ]}
         start_date = datetime.datetime(2016, 1, 1)
-        night_rally.run_rally(start_date, tracks, None, system_call)
+        cmd = night_rally.NightlyCommand(start_date, "/rally_root")
+        night_rally.run_rally(tracks, cmd, system=system_call)
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
                 "rally --configuration-name=nightly --pipeline=from-sources-complete --quiet --revision \"@2016-01-01T00:00:00Z\" "
                 "--effective-start-date \"2016-01-01 00:00:00\" --track=geonames --challenge=append-no-conflicts --car=defaults "
                 "--report-format=csv "
-                "--report-file=%s/.rally/benchmarks/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv"
-                % os.getenv("HOME"),
+                "--report-file=/rally_root/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv",
+
                 "rally --configuration-name=nightly --pipeline=from-sources-skip-build --quiet --revision \"@2016-01-01T00:00:00Z\" "
                 "--effective-start-date \"2016-01-01 00:00:00\" --track=geonames --challenge=append-no-conflicts --car=4gheap "
                 "--report-format=csv "
-                "--report-file=%s/.rally/benchmarks/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/4gheap/report.csv"
-                % os.getenv("HOME")]
+                "--report-file=/rally_root/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/4gheap/report.csv"
+                ]
             ,
             system_call.calls
         )
@@ -177,22 +177,21 @@ class NightRallyTests(unittest.TestCase):
         tracks["percolator"] = [["append-no-conflicts", "4gheap"]]
 
         start_date = datetime.datetime(2016, 10, 1)
-        night_rally.run_rally(start_date, tracks, "~/src/", system_call)
+        cmd = night_rally.NightlyCommand(start_date, "/rally_root", override_src_dir="~/src/")
+        night_rally.run_rally(tracks, cmd, system=system_call)
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
                 "rally --configuration-name=nightly --pipeline=from-sources-complete --quiet --revision \"@2016-10-01T00:00:00Z\" "
                 "--effective-start-date \"2016-10-01 00:00:00\" --track=geonames --challenge=append-no-conflicts --car=defaults "
                 "--report-format=csv "
-                "--report-file=%s/.rally/benchmarks/reports/rally/2016-10-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv "
-                "--override-src-dir=~/src/"
-                % os.getenv("HOME"),
+                "--report-file=/rally_root/reports/rally/2016-10-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv "
+                "--override-src-dir=~/src/",
                 "rally --configuration-name=nightly --pipeline=from-sources-skip-build --quiet --revision \"@2016-10-01T00:00:00Z\" "
                 "--effective-start-date \"2016-10-01 00:00:00\" --track=percolator --challenge=append-no-conflicts --car=4gheap "
                 "--report-format=csv "
-                "--report-file=%s/.rally/benchmarks/reports/rally/2016-10-01-00-00-00/percolator/append-no-conflicts/4gheap/report.csv "
-                "--override-src-dir=~/src/"
-                % os.getenv("HOME")]
+                "--report-file=/rally_root/reports/rally/2016-10-01-00-00-00/percolator/append-no-conflicts/4gheap/report.csv "
+                "--override-src-dir=~/src/"]
             ,
             system_call.calls
         )
@@ -206,20 +205,20 @@ class NightRallyTests(unittest.TestCase):
         tracks["percolator"] = [["append-no-conflicts", "4gheap"]]
 
         start_date = datetime.datetime(2016, 10, 1)
-        night_rally.run_rally(start_date, tracks, None, system_call)
+        cmd = night_rally.NightlyCommand(start_date, "/rally_root")
+        night_rally.run_rally(tracks, cmd, system=system_call)
+
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
                 "rally --configuration-name=nightly --pipeline=from-sources-complete --quiet --revision \"@2016-10-01T00:00:00Z\" "
                 "--effective-start-date \"2016-10-01 00:00:00\" --track=geonames --challenge=append-no-conflicts --car=defaults "
                 "--report-format=csv "
-                "--report-file=%s/.rally/benchmarks/reports/rally/2016-10-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv"
-                % os.getenv("HOME"),
+                "--report-file=/rally_root/reports/rally/2016-10-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv",
                 "rally --configuration-name=nightly --pipeline=from-sources-skip-build --quiet --revision \"@2016-10-01T00:00:00Z\" "
                 "--effective-start-date \"2016-10-01 00:00:00\" --track=percolator --challenge=append-no-conflicts --car=4gheap "
                 "--report-format=csv "
-                "--report-file=%s/.rally/benchmarks/reports/rally/2016-10-01-00-00-00/percolator/append-no-conflicts/4gheap/report.csv"
-                % os.getenv("HOME")]
+                "--report-file=/rally_root/reports/rally/2016-10-01-00-00-00/percolator/append-no-conflicts/4gheap/report.csv"]
             ,
             system_call.calls
         )

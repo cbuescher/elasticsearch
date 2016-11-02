@@ -30,8 +30,12 @@ NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
 SELF_UPDATE=NO
+DRY_RUN=NO
 # We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
 START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
+MODE="nightly"
+RELEASE="master"
+REPLACE_RELEASE=${RELEASE}
 
 for i in "$@"
 do
@@ -48,8 +52,24 @@ case ${i} in
     SELF_UPDATE=YES
     shift # past argument with no value
     ;;
+    --dry-run)
+    DRY_RUN=YES
+    shift # past argument with no value
+    ;;
+    --mode=*)
+    MODE="${i#*=}"
+    shift # past argument=value
+    ;;
+    --release=*)
+    RELEASE="${i#*=}"
+    shift # past argument=value
+    ;;
+    --replace-release=*)
+    REPLACE_RELEASE="${i#*=}"
+    shift # past argument=value
+    ;;
     *)
-    echo "unknown"        # unknown option
+    echo "unknown command line option passed to night_rally"
     ;;
 esac
 done
@@ -82,28 +102,47 @@ else
 	NIGHT_RALLY_OVERRIDE=""
 fi
 
+if [ ${DRY_RUN} == YES ]
+then
+	NIGHT_RALLY_DRY_RUN="--dry-run"
+else
+	NIGHT_RALLY_DRY_RUN=""
+fi
+
 # We need to pull down the current state of all reports from the S3 bucket as night_rally might be run on different nodes each day
 echo "Syncing previous results from $S3_ROOT_BUCKET"
-aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_ROOT}"
+if [ ${DRY_RUN} == NO ]
+then
+    aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_ROOT}"
+fi
 
 # Night Rally is *always* the master for assets
 ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/*"
 echo "Copying most recent assets from ${ASSET_SOURCE} to ${LOCAL_REPORT_ROOT}"
-cp -R ${ASSET_SOURCE} ${LOCAL_REPORT_ROOT}
+if [ ${DRY_RUN} == NO ]
+then
+    cp -R ${ASSET_SOURCE} ${LOCAL_REPORT_ROOT}
+fi
 
 
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
 set +e
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE}
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE}  --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}"
 set -e
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
-killall -q esrally
+if [ ${DRY_RUN} == NO ]
+then
+    killall -q esrally
+fi
 
 echo "Uploading results to $S3_ROOT_BUCKET"
-#s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
-aws s3 sync --acl "public-read" "${LOCAL_REPORT_ROOT}" "${S3_ROOT_BUCKET}/"
+if [ ${DRY_RUN} == NO ]
+then
+    #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
+    aws s3 sync --acl "public-read" "${LOCAL_REPORT_ROOT}" "${S3_ROOT_BUCKET}/"
+fi
 
 # Exit with the same exit code as night_rally.py
 exit ${exit_code}

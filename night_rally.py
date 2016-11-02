@@ -124,42 +124,93 @@ def configure_rally(dry_run):
                 print(line.replace("~", user_home))
 
 
-def run_rally(effective_start_date, tracks, override_src_dir, dry_run, root_dir, system=os.system):
-    ts = date_for_cmd_param(effective_start_date)
-    revision_ts = to_iso8601(effective_start_date)
+class BaseCommand:
+    def __init__(self, effective_start_date, root_dir):
+        self.effective_start_date = effective_start_date
+        self.root_dir = root_dir
+        self.ts = date_for_cmd_param(effective_start_date)
+        self.report_root_dir = config["report.base.dir"]
+
+    def report_path(self, track, challenge, car):
+        return "%s/%s/rally/%s/%s/%s/%s/report.csv" % (self.root_dir, self.report_root_dir,
+                                                       date_for_path(self.effective_start_date), track,
+                                                       challenge, car)
+
+    def runnable(self, track, challenge, car):
+        return True
+
+    def command_line(self, track, challenge, car):
+        raise NotImplementedError("abstract method")
+
+
+class NightlyCommand(BaseCommand):
+    def __init__(self, effective_start_date, root_dir, override_src_dir=None):
+        super().__init__(effective_start_date, root_dir)
+        self.revision_ts = to_iso8601(effective_start_date)
+        self.pipeline = "from-sources-complete"
+        if override_src_dir is not None:
+            self.override = " --override-src-dir=%s" % override_src_dir
+        else:
+            self.override = ""
+
+    def command_line(self, track, challenge, car):
+        cmd = "rally --configuration-name=nightly --pipeline={6} --quiet --revision \"@{0}\" --effective-start-date \"{1}\" " \
+              "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}". \
+            format(self.revision_ts, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline, self.override)
+        # after we've executed the first benchmark, there is no reason to build again from sources
+        self.pipeline = "from-sources-skip-build"
+        return cmd
+
+
+class ReleaseCommand(BaseCommand):
+    def __init__(self, effective_start_date, root_dir, distribution_version):
+        super().__init__(effective_start_date, root_dir)
+        self.pipeline = "from-distribution"
+        self.distribution_version = distribution_version
+
+    def command_line(self, track, challenge, car):
+        cmd = "rally --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
+              "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}". \
+            format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline)
+        return cmd
+
+
+class DockerCommand(BaseCommand):
+    def __init__(self, effective_start_date, root_dir, distribution_version):
+        super().__init__(effective_start_date, root_dir)
+        self.pipeline = "docker"
+        self.distribution_version = distribution_version.replace("Docker ", "")
+
+    def runnable(self, track, challenge, car):
+        return car not in ["two_nodes", "verbose_iw"]
+
+    def command_line(self, track, challenge, car):
+        cmd = "rally --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
+              "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}". \
+            format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline)
+        return cmd
+
+
+def run_rally(tracks, command, dry_run=False, system=os.system):
     rally_failure = False
     if dry_run:
         runner = logger.info
     else:
         runner = system
-
-    if override_src_dir is not None:
-        override = " --override-src-dir=%s" % override_src_dir
-    else:
-        override = ""
-
-    report_root_dir = config["report.base.dir"]
-
-    pipeline = "from-sources-complete"
     for track, setups in tracks.items():
         for setup in setups:
             challenge, car = setup
-            logger.info("Running Rally on track [%s] with challenge [%s] and car [%s]" % (track, challenge, car))
-            report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv" % (root_dir, report_root_dir,
-                                                                  date_for_path(effective_start_date), track,
-                                                                  challenge, car)
-            start = time.perf_counter()
-            if runner(
-                "rally --configuration-name=nightly --pipeline={6} --quiet --revision \"@{0}\" --effective-start-date \"{1}\" "
-                "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}"
-                    .format(revision_ts, ts, track, challenge, car, report_path, pipeline, override)):
-                rally_failure = True
-                logger.error("Failed to run track [%s]. Please check the logs." % track)
-            # after we've executed the first benchmark, there is no reason to build again from sources
-            pipeline = "from-sources-skip-build"
-            stop = time.perf_counter()
-            logger.info("Finished running on track [%s] with challenge [%s] and car [%s] in [%f] seconds." % (
-                track, challenge, car, (stop - start)))
+            if command.runnable(track, challenge, car):
+                logger.info("Running Rally on track [%s] with challenge [%s] and car [%s]" % (track, challenge, car))
+                start = time.perf_counter()
+                if runner(command.command_line(track, challenge, car)):
+                    rally_failure = True
+                    logger.error("Failed to run track [%s]. Please check the logs." % track)
+                stop = time.perf_counter()
+                logger.info("Finished running on track [%s] with challenge [%s] and car [%s] in [%f] seconds." % (
+                    track, challenge, car, (stop - start)))
+            else:
+                logger.info("Skipping track [%s], challenge [%s] and car [%s] (not supported by command)." % (track, challenge, car))
     return rally_failure
 
 
@@ -449,8 +500,8 @@ def parse_args():
     parser.add_argument(
         "--mode",
         help="In which mode to run?",
-        default="full",
-        choices=["full", "comparison"])
+        default="nightly",
+        choices=["nightly", "comparison"])
     parser.add_argument(
         "--release",
         help="Specify release string to use for comparison reports",
@@ -464,13 +515,18 @@ def parse_args():
 
 def main():
     args = parse_args()
-    rally_failure = False
     compare_mode = args.mode == "comparison"
-
     root_dir = config["root.dir"] if not args.override_root_dir else args.override_root_dir
-    if not compare_mode:
+    if compare_mode:
+        if args.release.startswith("Docker"):
+            command = DockerCommand(args.effective_start_date, root_dir, args.release)
+        else:
+            command = ReleaseCommand(args.effective_start_date, root_dir, args.release)
+    else:
         configure_rally(args.dry_run)
-        rally_failure = run_rally(args.effective_start_date, tracks, args.override_src_dir, args.dry_run, root_dir)
+        command = NightlyCommand(args.effective_start_date, root_dir, args.override_src_dir)
+
+    rally_failure = run_rally(tracks, command, args.dry_run)
     replace_release = args.replace_release if args.replace_release else args.release
     report(args.effective_start_date, tracks, defaults, replace_release, args.release, root_dir, compare_mode)
     if rally_failure:
