@@ -294,19 +294,22 @@ def meta_key_for(metric_pattern, metric_key, metric_name):
 def extract_metrics(source_report):
     metrics = {}
     for row in csv.reader(source_report):
-        for metric_pattern, metric_key in METRICS_TO_KEY.items():
-            metric_name = row[0]
-            op_name = row[1]
-            metric_value = row[2]
+        lap = row[0]
+        # Don't consider any metrics except the final one
+        if lap == "All":
+            for metric_pattern, metric_key in METRICS_TO_KEY.items():
+                metric_name = row[1]
+                op_name = row[2]
+                metric_value = row[3]
 
-            final_key = key_for(metric_pattern, metric_key, metric_name, op_name)
-            if final_key:
-                if is_multi_valued(final_key):
-                    if final_key not in metrics:
-                        metrics[final_key] = []
-                    metrics[final_key].append(metric_value)
-                else:
-                    metrics[final_key] = metric_value
+                final_key = key_for(metric_pattern, metric_key, metric_name, op_name)
+                if final_key:
+                    if is_multi_valued(final_key):
+                        if final_key not in metrics:
+                            metrics[final_key] = []
+                        metrics[final_key].append(metric_value)
+                    else:
+                        metrics[final_key] = metric_value
     return metrics
 
 
