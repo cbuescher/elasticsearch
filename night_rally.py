@@ -17,7 +17,7 @@ tracks["geonames"] = [
     ["append-no-conflicts-index-only", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only", "two_nodes"],
+    ["append-no-conflicts-index-only-1-replica", "two_nodes"],
     ["append-no-conflicts-index-only", "verbose_iw"]
 ]
 
@@ -30,7 +30,7 @@ tracks["geopoint"] = [
     ["append-no-conflicts-index-only", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only", "two_nodes"]
+    ["append-no-conflicts-index-only-1-replica", "two_nodes"]
 ]
 
 tracks["pmc"] = [
@@ -38,7 +38,7 @@ tracks["pmc"] = [
     ["append-no-conflicts", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only", "two_nodes"]
+    ["append-no-conflicts-index-only-1-replica", "two_nodes"]
 ]
 
 tracks["nyc_taxis"] = [
