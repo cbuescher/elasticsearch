@@ -142,5 +142,11 @@
 		"x": "2016-09-23 01:00:43",
 		"shortText": "J",
 		"text": "Benchmarks scheduled on a less powerful machine"
+	},
+	{
+		"series": "Append / 2 nodes",
+		"x": "2016-11-16 01:00:41",
+		"shortText": "L",
+		"text": "Use 1 replica for 2 nodes benchmark (instead of 0)"
 	}
 ]

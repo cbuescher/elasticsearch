@@ -58,5 +58,11 @@
     "x": "2016-10-14 06:25:54",
     "shortText": "K",
     "text": "Random conflicts were all within the first bulk (too many conflicts)"
+  },
+  {
+    "series": "Append / 2 nodes",
+    "x": "2016-11-16 01:00:41",
+    "shortText": "L",
+    "text": "Use 1 replica for 2 nodes benchmark (instead of 0)"
   }
 ]
