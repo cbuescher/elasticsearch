@@ -56,7 +56,7 @@ var charts = {
 
   compare: function() {
     // workaround for a deficiency in dygraphs bar charts and CSV data sources
-    var versions = ["1.7.6", "2.4.1", "5.0.1", "master", "Docker 5.0.0"];
+    var versions = ["1.7.6", "2.4.2", "5.0.1", "master", "Docker 5.0.0"];
 
     charts.indexingThroughput = chartingLib.renderBarChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', versions);
     charts.totalTimes = chartingLib.renderBarChart('indexing_total_times', 'Total times', 'Time [min]', versions);
