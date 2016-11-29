@@ -141,7 +141,9 @@ echo "Uploading results to $S3_ROOT_BUCKET"
 if [ ${DRY_RUN} == NO ]
 then
     #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
-    aws s3 sync --acl "public-read" "${LOCAL_REPORT_ROOT}" "${S3_ROOT_BUCKET}/"
+    # --acl "public-read"           - let everyone read the report files
+    # --cache-control max-age=86400 - ensure that report files expire after one day so users always see fresh data
+    aws s3 sync --acl "public-read" --cache-control max-age=86400 "${LOCAL_REPORT_ROOT}" "${S3_ROOT_BUCKET}/"
 fi
 
 # Exit with the same exit code as night_rally.py
