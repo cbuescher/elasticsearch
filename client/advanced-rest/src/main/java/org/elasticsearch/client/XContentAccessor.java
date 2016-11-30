@@ -94,17 +94,7 @@ public class XContentAccessor {
      * we throw an {@link IllegalArgumentException}
      */
     public Double evaluateDouble(String path) {
-        Object obj = evaluate(path);
-        if (obj == null) {
-            return null;
-        }
-        if (obj instanceof Double) {
-            return ((Double) obj);
-        }
-        if (obj instanceof Float) {
-            return ((Float) obj).doubleValue();
-        }
-        throw new IllegalArgumentException("Object under [" + path + "] should be Double, Float or null.");
+        return (Double) evaluate(path);
     }
 
     /**
