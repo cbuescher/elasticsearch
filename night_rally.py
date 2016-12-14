@@ -186,7 +186,8 @@ class DockerCommand(BaseCommand):
 
     def command_line(self, track, challenge, car):
         cmd = "rally --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
-              "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}". \
+              "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5} " \
+              "--client-options=\"basic_auth_user:'elastic',basic_auth_password:'changeme',timeout:60000,request_timeout:60000\"". \
             format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline)
         return cmd
 
