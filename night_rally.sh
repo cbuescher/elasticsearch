@@ -125,17 +125,25 @@ then
 fi
 
 
-# Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
+#****************************
+# START NO FAIL
+#****************************
 set +e
+# Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
 python3 ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE}  --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}"
-set -e
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
+# Also don't fail if there are no lingering Rally processes
 if [ ${DRY_RUN} == NO ]
 then
     killall -q esrally
 fi
+
+#****************************
+# END NO FAIL
+#****************************
+set -e
 
 echo "Uploading results to $S3_ROOT_BUCKET"
 if [ ${DRY_RUN} == NO ]
