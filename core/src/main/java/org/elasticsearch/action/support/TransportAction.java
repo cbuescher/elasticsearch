@@ -24,7 +24,6 @@ import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestValidationException;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.common.ParseFieldMatcher;
 import org.elasticsearch.common.component.AbstractComponent;
@@ -33,12 +32,13 @@ import org.elasticsearch.tasks.Task;
 import org.elasticsearch.tasks.TaskListener;
 import org.elasticsearch.tasks.TaskManager;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.elasticsearch.action.support.PlainActionFuture.newFuture;
 
-public abstract class TransportAction<Request extends ActionRequest, Response extends ActionResponse> extends AbstractComponent {
+public abstract class TransportAction<Request extends ActionRequest, Response extends TransportResponse> extends AbstractComponent {
 
     protected final ThreadPool threadPool;
     protected final String actionName;
@@ -148,7 +148,7 @@ public abstract class TransportAction<Request extends ActionRequest, Response ex
 
     protected abstract void doExecute(Request request, ActionListener<Response> listener);
 
-    private static class RequestFilterChain<Request extends ActionRequest, Response extends ActionResponse>
+    private static class RequestFilterChain<Request extends ActionRequest, Response extends TransportResponse>
             implements ActionFilterChain<Request, Response> {
 
         private final TransportAction<Request, Response> action;
@@ -182,7 +182,7 @@ public abstract class TransportAction<Request extends ActionRequest, Response ex
     /**
      * Wrapper for an action listener that stores the result at the end of the execution
      */
-    private static class TaskResultStoringActionListener<Response extends ActionResponse> implements ActionListener<Response> {
+    private static class TaskResultStoringActionListener<Response extends TransportResponse> implements ActionListener<Response> {
         private final ActionListener<Response> delegate;
         private final Task task;
         private final TaskManager taskManager;

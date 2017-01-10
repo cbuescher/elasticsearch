@@ -23,10 +23,10 @@ import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestBuilder;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.tasks.Task;
 import org.elasticsearch.tasks.TaskId;
+import org.elasticsearch.transport.TransportResponse;
 
 /**
  * A {@linkplain Client} that sets the parent task on all requests that it makes. Use this to conveniently implement actions that cause
@@ -59,7 +59,7 @@ public class ParentTaskAssigningClient extends FilterClient {
 
     @Override
     protected <     Request extends ActionRequest,
-                    Response extends ActionResponse,
+                    Response extends TransportResponse,
                     RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>
               > void doExecute(Action<Request, Response, RequestBuilder> action, Request request, ActionListener<Response> listener) {
         request.setParentTask(parentTask);

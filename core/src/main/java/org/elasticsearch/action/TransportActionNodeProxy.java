@@ -21,15 +21,15 @@ package org.elasticsearch.action;
 
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.component.AbstractComponent;
-import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.transport.TransportRequestOptions;
+import org.elasticsearch.transport.TransportResponse;
 import org.elasticsearch.transport.TransportService;
 
 /**
  * A generic proxy that will execute the given action against a specific node.
  */
-public class TransportActionNodeProxy<Request extends ActionRequest, Response extends ActionResponse> extends AbstractComponent {
+public class TransportActionNodeProxy<Request extends ActionRequest, Response extends TransportResponse> extends AbstractComponent {
 
     private final TransportService transportService;
     private final GenericAction<Request, Response> action;

@@ -19,13 +19,13 @@
 
 package org.elasticsearch.action.admin.cluster.node.tasks.get;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.tasks.TaskResult;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
@@ -34,7 +34,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Returns the list of tasks currently running on the nodes
  */
-public class GetTaskResponse extends ActionResponse implements ToXContentObject {
+public class GetTaskResponse extends TransportResponse implements ToXContentObject {
     private TaskResult task;
 
     public GetTaskResponse() {

@@ -19,13 +19,13 @@
 
 package org.elasticsearch.action.admin.indices.exists.indices;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
-public class IndicesExistsResponse extends ActionResponse {
+public class IndicesExistsResponse extends TransportResponse {
 
     private boolean exists;
 

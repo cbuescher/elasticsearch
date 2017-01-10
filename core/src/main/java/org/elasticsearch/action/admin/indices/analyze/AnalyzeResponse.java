@@ -19,12 +19,12 @@
 package org.elasticsearch.action.admin.indices.analyze;
 
 import org.elasticsearch.Version;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.io.stream.Streamable;
 import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class AnalyzeResponse extends ActionResponse implements Iterable<AnalyzeResponse.AnalyzeToken>, ToXContentObject {
+public class AnalyzeResponse extends TransportResponse implements Iterable<AnalyzeResponse.AnalyzeToken>, ToXContentObject {
 
     public static class AnalyzeToken implements Streamable, ToXContentObject {
         private String term;

@@ -20,7 +20,6 @@
 package org.elasticsearch.script.mustache;
 
 import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.ActionPlugin;
 import org.elasticsearch.plugins.Plugin;
@@ -28,6 +27,7 @@ import org.elasticsearch.plugins.ScriptPlugin;
 import org.elasticsearch.plugins.SearchPlugin;
 import org.elasticsearch.rest.RestHandler;
 import org.elasticsearch.script.ScriptEngineService;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +42,7 @@ public class MustachePlugin extends Plugin implements ScriptPlugin, ActionPlugin
     }
 
     @Override
-    public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
+    public List<ActionHandler<? extends ActionRequest, ? extends TransportResponse>> getActions() {
         return Arrays.asList(new ActionHandler<>(SearchTemplateAction.INSTANCE, TransportSearchTemplateAction.class),
                 new ActionHandler<>(MultiSearchTemplateAction.INSTANCE, TransportMultiSearchTemplateAction.class));
     }

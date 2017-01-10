@@ -21,7 +21,6 @@ package org.elasticsearch.action.search;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ExceptionsHelper;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -29,6 +28,7 @@ import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.io.stream.Streamable;
 import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ import java.util.Iterator;
 /**
  * A multi search response.
  */
-public class MultiSearchResponse extends ActionResponse implements Iterable<MultiSearchResponse.Item>, ToXContentObject {
+public class MultiSearchResponse extends TransportResponse implements Iterable<MultiSearchResponse.Item>, ToXContentObject {
 
     /**
      * A search response item, holding the actual search response, or an error message if it failed.

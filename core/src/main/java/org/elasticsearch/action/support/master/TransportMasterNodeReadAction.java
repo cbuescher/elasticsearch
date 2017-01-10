@@ -19,7 +19,6 @@
 
 package org.elasticsearch.action.support.master;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.cluster.metadata.IndexNameExpressionResolver;
 import org.elasticsearch.cluster.service.ClusterService;
@@ -27,6 +26,7 @@ import org.elasticsearch.common.settings.Setting;
 import org.elasticsearch.common.settings.Setting.Property;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.TransportResponse;
 import org.elasticsearch.transport.TransportService;
 
 import java.util.function.Supplier;
@@ -35,7 +35,7 @@ import java.util.function.Supplier;
  * A base class for read operations that needs to be performed on the master node.
  * Can also be executed on the local node if needed.
  */
-public abstract class TransportMasterNodeReadAction<Request extends MasterNodeReadRequest<Request>, Response extends ActionResponse>
+public abstract class TransportMasterNodeReadAction<Request extends MasterNodeReadRequest<Request>, Response extends TransportResponse>
         extends TransportMasterNodeAction<Request, Response> {
 
     public static final Setting<Boolean> FORCE_LOCAL_SETTING =

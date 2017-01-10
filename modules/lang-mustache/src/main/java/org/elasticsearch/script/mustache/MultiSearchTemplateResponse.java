@@ -20,7 +20,6 @@
 package org.elasticsearch.script.mustache;
 
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -29,12 +28,13 @@ import org.elasticsearch.common.io.stream.Streamable;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public class MultiSearchTemplateResponse extends ActionResponse implements Iterable<MultiSearchTemplateResponse.Item>, ToXContentObject {
+public class MultiSearchTemplateResponse extends TransportResponse implements Iterable<MultiSearchTemplateResponse.Item>, ToXContentObject {
 
     /**
      * A search template response item, holding the actual search template response, or an error message if it failed.

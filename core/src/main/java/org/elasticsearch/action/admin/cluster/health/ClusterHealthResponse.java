@@ -19,7 +19,6 @@
 
 package org.elasticsearch.action.admin.cluster.health;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.cluster.health.ClusterIndexHealth;
@@ -31,12 +30,13 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.StatusToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
-public class ClusterHealthResponse extends ActionResponse implements StatusToXContentObject {
+public class ClusterHealthResponse extends TransportResponse implements StatusToXContentObject {
     private String clusterName;
     private int numberOfPendingTasks = 0;
     private int numberOfInFlightFetch = 0;

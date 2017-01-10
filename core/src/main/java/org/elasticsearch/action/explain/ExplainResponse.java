@@ -20,10 +20,10 @@
 package org.elasticsearch.action.explain;
 
 import org.apache.lucene.search.Explanation;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.index.get.GetResult;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
@@ -33,7 +33,7 @@ import static org.elasticsearch.common.lucene.Lucene.writeExplanation;
 /**
  * Response containing the score explanation.
  */
-public class ExplainResponse extends ActionResponse {
+public class ExplainResponse extends TransportResponse {
 
     private String index;
     private String type;

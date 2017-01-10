@@ -24,11 +24,11 @@ import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestBuilder;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.client.support.AbstractClient;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.threadpool.TestThreadPool;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.util.concurrent.TimeUnit;
 
@@ -52,7 +52,7 @@ public class NoOpClient extends AbstractClient {
 
     @Override
     protected <Request extends ActionRequest,
-                    Response extends ActionResponse,
+                    Response extends TransportResponse,
                     RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>>
             void doExecute(Action<Request, Response, RequestBuilder> action, Request request, ActionListener<Response> listener) {
         listener.onResponse(null);

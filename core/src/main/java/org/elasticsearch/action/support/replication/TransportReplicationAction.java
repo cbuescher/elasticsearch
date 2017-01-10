@@ -24,7 +24,6 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.Version;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionListenerResponseHandler;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.UnavailableShardsException;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.ActiveShardCount;
@@ -984,7 +983,7 @@ public abstract class TransportReplicationAction<
     }
 
 
-    public static class ReplicaResponse extends ActionResponse implements ReplicationOperation.ReplicaResponse {
+    public static class ReplicaResponse extends TransportResponse implements ReplicationOperation.ReplicaResponse {
         private long localCheckpoint;
         private String allocationId;
 

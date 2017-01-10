@@ -21,13 +21,13 @@ package org.elasticsearch.action.support;
 
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.tasks.Task;
+import org.elasticsearch.transport.TransportResponse;
 
 /**
  * A filter chain allowing to continue and process the transport action request
  */
-public interface ActionFilterChain<Request extends ActionRequest, Response extends ActionResponse> {
+public interface ActionFilterChain<Request extends ActionRequest, Response extends TransportResponse> {
 
     /**
      * Continue processing the request. Should only be called if a response has not been sent through

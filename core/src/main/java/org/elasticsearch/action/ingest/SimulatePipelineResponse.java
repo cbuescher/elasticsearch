@@ -19,18 +19,18 @@
 
 package org.elasticsearch.action.ingest;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SimulatePipelineResponse extends ActionResponse implements ToXContentObject {
+public class SimulatePipelineResponse extends TransportResponse implements ToXContentObject {
     private String pipelineId;
     private boolean verbose;
     private List<SimulateDocumentResult> results;

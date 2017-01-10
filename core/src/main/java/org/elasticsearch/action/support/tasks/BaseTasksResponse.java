@@ -20,12 +20,12 @@
 package org.elasticsearch.action.support.tasks;
 
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.FailedNodeException;
 import org.elasticsearch.action.TaskOperationFailure;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.tasks.TaskId;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ import static org.elasticsearch.ExceptionsHelper.rethrowAndSuppress;
 /**
  * Base class for responses of task-related operations
  */
-public class BaseTasksResponse extends ActionResponse {
+public class BaseTasksResponse extends TransportResponse {
     private List<TaskOperationFailure> taskFailures;
     private List<FailedNodeException> nodeFailures;
 

@@ -19,10 +19,10 @@
 
 package org.elasticsearch.action.support.broadcast;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.ShardOperationFailedException;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,7 +32,7 @@ import static org.elasticsearch.action.support.DefaultShardOperationFailedExcept
 /**
  * Base class for all broadcast operation based responses.
  */
-public class BroadcastResponse extends ActionResponse {
+public class BroadcastResponse extends TransportResponse {
     private static final ShardOperationFailedException[] EMPTY = new ShardOperationFailedException[0];
     private int totalShards;
     private int successfulShards;

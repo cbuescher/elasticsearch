@@ -20,15 +20,16 @@
 package org.elasticsearch.action.admin.indices.settings.get;
 
 import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
-import org.elasticsearch.action.ActionResponse;
+
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
-public class GetSettingsResponse extends ActionResponse {
+public class GetSettingsResponse extends TransportResponse {
 
     private ImmutableOpenMap<String, Settings> indexToSettings = ImmutableOpenMap.of();
 

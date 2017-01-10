@@ -21,7 +21,6 @@ package org.elasticsearch.action.support.single.instance;
 
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.IndicesRequest;
 import org.elasticsearch.action.support.ActionFilter;
 import org.elasticsearch.action.support.ActionFilters;
@@ -47,6 +46,7 @@ import org.elasticsearch.threadpool.TestThreadPool;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.ConnectTransportException;
 import org.elasticsearch.transport.TransportException;
+import org.elasticsearch.transport.TransportResponse;
 import org.elasticsearch.transport.TransportService;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -80,7 +80,7 @@ public class TransportInstanceSingleOperationActionTests extends ESTestCase {
         }
     }
 
-    public static class Response extends ActionResponse {
+    public static class Response extends TransportResponse {
         public Response() {
         }
     }

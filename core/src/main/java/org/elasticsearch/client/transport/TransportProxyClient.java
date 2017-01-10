@@ -23,10 +23,10 @@ import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestBuilder;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.GenericAction;
 import org.elasticsearch.action.TransportActionNodeProxy;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.transport.TransportResponse;
 import org.elasticsearch.transport.TransportService;
 
 import java.util.HashMap;
@@ -52,7 +52,7 @@ final class TransportProxyClient {
         this.proxies = unmodifiableMap(proxies);
     }
 
-    public <Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends
+    public <Request extends ActionRequest, Response extends TransportResponse, RequestBuilder extends
         ActionRequestBuilder<Request, Response, RequestBuilder>> void execute(final Action<Request, Response, RequestBuilder> action,
                                                                               final Request request, ActionListener<Response> listener) {
         final TransportActionNodeProxy<Request, Response> proxy = proxies.get(action);

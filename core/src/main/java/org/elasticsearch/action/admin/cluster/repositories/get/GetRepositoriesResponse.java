@@ -19,11 +19,11 @@
 
 package org.elasticsearch.action.admin.cluster.repositories.get;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.metadata.RepositoryMetaData;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Get repositories response
  */
-public class GetRepositoriesResponse extends ActionResponse implements Iterable<RepositoryMetaData> {
+public class GetRepositoriesResponse extends TransportResponse implements Iterable<RepositoryMetaData> {
 
     private List<RepositoryMetaData> repositories = Collections.emptyList();
 

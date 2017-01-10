@@ -19,7 +19,6 @@
 
 package org.elasticsearch.action.admin.indices.mapping.get;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -28,6 +27,7 @@ import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.elasticsearch.index.mapper.Mapper;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,7 +37,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
 
 /** Response object for {@link GetFieldMappingsRequest} API */
-public class GetFieldMappingsResponse extends ActionResponse implements ToXContent {
+public class GetFieldMappingsResponse extends TransportResponse implements ToXContent {
 
     private Map<String, Map<String, Map<String, FieldMappingMetaData>>> mappings = emptyMap();
 

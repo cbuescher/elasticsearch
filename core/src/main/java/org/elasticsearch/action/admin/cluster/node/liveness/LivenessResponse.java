@@ -19,11 +19,11 @@
 
 package org.elasticsearch.action.admin.cluster.node.liveness;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
@@ -31,7 +31,7 @@ import java.io.IOException;
  * Transport level private response for the transport handler registered under
  * {@value org.elasticsearch.action.admin.cluster.node.liveness.TransportLivenessAction#NAME}
  */
-public final class LivenessResponse extends ActionResponse {
+public final class LivenessResponse extends TransportResponse {
 
     private DiscoveryNode node;
     private ClusterName clusterName;

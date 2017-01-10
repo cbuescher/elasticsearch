@@ -23,7 +23,6 @@ import org.elasticsearch.ElasticsearchSecurityException;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.cluster.node.info.NodeInfo;
 import org.elasticsearch.action.search.SearchAction;
 import org.elasticsearch.action.support.ActionFilter;
@@ -43,6 +42,7 @@ import org.elasticsearch.tasks.Task;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.Netty4Plugin;
+import org.elasticsearch.transport.TransportResponse;
 import org.junit.Before;
 
 import java.util.Arrays;
@@ -165,7 +165,7 @@ public class ReindexFromRemoteWithAuthTests extends ESSingleNodeTestCase {
         }
 
         @Override
-        public <Request extends ActionRequest, Response extends ActionResponse> void apply(Task task, String action,
+        public <Request extends ActionRequest, Response extends TransportResponse> void apply(Task task, String action,
                 Request request, ActionListener<Response> listener, ActionFilterChain<Request, Response> chain) {
             if (false == action.equals(SearchAction.NAME)) {
                 chain.proceed(task, action, request, listener);

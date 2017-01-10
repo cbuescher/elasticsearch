@@ -19,7 +19,6 @@
 
 package org.elasticsearch.action.admin.cluster.snapshots.restore;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
@@ -28,13 +27,14 @@ import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.snapshots.RestoreInfo;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
 /**
  * Contains information about restores snapshot
  */
-public class RestoreSnapshotResponse extends ActionResponse implements ToXContentObject {
+public class RestoreSnapshotResponse extends TransportResponse implements ToXContentObject {
 
     @Nullable
     private RestoreInfo restoreInfo;

@@ -19,11 +19,11 @@
 
 package org.elasticsearch.action.admin.indices.rollover;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class RolloverResponse extends ActionResponse implements ToXContentObject {
+public final class RolloverResponse extends TransportResponse implements ToXContentObject {
 
     private static final String NEW_INDEX = "new_index";
     private static final String OLD_INDEX = "old_index";

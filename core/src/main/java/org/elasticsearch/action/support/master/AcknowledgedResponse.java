@@ -18,9 +18,9 @@
  */
 package org.elasticsearch.action.support.master;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
@@ -28,7 +28,7 @@ import java.io.IOException;
  * Abstract class that allows to mark action responses that support acknowledgements.
  * Facilitates consistency across different api.
  */
-public abstract class AcknowledgedResponse extends ActionResponse {
+public abstract class AcknowledgedResponse extends TransportResponse {
 
     private boolean acknowledged;
 

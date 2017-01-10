@@ -25,7 +25,6 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.ClusterChangedEvent;
 import org.elasticsearch.cluster.ClusterStateApplier;
 import org.elasticsearch.cluster.node.DiscoveryNode;
@@ -36,6 +35,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.common.util.concurrent.ConcurrentMapLong;
 import org.elasticsearch.transport.TransportRequest;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -157,7 +157,7 @@ public class TaskManager extends AbstractComponent implements ClusterStateApplie
     /**
      * Stores the task failure
      */
-    public <Response extends ActionResponse> void storeResult(Task task, Exception error, ActionListener<Response> listener) {
+    public <Response extends TransportResponse> void storeResult(Task task, Exception error, ActionListener<Response> listener) {
         DiscoveryNode localNode = lastDiscoveryNodes.getLocalNode();
         if (localNode == null) {
             // too early to store anything, shouldn't really be here - just pass the error along
@@ -191,7 +191,7 @@ public class TaskManager extends AbstractComponent implements ClusterStateApplie
     /**
      * Stores the task result
      */
-    public <Response extends ActionResponse> void storeResult(Task task, Response response, ActionListener<Response> listener) {
+    public <Response extends TransportResponse> void storeResult(Task task, Response response, ActionListener<Response> listener) {
         DiscoveryNode localNode = lastDiscoveryNodes.getLocalNode();
         if (localNode == null) {
             // too early to store anything, shouldn't really be here - just pass the response along

@@ -23,10 +23,11 @@ import org.elasticsearch.action.support.PlainListenableActionFuture;
 import org.elasticsearch.client.ElasticsearchClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.util.Objects;
 
-public abstract class ActionRequestBuilder<Request extends ActionRequest, Response extends ActionResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> {
+public abstract class ActionRequestBuilder<Request extends ActionRequest, Response extends TransportResponse, RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>> {
 
     protected final Action<Request, Response, RequestBuilder> action;
     protected final Request request;

@@ -19,7 +19,6 @@
 
 package org.elasticsearch.index.reindex;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse.Failure;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -28,6 +27,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.reindex.ScrollableHitSource.SearchFailure;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import static org.elasticsearch.common.unit.TimeValue.timeValueNanos;
 /**
  * Response used for actions that index many documents using a scroll request.
  */
-public class BulkIndexByScrollResponse extends ActionResponse implements ToXContent {
+public class BulkIndexByScrollResponse extends TransportResponse implements ToXContent {
     private TimeValue took;
     private BulkByScrollTask.Status status;
     private List<Failure> bulkFailures;

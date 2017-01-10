@@ -19,10 +19,10 @@
 
 package org.elasticsearch.action.bulk;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ import java.util.Iterator;
  * bulk requests. Each item holds the index/type/id is operated on, and if it failed or not (with the
  * failure message).
  */
-public class BulkResponse extends ActionResponse implements Iterable<BulkItemResponse> {
+public class BulkResponse extends TransportResponse implements Iterable<BulkItemResponse> {
 
     public static final long NO_INGEST_TOOK = -1L;
 

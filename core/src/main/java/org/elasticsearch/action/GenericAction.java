@@ -21,11 +21,12 @@ package org.elasticsearch.action;
 
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.transport.TransportRequestOptions;
+import org.elasticsearch.transport.TransportResponse;
 
 /**
  * A generic action. Should strive to make it a singleton.
  */
-public abstract class GenericAction<Request extends ActionRequest, Response extends ActionResponse> {
+public abstract class GenericAction<Request extends ActionRequest, Response extends TransportResponse> {
 
     private final String name;
 

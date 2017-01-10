@@ -19,9 +19,8 @@
 package org.elasticsearch.versioning;
 
 import org.apache.lucene.util.TestUtil;
-import org.elasticsearch.action.ActionResponse;
-import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -31,6 +30,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.engine.VersionConflictEngineException;
 import org.elasticsearch.test.ESIntegTestCase;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -410,7 +410,7 @@ public class SimpleVersioningIT extends ESIntegTestCase {
         public long indexFinishTime;
         public boolean versionConflict;
         public boolean alreadyExists;
-        public ActionResponse response;
+        public TransportResponse response;
 
         @Override
         public String toString() {

@@ -23,7 +23,6 @@ import org.elasticsearch.Version;
 import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequestValidationException;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.support.ActionFilters;
 import org.elasticsearch.action.support.PlainActionFuture;
 import org.elasticsearch.action.support.ThreadedActionListener;
@@ -48,6 +47,7 @@ import org.elasticsearch.test.transport.CapturingTransport;
 import org.elasticsearch.threadpool.TestThreadPool;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.ConnectTransportException;
+import org.elasticsearch.transport.TransportResponse;
 import org.elasticsearch.transport.TransportService;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -97,6 +97,7 @@ public class TransportMasterNodeActionTests extends ESTestCase {
         allNodes = new DiscoveryNode[]{localNode, remoteNode};
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         super.tearDown();
@@ -126,7 +127,7 @@ public class TransportMasterNodeActionTests extends ESTestCase {
         }
     }
 
-    class Response extends ActionResponse {}
+    class Response extends TransportResponse {}
 
     class Action extends TransportMasterNodeAction<Request, Response> {
         Action(Settings settings, String actionName, TransportService transportService, ClusterService clusterService, ThreadPool threadPool) {

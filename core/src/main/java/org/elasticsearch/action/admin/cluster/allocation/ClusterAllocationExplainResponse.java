@@ -19,16 +19,16 @@
 
 package org.elasticsearch.action.admin.cluster.allocation;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
 /**
  * Explanation response for a shard in the cluster
  */
-public class ClusterAllocationExplainResponse extends ActionResponse {
+public class ClusterAllocationExplainResponse extends TransportResponse {
 
     private ClusterAllocationExplanation cae;
 

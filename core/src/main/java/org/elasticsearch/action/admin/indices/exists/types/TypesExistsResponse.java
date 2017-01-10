@@ -18,16 +18,16 @@
  */
 package org.elasticsearch.action.admin.indices.exists.types;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
 /**
  * Whether all of the existed types exist.
  */
-public class TypesExistsResponse extends ActionResponse {
+public class TypesExistsResponse extends TransportResponse {
 
     private boolean exists;
 

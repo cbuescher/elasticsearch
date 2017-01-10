@@ -21,16 +21,16 @@ package org.elasticsearch.action.main;
 
 import org.elasticsearch.Build;
 import org.elasticsearch.Version;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.xcontent.ToXContent;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
-public class MainResponse extends ActionResponse implements ToXContent {
+public class MainResponse extends TransportResponse implements ToXContent {
 
     private String nodeName;
     private Version version;

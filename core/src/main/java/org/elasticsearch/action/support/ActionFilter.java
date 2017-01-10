@@ -21,10 +21,10 @@ package org.elasticsearch.action.support;
 
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.component.AbstractComponent;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.tasks.Task;
+import org.elasticsearch.transport.TransportResponse;
 
 /**
  * A filter allowing to filter transport actions
@@ -40,7 +40,7 @@ public interface ActionFilter {
      * Enables filtering the execution of an action on the request side, either by sending a response through the
      * {@link ActionListener} or by continuing the execution through the given {@link ActionFilterChain chain}
      */
-    <Request extends ActionRequest, Response extends ActionResponse> void apply(Task task, String action, Request request,
+    <Request extends ActionRequest, Response extends TransportResponse> void apply(Task task, String action, Request request,
             ActionListener<Response> listener, ActionFilterChain<Request, Response> chain);
     /**
      * A simple base class for injectable action filters that spares the implementation from handling the
@@ -54,7 +54,7 @@ public interface ActionFilter {
         }
 
         @Override
-        public final <Request extends ActionRequest, Response extends ActionResponse> void apply(Task task, String action, Request request,
+        public final <Request extends ActionRequest, Response extends TransportResponse> void apply(Task task, String action, Request request,
                 ActionListener<Response> listener, ActionFilterChain<Request, Response> chain) {
             if (apply(action, request, listener)) {
                 chain.proceed(task, action, request, listener);

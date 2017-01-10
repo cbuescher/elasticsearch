@@ -35,6 +35,7 @@ import org.elasticsearch.rest.action.RestMainAction;
 import org.elasticsearch.tasks.TaskManager;
 import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.threadpool.ThreadPool;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.util.List;
 
@@ -52,7 +53,7 @@ public class ActionModuleTests extends ESTestCase {
     public void testPluginCantOverwriteBuiltinAction() {
         ActionPlugin dupsMainAction = new ActionPlugin() {
             @Override
-            public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
+            public List<ActionHandler<? extends ActionRequest, ? extends TransportResponse>> getActions() {
                 return singletonList(new ActionHandler<>(MainAction.INSTANCE, TransportMainAction.class));
             }
         };
@@ -67,30 +68,30 @@ public class ActionModuleTests extends ESTestCase {
                 return null;
             }
         }
-        class FakeTransportAction extends TransportAction<FakeRequest, ActionResponse> {
+        class FakeTransportAction extends TransportAction<FakeRequest, TransportResponse> {
             protected FakeTransportAction(Settings settings, String actionName, ThreadPool threadPool, ActionFilters actionFilters,
                     IndexNameExpressionResolver indexNameExpressionResolver, TaskManager taskManager) {
                 super(settings, actionName, threadPool, actionFilters, indexNameExpressionResolver, taskManager);
             }
 
             @Override
-            protected void doExecute(FakeRequest request, ActionListener<ActionResponse> listener) {
+            protected void doExecute(FakeRequest request, ActionListener<TransportResponse> listener) {
             }
         }
-        class FakeAction extends GenericAction<FakeRequest, ActionResponse> {
+        class FakeAction extends GenericAction<FakeRequest, TransportResponse> {
             protected FakeAction() {
                 super("fake");
             }
 
             @Override
-            public ActionResponse newResponse() {
+            public TransportResponse newResponse() {
                 return null;
             }
         }
         FakeAction action = new FakeAction();
         ActionPlugin registersFakeAction = new ActionPlugin() {
             @Override
-            public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
+            public List<ActionHandler<? extends ActionRequest, ? extends TransportResponse>> getActions() {
                 return singletonList(new ActionHandler<>(action, FakeTransportAction.class));
             }
         };

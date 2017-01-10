@@ -27,7 +27,6 @@ import org.apache.lucene.search.BoostAttribute;
 import org.apache.lucene.util.ArrayUtil;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.CharsRefBuilder;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.termvectors.TermVectorsRequest.Flag;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -39,6 +38,7 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.ToXContentObject;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.search.dfs.AggregatedDfs;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -46,7 +46,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class TermVectorsResponse extends ActionResponse implements ToXContentObject {
+public class TermVectorsResponse extends TransportResponse implements ToXContentObject {
 
     private static class FieldStrings {
         // term statistics strings

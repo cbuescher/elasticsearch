@@ -20,10 +20,10 @@
 
 package org.elasticsearch.tasks;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.cluster.node.DiscoveryNode;
 import org.elasticsearch.common.io.stream.NamedWriteable;
 import org.elasticsearch.common.xcontent.ToXContent;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 
@@ -152,7 +152,7 @@ public class Task {
         return new TaskResult(taskInfo(node.getId(), true), error);
     }
 
-    public TaskResult result(DiscoveryNode node, ActionResponse response) throws IOException {
+    public TaskResult result(DiscoveryNode node, TransportResponse response) throws IOException {
         if (response instanceof ToXContent) {
             return new TaskResult(taskInfo(node.getId(), true), (ToXContent) response);
         } else {

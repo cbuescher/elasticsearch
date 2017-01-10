@@ -19,11 +19,11 @@
 
 package org.elasticsearch.action.support.nodes;
 
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.FailedNodeException;
 import org.elasticsearch.cluster.ClusterName;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class BaseNodesResponse<TNodeResponse extends BaseNodeResponse> extends ActionResponse {
+public abstract class BaseNodesResponse<TNodeResponse extends BaseNodeResponse> extends TransportResponse {
 
     private ClusterName clusterName;
     private List<FailedNodeException> failures;

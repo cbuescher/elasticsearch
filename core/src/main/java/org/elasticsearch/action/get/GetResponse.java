@@ -20,7 +20,6 @@
 package org.elasticsearch.action.get;
 
 import org.elasticsearch.ElasticsearchParseException;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -30,6 +29,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.index.get.GetField;
 import org.elasticsearch.index.get.GetResult;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -42,7 +42,7 @@ import java.util.Objects;
  * @see GetRequest
  * @see org.elasticsearch.client.Client#get(GetRequest)
  */
-public class GetResponse extends ActionResponse implements Iterable<GetField>, ToXContentObject {
+public class GetResponse extends TransportResponse implements Iterable<GetField>, ToXContentObject {
 
     GetResult getResult;
 

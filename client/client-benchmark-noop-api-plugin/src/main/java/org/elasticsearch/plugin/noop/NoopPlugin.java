@@ -18,24 +18,24 @@
  */
 package org.elasticsearch.plugin.noop;
 
+import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.plugin.noop.action.bulk.NoopBulkAction;
 import org.elasticsearch.plugin.noop.action.bulk.RestNoopBulkAction;
 import org.elasticsearch.plugin.noop.action.bulk.TransportNoopBulkAction;
-import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.plugin.noop.action.search.NoopSearchAction;
 import org.elasticsearch.plugin.noop.action.search.RestNoopSearchAction;
 import org.elasticsearch.plugin.noop.action.search.TransportNoopSearchAction;
 import org.elasticsearch.plugins.ActionPlugin;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.rest.RestHandler;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class NoopPlugin extends Plugin implements ActionPlugin {
     @Override
-    public List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
+    public List<ActionHandler<? extends ActionRequest, ? extends TransportResponse>> getActions() {
         return Arrays.asList(
             new ActionHandler<>(NoopBulkAction.INSTANCE, TransportNoopBulkAction.class),
             new ActionHandler<>(NoopSearchAction.INSTANCE, TransportNoopSearchAction.class)

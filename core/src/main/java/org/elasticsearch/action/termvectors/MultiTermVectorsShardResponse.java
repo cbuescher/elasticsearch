@@ -20,15 +20,16 @@
 package org.elasticsearch.action.termvectors;
 
 import com.carrotsearch.hppc.IntArrayList;
-import org.elasticsearch.action.ActionResponse;
+
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiTermVectorsShardResponse extends ActionResponse {
+public class MultiTermVectorsShardResponse extends TransportResponse {
 
     IntArrayList locations;
     List<TermVectorsResponse> responses;

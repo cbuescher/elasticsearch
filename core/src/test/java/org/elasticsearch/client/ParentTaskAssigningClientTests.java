@@ -23,13 +23,13 @@ import org.elasticsearch.action.Action;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.ActionRequest;
 import org.elasticsearch.action.ActionRequestBuilder;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.search.ClearScrollRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.tasks.TaskId;
 import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.test.client.NoOpClient;
+import org.elasticsearch.transport.TransportResponse;
 
 public class ParentTaskAssigningClientTests extends ESTestCase {
     public void testSetsParentId() {
@@ -39,7 +39,7 @@ public class ParentTaskAssigningClientTests extends ESTestCase {
         NoOpClient mock = new NoOpClient(getTestName()) {
             @Override
             protected <     Request extends ActionRequest,
-                            Response extends ActionResponse,
+                            Response extends TransportResponse,
                             RequestBuilder extends ActionRequestBuilder<Request, Response, RequestBuilder>
                         > void doExecute( Action<Request, Response, RequestBuilder> action, Request request,
                             ActionListener<Response> listener) {

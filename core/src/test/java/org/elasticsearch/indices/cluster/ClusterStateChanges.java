@@ -21,7 +21,6 @@ package org.elasticsearch.indices.cluster;
 
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.Version;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.admin.cluster.reroute.ClusterRerouteRequest;
 import org.elasticsearch.action.admin.cluster.reroute.TransportClusterRerouteAction;
 import org.elasticsearch.action.admin.indices.close.CloseIndexRequest;
@@ -75,6 +74,7 @@ import org.elasticsearch.indices.IndicesService;
 import org.elasticsearch.test.gateway.TestGatewayAllocator;
 import org.elasticsearch.threadpool.ThreadPool;
 import org.elasticsearch.transport.Transport;
+import org.elasticsearch.transport.TransportResponse;
 import org.elasticsearch.transport.TransportService;
 
 import java.io.IOException;
@@ -237,7 +237,7 @@ public class ClusterStateChanges extends AbstractComponent {
         }
     }
 
-    private <Request extends MasterNodeRequest<Request>, Response extends ActionResponse> ClusterState execute(
+    private <Request extends MasterNodeRequest<Request>, Response extends TransportResponse> ClusterState execute(
         TransportMasterNodeAction<Request, Response> masterNodeAction, Request request, ClusterState clusterState) {
         return executeClusterStateUpdateTask(clusterState, () -> {
             try {

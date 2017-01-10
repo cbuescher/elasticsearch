@@ -20,7 +20,6 @@
 package org.elasticsearch.plugins;
 
 import org.elasticsearch.action.ActionRequest;
-import org.elasticsearch.action.ActionResponse;
 import org.elasticsearch.action.GenericAction;
 import org.elasticsearch.action.support.ActionFilter;
 import org.elasticsearch.action.support.TransportAction;
@@ -28,6 +27,7 @@ import org.elasticsearch.action.support.TransportActions;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.util.concurrent.ThreadContext;
 import org.elasticsearch.rest.RestHandler;
+import org.elasticsearch.transport.TransportResponse;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -51,7 +51,7 @@ public interface ActionPlugin {
     /**
      * Actions added by this plugin.
      */
-    default List<ActionHandler<? extends ActionRequest, ? extends ActionResponse>> getActions() {
+    default List<ActionHandler<? extends ActionRequest, ? extends TransportResponse>> getActions() {
         return Collections.emptyList();
     }
     /**
@@ -83,7 +83,7 @@ public interface ActionPlugin {
         return null;
     }
 
-    final class ActionHandler<Request extends ActionRequest, Response extends ActionResponse> {
+    final class ActionHandler<Request extends ActionRequest, Response extends TransportResponse> {
         private final GenericAction<Request, Response> action;
         private final Class<? extends TransportAction<Request, Response>> transportAction;
         private final Class<?>[] supportTransportActions;
