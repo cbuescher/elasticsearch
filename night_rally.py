@@ -269,7 +269,8 @@ def is_indexing_operation(op_name):
 
 
 def key_for(metric_pattern, metric_key, metric_name, op_name):
-    if re.match(metric_pattern, metric_name):
+    # force full regex match
+    if re.match("^%s$" % metric_pattern, metric_name):
         if metric_key == "median_indexing_throughput":
             if is_indexing_operation(op_name):
                 return metric_key

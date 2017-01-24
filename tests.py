@@ -13,6 +13,11 @@ All,Refresh time,,0.017216666666666665,min
 All,Merge throttle time,,0.00001,min
 All,Merge time,,0.00002,min
 All,Flush time,,0.00003,min
+All,Merge time (postings),,1.8252,min
+All,Merge time (stored fields),,0.7546166666666667,min
+All,Merge time (doc values),,1.5041166666666668,min
+All,Merge time (norms),,0.14778333333333335,min
+All,Merge time (points),,0.26083333333333336,min
 All,Median CPU usage,,44.35,%
 All,Total Young Gen GC,,0.183,s
 All,Total Old Gen GC,,0.039,s
@@ -130,6 +135,7 @@ All,100th percentile service time,painless_static,13.649789999817585,ms"""
 
 EXAMPLE_META_REPORT = """Name,Value
 Elasticsearch source revision,247cafe"""
+
 
 class RecordingSystemCall:
     def __init__(self, return_value):
