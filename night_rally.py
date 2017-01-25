@@ -144,9 +144,10 @@ class BaseCommand:
 
 
 class NightlyCommand(BaseCommand):
-    def __init__(self, effective_start_date, root_dir, override_src_dir=None):
+    def __init__(self, effective_start_date, target_host, root_dir, override_src_dir=None):
         super().__init__(effective_start_date, root_dir)
         self.revision_ts = to_iso8601(effective_start_date)
+        self.target_host = target_host
         self.pipeline = "from-sources-complete"
         if override_src_dir is not None:
             self.override = " --override-src-dir=%s" % override_src_dir
@@ -154,24 +155,27 @@ class NightlyCommand(BaseCommand):
             self.override = ""
 
     def command_line(self, track, challenge, car):
-        cmd = "rally --configuration-name=nightly --pipeline={6} --quiet --revision \"@{0}\" --effective-start-date \"{1}\" " \
-              "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}". \
-            format(self.revision_ts, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline, self.override)
+        cmd = "rally --configuration-name=nightly --target-host={8} --pipeline={6} --quiet --revision \"@{0}\" " \
+              "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}". \
+            format(self.revision_ts, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline, self.override,
+                   self.target_host)
         # after we've executed the first benchmark, there is no reason to build again from sources
         self.pipeline = "from-sources-skip-build"
         return cmd
 
 
 class ReleaseCommand(BaseCommand):
-    def __init__(self, effective_start_date, root_dir, distribution_version):
+    def __init__(self, effective_start_date, target_host, root_dir, distribution_version):
         super().__init__(effective_start_date, root_dir)
+        self.target_host = target_host
         self.pipeline = "from-distribution"
         self.distribution_version = distribution_version
 
     def command_line(self, track, challenge, car):
-        cmd = "rally --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
+        cmd = "rally --target-host={7} --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
               "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}". \
-            format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline)
+            format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline,
+                   self.target_host)
         return cmd
 
 
@@ -498,6 +502,11 @@ def parse_args():
         help=argparse.SUPPRESS,
         default=None)
     parser.add_argument(
+        "--target-host",
+        help="The Elasticsearch node that should be targeted",
+        # Temporarily define a default until the build script will trigger it correctly
+        default="138.201.122.203:39200")
+    parser.add_argument(
         "--dry-run",
         help="Does not do anything, just output",
         default=False,
@@ -526,10 +535,10 @@ def main():
         if args.release.startswith("Docker"):
             command = DockerCommand(args.effective_start_date, root_dir, args.release)
         else:
-            command = ReleaseCommand(args.effective_start_date, root_dir, args.release)
+            command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release)
     else:
         configure_rally(args.dry_run)
-        command = NightlyCommand(args.effective_start_date, root_dir, args.override_src_dir)
+        command = NightlyCommand(args.effective_start_date, args.target_host, root_dir, args.override_src_dir)
 
     rally_failure = run_rally(tracks, command, args.dry_run)
     replace_release = args.replace_release if args.replace_release else args.release
