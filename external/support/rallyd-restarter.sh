@@ -16,9 +16,9 @@ fi
 
 echo "Stopping rallyd"
 /var/lib/jenkins/bin/rallyd stop
-sleep 10
+sleep 5
 # just in case...
-echo "Killing all python processes"
-killall python
+echo "Killing all Rally daemon processes"
+killall esrallyd
 echo "Starting rallyd with node IP $1 and coordinator ip $2"
 /var/lib/jenkins/bin/rallyd start --node-ip $1 --coordinator-ip $2
