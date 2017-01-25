@@ -87,7 +87,7 @@
   <div class="row">
 	<div class="col-md-12">
     <h3>Benchmarking Methodology</h3>
-    <p>All benchmarks are run by <a href="https://github.com/elastic/rally">Rally</a> against the <a href="https://github.com/elastic/elasticsearch/tree/master/">Elasticsearch master branch</a> as of that date. Currently the benchmark driver and the benchmark candidate are located on the same machine (Will change in the near future so Rally runs on a dedicated machine and Elasticsearch runs on a dedicated machine).</p>
+    <p>All benchmarks are run by <a href="https://github.com/elastic/rally">Rally</a> against the <a href="https://github.com/elastic/elasticsearch/tree/master/">Elasticsearch master branch</a> as of that date. The benchmark uses two bare-metal server-class machines. On one we run the benchmark driver (Rally), on the other one the benchmark candidate (one or at most two Elasticsearch nodes).</p>
 
     <p>The benchmarks are intentionally not scalability benchmarks but rather show the performance characteristics of Elasticsearch for a single node (or at most two-nodes) and are mainly intended to help the development team spot performance regressions.</p>
 	</div>
@@ -96,12 +96,13 @@
   <div class="row">
     <div class="col-md-12">
     <h3>Benchmarking Environment</h3>
-    <p>All benchmarks are run on a bare metal machine with the following specifications:</p>
+    <p>All benchmarks are run on bare-metal machines with the following specifications:</p>
     <ul>
     	<li>CPU: <a href="http://ark.intel.com/products/88196/Intel-Core-i7-6700-Processor-8M-Cache-up-to-4_00-GHz">Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz</a></li>
     	<li>RAM: 32 GB</li>
     	<li>SSD: two Crucial MX200 (software RAID 0)</li>
-    	<li>OS: Linux Kernel version 4.4.0-28</li>
+    	<li>OS: Linux Kernel version 4.4.0-38</li>
+        <li>JVM: Oracle JDK 1.8.0_101-b13</li>
     </ul>
     <div>
   </div>
