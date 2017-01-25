@@ -504,8 +504,7 @@ def parse_args():
     parser.add_argument(
         "--target-host",
         help="The Elasticsearch node that should be targeted",
-        # Temporarily define a default until the build script will trigger it correctly
-        default="138.201.122.203:39200")
+        default=None)
     parser.add_argument(
         "--dry-run",
         help="Does not do anything, just output",
