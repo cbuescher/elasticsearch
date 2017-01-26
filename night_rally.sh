@@ -36,6 +36,7 @@ START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 MODE="nightly"
 RELEASE="master"
 REPLACE_RELEASE=${RELEASE}
+TARGET_HOST="localhost:9200"
 
 for i in "$@"
 do
@@ -68,8 +69,13 @@ case ${i} in
     REPLACE_RELEASE="${i#*=}"
     shift # past argument=value
     ;;
+    --target-host=*)
+    TARGET_HOST="${i#*=}"
+    shift # past argument=value
+    ;;
     *)
     echo "unknown command line option passed to night_rally"
+    exit 1
     ;;
 esac
 done
@@ -130,7 +136,7 @@ fi
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE}  --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE}  --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
