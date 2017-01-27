@@ -1,14 +1,14 @@
 [
-	{
-		"series": "GC young gen (sec)",
-		"x": "2016-08-24 07:58:20",
-		"shortText": "A",
-		"text": "Set default min heap equal to default max heap (#20080)"
-	},
-	{
-		"series": "GC old gen (sec)",
-		"x": "2016-08-24 07:58:20",
-		"shortText": "A",
-		"text": "Set default min heap equal to default max heap (#20080)"
-	}
+  {
+    "series": "GC young gen (sec)",
+    "x": "2016-08-24 07:58:20",
+    "shortText": "A",
+    "text": "Set default min heap equal to default max heap (#20080)"
+  },
+  {
+    "series": "GC old gen (sec)",
+    "x": "2016-08-24 07:58:20",
+    "shortText": "A",
+    "text": "Set default min heap equal to default max heap (#20080)"
+  }
 ]

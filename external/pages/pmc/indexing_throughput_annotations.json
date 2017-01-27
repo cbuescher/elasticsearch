@@ -64,5 +64,35 @@
     "x": "2016-11-16 01:00:41",
     "shortText": "L",
     "text": "Use 1 replica for 2 nodes benchmark (instead of 0)"
+  },
+  {
+    "series": "Append / default settings",
+    "x": "2017-01-26 09:44:50",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2017-01-26 09:44:50",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Append Fast / 4G heap",
+    "x": "2017-01-26 09:44:50",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Id Conflicts / 4G heap",
+    "x": "2017-01-26 09:44:50",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Append / 2 nodes:",
+    "x": "2017-01-26 09:44:50",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
   }
 ]

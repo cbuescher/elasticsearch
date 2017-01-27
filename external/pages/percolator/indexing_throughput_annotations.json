@@ -16,5 +16,11 @@
     "x": "2016-09-23 01:00:43",
     "shortText": "J",
     "text": "Benchmarks scheduled on a less powerful machine"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
   }
 ]

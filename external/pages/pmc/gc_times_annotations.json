@@ -1,14 +1,26 @@
 [
-	{
-		"series": "GC young gen (sec)",
-		"x": "2016-08-08 06:10:01",
-		"shortText": "A",
-		"text": "Use 4GB heap instead of default"
-	},
-	{
-		"series": "GC old gen (sec)",
-		"x": "2016-08-08 06:10:01",
-		"shortText": "A",
-		"text": "Use 4GB heap instead of default"
-	}
+  {
+    "series": "GC young gen (sec)",
+    "x": "2016-08-08 06:10:01",
+    "shortText": "A",
+    "text": "Use 4GB heap instead of default"
+  },
+  {
+    "series": "GC old gen (sec)",
+    "x": "2016-08-08 06:10:01",
+    "shortText": "A",
+    "text": "Use 4GB heap instead of default"
+  },
+  {
+    "series": "GC young gen (sec)",
+    "x": "2017-01-26 09:44:50",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "GC young gen (sec)",
+    "x": "2017-01-26 09:44:50",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  }
 ]

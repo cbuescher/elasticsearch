@@ -1,8 +1,62 @@
 [
-	{
-		"series": "Scroll",
-		"x": "2016-09-02 09:57:12",
-		"shortText": "D",
-		"text": "Change measurement approach: Show total latency instead of latency per scroll page"
-	}
+  {
+    "series": "Scroll",
+    "x": "2016-09-02 09:57:12",
+    "shortText": "D",
+    "text": "Change measurement approach: Show total latency instead of latency per scroll page"
+  },
+  {
+    "series": "Default",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Term",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Phrase",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Aggs (uncached)",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Aggs (cached)",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Scroll",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Expression",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Painless(Static)",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Painless(Dynamic)",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  }
 ]

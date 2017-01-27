@@ -10,5 +10,17 @@
     "x": "2016-08-25 08:41:08",
     "shortText": "A",
     "text": "Set default min heap equal to default max heap (#20080)"
+  },
+  {
+    "series": "GC young gen (sec)",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "GC young gen (sec)",
+    "x": "2017-01-25 13:12:27",
+    "shortText": "N",
+    "text": "Physically separate benchmark driver from benchmark candidate"
   }
 ]
