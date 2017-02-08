@@ -154,6 +154,12 @@ class NightlyCommand(BaseCommand):
         else:
             self.override = ""
 
+    def runnable(self, track, challenge, car):
+        if track == "pmc" and challenge == "append-no-conflicts" and car == "defaults":
+            return False
+        else:
+            return True
+
     def command_line(self, track, challenge, car):
         cmd = "rally --configuration-name=nightly --target-host={8} --pipeline={6} --quiet --revision \"@{0}\" " \
               "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}". \
