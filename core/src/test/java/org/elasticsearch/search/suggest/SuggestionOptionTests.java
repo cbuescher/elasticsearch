@@ -20,6 +20,8 @@
 package org.elasticsearch.search.suggest;
 
 import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.io.stream.BytesStreamOutput;
+import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -30,6 +32,7 @@ import java.io.IOException;
 
 import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
 import static org.elasticsearch.common.xcontent.XContentParserUtils.ensureExpectedToken;
+import static org.elasticsearch.test.EqualsHashCodeTestUtils.checkEqualsAndHashCode;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertToXContentEquivalent;
 
 public class SuggestionOptionTests extends ESTestCase {
@@ -70,5 +73,45 @@ public class SuggestionOptionTests extends ESTestCase {
                       + "\"collate_match\":true"
                    + "}"
                    , xContent.utf8ToString());
+    }
+
+    public void testEqualsAndHashcode() {
+        checkEqualsAndHashCode(createTestItem(), this::copy, this::mutate);
+    }
+
+    private Option copy(Option original) throws IOException {
+        try (BytesStreamOutput output = new BytesStreamOutput()) {
+            original.writeTo(output);
+            try (StreamInput in = output.bytes().streamInput()) {
+                Option option = new Option();
+                option.readFrom(in);
+                return option;
+            }
+        }
+    }
+
+    /**
+     * change the original in one aspect
+     */
+    private Option mutate(Option original) {
+        Text text = original.getText();
+        Text highlighted = original.getHighlighted();
+        float score = original.getScore();
+        boolean collateMatch = original.collateMatch();
+        switch (randomIntBetween(0, 3)) {
+            case 0:
+                text = new Text(text + "_prefix");
+                break;
+            case 1:
+                highlighted = highlighted == null ? new Text("something") : new Text(highlighted + "_prefix");
+                break;
+            case 2:
+                score = score * 2;
+                break;
+            case 3:
+                collateMatch = collateMatch == false;
+                break;
+        }
+        return new Option(text, highlighted, score, collateMatch);
     }
 }

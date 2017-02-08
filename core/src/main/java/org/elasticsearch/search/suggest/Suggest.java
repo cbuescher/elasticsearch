@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.elasticsearch.common.xcontent.ConstructingObjectParser.constructorArg;
@@ -663,12 +664,15 @@ public class Suggest implements Iterable<Suggest.Suggestion<? extends Entry<? ex
                     if (o == null || getClass() != o.getClass()) return false;
 
                     Option that = (Option) o;
-                    return text.equals(that.text);
+                    return Objects.equals(text, that.text) &&
+                            Objects.equals(highlighted, that.highlighted) &&
+                            Objects.equals(score, that.score) &&
+                            Objects.equals(collateMatch, that.collateMatch);
                 }
 
                 @Override
                 public int hashCode() {
-                    return text.hashCode();
+                    return Objects.hash(text, highlighted, score, collateMatch);
                 }
             }
         }
