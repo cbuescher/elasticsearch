@@ -490,7 +490,8 @@ def parse_args():
 
     parser.add_argument(
         "--effective-start-date",
-        help="Passes this date as start date to Rally (format: %Y-%m-%d %H:%M:%S). Needed for consistent results for multiple trial runs",
+        help="Passes this date as start date to Rally (format: %%Y-%%m-%%d %%H:%%M:%%S). Needed for consistent results for multiple "
+             "trial runs",
         required=True,
         type=lambda s: datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S"))
     parser.add_argument(
