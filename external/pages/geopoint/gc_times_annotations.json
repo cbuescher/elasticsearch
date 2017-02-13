@@ -18,7 +18,7 @@
     "text": "Physically separate benchmark driver from benchmark candidate"
   },
   {
-    "series": "GC young gen (sec)",
+    "series": "GC old gen (sec)",
     "x": "2017-01-25 13:12:27",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"

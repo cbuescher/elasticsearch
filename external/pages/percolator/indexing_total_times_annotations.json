@@ -22,17 +22,5 @@
     "x": "2017-01-25 13:12:27",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"
-  },
-  {
-    "series": "Flush time (min)",
-    "x": "2017-01-25 13:12:27",
-    "shortText": "N",
-    "text": "Physically separate benchmark driver from benchmark candidate"
-  },
-  {
-    "series": "Merge throttle time (min)",
-    "x": "2017-01-25 13:12:27",
-    "shortText": "N",
-    "text": "Physically separate benchmark driver from benchmark candidate"
   }
 ]

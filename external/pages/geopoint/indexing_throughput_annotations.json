@@ -163,13 +163,13 @@
   },
   {
     "series": "Append Fast / 4G heap",
-    "x": "2017-01-25 13:12:27",
+    "x": "2017-01-28 01:00:46",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"
   },
   {
     "series": "Append / 2 nodes",
-    "x": "2017-01-25 13:12:27",
+    "x": "2017-01-26 09:44:50",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"
   },

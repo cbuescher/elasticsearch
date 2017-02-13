@@ -58,5 +58,17 @@
     "x": "2017-01-25 13:12:27",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Scroll",
+    "x": "2017-02-07 10:24:38",
+    "shortText": "O",
+    "text": "Scroll fails (elastic/rally#221)"
+  },
+  {
+    "series": "Scroll",
+    "x": "2017-02-10 01:00:43",
+    "shortText": "P",
+    "text": "Fixed elastic/rally#221"
   }
 ]
