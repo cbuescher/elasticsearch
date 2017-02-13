@@ -125,8 +125,9 @@ def configure_rally(dry_run):
 
 
 class BaseCommand:
-    def __init__(self, effective_start_date, root_dir):
+    def __init__(self, effective_start_date, target_host, root_dir):
         self.effective_start_date = effective_start_date
+        self.target_host = target_host
         self.root_dir = root_dir
         self.ts = date_for_cmd_param(effective_start_date)
         self.report_root_dir = config["report.base.dir"]
@@ -145,9 +146,8 @@ class BaseCommand:
 
 class NightlyCommand(BaseCommand):
     def __init__(self, effective_start_date, target_host, root_dir, override_src_dir=None):
-        super().__init__(effective_start_date, root_dir)
+        super().__init__(effective_start_date, target_host, root_dir)
         self.revision_ts = to_iso8601(effective_start_date)
-        self.target_host = target_host
         self.pipeline = "from-sources-complete"
         if override_src_dir is not None:
             self.override = " --override-src-dir=%s" % override_src_dir
@@ -166,8 +166,7 @@ class NightlyCommand(BaseCommand):
 
 class ReleaseCommand(BaseCommand):
     def __init__(self, effective_start_date, target_host, root_dir, distribution_version):
-        super().__init__(effective_start_date, root_dir)
-        self.target_host = target_host
+        super().__init__(effective_start_date, target_host, root_dir)
         self.pipeline = "from-distribution"
         self.distribution_version = distribution_version
 
@@ -180,8 +179,8 @@ class ReleaseCommand(BaseCommand):
 
 
 class DockerCommand(BaseCommand):
-    def __init__(self, effective_start_date, root_dir, distribution_version):
-        super().__init__(effective_start_date, root_dir)
+    def __init__(self, effective_start_date, target_host, root_dir, distribution_version):
+        super().__init__(effective_start_date, target_host, root_dir)
         self.pipeline = "docker"
         self.distribution_version = distribution_version.replace("Docker ", "")
 
@@ -189,10 +188,11 @@ class DockerCommand(BaseCommand):
         return car not in ["two_nodes", "verbose_iw"]
 
     def command_line(self, track, challenge, car):
-        cmd = "rally --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
+        cmd = "rally --target-host={7} --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
               "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5} --cluster-health=yellow " \
               "--client-options=\"basic_auth_user:'elastic',basic_auth_password:'changeme',timeout:60000,request_timeout:60000\"". \
-            format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline)
+            format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline,
+                   self.target_host)
         return cmd
 
 
@@ -533,7 +533,7 @@ def main():
     root_dir = config["root.dir"] if not args.override_root_dir else args.override_root_dir
     if compare_mode:
         if args.release.startswith("Docker"):
-            command = DockerCommand(args.effective_start_date, root_dir, args.release)
+            command = DockerCommand(args.effective_start_date, args.target_host, root_dir, args.release)
         else:
             command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release)
     else:
