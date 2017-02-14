@@ -155,7 +155,7 @@ class NightlyCommand(BaseCommand):
             self.override = ""
 
     def command_line(self, track, challenge, car):
-        cmd = "esrally --test-mode --target-host={8} --pipeline={6} --quiet --revision \"@{0}\" " \
+        cmd = "rally --configuration-name=nightly --target-host={8} --pipeline={6} --quiet --revision \"@{0}\" " \
               "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}". \
             format(self.revision_ts, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline, self.override,
                    self.target_host)
