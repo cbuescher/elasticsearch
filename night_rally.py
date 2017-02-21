@@ -12,6 +12,10 @@ import time
 
 tracks = collections.OrderedDict()
 
+tracks["nested"] = [
+    ["nested-search-challenge", "4gheap"]
+]
+
 tracks["geonames"] = [
     ["append-no-conflicts", "defaults"],
     ["append-no-conflicts-index-only", "4gheap"],
@@ -51,7 +55,8 @@ defaults = {
     "percolator": ("append-no-conflicts", "4gheap"),
     "geopoint": ("append-no-conflicts", "defaults"),
     "pmc": ("append-no-conflicts", "4gheap"),
-    "nyc_taxis": ("append-no-conflicts", "4gheap")
+    "nyc_taxis": ("append-no-conflicts", "4gheap"),
+    "nested": ("nested-search-challenge", "4gheap"),
 }
 
 config = {
