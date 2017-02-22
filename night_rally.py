@@ -38,7 +38,8 @@ tracks["geopoint"] = [
 ]
 
 tracks["pmc"] = [
-    ["append-no-conflicts", "defaults"],
+    # deactivated as long we investigate
+    #["append-no-conflicts", "defaults"],
     ["append-no-conflicts", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
@@ -346,19 +347,24 @@ def write_report(file_name, timestamp, data):
         f.write("%s,%s" % (timestamp, data))
 
 
+def insert(lines, replace_release, new_release_name, data):
+    new_lines = []
+    found = False
+    for line in lines:
+        if line.startswith(replace_release):
+            new_lines.append("%s,%s" % (new_release_name, data))
+            found = True
+        else:
+            new_lines.append(line)
+    if not found:
+        new_lines.append("%s,%s" % (new_release_name, data))
+    return new_lines
+
+
 def insert_comparison_data(file_name, data, replace_release, new_release_name):
     with open(file_name, "r+") as f:
         lines = f.readlines()
-        new_lines = []
-        found = False
-        for line in lines:
-            if line.startswith(replace_release):
-                new_lines.append("%s,%s" % (new_release_name, data))
-                found = True
-            else:
-                new_lines.append(line)
-        if not found:
-            new_lines.append("%s,%s" % (new_release_name, data))
+        new_lines = insert(lines, replace_release, new_release_name, data)
         f.seek(0)
         f.writelines(new_lines)
         f.truncate()
