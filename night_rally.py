@@ -38,8 +38,7 @@ tracks["geopoint"] = [
 ]
 
 tracks["pmc"] = [
-    # deactivated as long we investigate
-    #["append-no-conflicts", "defaults"],
+    ["append-no-conflicts", "defaults"],
     ["append-no-conflicts", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
@@ -159,6 +158,12 @@ class NightlyCommand(BaseCommand):
             self.override = " --override-src-dir=%s" % override_src_dir
         else:
             self.override = ""
+
+    def runnable(self, track, challenge, car):
+        if (track == "pmc" and challenge == "append-no-conflicts" and car == "defaults") or \
+           (track == "pmc" and challenge == "append-no-conflicts-index-only-1-replica" and car == "two_nodes"):
+            return False
+        return True
 
     def command_line(self, track, challenge, car):
         cmd = "rally --configuration-name=nightly --target-host={8} --pipeline={6} --quiet --revision \"@{0}\" " \
