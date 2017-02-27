@@ -1,8 +1,8 @@
 [
   {
-    "series": "Append / default settings",
-    "x": "2000-01-01 00:00:00",
-    "shortText": "A",
-    "text": "Template for an annotation"
+    "series": "Total bytes written",
+    "x": "2017-02-25 00:00:46",
+    "shortText": "Q",
+    "text": "Adjust nested track: Use only one shard"
   }
 ]
