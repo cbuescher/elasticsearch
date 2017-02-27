@@ -4,5 +4,11 @@
     "x": "2017-01-26 09:44:50",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2017-02-22 07:17:19",
+    "shortText": "R",
+    "text": "#23284: Adjust network predictor size to 32kb"
   }
 ]

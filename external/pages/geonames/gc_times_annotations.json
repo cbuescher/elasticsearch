@@ -10,5 +10,17 @@
     "x": "2016-08-24 07:58:20",
     "shortText": "A",
     "text": "Set default min heap equal to default max heap (#20080)"
+  },
+  {
+    "series": "GC young gen (sec)",
+    "x": "2017-02-22 07:17:19",
+    "shortText": "R",
+    "text": "#23284: Adjust network predictor size to 32kb"
+  },
+  {
+    "series": "GC old gen (sec)",
+    "x": "2017-02-22 07:17:19",
+    "shortText": "R",
+    "text": "#23284: Adjust network predictor size to 32kb"
   }
 ]
