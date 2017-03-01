@@ -29,7 +29,10 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.test.ESTestCase;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertToXContentEquivalent;
@@ -52,11 +55,22 @@ public class SearchHitsTests extends ESTestCase {
         XContentType xcontentType = randomFrom(XContentType.values());
         boolean humanReadable = randomBoolean();
         BytesReference originalBytes = toShuffledXContent(searchHits, xcontentType, ToXContent.EMPTY_PARAMS, humanReadable);
-        SearchHits parsed;
-        try (XContentParser parser = createParser(xcontentType.xContent(), originalBytes)) {
-            parsed = SearchHits.fromXContent(parser);
+        // we add a few random fields to check that parser is lenient on new fields
+        Set<String> exceptLevel = new HashSet<>(Arrays.asList("highlight", "fields"));
+        Set<String> ignoreSubStructure = new HashSet<>(Arrays.asList("_source"));
+        BytesReference withRandomFields = insertRandomFields(xcontentType, originalBytes, exceptLevel, ignoreSubStructure).bytes();
+        SearchHits parsed = null;
+        try (XContentParser parser = createParser(xcontentType.xContent(), withRandomFields)) {
+            assertEquals(XContentParser.Token.START_OBJECT, parser.nextToken());
+            while ((parser.nextToken()) != XContentParser.Token.END_OBJECT) {
+                if (SearchHits.Fields.HITS.equals(parser.currentName())) {
+                    parsed = SearchHits.fromXContent(parser);
+                } else {
+                    // skip any top level bogus field, this test only needs to check that "hits" are parsed correctly
+                    parser.skipChildren();
+                }
+            }
             assertEquals(XContentParser.Token.END_OBJECT, parser.currentToken());
-            assertEquals(XContentParser.Token.END_OBJECT, parser.nextToken());
             assertNull(parser.nextToken());
         }
         assertToXContentEquivalent(originalBytes, toXContent(parsed, xcontentType, humanReadable), xcontentType);

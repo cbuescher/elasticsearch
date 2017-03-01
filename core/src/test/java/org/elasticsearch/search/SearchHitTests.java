@@ -44,8 +44,10 @@ import org.elasticsearch.test.RandomObjects;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -140,9 +142,13 @@ public class SearchHitTests extends ESTestCase {
         boolean humanReadable = randomBoolean();
         XContentType xContentType = randomFrom(XContentType.values());
         BytesReference originalBytes = toShuffledXContent(searchHit, xContentType, ToXContent.EMPTY_PARAMS, humanReadable);
+        // we add a few random fields to check that parser is lenient on new fields
+        Set<String> exceptLevel = new HashSet<>(Arrays.asList("highlight", "fields"));
+        Set<String> ignoreSubStructure = new HashSet<>(Arrays.asList("_source", "inner_hits"));
+        BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, exceptLevel, ignoreSubStructure).bytes();
 
         SearchHit parsed;
-        try (XContentParser parser = createParser(xContentType.xContent(), originalBytes)) {
+        try (XContentParser parser = createParser(xContentType.xContent(), withRandomFields)) {
             parser.nextToken(); // jump to first START_OBJECT
             parsed = SearchHit.fromXContent(parser);
             assertEquals(XContentParser.Token.END_OBJECT, parser.currentToken());

@@ -128,6 +128,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -909,6 +910,58 @@ public abstract class ESTestCase extends LuceneTestCase {
                 return builder.bytes();
             }
         }
+    }
+
+    /**
+     * Insert a random field at the start of each new xContent object for this builder.
+     * This can be used e.g. to test if parsers are lenient when encountering unknown new xContent fields.
+     */
+    public XContentBuilder insertRandomFields(XContentType contentType, BytesReference data, Set<String> exceptLevel,
+            Set<String> ignoreSubStructure) throws IOException {
+        try (XContentParser parser = createParser(contentType.xContent(), data)) {
+            Map<String, Object> newMap = insertRandomIntoMap(parser.mapOrdered(), exceptLevel, ignoreSubStructure, true);
+            XContentBuilder xContentBuilder = XContentFactory.contentBuilder(parser.contentType());
+            return xContentBuilder.map(newMap);
+        }
+    }
+
+    private Map<String, Object> insertRandomIntoMap(Map<String, Object> map, Set<String> exceptFields, Set<String> ignoreSubStructure,
+            boolean insertOnThisLevel) {
+        List<String> keys = new ArrayList<>(map.keySet());
+        Map<String, Object> targetMap = new TreeMap<>();
+        if (insertOnThisLevel) {
+            // add a new field, object or array with random values
+            String newField = "bogus_" + randomAlphaOfLength(10);
+            if (randomBoolean()) {
+                targetMap.put(newField, randomAlphaOfLength(10));
+            } else {
+                if (randomBoolean()) {
+                    targetMap.put(newField, Collections.singletonMap(randomAlphaOfLength(10), randomAlphaOfLength(10)));
+                } else {
+                    targetMap.put(newField, Arrays.asList(randomAlphaOfLength(10), randomAlphaOfLength(10)));
+                }
+            }
+        }
+        for (String key : keys) {
+            Object value = map.get(key);
+            if (value instanceof Map && ignoreSubStructure.contains(key) == false) {
+                targetMap.put(key, insertRandomIntoMap((Map) value, exceptFields, ignoreSubStructure, exceptFields.contains(key) == false));
+            } else if (value instanceof List && ignoreSubStructure.contains(key) == false) {
+                // recurse into maps that might be contained in lists
+                ArrayList<Object> newList = new ArrayList<>();
+                for (Object element : (List) value) {
+                    if (element instanceof Map) {
+                        newList.add(insertRandomIntoMap((Map) element, exceptFields, ignoreSubStructure, exceptFields.contains(key) == false));
+                    } else {
+                        newList.add(element);
+                    }
+                }
+                targetMap.put(key, newList);
+            } else {
+                targetMap.put(key, value);
+            }
+        }
+        return targetMap;
     }
 
     /**

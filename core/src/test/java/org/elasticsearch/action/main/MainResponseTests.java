@@ -32,6 +32,7 @@ import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.test.VersionUtils;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Date;
 
 import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
@@ -55,8 +56,11 @@ public class MainResponseTests extends ESTestCase {
         XContentType xContentType = randomFrom(XContentType.values());
         boolean humanReadable = randomBoolean();
         BytesReference originalBytes = toShuffledXContent(mainResponse, xContentType, ToXContent.EMPTY_PARAMS, humanReadable);
+        // we add a few random fields to check that parser is lenient on new fields
+        BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, Collections.emptySet(), Collections.emptySet())
+                .bytes();
         MainResponse parsed;
-        try (XContentParser parser = createParser(xContentType.xContent(), originalBytes)) {
+        try (XContentParser parser = createParser(xContentType.xContent(), withRandomFields)) {
             parsed = MainResponse.fromXContent(parser);
             assertNull(parser.nextToken());
         }
