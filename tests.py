@@ -261,9 +261,11 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(["Header", "5.2.0,1111", "master,1.00"],
                          night_rally.insert(["Header", "5.2.0,1111"], "master", "master", "1.00"))
 
-    def test_override_existing_master_record(self):
+    def test_override_existing_record(self):
         self.assertEqual(["Header", "5.2.0,1111", "master,1.00"],
                          night_rally.insert(["Header", "5.2.0,1111", "master,3.4"], "master", "master", "1.00"))
+        self.assertEqual(["Header", "5.2.1,10.00", "master,3.4"],
+                         night_rally.insert(["Header", "5.2.0,1111", "master,3.4"], "5.2.0", "5.2.1", "10.00"))
 
 if __name__ == '__main__':
     unittest.main()
