@@ -60,7 +60,7 @@ var charts = {
     // workaround for a deficiency in dygraphs bar charts and CSV data sources
     var versions = ["1.7.6", "2.4.2", "5.2.2", "master", "Docker 5.2.2"];
 
-ddddddd    charts.indexingThroughput = chartingLib.renderBarChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', versions);
+    charts.indexingThroughput = chartingLib.renderBarChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', versions);
     charts.totalTimes = chartingLib.renderBarChart('indexing_total_times', 'Total times', 'Time [min]', versions);
     charts.segmentMemory = chartingLib.renderBarChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', versions);
     charts.cpuUsage = chartingLib.renderBarChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', versions)
