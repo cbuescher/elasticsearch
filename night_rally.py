@@ -478,7 +478,7 @@ def report(effective_start_date, tracks, default_setup_per_track, replace_releas
                 merge_parts = "%s\n" % ",".join(metrics["merge_time_parts"])
                 if not compare_mode:
                     write_report("%s/merge_parts.csv" % output_report_path, report_timestamp, merge_parts)
-                insert_comparison_data("%s/merge_parts.csv" % output_report_path, merge_parts, replace_release, release_name)
+                insert_comparison_data("%s/merge_parts_comparison.csv" % output_report_path, merge_parts, replace_release, release_name)
 
             if not compare_mode:
                 with open(meta_report_path) as csvfile:

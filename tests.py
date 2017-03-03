@@ -252,6 +252,8 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual("8.886418309989502", metrics["latency_indices_stats_p99"])
         self.assertEqual("8.323224410164585", metrics["latency_nodes_stats_p99"])
         self.assertEqual(["29", "23", "31", "7", "28", "146", "12", "13"], metrics["query_latency_p99"])
+        self.assertEqual(["1.8252", "0.7546166666666667", "1.5041166666666668", "0.14778333333333335", "0.26083333333333336"],
+                         metrics["merge_time_parts"])
 
     def test_extract_meta_metrics(self):
         metrics = night_rally.extract_meta_metrics(EXAMPLE_META_REPORT.split("\n"))
