@@ -90,9 +90,33 @@
     "text": "Physically separate benchmark driver from benchmark candidate"
   },
   {
-    "series": "Append / 2 nodes:",
+    "series": "Append / 2 nodes",
     "x": "2017-01-26 09:44:50",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Append / default settings",
+    "x": "2017-02-22 07:17:19",
+    "shortText": "R",
+    "text": "#23284: Adjust network predictor size to 32kb"
+  },
+  {
+    "series": "Append / 2 nodes",
+    "x": "2017-02-22 07:17:19",
+    "shortText": "R",
+    "text": "#23284: Adjust network predictor size to 32kb"
+  },
+  {
+    "series": "Append / default settings",
+    "x": "2017-03-13 00:00:51",
+    "shortText": "S",
+    "text": "#23542: Adjust network predictor size to 64kb"
+  },
+  {
+    "series": "Append / 2 nodes",
+    "x": "2017-03-13 00:00:51",
+    "shortText": "S",
+    "text": "#23542: Adjust network predictor size to 64kb"
   }
 ]
