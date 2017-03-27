@@ -343,14 +343,23 @@ public class Joda {
             try {
                 long millis = Long.valueOf(text) * factor;
                 DateTime dt = new DateTime(millis, DateTimeZone.UTC);
+                System.out.println(dt);
+                System.out.println(dt.getYear());
                 bucket.saveField(DateTimeFieldType.year(), dt.getYear());
+                System.out.println(dt.getMonthOfYear());
                 bucket.saveField(DateTimeFieldType.monthOfYear(), dt.getMonthOfYear());
+                System.out.println(dt.getDayOfMonth());
                 bucket.saveField(DateTimeFieldType.dayOfMonth(), dt.getDayOfMonth());
+                System.out.println(dt.getHourOfDay());
                 bucket.saveField(DateTimeFieldType.hourOfDay(), dt.getHourOfDay());
+                System.out.println(dt.getMinuteOfHour());
                 bucket.saveField(DateTimeFieldType.minuteOfHour(), dt.getMinuteOfHour());
+                System.out.println(dt.getSecondOfDay());
                 bucket.saveField(DateTimeFieldType.secondOfMinute(), dt.getSecondOfMinute());
+                System.out.println(dt.getMillisOfSecond());
                 bucket.saveField(DateTimeFieldType.millisOfSecond(), dt.getMillisOfSecond());
                 bucket.setZone(DateTimeZone.UTC);
+                System.out.println(bucket.computeMillis());
             } catch (Exception e) {
                 return -1;
             }

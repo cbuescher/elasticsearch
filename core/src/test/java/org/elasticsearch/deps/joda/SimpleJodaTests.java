@@ -705,6 +705,25 @@ public class SimpleJodaTests extends ESTestCase {
         }
     }
 
+    public void testMaxLongOverflow() {
+        FormatDateTimeFormatter formatter = Joda.forPattern("epoch_millis");
+
+        // this date still works (its 292278994-08-16T23:59:59.999Z)
+        MutableDateTime date = new MutableDateTime(1970, 1, 1, 23, 59, 59, 99, DateTimeZone.UTC);
+        formatter.parser().parseInto(date, Long.toString(9223372036828799999L), 0);
+        assertEquals(9223372036828799999L, date.getMillis());
+
+        // this date overflows (its 292278994-08-17T00:00:00.000Z)
+        date = new MutableDateTime(1970, 1, 1, 23, 59, 59, 99, DateTimeZone.UTC);
+        formatter.parser().parseInto(date, Long.toString(9223372036828800000L), 0);
+        //assertEquals(9223372036828800000L, date.getMillis());
+
+        // the same, however works with a different original MutableDateTime
+        date = new MutableDateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeZone.UTC);
+        formatter.parser().parseInto(date, Long.toString(9223372036828800000L), 0);
+        assertEquals(9223372036828800000L, date.getMillis());
+    }
+
     private void assertValidDateFormatParsing(String pattern, String dateToParse) {
         assertValidDateFormatParsing(pattern, dateToParse, dateToParse);
     }
