@@ -19,9 +19,6 @@
 
 package org.elasticsearch.search;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.lucene.document.InetAddressPoint;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.io.stream.BytesStreamOutput;
@@ -33,6 +30,9 @@ import org.elasticsearch.common.joda.Joda;
 import org.elasticsearch.common.network.InetAddresses;
 import org.elasticsearch.test.ESTestCase;
 import org.joda.time.DateTimeZone;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DocValueFormatTests extends ESTestCase {
 
@@ -57,7 +57,7 @@ public class DocValueFormatTests extends ESTestCase {
         in = new NamedWriteableAwareStreamInput(out.bytes().streamInput(), registry);
         DocValueFormat vf = in.readNamedWriteable(DocValueFormat.class);
         assertEquals(DocValueFormat.Decimal.class, vf.getClass());
-        assertEquals("###.##", ((DocValueFormat.Decimal) vf).pattern);
+        assertEquals("###.##", ((DocValueFormat.Decimal) vf).getPattern());
 
         DocValueFormat.DateTime dateFormat = new DocValueFormat.DateTime(Joda.forPattern("epoch_second"), DateTimeZone.forOffsetHours(1));
         out = new BytesStreamOutput();

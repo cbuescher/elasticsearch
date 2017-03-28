@@ -320,7 +320,7 @@ public interface DocValueFormat extends NamedWriteable {
         public static final String NAME = "decimal";
         private static final DecimalFormatSymbols SYMBOLS = new DecimalFormatSymbols(Locale.ROOT);
 
-        final String pattern;
+        private final String pattern;
         private final NumberFormat format;
 
         public Decimal(String pattern) {
@@ -330,6 +330,10 @@ public interface DocValueFormat extends NamedWriteable {
 
         public Decimal(StreamInput in) throws IOException {
             this(in.readString());
+        }
+
+        String getPattern() {
+            return this.pattern;
         }
 
         @Override
@@ -392,6 +396,23 @@ public interface DocValueFormat extends NamedWriteable {
         @Override
         public BytesRef parseBytesRef(String value) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(pattern);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (obj.getClass() != getClass()) {
+                return false;
+            }
+            Decimal other = (Decimal) obj;
+            return Objects.equals(pattern, other.pattern);
         }
     }
 }

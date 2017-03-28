@@ -19,19 +19,27 @@
 
 package org.elasticsearch.search.aggregations.metrics.cardinality;
 
+import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.io.stream.Writeable.Reader;
 import org.elasticsearch.common.lease.Releasables;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.util.MockBigArrays;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.indices.breaker.NoneCircuitBreakerService;
 import org.elasticsearch.search.aggregations.InternalAggregationTestCase;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 import org.junit.After;
 import org.junit.Before;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
 
 public class InternalCardinalityTests extends InternalAggregationTestCase<InternalCardinality> {
     private static List<HyperLogLogPlusPlus> algos;
@@ -71,6 +79,33 @@ public class InternalCardinalityTests extends InternalAggregationTestCase<Intern
             }
             assertEquals(result.cardinality(0), reduced.value(), 0);
         }
+    }
+
+    public void testFromXContent() throws IOException {
+        String name = randomAsciiOfLength(15);
+        Map<String, Object> metadata = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            metadata.put(randomAsciiOfLength(10), randomAsciiOfLength(10));
+        }
+        InternalCardinality cardinality = createTestInstance(name, Collections.emptyList(), metadata);
+        boolean humanReadable = randomBoolean();
+        XContentType xContentType = randomFrom(XContentType.values());
+        BytesReference originalBytes = toXContent(cardinality, xContentType, humanReadable);
+
+        Cardinality parsed;
+        try (XContentParser parser = createParser(xContentType.xContent(), originalBytes)) {
+            parser.nextToken(); // jump to first START_OBJECT
+            parser.nextToken(); // jump to name#internal_max
+            parser.nextToken(); // jump to START_OBJECT
+            parsed = InternalCardinality.parseXContentBody(name, parser);
+            assertEquals(XContentParser.Token.END_OBJECT, parser.currentToken());
+            assertEquals(XContentParser.Token.END_OBJECT, parser.nextToken());
+            assertNull(parser.nextToken());
+        }
+        assertEquals(cardinality.getName(), parsed.getName());
+        assertEquals(cardinality.getValue(), parsed.getValue(), Double.MIN_VALUE);
+        assertEquals(cardinality.getValueAsString(), parsed.getValueAsString());
+        assertEquals(cardinality.getMetaData(), parsed.getMetaData());
     }
 
     @After

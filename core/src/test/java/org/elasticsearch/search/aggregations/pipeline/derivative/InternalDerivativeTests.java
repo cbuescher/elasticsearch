@@ -19,22 +19,31 @@
 
 package org.elasticsearch.search.aggregations.pipeline.derivative;
 
+import com.carrotsearch.randomizedtesting.annotations.Repeat;
+
+import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.io.stream.Writeable.Reader;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.search.DocValueFormat;
 import org.elasticsearch.search.aggregations.InternalAggregationTestCase;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
+import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertToXContentEquivalent;
 
 public class InternalDerivativeTests extends InternalAggregationTestCase<InternalDerivative> {
 
     @Override
     protected InternalDerivative createTestInstance(String name,
             List<PipelineAggregator> pipelineAggregators, Map<String, Object> metaData) {
-        DocValueFormat formatter = randomFrom(DocValueFormat.BOOLEAN, DocValueFormat.GEOHASH,
-                DocValueFormat.IP, DocValueFormat.RAW);
+        DocValueFormat formatter = randomFrom(new DocValueFormat.Decimal("###.##"),
+                DocValueFormat.BOOLEAN, DocValueFormat.RAW);
         double value = randomDoubleBetween(0, 100000, true);
         double normalizationFactor = randomDoubleBetween(0, 100000, true);
         return new InternalDerivative(name, value, normalizationFactor, formatter,
@@ -58,4 +67,28 @@ public class InternalDerivativeTests extends InternalAggregationTestCase<Interna
         return InternalDerivative::new;
     }
 
+    @Repeat(iterations=100)
+    public void testFromXContent() throws IOException {
+        String name = randomAsciiOfLength(15);
+        InternalDerivative derivative = createTestInstance(name, Collections.emptyList(), null);
+        boolean humanReadable = randomBoolean();
+        XContentType xContentType = randomFrom(XContentType.values());
+        BytesReference originalBytes = toXContent(derivative, xContentType, humanReadable);
+
+        InternalDerivative parsed;
+        try (XContentParser parser = createParser(xContentType.xContent(), originalBytes)) {
+            parser.nextToken(); // jump to first START_OBJECT
+            parser.nextToken(); // jump to name#internal_max
+            parser.nextToken(); // jump to START_OBJECT
+            parsed = InternalDerivative.parseXContentBody(name, parser);
+            assertEquals(XContentParser.Token.END_OBJECT, parser.currentToken());
+            assertEquals(XContentParser.Token.END_OBJECT, parser.nextToken());
+            assertNull(parser.nextToken());
+        }
+        assertEquals(derivative.getName(), parsed.getName());
+        assertEquals(derivative.getValue(), parsed.getValue(), Double.MIN_VALUE);
+        assertEquals(derivative.getValueAsString(), parsed.getValueAsString());
+        assertEquals(derivative.normalizedValue(), parsed.normalizedValue(), Double.MIN_VALUE);
+        assertToXContentEquivalent(originalBytes, toXContent(parsed, xContentType, humanReadable), xContentType);
+    }
 }
