@@ -52,5 +52,11 @@
     "x": "2017-02-10 01:00:43",
     "shortText": "P",
     "text": "Fixed elastic/rally#221"
+  },
+  {
+    "series": "Scroll",
+    "x": "2017-03-13 00:00:51",
+    "shortText": "S",
+    "text": "#23542: Adjust network predictor size to 64kb"
   }
 ]
