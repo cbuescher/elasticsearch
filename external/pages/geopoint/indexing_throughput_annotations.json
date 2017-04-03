@@ -208,5 +208,35 @@
     "x": "2017-02-22 07:17:19",
     "shortText": "R",
     "text": "#23284: Adjust network predictor size to 32kb"
+  },
+  {
+    "series": "Append / default settings",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
+  },
+  {
+    "series": "Append Fast / 4G heap",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
+  },
+  {
+    "series": "Append / 2 nodes",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
+  },
+  {
+    "series": "Id Conflicts / 4G heap",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
   }
 ]

@@ -4,5 +4,11 @@
     "x": "2017-02-25 00:00:46",
     "shortText": "Q",
     "text": "Adjust nested track: Use only one shard"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2017-03-30 05:54:17",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
   }
 ]

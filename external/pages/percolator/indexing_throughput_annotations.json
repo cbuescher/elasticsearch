@@ -28,6 +28,11 @@
     "x": "2017-02-27 00:00:46",
     "shortText": "R",
     "text": "#23284: Adjust network predictor size to 32kb"
+  },
+  {
+    "series": "Append / 4G heap",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
   }
-
 ]

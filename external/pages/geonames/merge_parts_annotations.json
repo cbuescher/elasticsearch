@@ -28,5 +28,35 @@
     "x": "2017-01-25 13:12:27",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Postings (min)",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
+  },
+  {
+    "series": "Stored fields (min)",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
+  },
+  {
+    "series": "Doc values (min)",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
+  },
+  {
+    "series": "Norms (min)",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
+  },
+  {
+    "series": "Points (min)",
+    "x": "2017-03-30 00:00:45",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
   }
 ]

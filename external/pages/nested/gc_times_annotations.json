@@ -1,8 +1,8 @@
 [
   {
-    "series": "Append / default settings",
-    "x": "2000-01-01 00:00:00",
-    "shortText": "A",
-    "text": "Template for an annotation"
+    "series": "GC young gen (sec)",
+    "x": "2017-03-30 05:54:17",
+    "shortText": "T",
+    "text": "#23665: Refactoring of TransportShardBulkAction"
   }
 ]
