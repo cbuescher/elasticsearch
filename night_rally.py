@@ -474,13 +474,13 @@ def report(effective_start_date, tracks, default_setup_per_track, replace_releas
                     write_report("%s/merge_parts.csv" % output_report_path, report_timestamp, merge_parts)
                 insert_comparison_data("%s/merge_parts_comparison.csv" % output_report_path, merge_parts, replace_release, release_name)
 
-            if not compare_mode:
-                with open(meta_report_path) as csvfile:
-                    meta_metrics = extract_meta_metrics(csvfile)
+        if not compare_mode:
+            with open(meta_report_path) as csvfile:
+                meta_metrics = extract_meta_metrics(csvfile)
 
-                if meta_metrics and "source_revision" in meta_metrics:
-                    with open("%s/source_revision.csv" % output_report_path, "a") as f:
-                        f.write("%s,%s\n" % (report_timestamp, meta_metrics["source_revision"]))
+            if meta_metrics and "source_revision" in meta_metrics:
+                with open("%s/source_revision.csv" % output_report_path, "a") as f:
+                    f.write("%s,%s\n" % (report_timestamp, meta_metrics["source_revision"]))
 
         if len(segment_count_metrics) > 0:
             segment_counts = "%s\n" % ",".join(segment_count_metrics)
