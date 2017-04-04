@@ -37,13 +37,13 @@
   },
   {
     "series": "GC young gen (sec)",
-    "x": "2017-03-30 00:00:45",
+    "x": "2017-03-30 05:54:17",
     "shortText": "T",
     "text": "#23665: Refactoring of TransportShardBulkAction"
   },
   {
     "series": "GC old gen (sec)",
-    "x": "2017-03-30 00:00:45",
+    "x": "2017-03-30 05:54:17",
     "shortText": "T",
     "text": "#23665: Refactoring of TransportShardBulkAction"
   }
