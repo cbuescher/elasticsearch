@@ -190,6 +190,28 @@ public class DateFieldMapperTests extends ESSingleNodeTestCase {
         assertEquals(0, fields.length);
     }
 
+    public void testCoerceDoubleEpochMillis() throws Exception {
+        String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
+                .startObject("properties").startObject("field").field("type", "date")
+                .field("format", "epoch_millis").endObject().endObject()
+                .endObject().endObject().string();
+
+        DocumentMapper mapper = parser.parse("type", new CompressedXContent(mapping));
+
+        assertEquals(mapping, mapper.mappingSource().toString());
+
+        ParsedDocument doc = mapper.parse(SourceToParse.source("test", "type", "1", XContentFactory.jsonBuilder()
+                .startObject()
+                .field("field", "1390798800000.00001")
+                .endObject()
+                .bytes(),
+                XContentType.JSON));
+        IndexableField[] fields = doc.rootDoc().getFields("field");
+        assertEquals(2, fields.length);
+        assertEquals(1390798800000L, fields[0].numericValue());
+        assertEquals(1390798800000L, fields[1].numericValue());
+    }
+
     public void testChangeFormat() throws IOException {
         String mapping = XContentFactory.jsonBuilder().startObject().startObject("type")
                 .startObject("properties").startObject("field").field("type", "date")

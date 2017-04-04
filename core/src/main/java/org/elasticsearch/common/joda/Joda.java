@@ -342,7 +342,13 @@ public class Joda {
 
             int factor = hasMilliSecondPrecision ? 1 : 1000;
             try {
-                long millis = Long.valueOf(text) * factor;
+                long millis;
+                try {
+                    millis = Long.valueOf(text) * factor;
+                } catch (NumberFormatException e) {
+                    // we might have a double here, try to coerce it into a long
+                    millis = Double.valueOf(text).longValue() * factor;
+                }
                 DateTime dt = new DateTime(millis, DateTimeZone.UTC);
                 bucket.saveField(DateTimeFieldType.year(), dt.getYear());
                 bucket.saveField(DateTimeFieldType.monthOfYear(), dt.getMonthOfYear());
