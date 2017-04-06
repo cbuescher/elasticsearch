@@ -286,9 +286,9 @@ public class GeoBoundingBoxQueryBuilder extends AbstractQueryBuilder<GeoBounding
         return ignoreUnmapped;
     }
 
-    QueryValidationException checkLatLon(boolean indexCreatedBeforeV2_0) {
+    QueryValidationException checkLatLon() {
         // validation was not available prior to 2.x, so to support bwc percolation queries we only ignore_malformed on 2.x created indexes
-        if (GeoValidationMethod.isIgnoreMalformed(validationMethod) || indexCreatedBeforeV2_0) {
+        if (GeoValidationMethod.isIgnoreMalformed(validationMethod)) {
             return null;
         }
 
@@ -327,7 +327,7 @@ public class GeoBoundingBoxQueryBuilder extends AbstractQueryBuilder<GeoBounding
             throw new QueryShardException(context, "field [" + fieldName + "] is not a geo_point field");
         }
 
-        QueryValidationException exception = checkLatLon(context.indexVersionCreated().before(Version.V_2_0_0));
+        QueryValidationException exception = checkLatLon();
         if (exception != null) {
             throw new QueryShardException(context, "couldn't validate latitude/ longitude values", exception);
         }
@@ -335,7 +335,7 @@ public class GeoBoundingBoxQueryBuilder extends AbstractQueryBuilder<GeoBounding
         GeoPoint luceneTopLeft = new GeoPoint(topLeft);
         GeoPoint luceneBottomRight = new GeoPoint(bottomRight);
         final Version indexVersionCreated = context.indexVersionCreated();
-        if (indexVersionCreated.onOrAfter(Version.V_2_2_0) || GeoValidationMethod.isCoerce(validationMethod)) {
+        if (GeoValidationMethod.isCoerce(validationMethod)) {
             // Special case: if the difference between the left and right is 360 and the right is greater than the left, we are asking for
             // the complete longitude range so need to set longitude to the complete longitude range
             double right = luceneBottomRight.getLon();

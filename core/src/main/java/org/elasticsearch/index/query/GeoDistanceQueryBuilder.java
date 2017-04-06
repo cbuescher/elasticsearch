@@ -242,12 +242,12 @@ public class GeoDistanceQueryBuilder extends AbstractQueryBuilder<GeoDistanceQue
         }
 
         final Version indexVersionCreated = shardContext.indexVersionCreated();
-        QueryValidationException exception = checkLatLon(shardContext.indexVersionCreated().before(Version.V_2_0_0));
+        QueryValidationException exception = checkLatLon();
         if (exception != null) {
             throw new QueryShardException(shardContext, "couldn't validate latitude/ longitude values", exception);
         }
 
-        if (indexVersionCreated.onOrAfter(Version.V_2_2_0) || GeoValidationMethod.isCoerce(validationMethod)) {
+        if (GeoValidationMethod.isCoerce(validationMethod)) {
             GeoUtils.normalizePoint(center, true, true);
         }
 
@@ -389,9 +389,9 @@ public class GeoDistanceQueryBuilder extends AbstractQueryBuilder<GeoDistanceQue
                 Objects.equals(ignoreUnmapped, other.ignoreUnmapped);
     }
 
-    private QueryValidationException checkLatLon(boolean indexCreatedBeforeV2_0) {
+    private QueryValidationException checkLatLon() {
         // validation was not available prior to 2.x, so to support bwc percolation queries we only ignore_malformed on 2.x created indexes
-        if (GeoValidationMethod.isIgnoreMalformed(validationMethod) || indexCreatedBeforeV2_0) {
+        if (GeoValidationMethod.isIgnoreMalformed(validationMethod)) {
             return null;
         }
 
