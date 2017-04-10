@@ -38,7 +38,7 @@ tracks["geopoint"] = [
 ]
 
 tracks["pmc"] = [
-    ["append-no-conflicts", "defaults"],
+    ["append-no-conflicts-index-only", "defaults"],
     ["append-no-conflicts", "4gheap"],
     ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
