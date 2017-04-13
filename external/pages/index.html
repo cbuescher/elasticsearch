@@ -94,18 +94,24 @@
     <p>The benchmarks are intentionally not scalability benchmarks but rather show the performance characteristics of Elasticsearch for a single node (or at most two-nodes) and are mainly intended to help the development team spot performance regressions.</p>
 	</div>
   </div>
-  
+
   <div class="row">
     <div class="col-md-12">
     <h3>Benchmarking Environment</h3>
-    <p>All benchmarks are run on bare-metal machines with the following specifications:</p>
+    <h4>Current environment</h4>
+      <p>All benchmarks are run on bare-metal machines with the following specifications:</p>
+        <ul>
+            <li>CPU: <a href="http://ark.intel.com/products/88196/Intel-Core-i7-6700-Processor-8M-Cache-up-to-4_00-GHz">Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz</a></li>
+            <li>RAM: 32 GB</li>
+            <li>SSD: two Crucial MX200 (software RAID 0)</li>
+            <li>OS: Linux Kernel version 4.4.0-72</li>
+            <li>JVM: Oracle JDK 1.8.0_101-b13</li>
+        </ul>
+    <h4>History of changes</h4>
     <ul>
-    	<li>CPU: <a href="http://ark.intel.com/products/88196/Intel-Core-i7-6700-Processor-8M-Cache-up-to-4_00-GHz">Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz</a></li>
-    	<li>RAM: 32 GB</li>
-    	<li>SSD: two Crucial MX200 (software RAID 0)</li>
-    	<li>OS: Linux Kernel version 4.4.0-38</li>
-        <li>JVM: Oracle JDK 1.8.0_101-b13</li>
+      <li>2017-04-13: Upgrade kernel from version 4.4.0-38 to 4.4.0-72</li>
     </ul>
+
     <div>
   </div>
 </div> <!-- /container -->
