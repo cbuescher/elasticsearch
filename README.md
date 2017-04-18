@@ -50,3 +50,28 @@ For this three steps are needed:
 3. Add your track and the challenges to run in the `tracks` hash in `night_rally.py`
 
 If you're finished, please submit a PR. After the PR is merged, the new track will show up after the next benchmark.
+
+
+#### Run a release benchmark
+
+Suppose we want to replace the (already published) results of the Elasticsearch release `5.3.0` with release `5.3.1` on our benchmark page. 
+
+1. Replace "5.3.0" with "5.3.1" in the `versions` array in each `index.html` in `external/pages`. Commit and push your changes (commit message convention: "Update comparison charts to 5.3.1")
+2. On the benchmark machine, issue the following command:
+
+```
+night_rally.sh --target-host=target-551504.benchmark.hetzner-dc17.elasticnet.co:39200 --mode=comparison --release="5.3.1" --replace-release="5.3.0"
+```
+
+#### Run an ad-hoc benchmark
+
+_Note: An ad-hoc benchmark is a benchmark of an arbitrary git commit hash that should be published as a separate data series in our release comparison charts._
+
+Suppose we want to publish the results of the commit hash `66202dc` in the Elasticsearch repo as "Lucene 7 upgrade" on our benchmark page. 
+
+1. Add "Lucene 7 upgrade" to the `versions` array in each `index.html` in `external/pages`. Commit and push your changes.
+2. On the benchmark machine, issue the following command:
+
+```
+night_rally.sh --target-host=target-551504.benchmark.hetzner-dc17.elasticnet.co:39200 --mode=adhoc --revision=66202dc --release="Lucene 7" --replace-release="Lucene 7
+```

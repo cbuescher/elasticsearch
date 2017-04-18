@@ -1,6 +1,8 @@
 import collections
 import datetime
 import unittest
+import os
+import os.path
 
 if __name__ == "__main__" and __package__ is None:
     __package__ = "night_rally"
@@ -148,6 +150,22 @@ class RecordingSystemCall:
 
 
 class NightRallyTests(unittest.TestCase):
+    def test_sanitize(self):
+        self.assertEqual("lucene-7-upgrade", night_rally.sanitize("Lucene 7 Upgrade"))
+        self.assertEqual("lucene-7-upgrade", night_rally.sanitize("lucene-7-upgrade"))
+        self.assertEqual("elasticsearch-6_0_0-alpha1-docker", night_rally.sanitize("Elasticsearch 6.0.0-alpha1 Docker"))
+
+    def test_configure_rally(self):
+        path = "%s/.rally/rally-night-rally-unit-test.ini" % os.getenv("HOME")
+        try:
+            night_rally.configure_rally("night-rally-unit-test", dry_run=False)
+            self.assertTrue(os.path.isfile(path), "configuration routine did not create [%s]" % path)
+        finally:
+            try:
+                os.remove(path)
+            except Exception:
+                pass
+
     def test_run_two_challenges_successfully(self):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -198,6 +216,61 @@ class NightRallyTests(unittest.TestCase):
                 "--challenge=append-no-conflicts --car=4gheap --report-format=csv "
                 "--report-file=/rally_root/reports/rally/2016-10-01-00-00-00/percolator/append-no-conflicts/4gheap/report.csv "
                 "--override-src-dir=~/src/"]
+            ,
+            system_call.calls
+        )
+
+    def test_run_adhoc_benchmark(self):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = collections.OrderedDict()
+        tracks["geonames"] = [["append-no-conflicts", "defaults"]]
+        tracks["percolator"] = [["append-no-conflicts", "4gheap"]]
+
+        start_date = datetime.datetime(2016, 10, 1)
+        cmd = night_rally.AdHocCommand("66202dc", start_date, "localhost", "/rally_root", "lucene-7", override_src_dir="~/src/")
+        night_rally.run_rally(tracks, cmd, system=system_call)
+        self.assertEqual(2, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --configuration-name=lucene-7 --target-host=localhost --pipeline=from-sources-complete --quiet "
+                "--revision \"66202dc\" --effective-start-date \"2016-10-01 00:00:00\" --track=geonames "
+                "--challenge=append-no-conflicts --car=defaults --report-format=csv "
+                "--report-file=/rally_root/reports/rally/2016-10-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv "
+                "--override-src-dir=~/src/",
+                "rally --configuration-name=lucene-7 --target-host=localhost --pipeline=from-sources-skip-build --quiet "
+                "--revision \"66202dc\" --effective-start-date \"2016-10-01 00:00:00\" --track=percolator "
+                "--challenge=append-no-conflicts --car=4gheap --report-format=csv "
+                "--report-file=/rally_root/reports/rally/2016-10-01-00-00-00/percolator/append-no-conflicts/4gheap/report.csv "
+                "--override-src-dir=~/src/"]
+            ,
+            system_call.calls
+        )
+
+
+    def test_run_release_benchmark(self):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = {"geonames": [
+            ["append-no-conflicts", "defaults"],
+            ["append-no-conflicts", "4gheap"]
+        ]}
+        start_date = datetime.datetime(2016, 1, 1)
+        cmd = night_rally.ReleaseCommand(start_date, "localhost", "/rally_root", "5.3.0", "5_3_0")
+        night_rally.run_rally(tracks, cmd, system=system_call)
+        self.assertEqual(2, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --configuration-name=5_3_0 --target-host=localhost --pipeline=from-distribution --quiet "
+                "--distribution-version=5.3.0 --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
+                "--challenge=append-no-conflicts --car=defaults --report-format=csv "
+                "--report-file=/rally_root/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv",
+
+                "rally --configuration-name=5_3_0 --target-host=localhost --pipeline=from-distribution --quiet "
+                "--distribution-version=5.3.0 --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
+                "--challenge=append-no-conflicts --car=4gheap --report-format=csv "
+                "--report-file=/rally_root/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/4gheap/report.csv"
+            ]
             ,
             system_call.calls
         )

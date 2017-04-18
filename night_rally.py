@@ -114,19 +114,30 @@ def ensure_dir(directory):
             raise
 
 
-def configure_rally(dry_run):
+def sanitize(text):
+    """
+    Sanitizes the input text so it is safe to use as an environment name in Rally.
+    
+    :param text: A text to sanitize
+    """
+    return text.lower().replace(" ", "-").replace(".", "_")
+
+
+def configure_rally(configuration_name, dry_run):
     user_home = os.getenv("HOME")
     root = os.path.dirname(os.path.realpath(__file__))
-    source = "%s/resources/rally-nightly.ini" % root
-    destination = "%s/.rally/rally-nightly.ini" % user_home
+    source = "%s/resources/rally-template.ini" % root
+    destination = "%s/.rally/rally-%s.ini" % (user_home, configuration_name)
     logger.info("Copying rally configuration from [%s] to [%s]" % (source, destination))
     if not dry_run:
         ensure_dir("%s/.rally" % user_home)
         shutil.copyfile(source, destination)
-        # materialize current user home
+        # materialize current user home and set environment name
         with fileinput.input(files=destination, inplace=True) as f:
             for line in f:
-                print(line.replace("~", user_home))
+                print(line
+                      .replace("~", user_home)
+                      .replace("<<ENVIRONMENT>>", configuration_name))
 
 
 class BaseCommand:
@@ -149,10 +160,11 @@ class BaseCommand:
         raise NotImplementedError("abstract method")
 
 
-class NightlyCommand(BaseCommand):
-    def __init__(self, effective_start_date, target_host, root_dir, override_src_dir=None):
+class SourceBasedCommand(BaseCommand):
+    def __init__(self, effective_start_date, target_host, root_dir, revision, configuration_name, override_src_dir=None):
         super().__init__(effective_start_date, target_host, root_dir)
-        self.revision_ts = to_iso8601(effective_start_date)
+        self.revision = revision
+        self.configuration_name = configuration_name
         self.pipeline = "from-sources-complete"
         if override_src_dir is not None:
             self.override = " --override-src-dir=%s" % override_src_dir
@@ -160,26 +172,40 @@ class NightlyCommand(BaseCommand):
             self.override = ""
 
     def command_line(self, track, challenge, car):
-        cmd = "rally --configuration-name=nightly --target-host={8} --pipeline={6} --quiet --revision \"@{0}\" " \
+        cmd = "rally --configuration-name={9} --target-host={8} --pipeline={6} --quiet --revision \"{0}\" " \
               "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}". \
-            format(self.revision_ts, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline, self.override,
-                   self.target_host)
+            format(self.revision, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline, self.override,
+                   self.target_host, self.configuration_name)
         # after we've executed the first benchmark, there is no reason to build again from sources
         self.pipeline = "from-sources-skip-build"
         return cmd
 
 
+class NightlyCommand(SourceBasedCommand):
+    CONFIG_NAME = "nightly"
+
+    def __init__(self, effective_start_date, target_host, root_dir, override_src_dir=None):
+        super().__init__(effective_start_date, target_host, root_dir, "@%s" % to_iso8601(effective_start_date),
+                         NightlyCommand.CONFIG_NAME, override_src_dir)
+
+
+class AdHocCommand(SourceBasedCommand):
+    def __init__(self, revision, effective_start_date, target_host, root_dir, configuration_name, override_src_dir=None):
+        super().__init__(effective_start_date, target_host, root_dir, revision, configuration_name, override_src_dir)
+
+
 class ReleaseCommand(BaseCommand):
-    def __init__(self, effective_start_date, target_host, root_dir, distribution_version):
+    def __init__(self, effective_start_date, target_host, root_dir, distribution_version, configuration_name):
         super().__init__(effective_start_date, target_host, root_dir)
+        self.configuration_name = configuration_name
         self.pipeline = "from-distribution"
         self.distribution_version = distribution_version
 
     def command_line(self, track, challenge, car):
-        cmd = "rally --target-host={7} --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
-              "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}". \
+        cmd = "rally --configuration-name={8} --target-host={7} --pipeline={6} --quiet --distribution-version={0} " \
+              "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}". \
             format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline,
-                   self.target_host)
+                   self.target_host, self.configuration_name)
         return cmd
 
 
@@ -528,7 +554,11 @@ def parse_args():
         "--mode",
         help="In which mode to run?",
         default="nightly",
-        choices=["nightly", "comparison"])
+        choices=["nightly", "comparison", "adhoc"])
+    parser.add_argument(
+        "--revision",
+        help="Specify the source code revision to build for adhoc benchmarks.",
+        default="latest")
     parser.add_argument(
         "--release",
         help="Specify release string to use for comparison reports",
@@ -543,16 +573,23 @@ def parse_args():
 def main():
     args = parse_args()
     compare_mode = args.mode == "comparison"
+    adhoc_mode = args.mode == "adhoc"
     root_dir = config["root.dir"] if not args.override_root_dir else args.override_root_dir
     if compare_mode:
+        env_name = sanitize(args.release)
+        configure_rally(env_name, args.dry_run)
         if args.release.startswith("Docker"):
             command = DockerCommand(args.effective_start_date, args.target_host, root_dir, args.release)
         else:
             command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release)
+    elif adhoc_mode:
+        env_name = sanitize(args.release)
+        command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.override_src_dir)
     else:
-        configure_rally(args.dry_run)
+        env_name = NightlyCommand.CONFIG_NAME
         command = NightlyCommand(args.effective_start_date, args.target_host, root_dir, args.override_src_dir)
 
+    configure_rally(env_name, args.dry_run)
     rally_failure = run_rally(tracks, command, args.dry_run)
     replace_release = args.replace_release if args.replace_release else args.release
     report(args.effective_start_date, tracks, defaults, replace_release, args.release, root_dir, compare_mode)

@@ -35,6 +35,8 @@ DRY_RUN=NO
 START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 MODE="nightly"
 RELEASE="master"
+# only needed for ad-hoc benchmarks
+REVISION="latest"
 REPLACE_RELEASE=${RELEASE}
 TARGET_HOST="localhost:9200"
 
@@ -59,6 +61,10 @@ case ${i} in
     ;;
     --mode=*)
     MODE="${i#*=}"
+    shift # past argument=value
+    ;;
+    --revision=*)
+    REVISION="${i#*=}"
     shift # past argument=value
     ;;
     --release=*)
@@ -136,7 +142,7 @@ fi
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE}  --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE} --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --revision="${REVISION}" --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
