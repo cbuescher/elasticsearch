@@ -210,8 +210,9 @@ class ReleaseCommand(BaseCommand):
 
 
 class DockerCommand(BaseCommand):
-    def __init__(self, effective_start_date, target_host, root_dir, distribution_version):
+    def __init__(self, effective_start_date, target_host, root_dir, distribution_version, configuration_name):
         super().__init__(effective_start_date, target_host, root_dir)
+        self.configuration_name = configuration_name
         self.pipeline = "docker"
         self.distribution_version = distribution_version.replace("Docker ", "")
 
@@ -219,11 +220,12 @@ class DockerCommand(BaseCommand):
         return car not in ["two_nodes", "verbose_iw"]
 
     def command_line(self, track, challenge, car):
-        cmd = "rally --target-host={7} --pipeline={6} --quiet --distribution-version={0} --effective-start-date \"{1}\" " \
-              "--track={2} --challenge={3} --car={4} --report-format=csv --report-file={5} --cluster-health=yellow " \
+        cmd = "rally --configuration-name={8} --target-host={7} --pipeline={6} --quiet --distribution-version={0} " \
+              "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5} " \
+              "--cluster-health=yellow " \
               "--client-options=\"basic_auth_user:'elastic',basic_auth_password:'changeme',timeout:60000,request_timeout:60000\"". \
             format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline,
-                   self.target_host)
+                   self.target_host, self.configuration_name)
         return cmd
 
 
@@ -579,9 +581,9 @@ def main():
         env_name = sanitize(args.release)
         configure_rally(env_name, args.dry_run)
         if args.release.startswith("Docker"):
-            command = DockerCommand(args.effective_start_date, args.target_host, root_dir, args.release)
+            command = DockerCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
         else:
-            command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release)
+            command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
     elif adhoc_mode:
         env_name = sanitize(args.release)
         command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.override_src_dir)
