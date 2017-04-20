@@ -58,5 +58,35 @@
     "x": "2017-02-22 07:17:19",
     "shortText": "R",
     "text": "#23284: Adjust network predictor size to 32kb"
+  },
+  {
+    "series": "Indexing time (min)",
+    "x": "2017-04-19 09:13:44",
+    "shortText": "V",
+    "text": "#24089: Upgrade to Lucene 7"
+  },
+  {
+    "series": "Merge time (min)",
+    "x": "2017-04-19 09:13:44",
+    "shortText": "V",
+    "text": "#24089: Upgrade to Lucene 7"
+  },
+  {
+    "series": "Refresh time (min)",
+    "x": "2017-04-19 09:13:44",
+    "shortText": "V",
+    "text": "#24089: Upgrade to Lucene 7"
+  },
+  {
+    "series": "Flush time (min)",
+    "x": "2017-04-19 09:13:44",
+    "shortText": "V",
+    "text": "#24089: Upgrade to Lucene 7"
+  },
+  {
+    "series": "Merge throttle time (min)",
+    "x": "2017-04-19 09:13:44",
+    "shortText": "V",
+    "text": "#24089: Upgrade to Lucene 7"
   }
 ]

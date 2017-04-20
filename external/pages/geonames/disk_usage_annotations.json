@@ -10,5 +10,11 @@
     "x": "2017-01-25 13:12:27",
     "shortText": "N",
     "text": "Physically separate benchmark driver from benchmark candidate"
+  },
+  {
+    "series": "Total bytes written",
+    "x": "2017-04-19 09:13:44",
+    "shortText": "V",
+    "text": "#24089: Upgrade to Lucene 7"
   }
 ]
