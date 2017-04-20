@@ -17,7 +17,8 @@ set -e
 
 
 S3_ROOT_BUCKET="s3://elasticsearch-benchmarks.elastic.co"
-LOCAL_REPORT_ROOT="${HOME}/.rally/benchmarks/reports/out/"
+LOCAL_REPORT_ROOT="${HOME}/.rally/benchmarks/reports"
+LOCAL_REPORT_OUT="${LOCAL_REPORT_ROOT}/out"
 
 # see http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
@@ -125,16 +126,29 @@ fi
 echo "Syncing previous results from $S3_ROOT_BUCKET"
 if [ ${DRY_RUN} == NO ]
 then
-    aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_ROOT}"
+    aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_OUT}/"
 fi
 
 # Night Rally is *always* the master for assets
-ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/*"
-echo "Copying most recent assets from ${ASSET_SOURCE} to ${LOCAL_REPORT_ROOT}"
+ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/default/*"
+ASSET_TARGET="${LOCAL_REPORT_OUT}/"
+echo "Copying most recent assets from ${ASSET_SOURCE} to ${ASSET_TARGET}"
 if [ ${DRY_RUN} == NO ]
 then
-    cp -R ${ASSET_SOURCE} ${LOCAL_REPORT_ROOT}
+    cp -R ${ASSET_SOURCE} ${ASSET_TARGET}
 fi
+
+# Only copy if the target directory does not exist! Otherwise we overwrite csv files with data.
+ADHOC_TEMPLATE_ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/adhoc/*"
+ADHOC_TEMPLATE_ASSET_TARGET="${LOCAL_REPORT_ROOT}/templates"
+if [ ! -d "${ADHOC_TEMPLATE_ASSET_TARGET}" ]; then
+    echo "Copying most recent adhoc benchmark templates from ${ADHOC_TEMPLATE_ASSET_SOURCE} to ${ADHOC_TEMPLATE_ASSET_TARGET}"
+    if [ ${DRY_RUN} == NO ]
+    then
+        cp -R ${ADHOC_TEMPLATE_ASSET_SOURCE} ${ADHOC_TEMPLATE_ASSET_TARGET}
+    fi
+fi
+
 
 
 #****************************
@@ -163,7 +177,7 @@ then
     #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
     # --acl "public-read"           - let everyone read the report files
     # --cache-control max-age=86400 - ensure that report files expire after one day so users always see fresh data
-    aws s3 sync --acl "public-read" --cache-control max-age=86400 "${LOCAL_REPORT_ROOT}" "${S3_ROOT_BUCKET}/"
+    aws s3 sync --acl "public-read" --cache-control max-age=86400 "${LOCAL_REPORT_OUT}/" "${S3_ROOT_BUCKET}/"
 fi
 
 # Exit with the same exit code as night_rally.py

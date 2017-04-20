@@ -369,11 +369,6 @@ def extract_meta_metrics(source_meta_report):
     return meta_metrics
 
 
-def write_report(file_name, timestamp, data):
-    with open(file_name, "a") as f:
-        f.write("%s,%s" % (timestamp, data))
-
-
 def insert(lines, replace_release, new_release_name, data):
     new_lines = []
     found = False
@@ -388,142 +383,168 @@ def insert(lines, replace_release, new_release_name, data):
     return new_lines
 
 
-def insert_comparison_data(file_name, data, replace_release, new_release_name):
-    with open(file_name, "r+") as f:
-        lines = f.readlines()
-        new_lines = insert(lines, replace_release, new_release_name, data)
-        f.seek(0)
-        f.writelines(new_lines)
-        f.truncate()
+class MetricReader:
+    def __init__(self, effective_start_date, root_dir):
+        self.timestamp = date_for_path(effective_start_date)
+        self.root_dir = root_dir
+        self.report_root_dir = config["report.base.dir"]
+
+    def metrics(self, track, challenge, car):
+        report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv" % (self.root_dir, self.report_root_dir, self.timestamp, track, challenge, car)
+        if not os.path.isfile(report_path):
+            logger.warn("[%s] does not exist. Skipping track [%s], challenge [%s], car [%s]."
+                        % (report_path, track, challenge, car))
+            return None
+
+        with open(report_path) as csvfile:
+            return extract_metrics(csvfile)
+
+    def meta_metrics(self, track, challenge, car):
+        meta_report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv.meta" % (self.root_dir, self.report_root_dir, self.timestamp, track, challenge, car)
+        if not os.path.isfile(meta_report_path):
+            logger.warn("Could not find [%s]. No git meta-data will be available for this trial run." % meta_report_path)
+            return None
+
+        with open(meta_report_path) as csvfile:
+            return extract_meta_metrics(csvfile)
 
 
-def report(effective_start_date, tracks, default_setup_per_track, replace_release, release_name, root_dir, compare_mode):
+class Reporter:
+    def __init__(self, root_dir, effective_start_date, adhoc_mode, compare_mode, replace_release, release_name):
+        self.report_timestamp = date_for_cmd_param(effective_start_date)
+        self.report_root_dir = config["report.base.dir"]
+        self.root_dir = root_dir
+        self.adhoc_mode = adhoc_mode
+        self.compare_mode = compare_mode
+        self.replace_release = replace_release
+        self.release_name = release_name
+        self.adhoc_template_root_path = "%s/%s/templates" % (self.root_dir, self.report_root_dir)
+        if self.adhoc_mode:
+            self.output_root_path = "%s/%s/out/%s" % (self.root_dir, self.report_root_dir, sanitize(self.release_name))
+        else:
+            self.output_root_path = "%s/%s/out" % (self.root_dir, self.report_root_dir)
+
+    def __call__(self, track, report_name, data):
+        formatted_data = "%s\n" % ",".join(data)
+        p = self._output_report_path(track)
+        if not self.compare_mode:
+            self._write_report("%s/%s.csv" % (p, report_name), formatted_data)
+        self._insert_comparison_data("%s/%s_comparison.csv" % (p, report_name), formatted_data)
+        # write the comparison data again for our adhoc benchmark templates. master is always considered our baseline for adhoc benchmarks.
+        # We could support arbitrary baselines but the problem is the graphing library that is pretty picky about the data in the source
+        # CSV file and that's why we limit ourselves to master as a baseline for the moment.
+        if self.release_name == "master":
+            adhoc_path = self._adhoc_template_path(track)
+            logger.info("Writing comparison data for [%s] also to template directory [%s]." % (self.release_name, adhoc_path))
+            self._insert_comparison_data("%s/%s_comparison.csv" % (adhoc_path, report_name), formatted_data)
+
+    def copy_template(self):
+        # prevent stupid mistakes
+        if self.adhoc_mode:
+            logger.info("Copying most recent templates from [%s] to [%s]." % (self.adhoc_template_root_path, self.output_root_path))
+            shutil.copytree(self.adhoc_template_root_path, self.output_root_path)
+
+    def write_meta_report(self, track, revision):
+        if not self.compare_mode:
+            with open("%s/source_revision.csv" % self._output_report_path(track), "a") as f:
+                f.write("%s,%s\n" % (self.report_timestamp, revision))
+
+    def _output_report_path(self, track):
+            return "%s/%s" % (self.output_root_path, track)
+
+    def _adhoc_template_path(self, track):
+        return "%s/%s" % (self.adhoc_template_root_path, track)
+
+    def _write_report(self, file_name, data):
+        with open(file_name, "a") as of:
+            of.write("%s,%s" % (self.report_timestamp, data))
+
+    def _insert_comparison_data(self, file_name, data):
+        # in ad-hoc mode we're bound to a constant name due graphing library constraints (it cannot get the data series name from the CSV)
+        series_name = "Adhoc" if self.adhoc_mode else self.release_name
+        with open(file_name, "r+") as f:
+            lines = f.readlines()
+            new_lines = insert(lines, self.replace_release, series_name, data)
+            f.seek(0)
+            f.writelines(new_lines)
+            f.truncate()
+
+
+def report(tracks, default_setup_per_track, reader, reporter):
     """
     Publishes all data from the provided trial run.
 
-    :param effective_start_date: A timestamp for which we should publish data.
     :param tracks: A hash of all tracks that have been run and their challenges.
     :param default_setup_per_track: A hash of the default challenge / car per track.
+    :param reader: A ``Reader`` instance that can read the race results.
+    :param reporter: A ``Reporter`` instance that can write the result files.
 
     """
-    timestamp = date_for_path(effective_start_date)
-    # this timestamp gets used in the report files
-    report_timestamp = date_for_cmd_param(effective_start_date)
-    report_root_dir = config["report.base.dir"]
 
     for track, setups in tracks.items():
-        output_report_path = "%s/%s/out/%s" % (root_dir, report_root_dir, track)
         segment_count_metrics = []
         indexing_throughput_metrics = []
         meta_metrics = None
-
         for setup in setups:
             challenge, car = setup
             current_is_default = is_default_setup(default_setup_per_track[track], setup)
-            report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv" % (root_dir, report_root_dir, timestamp, track, challenge, car)
-            meta_report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv.meta" % (root_dir, report_root_dir, timestamp, track, challenge, car)
 
-            if not os.path.isfile(report_path):
-                logger.warn("[%s] does not exist. Skipping track [%s], challenge [%s], car [%s]."
-                            % (report_path, track, challenge, car))
+            metrics = reader.metrics(track, challenge, car)
+            if not metrics:
                 continue
-
-            with open(report_path) as csvfile:
-                metrics = extract_metrics(csvfile)
-
-            if "segment_count" in metrics:
-                segment_count_metrics.append(metrics["segment_count"])
-            else:
-                segment_count_metrics.append("")
+            meta_metrics = reader.meta_metrics(track, challenge, car)
 
             # Beware: this one is one column per series!
-            if "median_indexing_throughput" in metrics:
-                indexing_throughput_metrics.append(metrics["median_indexing_throughput"])
-            else:
-                indexing_throughput_metrics.append("")
-
-            if current_is_default and "cpu_usage" in metrics:
-                cpu_usage = "%s\n" % metrics["cpu_usage"]
-                if not compare_mode:
-                    write_report("%s/indexing_cpu_usage.csv" % output_report_path, report_timestamp, cpu_usage)
-                insert_comparison_data("%s/indexing_cpu_usage_comparison.csv" % output_report_path, cpu_usage, replace_release, release_name)
-
-            if current_is_default and ("young_gen_gc" in metrics or "old_gen_gc" in metrics):
-                gc_times = "%s,%s\n" % (v(metrics, "young_gen_gc"), v(metrics, "old_gen_gc"))
-                if not compare_mode:
-                    write_report("%s/gc_times.csv" % output_report_path, report_timestamp, gc_times)
-                insert_comparison_data("%s/gc_times_comparison.csv" % output_report_path, gc_times, replace_release, release_name)
-
-            if current_is_default and ("latency_indices_stats_p99" in metrics or "latency_nodes_stats_p99" in metrics):
-                stats_latency = "%s,%s\n" % (v(metrics, "latency_indices_stats_p99"), v(metrics, "latency_nodes_stats_p99"))
-                if not compare_mode:
-                    write_report("%s/search_latency_stats.csv" % output_report_path, report_timestamp, stats_latency)
-                insert_comparison_data("%s/search_latency_stats_comparison.csv" % output_report_path, stats_latency, replace_release, release_name)
-
-            if current_is_default and "mem_segments" in metrics:
-                # Date,Total heap used (MB),Doc values (MB),Terms (MB),Norms (MB),Stored fields (MB),Points (MB)
-                total_memory = "%s,%s,%s,%s,%s,%s\n" % (v(metrics, "mem_segments"),
-                                                        v(metrics, "mem_doc_values"),
-                                                        v(metrics, "mem_terms"),
-                                                        v(metrics, "mem_norms"),
-                                                        v(metrics, "mem_fields"),
-                                                        v(metrics, "mem_points"))
-                if not compare_mode:
-                    write_report("%s/segment_total_memory.csv" % output_report_path, report_timestamp, total_memory)
-                insert_comparison_data("%s/segment_total_memory_comparison.csv" % output_report_path, total_memory, replace_release, release_name)
-
-            if current_is_default and "indexing_time" in metrics:
-                # Date,Indexing time (min),Merge time (min),Refresh time (min),Flush time (min),Merge throttle time (min)
-                total_times = "%s,%s,%s,%s,%s\n" % (v(metrics, "indexing_time"),
-                                                    v(metrics, "merge_time"),
-                                                    v(metrics, "refresh_time"),
-                                                    v(metrics, "flush_time"),
-                                                    v(metrics, "merge_throttle_time"))
-                if not compare_mode:
-                    write_report("%s/indexing_total_times.csv" % output_report_path, report_timestamp, total_times)
-                insert_comparison_data("%s/indexing_total_times_comparison.csv" % output_report_path, total_times, replace_release, release_name)
-
-            if current_is_default and ("index_size" in metrics or "totally_written" in metrics):
-                # Date,Final index size,Total bytes written
-                disk_usage = "%s,%s\n" % (v(metrics, "index_size"), v(metrics, "totally_written"))
-                if not compare_mode:
-                    write_report("%s/disk_usage.csv" % output_report_path, report_timestamp, disk_usage)
-                insert_comparison_data("%s/disk_usage_comparison.csv" % output_report_path, disk_usage, replace_release, release_name)
-
-            if current_is_default and "query_latency_p99" in metrics:
-                query_latency = "%s\n" % ",".join(metrics["query_latency_p99"])
-                if not compare_mode:
-                    write_report("%s/search_latency_queries.csv" % output_report_path, report_timestamp, query_latency)
-                insert_comparison_data("%s/search_latency_queries_comparison.csv" % output_report_path, query_latency, replace_release, release_name)
+            segment_count_metrics.append(metrics.get("segment_count", ""))
+            indexing_throughput_metrics.append(metrics.get("median_indexing_throughput", ""))
 
             if "merge_time_parts" in metrics:
-                merge_parts = "%s\n" % ",".join(metrics["merge_time_parts"])
-                if not compare_mode:
-                    write_report("%s/merge_parts.csv" % output_report_path, report_timestamp, merge_parts)
-                insert_comparison_data("%s/merge_parts_comparison.csv" % output_report_path, merge_parts, replace_release, release_name)
+                reporter(track, "merge_parts", metrics["merge_time_parts"])
 
-        if not compare_mode:
-            try:
-                with open(meta_report_path) as csvfile:
-                    meta_metrics = extract_meta_metrics(csvfile)
+            if current_is_default:
+                if "cpu_usage" in metrics:
+                    reporter(track, "indexing_cpu_usage", [metrics["cpu_usage"]])
 
-                if meta_metrics and "source_revision" in meta_metrics:
-                    with open("%s/source_revision.csv" % output_report_path, "a") as f:
-                        f.write("%s,%s\n" % (report_timestamp, meta_metrics["source_revision"]))
-            except FileNotFoundError:
-                logger.warn("Could not find [%s]. No git meta-data will be available for this trial run." % meta_report_path)
+                if "young_gen_gc" in metrics or "old_gen_gc" in metrics:
+                    reporter(track, "gc_times", [v(metrics, "young_gen_gc"), v(metrics, "old_gen_gc")])
+
+                if "latency_indices_stats_p99" in metrics or "latency_nodes_stats_p99" in metrics:
+                    reporter(track, "search_latency_stats", [v(metrics, "latency_indices_stats_p99"), v(metrics, "latency_nodes_stats_p99")])
+
+                if "mem_segments" in metrics:
+                    # Date,Total heap used (MB),Doc values (MB),Terms (MB),Norms (MB),Stored fields (MB),Points (MB)
+                    total_memory = [v(metrics, "mem_segments"),
+                                    v(metrics, "mem_doc_values"),
+                                    v(metrics, "mem_terms"),
+                                    v(metrics, "mem_norms"),
+                                    v(metrics, "mem_fields"),
+                                    v(metrics, "mem_points")]
+                    reporter(track, "segment_total_memory", total_memory)
+
+                if "indexing_time" in metrics:
+                    # Date,Indexing time (min),Merge time (min),Refresh time (min),Flush time (min),Merge throttle time (min)
+                    total_times = [v(metrics, "indexing_time"),
+                                   v(metrics, "merge_time"),
+                                   v(metrics, "refresh_time"),
+                                   v(metrics, "flush_time"),
+                                   v(metrics, "merge_throttle_time")]
+                    reporter(track, "indexing_total_times", total_times)
+
+                if "index_size" in metrics or "totally_written" in metrics:
+                    # Date,Final index size,Total bytes written
+                    reporter(track, "disk_usage", [v(metrics, "index_size"), v(metrics, "totally_written")])
+
+                if "query_latency_p99" in metrics:
+                    reporter(track, "search_latency_queries", metrics["query_latency_p99"])
 
         if len(segment_count_metrics) > 0:
-            segment_counts = "%s\n" % ",".join(segment_count_metrics)
-            if not compare_mode:
-                write_report("%s/segment_counts.csv" % output_report_path, report_timestamp, segment_counts)
-            insert_comparison_data("%s/segment_counts_comparison.csv" % output_report_path, segment_counts, replace_release, release_name)
+            reporter(track, "segment_counts", segment_count_metrics)
 
         if len(indexing_throughput_metrics) > 0:
-            indexing_throughput = "%s\n" % ",".join(indexing_throughput_metrics)
-            if not compare_mode:
-                write_report("%s/indexing_throughput.csv" % output_report_path, report_timestamp, indexing_throughput)
-            insert_comparison_data("%s/indexing_throughput_comparison.csv" % output_report_path, indexing_throughput, replace_release, release_name)
+            reporter(track, "indexing_throughput", indexing_throughput_metrics)
+
+        if meta_metrics and "source_revision" in meta_metrics:
+            reporter.write_meta_report(track, meta_metrics["source_revision"])
 
 
 def parse_args():
@@ -585,6 +606,7 @@ def main():
         else:
             command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
     elif adhoc_mode:
+        # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
         command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.override_src_dir)
     else:
@@ -594,7 +616,11 @@ def main():
     configure_rally(env_name, args.dry_run)
     rally_failure = run_rally(tracks, command, args.dry_run)
     replace_release = args.replace_release if args.replace_release else args.release
-    report(args.effective_start_date, tracks, defaults, replace_release, args.release, root_dir, compare_mode)
+
+    reader = MetricReader(args.effective_start_date, root_dir)
+    reporter = Reporter(root_dir, args.effective_start_date, adhoc_mode, compare_mode, replace_release, args.release)
+    reporter.copy_template()
+    report(tracks, defaults, reader, reporter)
     if rally_failure:
         exit(1)
 
