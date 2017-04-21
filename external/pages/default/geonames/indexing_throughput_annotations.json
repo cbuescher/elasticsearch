@@ -90,12 +90,6 @@
     "text": "Physically separate benchmark driver from benchmark candidate"
   },
   {
-    "series": "Append Fast / 4G heap",
-    "x": "2017-01-25 13:12:27",
-    "shortText": "N",
-    "text": "Physically separate benchmark driver from benchmark candidate"
-  },
-  {
     "series": "Append / 2 nodes",
     "x": "2017-01-25 13:12:27",
     "shortText": "N",
