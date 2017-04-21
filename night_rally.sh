@@ -32,6 +32,7 @@ NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 SELF_UPDATE=NO
 DRY_RUN=NO
+SKIP_S3=NO
 # We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
 START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 MODE="nightly"
@@ -59,6 +60,10 @@ case ${i} in
     ;;
     --dry-run)
     DRY_RUN=YES
+    shift # past argument with no value
+    ;;
+    --skip-s3)
+    SKIP_S3=YES
     shift # past argument with no value
     ;;
     --mode=*)
@@ -128,10 +133,15 @@ else
 fi
 
 # We need to pull down the current state of all reports from the S3 bucket as night_rally might be run on different nodes each day
-echo "Syncing previous results from $S3_ROOT_BUCKET"
-if [ ${DRY_RUN} == NO ]
+if [ ${SKIP_S3} == NO ]
 then
-    aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_OUT}/"
+    echo "Syncing previous results from ${S3_ROOT_BUCKET}"
+    if [ ${DRY_RUN} == NO ]
+    then
+        aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_OUT}/"
+    fi
+else
+    echo "Skipping download from ${S3_ROOT_BUCKET}"
 fi
 
 # Night Rally is *always* the master for assets
@@ -177,13 +187,18 @@ fi
 #****************************
 set -e
 
-echo "Uploading results to $S3_ROOT_BUCKET"
-if [ ${DRY_RUN} == NO ]
+if [ ${SKIP_S3} == NO ]
 then
-    #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
-    # --acl "public-read"           - let everyone read the report files
-    # --cache-control max-age=86400 - ensure that report files expire after one day so users always see fresh data
-    aws s3 sync --acl "public-read" --cache-control max-age=86400 "${LOCAL_REPORT_OUT}/" "${S3_ROOT_BUCKET}/"
+    echo "Uploading results to ${S3_ROOT_BUCKET}"
+    if [ ${DRY_RUN} == NO ]
+    then
+        #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
+        # --acl "public-read"           - let everyone read the report files
+        # --cache-control max-age=86400 - ensure that report files expire after one day so users always see fresh data
+        aws s3 sync --acl "public-read" --cache-control max-age=86400 "${LOCAL_REPORT_OUT}/" "${S3_ROOT_BUCKET}/"
+    fi
+else
+    echo "Skipping upload from results to ${S3_ROOT_BUCKET}"
 fi
 
 # Exit with the same exit code as night_rally.py
