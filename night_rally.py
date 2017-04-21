@@ -49,6 +49,14 @@ tracks["nyc_taxis"] = [
     ["append-no-conflicts", "4gheap"]
 ]
 
+tracks["logging"] = [
+    ["append-no-conflicts-index-only", "defaults"],
+    ["append-no-conflicts", "4gheap"],
+    ["append-fast-no-conflicts", "4gheap"],
+    ["append-no-conflicts-index-only-1-replica", "two_nodes"],
+    ["append-no-conflicts-index-only", "verbose_iw"]
+]
+
 # default challenge / car per track
 defaults = {
     "geonames": ("append-no-conflicts", "defaults"),
@@ -57,6 +65,7 @@ defaults = {
     "pmc": ("append-no-conflicts", "4gheap"),
     "nyc_taxis": ("append-no-conflicts", "4gheap"),
     "nested": ("nested-search-challenge", "4gheap"),
+    "logging": ("append-no-conflicts", "4gheap"),
 }
 
 config = {
