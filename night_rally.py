@@ -410,12 +410,13 @@ class MetricReader:
 
 
 class Reporter:
-    def __init__(self, root_dir, effective_start_date, adhoc_mode, compare_mode, replace_release, release_name):
+    def __init__(self, root_dir, effective_start_date, adhoc_mode, compare_mode, dry_run, replace_release, release_name):
         self.report_timestamp = date_for_cmd_param(effective_start_date)
         self.report_root_dir = config["report.base.dir"]
         self.root_dir = root_dir
         self.adhoc_mode = adhoc_mode
         self.compare_mode = compare_mode
+        self.dry_run = dry_run
         self.replace_release = replace_release
         self.release_name = release_name
         self.adhoc_template_root_path = "%s/%s/templates" % (self.root_dir, self.report_root_dir)
@@ -442,7 +443,10 @@ class Reporter:
         # prevent stupid mistakes
         if self.adhoc_mode:
             logger.info("Copying most recent templates from [%s] to [%s]." % (self.adhoc_template_root_path, self.output_root_path))
-            shutil.copytree(self.adhoc_template_root_path, self.output_root_path)
+            if not self.dry_run:
+                # ensure that the target directory does NOT exist
+                shutil.rmtree(self.output_root_path, ignore_errors=True)
+                shutil.copytree(self.adhoc_template_root_path, self.output_root_path)
 
     def write_meta_report(self, track, revision):
         if not self.compare_mode:
@@ -618,7 +622,7 @@ def main():
     replace_release = args.replace_release if args.replace_release else args.release
 
     reader = MetricReader(args.effective_start_date, root_dir)
-    reporter = Reporter(root_dir, args.effective_start_date, adhoc_mode, compare_mode, replace_release, args.release)
+    reporter = Reporter(root_dir, args.effective_start_date, adhoc_mode, compare_mode, args.dry_run, replace_release, args.release)
     reporter.copy_template()
     report(tracks, defaults, reader, reporter)
     if rally_failure:
