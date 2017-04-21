@@ -145,6 +145,7 @@ if [ ! -d "${ADHOC_TEMPLATE_ASSET_TARGET}" ]; then
     echo "Copying most recent adhoc benchmark templates from ${ADHOC_TEMPLATE_ASSET_SOURCE} to ${ADHOC_TEMPLATE_ASSET_TARGET}"
     if [ ${DRY_RUN} == NO ]
     then
+        mkdir -p ${ADHOC_TEMPLATE_ASSET_TARGET}
         cp -R ${ADHOC_TEMPLATE_ASSET_SOURCE} ${ADHOC_TEMPLATE_ASSET_TARGET}
     fi
 fi
