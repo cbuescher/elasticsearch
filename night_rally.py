@@ -161,7 +161,7 @@ class BaseCommand:
 
 
 class SourceBasedCommand(BaseCommand):
-    def __init__(self, effective_start_date, target_host, root_dir, revision, configuration_name, override_src_dir=None):
+    def __init__(self, effective_start_date, target_host, root_dir, revision, configuration_name, user_tag=None, override_src_dir=None):
         super().__init__(effective_start_date, target_host, root_dir)
         self.revision = revision
         self.configuration_name = configuration_name
@@ -170,12 +170,16 @@ class SourceBasedCommand(BaseCommand):
             self.override = " --override-src-dir=%s" % override_src_dir
         else:
             self.override = ""
+        if user_tag:
+            self.user_tag = " --user-tag=\"intention:%s\"" % user_tag
+        else:
+            self.user_tag = ""
 
     def command_line(self, track, challenge, car):
         cmd = "rally --configuration-name={9} --target-host={8} --pipeline={6} --quiet --revision \"{0}\" " \
-              "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}". \
+              "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}{10}". \
             format(self.revision, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline, self.override,
-                   self.target_host, self.configuration_name)
+                   self.target_host, self.configuration_name, self.user_tag)
         # after we've executed the first benchmark, there is no reason to build again from sources
         self.pipeline = "from-sources-skip-build"
         return cmd
@@ -186,12 +190,12 @@ class NightlyCommand(SourceBasedCommand):
 
     def __init__(self, effective_start_date, target_host, root_dir, override_src_dir=None):
         super().__init__(effective_start_date, target_host, root_dir, "@%s" % to_iso8601(effective_start_date),
-                         NightlyCommand.CONFIG_NAME, override_src_dir)
+                         NightlyCommand.CONFIG_NAME, user_tag=None, override_src_dir=override_src_dir)
 
 
 class AdHocCommand(SourceBasedCommand):
-    def __init__(self, revision, effective_start_date, target_host, root_dir, configuration_name, override_src_dir=None):
-        super().__init__(effective_start_date, target_host, root_dir, revision, configuration_name, override_src_dir)
+    def __init__(self, revision, effective_start_date, target_host, root_dir, configuration_name, user_tag, override_src_dir=None):
+        super().__init__(effective_start_date, target_host, root_dir, revision, configuration_name, user_tag, override_src_dir)
 
 
 class ReleaseCommand(BaseCommand):
@@ -569,6 +573,10 @@ def parse_args():
         help=argparse.SUPPRESS,
         default=None)
     parser.add_argument(
+        "--tag",
+        help=argparse.SUPPRESS,
+        default=None)
+    parser.add_argument(
         "--target-host",
         help="The Elasticsearch node that should be targeted",
         required=True)
@@ -612,7 +620,7 @@ def main():
     elif adhoc_mode:
         # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
-        command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.override_src_dir)
+        command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.tag, args.override_src_dir)
     else:
         env_name = NightlyCommand.CONFIG_NAME
         command = NightlyCommand(args.effective_start_date, args.target_host, root_dir, args.override_src_dir)
