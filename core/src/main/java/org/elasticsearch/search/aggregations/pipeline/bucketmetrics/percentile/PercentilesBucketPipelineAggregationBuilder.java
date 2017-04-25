@@ -79,11 +79,17 @@ public class PercentilesBucketPipelineAggregationBuilder
         if (percents == null) {
             throw new IllegalArgumentException("[percents] must not be null: [" + name + "]");
         }
+        double previous = Double.MIN_VALUE;
         for (Double p : percents) {
             if (p == null || p < 0.0 || p > 100.0) {
                 throw new IllegalArgumentException(PERCENTS_FIELD.getPreferredName()
                         + " must only contain non-null doubles from 0.0-100.0 inclusive");
             }
+            if (p <= previous) {
+                throw new IllegalArgumentException(PERCENTS_FIELD.getPreferredName()
+                        + " must be specified in increasing order");
+            }
+            previous = p;
         }
         this.percents = percents;
         return this;

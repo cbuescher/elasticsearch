@@ -19,6 +19,8 @@
 
 package org.elasticsearch.search.aggregations.pipeline;
 
+import com.carrotsearch.randomizedtesting.annotations.Repeat;
+
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.search.SearchPhaseExecutionException;
@@ -424,6 +426,14 @@ public class PercentilesBucketIT extends ESIntegTestCase {
             }
         }
 
+    }
+
+    @Repeat(iterations=10)
+    public void testUnorderedPercents() throws Exception {
+        double[] unorderdPercents = { 75.00, 25.0, 1.0, 50.0, 99.0, 100.0 };
+        expectThrows(IllegalArgumentException.class, () -> client().prepareSearch("idx")
+                .addAggregation(terms("terms").field("tag").subAggregation(sum("sum").field(SINGLE_VALUED_FIELD_NAME)))
+                .addAggregation(percentilesBucket("percentiles_bucket", "terms>sum").percents(unorderdPercents)).execute().actionGet());
     }
 
     public void testBadPercents_asSubAgg() throws Exception {
