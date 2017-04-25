@@ -52,8 +52,7 @@ tracks["nyc_taxis"] = [
 tracks["logging"] = [
     ["append-no-conflicts-index-only", "defaults"],
     ["append-no-conflicts", "4gheap"],
-    ["append-fast-no-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only-1-replica", "two_nodes"]
+    ["append-fast-no-conflicts", "4gheap"]
 ]
 
 # default challenge / car per track
