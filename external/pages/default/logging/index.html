@@ -35,7 +35,6 @@ var charts = {
 
     charts.indexingThroughput = chartingLib.renderChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', 'indexing_throughput_annotations.json');
     charts.totalTimes = chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', 'indexing_total_times_annotations.json');
-    charts.mergeParts = chartingLib.renderChart('merge_parts', 'Merge Times, By Part', 'Time [min]', annotationSource);
     charts.segmentMemory = chartingLib.renderChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', annotationSource);
     charts.cpuUsage = chartingLib.renderChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', 'indexing_cpu_usage_annotations.json')
     charts.diskUsage = chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', annotationSource),
@@ -48,7 +47,6 @@ var charts = {
     chartingLib.synchronize([
       charts.indexingThroughput,
       charts.totalTimes,
-      charts.mergeParts,
       charts.segmentMemory,
       charts.cpuUsage,
       charts.diskUsage,
@@ -65,7 +63,6 @@ var charts = {
 
     charts.indexingThroughput = chartingLib.renderBarChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', versions);
     charts.totalTimes = chartingLib.renderBarChart('indexing_total_times', 'Total times', 'Time [min]', versions);
-    charts.mergeParts = chartingLib.renderBarChart('merge_parts', 'Merge Times, By Part', 'Time [min]', versions);
     charts.segmentMemory = chartingLib.renderBarChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', versions);
     charts.cpuUsage = chartingLib.renderBarChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', versions)
     charts.diskUsage = chartingLib.renderBarChart('disk_usage', 'Index disk usage', '[GB]', versions),
@@ -114,7 +111,6 @@ var charts = {
                     <ul class="dropdown-menu">
                         <li><a href="#indexing_throughput">Indexing Throughput</a></li>
                         <li><a href="#indexing_total_times">Total times</a></li>
-                        <li><a href="#merge_parts">Merge Times, By Part</a></li>
                         <li><a href="#segment_total_memory">Segment total heap used</a></li>
                         <!--<li><a href="#indexing_cpu_usage">Indexing CPU usage</a></li>-->
                         <li><a href="#disk_usage">Index disk usage</a></li>
@@ -178,16 +174,6 @@ var charts = {
         <div class="col-md-10 col-md-pull-2">
             <a name="indexing_total_times" id="indexing_total_times"></a>
             <div id="chart_indexing_total_times" class="benchmark-chart"></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_merge_parts_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="merge_parts" id="merge_parts"></a>
-            <div id="chart_merge_parts" class="benchmark-chart"></div>
         </div>
     </div>
 
