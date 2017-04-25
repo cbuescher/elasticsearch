@@ -509,9 +509,12 @@ def report(tracks, default_setup_per_track, reader, reporter):
                 continue
             meta_metrics = reader.meta_metrics(track, challenge, car)
 
-            # Beware: this one is one column per series!
-            segment_count_metrics.append(metrics.get("segment_count", ""))
-            indexing_throughput_metrics.append(metrics.get("median_indexing_throughput", ""))
+            # "verbose_iw" is just a tool to get the merge time parts stats. We actually do not care about segment counts and the indexing
+            # throughput in this case. So we'll just skip it.
+            if car != "verbose_iw":
+                # Beware: this one is one column per series!
+                segment_count_metrics.append(metrics.get("segment_count", ""))
+                indexing_throughput_metrics.append(metrics.get("median_indexing_throughput", ""))
 
             if "merge_time_parts" in metrics:
                 reporter(track, "merge_parts", metrics["merge_time_parts"])
