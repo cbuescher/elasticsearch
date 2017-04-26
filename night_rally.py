@@ -25,9 +25,10 @@ tracks["geonames"] = [
     ["append-no-conflicts-index-only", "verbose_iw"]
 ]
 
-tracks["percolator"] = [
-    ["append-no-conflicts", "4gheap"]
-]
+# temporarily disabled due to https://github.com/elastic/elasticsearch/pull/24317
+# tracks["percolator"] = [
+#     ["append-no-conflicts", "4gheap"]
+# ]
 
 tracks["geopoint"] = [
     ["append-no-conflicts", "defaults"],
