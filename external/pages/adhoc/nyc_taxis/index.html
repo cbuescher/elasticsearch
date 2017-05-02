@@ -94,10 +94,12 @@ var charts = {
                 it to evaluate the performance of Elasticsearch for structured data. We run the following variation (which we call
                 "challenge" in Rally):</p>
             <ul>
-                <li><strong>Append</strong>: Indexes the whole document corpus using Elasticsearch default settings. We only adjust the
-                    number of replicas as we benchmark a single node cluster and Rally will only start the benchmark if the cluster turns
-                    green. Document ids are unique so all index operations are append only. After that a couple of queries are run in
-                    parallel by multiple clients.
+                <li><strong>Append</strong>: Indexes the whole document corpus using a setup that will lead to a larger indexing throughput than the default settings
+                   and produce a smaller index (higher compression rate). Document ids are unique so all index operations are append only.
+                </li>
+                <li><strong>Append Sorted</strong>: Indexes the whole document corpus in an index sorted by pickup_datetime field in descending order (most recent first)
+                   and using a setup that will lead to a larger indexing throughput than the default settings and produce a smaller index (higher compression rate).
+                   Document ids are unique so all index operations are append only.
                 </li>
             </ul>
             <p>The benchmarks are run either for an out of the box configuration of Elasticsearch but with a larger heap of 4GB. For more
