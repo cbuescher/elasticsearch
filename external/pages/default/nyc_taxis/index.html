@@ -135,6 +135,10 @@ var charts = {
                     green. Document ids are unique so all index operations are append only. After that a couple of queries are run in
                     parallel by multiple clients.
                 </li>
+                <li><strong>Append Sorted</strong>: Indexes the whole document corpus in an index sorted by pickup_datetime field in descending order (most recent first)
+                    and using a setup that will lead to a larger indexing throughput than the default settings and produce a smaller index (higher compression rate).
+                    Document ids are unique so all index operations are append only.
+                </li>
             </ul>
             <p>The benchmarks are run either for an out of the box configuration of Elasticsearch but with a larger heap of 4GB. For more
                 details please refer to the <a href="https://github.com/elastic/rally-tracks/blob/master/nyc_taxis/track.json">NYC taxis
