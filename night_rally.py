@@ -216,6 +216,12 @@ class ReleaseCommand(BaseCommand):
         self.pipeline = "from-distribution"
         self.distribution_version = distribution_version
 
+    def runnable(self, track, challenge, car):
+        # cannot run "sorted" challenges - it's a 6.0+ feature
+        if int(self.distribution_version[0]) < 6:
+            return "sorted" not in challenge
+        return True
+
     def command_line(self, track, challenge, car):
         cmd = "rally --configuration-name={8} --target-host={7} --pipeline={6} --quiet --distribution-version={0} " \
               "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}". \
@@ -232,7 +238,12 @@ class DockerCommand(BaseCommand):
         self.distribution_version = distribution_version.replace("Docker ", "")
 
     def runnable(self, track, challenge, car):
-        return car not in ["two_nodes", "verbose_iw"]
+        if car in ["two_nodes", "verbose_iw"]:
+            return False
+        # cannot run "sorted" challenges - it's a 6.0+ feature
+        if int(self.distribution_version[0]) < 6:
+            return "sorted" not in challenge
+        return True
 
     def command_line(self, track, challenge, car):
         cmd = "rally --configuration-name={8} --target-host={7} --pipeline={6} --quiet --distribution-version={0} " \
