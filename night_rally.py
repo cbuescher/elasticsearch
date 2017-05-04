@@ -19,8 +19,7 @@ tracks["nested"] = [
 tracks["geonames"] = [
     ["append-no-conflicts", "defaults"],
     ["append-no-conflicts-index-only", "4gheap"],
-    ["append-fast-no-conflicts", "4gheap"],
-    ["append-fast-sorted-no-conflicts", "4gheap"],
+    ["append-sorted-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
     ["append-no-conflicts-index-only-1-replica", "two_nodes"],
     ["append-no-conflicts-index-only", "verbose_iw"]
@@ -33,7 +32,6 @@ tracks["percolator"] = [
 tracks["geopoint"] = [
     ["append-no-conflicts", "defaults"],
     ["append-no-conflicts-index-only", "4gheap"],
-    ["append-fast-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
     ["append-no-conflicts-index-only-1-replica", "two_nodes"]
 ]
@@ -41,8 +39,7 @@ tracks["geopoint"] = [
 tracks["pmc"] = [
     ["append-no-conflicts-index-only", "defaults"],
     ["append-no-conflicts", "4gheap"],
-    ["append-fast-no-conflicts", "4gheap"],
-    ["append-fast-sorted-no-conflicts", "4gheap"],
+    ["append-sorted-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
     ["append-no-conflicts-index-only-1-replica", "two_nodes"]
 ]
@@ -55,8 +52,7 @@ tracks["nyc_taxis"] = [
 tracks["logging"] = [
     ["append-no-conflicts-index-only", "defaults"],
     ["append-no-conflicts", "4gheap"],
-    ["append-fast-no-conflicts", "4gheap"],
-    ["append-fast-sorted-no-conflicts", "4gheap"]
+    ["append-sorted-no-conflicts", "4gheap"]
 ]
 
 # default challenge / car per track
