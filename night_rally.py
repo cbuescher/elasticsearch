@@ -639,7 +639,7 @@ def main():
             command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
     elif adhoc_mode:
         # copy data from templates directory to our dedicated output directory
-        env_name = sanitize(args.mode)
+        env_name = sanitize(args.release)
         command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.tag, args.override_src_dir)
     else:
         env_name = NightlyCommand.CONFIG_NAME
