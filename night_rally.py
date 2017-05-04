@@ -631,7 +631,8 @@ def main():
     adhoc_mode = args.mode == "adhoc"
     root_dir = config["root.dir"] if not args.override_root_dir else args.override_root_dir
     if compare_mode:
-        env_name = sanitize(args.release)
+        # use always the same name for comparison benchmarks
+        env_name = sanitize(args.mode)
         configure_rally(env_name, args.dry_run)
         if args.release.startswith("Docker"):
             command = DockerCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
