@@ -302,7 +302,7 @@ METRICS_TO_KEY = {
     "Heap used for norms": "mem_norms",
     "Heap used for points": "mem_points",
     "Heap used for stored fields": "mem_fields",
-    "99.0th percentile service time": "query_latency_p99",
+    "99(\.0)?th percentile service time": "query_latency_p99",
     "Merge time \(.*": "merge_time_parts"
 }
 
