@@ -1,0 +1,46 @@
+{
+  "mappings": {
+    "type": {
+      "_all": {
+        "enabled": false
+      },
+      "dynamic_templates": [
+        {
+          "strings": {
+            "match": "*",
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        }
+      ],
+      "properties": {
+        "environment": {
+          "type": "keyword"
+        },
+        "trial-timestamp": {
+          "type": "date",
+          "fields": {
+            "raw": {
+              "type": "keyword"
+            }
+          },
+          "format": "basic_date_time_no_millis"
+        },
+        "user-tag": {
+          "type": "keyword"
+        },
+        "track": {
+          "type": "keyword"
+        },
+        "chart": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}

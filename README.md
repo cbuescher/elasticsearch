@@ -23,27 +23,32 @@ Now you can invoke night_rally regularly with the startup script `night_rally.sh
 
 #### Add an annotation
 
-To add an annotation, just find the right `*_annotation.json` file and add an annotation there. Here is an example record:
+To add an annotation, use the admin tool. First find the correct trial timestamp by issuing `python3 admin.py list races --environment=nightly`. You will need the trial timestamp later. Below are examples for common cases:
+ 
+* Add an annotation for all charts for a specific nightly benchmark trial: `python3 admin.py add annotation --environment=nightly --trial-timestamp=20170502T220213Z --message="Just a test annotation"`
+* Add an annotation for all charts of one track for a specific nightly benchmark trial: `python3 admin.py add annotation --environment=nightly --trial-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`
+* Add an annotation for a specific chart of one track for a specific nightly benchmark trial: `python3 admin.py add annotation --environment=nightly --trial-timestamp=20170502T220213Z --track=geonames --chart=io --message="Just a test annotation"`
 
-```json
-{
-    "series": "GC young gen (sec)",
-    "x": "2016-08-08 06:10:01",
-    "shortText": "A",
-    "text": "Use 4GB heap instead of default"
-}
-```
+For more details, please issue `python3 admin.py add annotation --help`.
 
-* The series name has to match the series name in the CSV data file on the server (if no example is in the file you want to edit, inspect the S3 bucket `elasticsearch-benchmarks.elastic.co`).
-* In `x` you specify the timestamp where an annotation should appear. The timestamp format must be identical to the one in the example.
-* `shortText` is the annotation label.
-* `text` is the explanation that will be shown in the tooltip for this annotation.
+**Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
 
-If you're finished, commit and push the change to `master` and the annotation will be shown after the next benchmark run.
+**Note:** The new annotation will show up immediately. 
+
+#### Remove an annotation
+
+If you have made an error you can also remove specific annotations by id.
+
+1. Issue `python3 admin.py list annotations --environment=nightly` and find the right annotation. Note that only the 20 most recent annotations are shown. You can show more, by specifying `--limit=NUMBER`. 
+2. Suppose the id of the annotation that we want to delete is `AVwM0jAA-dI09MVLDV39`. Then issue `python3 admin.py delete annotation --id=AVwM0jAA-dI09MVLDV39`.
+
+For more details, please issue `python3 admin.py delete annotation --help`.
+
+**Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
  
 #### Add a new track
  
-For this three steps are needed:
+The following steps are necessary to add a new track: 
 
 1. Copy a directory in `external/pages` and adjust the names accordingly.
 2. Adjust the menu structure in all other files (if this happens more often, we should think about using a template engine for that...)
@@ -54,14 +59,13 @@ If you're finished, please submit a PR. After the PR is merged, the new track wi
 
 #### Run a release benchmark
 
-Suppose we want to replace the (already published) results of the Elasticsearch release `5.3.0` with release `5.3.1` on our benchmark page. 
+Suppose we want to publish a new release benchmark of the Elasticsearch release `5.3.1` on our benchmark page. To do that, start a new [macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic/) with the following parameters:
 
-1. Replace "5.3.0" with "5.3.1" in the `versions` array in each `index.html` in `external/pages`. Commit and push your changes (commit message convention: "Update comparison charts to 5.3.1")
-2. On the benchmark machine, issue the following command:
+* MODE: release
+* RELEASE: 5.3.1
+* TARGET_HOST: Just use the default value
 
-```
-night_rally.sh --target-host=target-551504.benchmark.hetzner-dc17.elasticnet.co:39200 --mode=comparison --release="5.3.1" --replace-release="5.3.0"
-```
+The results will show up automatically as soon as the build is finished
 
 #### Run an ad-hoc benchmark
 
@@ -73,5 +77,5 @@ Suppose we want to publish the results of the commit hash `66202dc` in the Elast
 2. On the benchmark machine, issue the following command:
 
 ```
-night_rally.sh --target-host=target-551504.benchmark.hetzner-dc17.elasticnet.co:39200 --mode=adhoc --revision=66202dc --release="Lucene 7" --replace-release="Lucene 7
+night_rally.sh --target-host=target-551504.benchmark.hetzner-dc17.elasticnet.co:39200 --mode=adhoc --revision=66202dc --release="Lucene 7"
 ```
