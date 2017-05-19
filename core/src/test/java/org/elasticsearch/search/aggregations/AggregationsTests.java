@@ -77,6 +77,7 @@ import org.junit.Before;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -171,7 +172,11 @@ public class AggregationsTests extends ESTestCase {
         final ToXContent.Params params = new ToXContent.MapParams(singletonMap(RestSearchAction.TYPED_KEYS_PARAM, "true"));
         Aggregations aggregations = createTestInstance();
         BytesReference originalBytes = toShuffledXContent(aggregations, xContentType, params, randomBoolean());
-        try (XContentParser parser = createParser(xContentType.xContent(), originalBytes)) {
+        // we add a few random fields to check that parser is lenient on new fields
+        Set<String> exceptLevel = new HashSet<>();
+        Set<String> ignoreSubStructure = new HashSet<>();
+        BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, exceptLevel, ignoreSubStructure).bytes();
+        try (XContentParser parser = createParser(xContentType.xContent(), withRandomFields)) {
             assertEquals(XContentParser.Token.START_OBJECT, parser.nextToken());
             assertEquals(XContentParser.Token.FIELD_NAME, parser.nextToken());
             assertEquals(Aggregations.AGGREGATIONS_FIELD, parser.currentName());

@@ -804,7 +804,7 @@ public class ElasticsearchAssertions {
      */
     @SuppressWarnings("unchecked")
     private static void assertMapEquals(Map<String, Object> expected, Map<String, Object> actual) {
-        assertEquals(expected.size(), actual.size());
+        assertEquals("expected maps differ in size: [" + expected + "] vs [" + actual + "]", expected.size(), actual.size());
         for (Map.Entry<String, Object> expectedEntry : expected.entrySet()) {
             String expectedKey = expectedEntry.getKey();
             Object expectedValue = expectedEntry.getValue();
