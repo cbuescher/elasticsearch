@@ -71,7 +71,7 @@ config = {
     "report.base.dir": "reports"
 }
 
-RALLY_BINARY = "rally"
+RALLY_BINARY = "rally --skip-update"
 
 # console logging
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s][%(levelname)s] %(message)s")
