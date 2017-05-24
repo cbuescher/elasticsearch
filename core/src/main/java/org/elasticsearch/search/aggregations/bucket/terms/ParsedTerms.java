@@ -32,6 +32,7 @@ import org.elasticsearch.search.aggregations.ParsedMultiBucketAggregation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.elasticsearch.search.aggregations.bucket.terms.InternalTerms.DOC_COUNT_ERROR_UPPER_BOUND_FIELD_NAME;
@@ -136,8 +137,11 @@ public abstract class ParsedTerms extends ParsedMultiBucketAggregation<ParsedTer
                         bucket.showDocCountError = true;
                     }
                 } else if (token == XContentParser.Token.START_OBJECT) {
-                    System.out.println(parser.currentName());
-                    aggregations.add(XContentParserUtils.parseTypedKeysObject(parser, Aggregation.TYPED_KEYS_DELIMITER, Aggregation.class));
+                    Optional<Aggregation> innerAgg = XContentParserUtils.parseTypedKeysObject(parser, Aggregation.TYPED_KEYS_DELIMITER,
+                            Aggregation.class, true);
+                    if (innerAgg.isPresent()) {
+                        aggregations.add(innerAgg.get());
+                    }
                 }
             }
             bucket.setAggregations(new Aggregations(aggregations));

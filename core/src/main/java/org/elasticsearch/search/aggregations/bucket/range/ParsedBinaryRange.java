@@ -31,6 +31,7 @@ import org.elasticsearch.search.aggregations.bucket.range.ip.IpRangeAggregationB
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.elasticsearch.common.xcontent.XContentParserUtils.ensureExpectedToken;
 
@@ -146,7 +147,11 @@ public class ParsedBinaryRange extends ParsedMultiBucketAggregation<ParsedBinary
                         bucket.to = parser.text();
                     }
                 } else if (token == XContentParser.Token.START_OBJECT) {
-                    aggregations.add(XContentParserUtils.parseTypedKeysObject(parser, Aggregation.TYPED_KEYS_DELIMITER, Aggregation.class));
+                    Optional<Aggregation> innerAgg = XContentParserUtils.parseTypedKeysObject(parser, Aggregation.TYPED_KEYS_DELIMITER,
+                            Aggregation.class, true);
+                    if (innerAgg.isPresent()) {
+                        aggregations.add(innerAgg.get());
+                    }
                 }
             }
             bucket.setAggregations(new Aggregations(aggregations));

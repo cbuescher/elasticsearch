@@ -173,8 +173,10 @@ public class AggregationsTests extends ESTestCase {
         Aggregations aggregations = createTestInstance();
         BytesReference originalBytes = toShuffledXContent(aggregations, xContentType, params, randomBoolean());
         // we add a few random fields to check that parser is lenient on new fields
-        Predicate<String> pathsToExclude = path -> (path.endsWith("buckets") || path.endsWith("values"));
+        Predicate<String> pathsToExclude = path -> (path.endsWith("meta") || path.endsWith("buckets")
+                || path.endsWith("values") || path.endsWith("value"));
         BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, pathsToExclude).bytes();
+        System.out.println(XContentHelper.convertToJson(withRandomFields, true));
         try (XContentParser parser = createParser(xContentType.xContent(), withRandomFields)) {
             assertEquals(XContentParser.Token.START_OBJECT, parser.nextToken());
             assertEquals(XContentParser.Token.FIELD_NAME, parser.nextToken());
