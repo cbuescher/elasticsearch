@@ -915,7 +915,40 @@ public abstract class ESTestCase extends LuceneTestCase {
      * If the xContent output contains objects that should be skipped of such treatment, an optional filtering
      * {@link Predicate} can be supplied that checks xContent paths that should be excluded from this treatment.
      *
+     * This predicate should check the xContent path that we want to insert to and return <tt>true</tt> if the
+     * path should be excluded. Paths are string concatenating field names and array indices, so e.g. in:
      *
+     * <pre>
+     * {
+     *      "foo1 : {
+     *          "bar" : [
+     *              { ... },
+     *              { ... },
+     *              {
+     *                  "baz" : {
+     *                      // insert here
+     *                  }
+     *              }
+     *          ]
+     *      }
+     * }
+     * </pre>
+     *
+     * "foo1.bar.2.baz" would point to the desired insert location.
+     *
+     * To exclude inserting into the "foo1" object we would user a {@link Predicate} like
+     * <pre>
+     * {@code
+     *      (path) -> path.endsWith("foo1")
+     * }
+     * </pre>
+     *
+     * or if we don't want any random insertions in the "foo1" tree we could use
+     * <pre>
+     * {@code
+     *      (path) -> path.contains("foo1")
+     * }
+     * </pre>
      */
     public XContentBuilder insertRandomFields(XContentType contentType, BytesReference xContent, Predicate<String> excludeFilter)
             throws IOException {
@@ -924,8 +957,8 @@ public abstract class ESTestCase extends LuceneTestCase {
             excludeFilter = path -> false;
         }
         try (XContentParser parser = createParser(contentType.xContent(), xContent)) {
-            List<String> validPaths = XContentTestUtils.getInsertPaths(parser);
-            validPaths.stream().filter(excludeFilter.negate()).forEach(insertPaths::add);
+            List<String> possiblePaths = XContentTestUtils.getInsertPaths(parser);
+            possiblePaths.stream().filter(excludeFilter.negate()).forEach(insertPaths::add);
         }
         try (XContentParser parser = createParser(contentType.xContent(), xContent)) {
             Supplier<Object> value = () -> {
@@ -942,45 +975,6 @@ public abstract class ESTestCase extends LuceneTestCase {
             return XContentTestUtils.insertIntoXContent(parser, insertPaths, () -> randomAlphaOfLength(10), value);
         }
     }
-
-//    private Map<String, Object> insertRandomIntoMap(Map<String, Object> map, Set<String> exceptFields, Set<String> ignoreSubStructure,
-//            boolean insertOnThisLevel) {
-//        List<String> keys = new ArrayList<>(map.keySet());
-//        Map<String, Object> targetMap = new TreeMap<>();
-//        if (insertOnThisLevel) {
-//            // add a new field, object or array with random values
-//            String newField = "bogus_" + randomAlphaOfLength(10);
-//            if (randomBoolean()) {
-//                targetMap.put(newField, randomAlphaOfLength(10));
-//            } else {
-//                if (randomBoolean()) {
-//                    targetMap.put(newField, Collections.singletonMap(randomAlphaOfLength(10), randomAlphaOfLength(10)));
-//                } else {
-//                    targetMap.put(newField, Arrays.asList(randomAlphaOfLength(10), randomAlphaOfLength(10)));
-//                }
-//            }
-//        }
-//        for (String key : keys) {
-//            Object value = map.get(key);
-//            if (value instanceof Map && ignoreSubStructure.contains(key) == false) {
-//                targetMap.put(key, insertRandomIntoMap((Map) value, exceptFields, ignoreSubStructure, exceptFields.contains(key) == false));
-//            } else if (value instanceof List && ignoreSubStructure.contains(key) == false) {
-//                // recurse into maps that might be contained in lists
-//                ArrayList<Object> newList = new ArrayList<>();
-//                for (Object element : (List) value) {
-//                    if (element instanceof Map) {
-//                        newList.add(insertRandomIntoMap((Map) element, exceptFields, ignoreSubStructure, exceptFields.contains(key) == false));
-//                    } else {
-//                        newList.add(element);
-//                    }
-//                }
-//                targetMap.put(key, newList);
-//            } else {
-//                targetMap.put(key, value);
-//            }
-//        }
-//        return targetMap;
-//    }
 
     /**
      * Randomly shuffles the fields inside objects in the {@link XContentBuilder} passed in.

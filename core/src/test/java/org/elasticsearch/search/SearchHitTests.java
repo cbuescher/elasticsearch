@@ -19,8 +19,6 @@
 
 package org.elasticsearch.search;
 
-import com.carrotsearch.randomizedtesting.annotations.Repeat;
-
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.action.OriginalIndices;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -138,13 +136,34 @@ public class SearchHitTests extends ESTestCase {
         return hit;
     }
 
-    @Repeat(iterations=100)
     public void testFromXContent() throws IOException {
         SearchHit searchHit = createTestItem(true);
         boolean humanReadable = randomBoolean();
         XContentType xContentType = randomFrom(XContentType.values());
         BytesReference originalBytes = toShuffledXContent(searchHit, xContentType, ToXContent.EMPTY_PARAMS, humanReadable);
-        // we add a few random fields to check that parser is lenient on new fields
+        SearchHit parsed;
+        try (XContentParser parser = createParser(xContentType.xContent(), originalBytes)) {
+            parser.nextToken(); // jump to first START_OBJECT
+            parsed = SearchHit.fromXContent(parser);
+            assertEquals(XContentParser.Token.END_OBJECT, parser.currentToken());
+            assertNull(parser.nextToken());
+        }
+        assertToXContentEquivalent(originalBytes, toXContent(parsed, xContentType, humanReadable), xContentType);
+    }
+
+    /**
+     * This test adds randomized fields on all json objects and checks that we can parse it to
+     * ensure the parsing is lenient for forward compatibility.
+     * We need to exclude json objects with the "highlight" and "fields" field name since these
+     * objects allow arbitrary keys (the field names that are queries). Also we want to exclude
+     * to add anything under "_source" since it is not parsed, and avoid complexity by excluding
+     * everything under "inner_hits". They are also keyed by arbitrary names and contain SearchHits,
+     * which are already tested elsewhere.
+     */
+    public void testFromXContentLenientParsing() throws IOException {
+        SearchHit searchHit = createTestItem(true);
+        XContentType xContentType = randomFrom(XContentType.values());
+        BytesReference originalBytes = toXContent(searchHit, xContentType, true);
         Predicate<String> pathsToExclude = path -> (path.endsWith("highlight") || path.endsWith("fields") || path.contains("_source")
                 || path.contains("inner_hits"));
         BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, pathsToExclude).bytes();
@@ -156,7 +175,7 @@ public class SearchHitTests extends ESTestCase {
             assertEquals(XContentParser.Token.END_OBJECT, parser.currentToken());
             assertNull(parser.nextToken());
         }
-        assertToXContentEquivalent(originalBytes, toXContent(parsed, xContentType, humanReadable), xContentType);
+        assertToXContentEquivalent(originalBytes, toXContent(parsed, xContentType, true), xContentType);
     }
 
     /**

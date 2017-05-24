@@ -19,6 +19,8 @@
 
 package org.elasticsearch.search;
 
+import com.carrotsearch.randomizedtesting.annotations.Repeat;
+
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.common.xcontent.ToXContent;
@@ -53,24 +55,43 @@ public class SearchHitsTests extends ESTestCase {
         XContentType xcontentType = randomFrom(XContentType.values());
         boolean humanReadable = randomBoolean();
         BytesReference originalBytes = toShuffledXContent(searchHits, xcontentType, ToXContent.EMPTY_PARAMS, humanReadable);
-        // we add a few random fields to check that parser is lenient on new fields
-        Predicate<String> pathsToExclude = path -> (path.endsWith("highlight") || path.endsWith("fields") || path.contains("_source"));
-        BytesReference withRandomFields = insertRandomFields(xcontentType, originalBytes, pathsToExclude).bytes();
         SearchHits parsed = null;
-        try (XContentParser parser = createParser(xcontentType.xContent(), withRandomFields)) {
+        try (XContentParser parser = createParser(xcontentType.xContent(), originalBytes)) {
             assertEquals(XContentParser.Token.START_OBJECT, parser.nextToken());
             while ((parser.nextToken()) != XContentParser.Token.END_OBJECT) {
-                if (SearchHits.Fields.HITS.equals(parser.currentName())) {
-                    parsed = SearchHits.fromXContent(parser);
-                } else {
-                    // skip any top level bogus field, this test only needs to check that "hits" are parsed correctly
-                    parser.skipChildren();
-                }
+                parsed = SearchHits.fromXContent(parser);
             }
             assertEquals(XContentParser.Token.END_OBJECT, parser.currentToken());
             assertNull(parser.nextToken());
         }
         assertToXContentEquivalent(originalBytes, toXContent(parsed, xcontentType, humanReadable), xcontentType);
+    }
+
+    /**
+     * This test adds randomized fields on all json objects and checks that we can parse it to
+     * ensure the parsing is lenient for forward compatibility.
+     * We need to exclude json objects with the "highlight" and "fields" field name since these
+     * objects allow arbitrary keys (the field names that are queries). Also we want to exclude
+     * to add anything under "_source" since it is not parsed.
+     */
+    @Repeat(iterations=100)
+    public void testFromXContentLenientParsing() throws IOException {
+        SearchHits searchHits = createTestItem();
+        XContentType xcontentType = randomFrom(XContentType.values());
+        BytesReference originalBytes = toXContent(searchHits, xcontentType, ToXContent.EMPTY_PARAMS, true);
+        Predicate<String> pathsToExclude = path -> (path.isEmpty() || path.endsWith("highlight") || path.endsWith("fields")
+                || path.contains("_source"));
+        BytesReference withRandomFields = insertRandomFields(xcontentType, originalBytes, pathsToExclude).bytes();
+        SearchHits parsed = null;
+        try (XContentParser parser = createParser(xcontentType.xContent(), withRandomFields)) {
+            assertEquals(XContentParser.Token.START_OBJECT, parser.nextToken());
+            while ((parser.nextToken()) != XContentParser.Token.END_OBJECT) {
+                parsed = SearchHits.fromXContent(parser);
+            }
+            assertEquals(XContentParser.Token.END_OBJECT, parser.currentToken());
+            assertNull(parser.nextToken());
+        }
+        assertToXContentEquivalent(originalBytes, toXContent(parsed, xcontentType, true), xcontentType);
     }
 
     public void testToXContent() throws IOException {
