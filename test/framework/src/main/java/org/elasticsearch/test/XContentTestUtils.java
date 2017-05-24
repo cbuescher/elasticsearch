@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.function.Supplier;
 
 import static org.elasticsearch.common.xcontent.ToXContent.EMPTY_PARAMS;
 
@@ -125,21 +126,21 @@ public final class XContentTestUtils {
         }
     }
 
-    public static List<String[]> getInsertPaths(XContentParser parser) throws IOException{
+    public static List<String> getInsertPaths(XContentParser parser) throws IOException{
         if (parser.currentToken() == null) {
             parser.nextToken();
         }
         return getInsertPaths(parser, new Stack<String>());
     }
 
-    private static List<String[]> getInsertPaths(XContentParser parser, Stack<String> currentPath) throws IOException {
+    private static List<String> getInsertPaths(XContentParser parser, Stack<String> currentPath) throws IOException {
         assert (parser.currentToken() == XContentParser.Token.START_OBJECT || parser.currentToken() == XContentParser.Token.START_ARRAY);
-        List<String[]> validPaths = new ArrayList<>();
+        List<String> validPaths = new ArrayList<>();
         if (parser.currentToken() == XContentParser.Token.START_OBJECT) {
             if (parser.currentName() != null) {
                 currentPath.push(parser.currentName());
             }
-            validPaths.add(currentPath.toArray(new String[currentPath.size()]));
+            validPaths.add(String.join(".", currentPath.toArray(new String[currentPath.size()])));
             while (parser.nextToken() != XContentParser.Token.END_OBJECT) {
                 if (parser.currentToken() == XContentParser.Token.START_OBJECT
                         || parser.currentToken() == XContentParser.Token.START_ARRAY) {
@@ -166,25 +167,32 @@ public final class XContentTestUtils {
         return validPaths;
     }
 
-    public static XContentBuilder insertIntoXContent(XContentParser original, String[] path, String key, Object value) throws IOException {
+    public static XContentBuilder insertIntoXContent(XContentParser original, List<String> paths, Supplier<String> key,
+            Supplier<Object> value) throws IOException {
         Map<String, Object> originalMap = original.mapOrdered();
-        Object insertObject = originalMap;
-        for (String pathPart : path) {
-            if (insertObject instanceof Map) {
-                insertObject = ((Map<String, Object>) insertObject).get(pathPart);
-                if (insertObject == null) {
-                    throw new IllegalStateException("Not a valid insert path: " + path);
+        for (String path : paths) {
+            Object insertObject = originalMap;
+            // an empty path means we want to insert into this map directly
+            if (path.isEmpty() == false) {
+                String[] pathParts = path.contains(".") ? path.split("\\.") : new String[] { path };
+                for (String pathPart : pathParts) {
+                    if (insertObject instanceof Map) {
+                        insertObject = ((Map<String, Object>) insertObject).get(pathPart);
+                        if (insertObject == null) {
+                            throw new IllegalStateException("Not a valid insert path: " + paths);
+                        }
+                    } else if (insertObject instanceof List) {
+                        int position = Integer.parseInt(pathPart);
+                        List<Object> insertList = (List<Object>) insertObject;
+                        if (position > insertList.size()) {
+                            throw new IllegalStateException("Not a valid insert path: " + paths);
+                        }
+                        insertObject = insertList.get(position);
+                    }
                 }
-            } else if (insertObject instanceof List) {
-                int position = Integer.parseInt(pathPart);
-                List<Object> insertList = (List<Object>) insertObject;
-                if (position > insertList.size()) {
-                    throw new IllegalStateException("Not a valid insert path: " + path);
-                }
-                insertObject = insertList.get(position);
             }
+            ((Map<String, Object>) insertObject).put(key.get(), value.get());
         }
-        ((Map<String, Object>) insertObject).put(key, value);
         XContentBuilder builder = XContentBuilder.builder(original.contentType().xContent());
         builder.map(originalMap);
         return builder;

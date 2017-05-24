@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
@@ -184,8 +185,8 @@ public class ESTestCaseTests extends ESTestCase {
 
         Map<String, Object> resultMap;
 
-        try (XContentParser parser = createParser(
-                insertRandomFields(builder.contentType(), builder.bytes(), Collections.singleton("foo1"), Collections.emptySet()))) {
+        Predicate<String> pathsToExclude = path -> path.endsWith("foo1");
+        try (XContentParser parser = createParser(insertRandomFields(builder.contentType(), builder.bytes(), pathsToExclude))) {
             resultMap = parser.map();
         }
         assertEquals(5, resultMap.keySet().size());
@@ -197,8 +198,8 @@ public class ESTestCaseTests extends ESTestCase {
         assertEquals(1, foo4List.size());
         assertEquals(2, ((Map<String, Object>) foo4List.get(0)).keySet().size());
 
-        try (XContentParser parser = createParser(
-                insertRandomFields(builder.contentType(), builder.bytes(), Collections.emptySet(), Collections.singleton("foo1")))) {
+        pathsToExclude = path -> path.contains("foo1");
+        try (XContentParser parser = createParser(insertRandomFields(builder.contentType(), builder.bytes(), pathsToExclude))) {
             resultMap = parser.map();
         }
         assertEquals(5, resultMap.keySet().size());

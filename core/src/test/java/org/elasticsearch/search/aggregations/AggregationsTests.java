@@ -77,9 +77,9 @@ import org.junit.Before;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonMap;
@@ -173,9 +173,8 @@ public class AggregationsTests extends ESTestCase {
         Aggregations aggregations = createTestInstance();
         BytesReference originalBytes = toShuffledXContent(aggregations, xContentType, params, randomBoolean());
         // we add a few random fields to check that parser is lenient on new fields
-        Set<String> exceptLevel = new HashSet<>();
-        Set<String> ignoreSubStructure = new HashSet<>();
-        BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, exceptLevel, ignoreSubStructure).bytes();
+        Predicate<String> pathsToExclude = path -> (path.endsWith("buckets") || path.endsWith("values"));
+        BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, pathsToExclude).bytes();
         try (XContentParser parser = createParser(xContentType.xContent(), withRandomFields)) {
             assertEquals(XContentParser.Token.START_OBJECT, parser.nextToken());
             assertEquals(XContentParser.Token.FIELD_NAME, parser.nextToken());

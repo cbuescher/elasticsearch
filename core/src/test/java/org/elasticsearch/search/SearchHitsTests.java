@@ -29,10 +29,8 @@ import org.elasticsearch.common.xcontent.json.JsonXContent;
 import org.elasticsearch.test.ESTestCase;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.function.Predicate;
 
 import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertToXContentEquivalent;
@@ -56,9 +54,8 @@ public class SearchHitsTests extends ESTestCase {
         boolean humanReadable = randomBoolean();
         BytesReference originalBytes = toShuffledXContent(searchHits, xcontentType, ToXContent.EMPTY_PARAMS, humanReadable);
         // we add a few random fields to check that parser is lenient on new fields
-        Set<String> exceptLevel = new HashSet<>(Arrays.asList("highlight", "fields"));
-        Set<String> ignoreSubStructure = new HashSet<>(Arrays.asList("_source"));
-        BytesReference withRandomFields = insertRandomFields(xcontentType, originalBytes, exceptLevel, ignoreSubStructure).bytes();
+        Predicate<String> pathsToExclude = path -> (path.endsWith("highlight") || path.endsWith("fields") || path.contains("_source"));
+        BytesReference withRandomFields = insertRandomFields(xcontentType, originalBytes, pathsToExclude).bytes();
         SearchHits parsed = null;
         try (XContentParser parser = createParser(xcontentType.xContent(), withRandomFields)) {
             assertEquals(XContentParser.Token.START_OBJECT, parser.nextToken());

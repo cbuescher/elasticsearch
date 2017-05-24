@@ -26,6 +26,7 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.json.JsonXContent;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,13 +67,13 @@ public class XContentTestUtilsTests extends ESTestCase {
         builder.endObject();
 
         try (XContentParser parser = XContentHelper.createParser(NamedXContentRegistry.EMPTY, builder.bytes(), builder.contentType())) {
-            List<String[]> insertPaths = XContentTestUtils.getInsertPaths(parser);
+            List<String> insertPaths = XContentTestUtils.getInsertPaths(parser);
             assertEquals(5, insertPaths.size());
-            assertThat(insertPaths, hasItem(equalTo(new String[]{})));
-            assertThat(insertPaths, hasItem(equalTo(new String[]{"list1", "2"})));
-            assertThat(insertPaths, hasItem(equalTo(new String[]{"list1", "4"})));
-            assertThat(insertPaths, hasItem(equalTo(new String[]{"inner1"})));
-            assertThat(insertPaths, hasItem(equalTo(new String[]{"inner1", "inner2"})));
+            assertThat(insertPaths, hasItem(equalTo("")));
+            assertThat(insertPaths, hasItem(equalTo("list1.2")));
+            assertThat(insertPaths, hasItem(equalTo("list1.4")));
+            assertThat(insertPaths, hasItem(equalTo("inner1")));
+            assertThat(insertPaths, hasItem(equalTo("inner1.inner2")));
         }
     }
 
@@ -81,16 +82,17 @@ public class XContentTestUtilsTests extends ESTestCase {
         builder.startObject();
         builder.endObject();
         try (XContentParser parser = XContentHelper.createParser(NamedXContentRegistry.EMPTY, builder.bytes(), builder.contentType())) {
-            builder = XContentTestUtils.insertIntoXContent(parser, new String[] {}, "inner1", new HashMap<>());
+            builder = XContentTestUtils.insertIntoXContent(parser, Collections.singletonList(""), () -> "inner1", () -> new HashMap<>());
         }
         try (XContentParser parser = XContentHelper.createParser(NamedXContentRegistry.EMPTY, builder.bytes(), builder.contentType())) {
-            builder = XContentTestUtils.insertIntoXContent(parser, new String[] {}, "field1", "value1");
+            builder = XContentTestUtils.insertIntoXContent(parser, Collections.singletonList(""), () -> "field1", () -> "value1");
         }
         try (XContentParser parser = XContentHelper.createParser(NamedXContentRegistry.EMPTY, builder.bytes(), builder.contentType())) {
-            builder = XContentTestUtils.insertIntoXContent(parser, new String[] { "inner1" }, "inner2", new HashMap<>());
+            builder = XContentTestUtils.insertIntoXContent(parser, Collections.singletonList("inner1"), () -> "inner2",
+                    () -> new HashMap<>());
         }
         try (XContentParser parser = XContentHelper.createParser(NamedXContentRegistry.EMPTY, builder.bytes(), builder.contentType())) {
-            builder = XContentTestUtils.insertIntoXContent(parser, new String[] { "inner1" }, "field2", "value2");
+            builder = XContentTestUtils.insertIntoXContent(parser, Collections.singletonList("inner1"), () -> "field2", () -> "value2");
         }
         try (XContentParser parser = XContentHelper.createParser(NamedXContentRegistry.EMPTY, builder.bytes(), builder.contentType())) {
             Map<String, Object> map = parser.map();

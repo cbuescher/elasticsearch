@@ -19,6 +19,8 @@
 
 package org.elasticsearch.search;
 
+import com.carrotsearch.randomizedtesting.annotations.Repeat;
+
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.action.OriginalIndices;
 import org.elasticsearch.common.bytes.BytesArray;
@@ -44,13 +46,12 @@ import org.elasticsearch.test.RandomObjects;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertToXContentEquivalent;
@@ -137,15 +138,16 @@ public class SearchHitTests extends ESTestCase {
         return hit;
     }
 
+    @Repeat(iterations=100)
     public void testFromXContent() throws IOException {
         SearchHit searchHit = createTestItem(true);
         boolean humanReadable = randomBoolean();
         XContentType xContentType = randomFrom(XContentType.values());
         BytesReference originalBytes = toShuffledXContent(searchHit, xContentType, ToXContent.EMPTY_PARAMS, humanReadable);
         // we add a few random fields to check that parser is lenient on new fields
-        Set<String> exceptLevel = new HashSet<>(Arrays.asList("highlight", "fields"));
-        Set<String> ignoreSubStructure = new HashSet<>(Arrays.asList("_source", "inner_hits"));
-        BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, exceptLevel, ignoreSubStructure).bytes();
+        Predicate<String> pathsToExclude = path -> (path.endsWith("highlight") || path.endsWith("fields") || path.contains("_source")
+                || path.contains("inner_hits"));
+        BytesReference withRandomFields = insertRandomFields(xContentType, originalBytes, pathsToExclude).bytes();
 
         SearchHit parsed;
         try (XContentParser parser = createParser(xContentType.xContent(), withRandomFields)) {
