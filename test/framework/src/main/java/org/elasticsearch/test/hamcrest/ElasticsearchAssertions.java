@@ -55,11 +55,6 @@ import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.io.stream.Streamable;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.NamedXContentRegistry;
-import org.elasticsearch.common.xcontent.ToXContent;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchModule;
@@ -784,20 +779,20 @@ public class ElasticsearchAssertions {
      * The comparison is done by parsing both into a map and comparing those two, so that keys ordering doesn't matter.
      * Also binary values (byte[]) are properly compared through arrays comparisons.
      */
-    public static void assertToXContentEquivalent(BytesReference expected, BytesReference actual, XContentType xContentType)
-            throws IOException {
-        //we tried comparing byte per byte, but that didn't fly for a couple of reasons:
-        //1) whenever anything goes through a map while parsing, ordering is not preserved, which is perfectly ok
-        //2) Jackson SMILE parser parses floats as double, which then get printed out as double (with double precision)
-        //Note that byte[] holding binary values need special treatment as they need to be properly compared item per item.
-        try (XContentParser actualParser = xContentType.xContent().createParser(NamedXContentRegistry.EMPTY, actual)) {
-            Map<String, Object> actualMap = actualParser.map();
-            try (XContentParser expectedParser = xContentType.xContent().createParser(NamedXContentRegistry.EMPTY, expected)) {
-                Map<String, Object> expectedMap = expectedParser.map();
-                assertMapEquals(expectedMap, actualMap);
-            }
-        }
-    }
+//    public static void assertToXContentEquivalent(BytesReference expected, BytesReference actual, XContentType xContentType)
+//            throws IOException {
+//        //we tried comparing byte per byte, but that didn't fly for a couple of reasons:
+//        //1) whenever anything goes through a map while parsing, ordering is not preserved, which is perfectly ok
+//        //2) Jackson SMILE parser parses floats as double, which then get printed out as double (with double precision)
+//        //Note that byte[] holding binary values need special treatment as they need to be properly compared item per item.
+//        try (XContentParser actualParser = xContentType.xContent().createParser(NamedXContentRegistry.EMPTY, actual)) {
+//            Map<String, Object> actualMap = actualParser.map();
+//            try (XContentParser expectedParser = xContentType.xContent().createParser(NamedXContentRegistry.EMPTY, expected)) {
+//                Map<String, Object> expectedMap = expectedParser.map();
+//                assertMapEquals(expectedMap, actualMap);
+//            }
+//        }
+//    }
 
     /**
      * Compares two maps recursively, using arrays comparisons for byte[] through Arrays.equals(byte[], byte[])

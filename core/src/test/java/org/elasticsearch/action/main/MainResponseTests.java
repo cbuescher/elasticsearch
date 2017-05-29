@@ -34,9 +34,7 @@ import org.elasticsearch.test.VersionUtils;
 import java.io.IOException;
 import java.util.Date;
 
-import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
 import static org.elasticsearch.test.EqualsHashCodeTestUtils.checkEqualsAndHashCode;
-import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertToXContentEquivalent;
 
 public class MainResponseTests extends ESTestCase {
 
@@ -67,7 +65,7 @@ public class MainResponseTests extends ESTestCase {
         assertEquals(mainResponse.getVersion(), parsed.getVersion());
         // we cannot recreate the "available" flag from xContent, but should be "true" if request came through
         assertEquals(true, parsed.isAvailable());
-        assertToXContentEquivalent(originalBytes, toXContent(parsed, xContentType, humanReadable), xContentType);
+        assertEqualsWithErrorMessageFromXContent(mainResponse, parsed, ToXContent.EMPTY_PARAMS, humanReadable);
     }
 
     public void testToXContent() throws IOException {

@@ -97,7 +97,6 @@ import org.elasticsearch.script.Script;
 import org.elasticsearch.script.ScriptContext;
 import org.elasticsearch.script.ScriptEngine;
 import org.elasticsearch.script.ScriptModule;
-import org.elasticsearch.script.ScriptService;
 import org.elasticsearch.script.ScriptType;
 import org.elasticsearch.search.MockSearchService;
 import org.elasticsearch.test.junit.listeners.LoggingListener;
@@ -139,12 +138,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.elasticsearch.common.util.CollectionUtils.arrayAsArrayList;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -1042,6 +1038,14 @@ public abstract class ESTestCase extends LuceneTestCase {
      * differences if they aren't equal.
      */
     public static <T extends ToXContent> void assertEqualsWithErrorMessageFromXContent(T expected, T actual) {
+        assertEqualsWithErrorMessageFromXContent(expected, actual, ToXContent.EMPTY_PARAMS, false);
+    }
+
+    /**
+     * Assert that two objects are equals, calling {@link ToXContent#toXContent(XContentBuilder, ToXContent.Params)} to print out their
+     * differences if they aren't equal.
+     */
+    public static <T extends ToXContent> void assertEqualsWithErrorMessageFromXContent(T expected, T actual, ToXContent.Params params, boolean humanreadable ) {
         if (Objects.equals(expected, actual)) {
             return;
         }
@@ -1053,12 +1057,18 @@ public abstract class ESTestCase extends LuceneTestCase {
         }
         try (XContentBuilder actualJson = JsonXContent.contentBuilder();
                 XContentBuilder expectedJson = JsonXContent.contentBuilder()) {
-            actualJson.startObject();
-            actual.toXContent(actualJson, ToXContent.EMPTY_PARAMS);
-            actualJson.endObject();
-            expectedJson.startObject();
-            expected.toXContent(expectedJson, ToXContent.EMPTY_PARAMS);
-            expectedJson.endObject();
+            actualJson.humanReadable(humanreadable);
+            expectedJson.humanReadable(humanreadable);
+            if (actual.isFragment()) {
+                actualJson.startObject();
+                expectedJson.startObject();
+            }
+            actual.toXContent(actualJson, params);
+            expected.toXContent(expectedJson, params);
+            if (actual.isFragment()) {
+                actualJson.endObject();
+                expectedJson.endObject();
+            }
             NotEqualMessageBuilder message = new NotEqualMessageBuilder();
             message.compareMaps(
                     XContentHelper.convertToMap(actualJson.bytes(), false).v2(),

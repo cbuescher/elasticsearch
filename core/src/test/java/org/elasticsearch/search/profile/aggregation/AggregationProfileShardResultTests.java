@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.elasticsearch.common.xcontent.XContentHelper.toXContent;
-import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertToXContentEquivalent;
 
 public class AggregationProfileShardResultTests extends ESTestCase {
 
@@ -64,7 +63,7 @@ public class AggregationProfileShardResultTests extends ESTestCase {
             assertEquals(XContentParser.Token.END_OBJECT, parser.nextToken());
             assertNull(parser.nextToken());
         }
-        assertToXContentEquivalent(originalBytes, toXContent(parsed, xContentType, humanReadable), xContentType);
+        assertEqualsWithErrorMessageFromXContent(profileResult, parsed, ToXContent.EMPTY_PARAMS, humanReadable);
     }
 
     public void testToXContent() throws IOException {
