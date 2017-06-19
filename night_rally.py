@@ -13,7 +13,8 @@ import time
 tracks = collections.OrderedDict()
 
 tracks["nested"] = [
-    ["nested-search-challenge", "4gheap"]
+    ["nested-search-challenge", "4gheap"],
+    ["nested-search-challenge", "1gheap"]
 ]
 
 tracks["geonames"] = [
@@ -22,18 +23,21 @@ tracks["geonames"] = [
     ["append-sorted-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
     ["append-no-conflicts-index-only-1-replica", "two_nodes"],
-    ["append-no-conflicts-index-only", "verbose_iw"]
+    ["append-no-conflicts-index-only", "verbose_iw"],
+    ["append-no-conflicts", "1gheap"],
 ]
 
 tracks["percolator"] = [
-    ["append-no-conflicts", "4gheap"]
+    ["append-no-conflicts", "4gheap"],
+    ["append-no-conflicts", "1gheap"]
 ]
 
 tracks["geopoint"] = [
     ["append-no-conflicts", "defaults"],
     ["append-no-conflicts-index-only", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only-1-replica", "two_nodes"]
+    ["append-no-conflicts-index-only-1-replica", "two_nodes"],
+    ["append-no-conflicts", "1gheap"],
 ]
 
 tracks["pmc"] = [
@@ -41,18 +45,21 @@ tracks["pmc"] = [
     ["append-no-conflicts", "4gheap"],
     ["append-sorted-no-conflicts", "4gheap"],
     ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only-1-replica", "two_nodes"]
+    ["append-no-conflicts-index-only-1-replica", "two_nodes"],
+    ["append-no-conflicts", "1gheap"],
 ]
 
 tracks["nyc_taxis"] = [
     ["append-no-conflicts", "4gheap"],
-    ["append-sorted-no-conflicts-index-only", "4gheap"]
+    ["append-sorted-no-conflicts-index-only", "4gheap"],
+    ["append-no-conflicts", "1gheap"],
 ]
 
 tracks["logging"] = [
     ["append-no-conflicts-index-only", "defaults"],
     ["append-no-conflicts", "4gheap"],
-    ["append-sorted-no-conflicts", "4gheap"]
+    ["append-sorted-no-conflicts", "4gheap"],
+    ["append-no-conflicts", "1gheap"],
 ]
 
 # default challenge / car per track
