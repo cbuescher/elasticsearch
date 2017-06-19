@@ -1,6 +1,5 @@
 ---
 
-# This is just a NOOP placeholder. In reality we will create the encrypted volume here.
 - hosts: macrobenchmarks-targets
   tasks:
   - name: Set up the encrypted data volume

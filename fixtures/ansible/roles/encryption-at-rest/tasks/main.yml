@@ -1,0 +1,10 @@
+---
+
+- include: '{{ system_item }}'
+  become: '{{ system != "win32nt" }}'
+  with_first_found:
+    - '{{ system }}/main.yml'
+    - unsupported.yml
+  loop_control:
+    loop_var: system_item
+  when: launch_encrypted_storage == 'y'

@@ -1,0 +1,12 @@
+# MACROBENCHMARKS NODES
+# ---------------------
+
+#TODO: Should we rename this or stick to the name in the infra repo?
+[elasticsearch-ci-slaves-macrobenchmarks]
+slave-551503.build.hetzner-dc17.elasticnet.co
+
+
+[macrobenchmarks-targets]
+target-551504.benchmark.hetzner-dc17.elasticnet.co
+
+[macrobenchmarks-targets:children]

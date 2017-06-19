@@ -1,0 +1,9 @@
+---
+
+- name: run fixtures on macrobenchmarks targets
+# =============================================
+  hosts: macrobenchmarks-targets
+  gather_facts: false
+# TODO: This depends on which fixtures have been specified via the Jenkins build
+  roles:
+    - { role: macrobenchmarks_targets, tags: macrobenchmarks_targets }

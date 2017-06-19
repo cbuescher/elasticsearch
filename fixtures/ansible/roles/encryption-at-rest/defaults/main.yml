@@ -1,0 +1,16 @@
+---
+
+default_linux_os_filesystem: ext4
+
+# whether or not to apply this role (only select nodes will override this)
+launch_encrypted_storage: false
+
+# encrypted device mountpoint
+encrypted_mount_point: /var/lib/jenkins
+
+# encrypted file system passphrase; this is not really sensitive as we are just interested in how builds behave on encrypted FSes.
+# details in #1716
+encrypted_volume_passphrase: elastic123
+
+encrypted_volume_passphrase_file: /etc/encrypted_volume_keyfile
+encrypted_volume_name: earjenkins

@@ -1,0 +1,10 @@
+---
+
+- name: update Rally on all affected machines before the benchmark
+# ================================================================
+# First the Rally master (coordinating node which is running on the (only) Jenkins slave node, then the Rally slaves (running
+# on the target machines)
+  hosts: elasticsearch-ci-slaves-macrobenchmarks, macrobenchmarks-targets
+  gather_facts: false
+  roles:
+    - { role: rally-update, tags: rally-update }

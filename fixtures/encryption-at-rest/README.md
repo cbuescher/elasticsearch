@@ -1,1 +1,0 @@
-Sets up a dm-crypted volume based on the [encrypted_storage Ansible role](https://github.com/elastic/infra/blob/master/ansible/roles/encrypted_storage/README.md) from the infra repo (although we'll need to copy the code from that role to this repo). 
