@@ -1,0 +1,7 @@
+---
+
+# DRY up these common expressions
+distribution_release : "{{ ansible_distribution_release | lower }}"
+distribution : "{{ ansible_distribution | lower }}"
+os_family: "{{ ansible_os_family | lower }}"
+system: "{{ ansible_system | lower }}"

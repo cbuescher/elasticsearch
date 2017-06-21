@@ -1,0 +1,4 @@
+---
+
+- debug:
+    msg: 'WARNING: Darwin systems are not fully supported by this role!'

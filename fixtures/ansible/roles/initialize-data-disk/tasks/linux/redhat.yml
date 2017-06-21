@@ -1,0 +1,11 @@
+---
+
+- name: install the cryptsetup package
+  package:
+    name: cryptsetup
+    state: present
+
+- name: set fact about default linux filesystem
+  set_fact:
+    default_linux_os_filesystem: xfs
+  when: ansible_distribution_major_version|int >= 7
