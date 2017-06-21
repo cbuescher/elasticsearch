@@ -1,0 +1,80 @@
+# vi: set ft=ruby :
+# -*- ruby -*-
+
+master_ip = '192.168.180.10'
+
+slave_oses = %w(
+  centos-7
+  ubuntu-16.04
+)
+
+nodes = slave_oses.collect do |os|
+  boxname = os.sub(/^(windows-\d+)(r\d)$/,'\1_\2')
+  {hostname: os, domain: 'benchmarks.ci.vagrant', box: "elastic/#{boxname}-x86_64"}
+end
+
+Vagrant.configure(2) do |config|
+  use_cachier = false
+  if Vagrant.has_plugin?('vagrant-cachier') and not ENV['VAGRANT_NO_CACHIER']
+    use_cachier = true
+    config.cache.scope = :machine
+  end
+
+  ENV['VAGRANT_FORCE_REFRESH_CACHE'] = 'true'
+
+  nodes.each do |node|
+
+    fqdn = node[:hostname] + '.' + node[:domain]
+
+    config.vm.define fqdn, autostart: node[:autostart] do |node_config|
+
+      node_config.vm.box = node[:box]
+      node_config.vm.hostname = fqdn
+
+      if node[:ip]
+        node_config.vm.network :private_network, ip: node[:ip]
+      else
+        node_config.vm.network :private_network, type: 'dhcp'
+      end
+
+      node_config.vm.provider :virtualbox do |vbox, override_config|
+        vbox.name = fqdn
+        vbox.cpus = 2
+        vbox.memory = node[:memory] || 4096
+        override_config.vm.synced_folder '..', '/vagrant'
+
+        # Workaround for https://github.com/fgrehm/vagrant-cachier/issues/175#issuecomment-233507989
+        if use_cachier and ['ubuntu-16.04', 'ubuntu-16.10'].any? { |os_substring| node[:box].include?(os_substring) }
+          override_config.cache.synced_folder_opts = {
+            owner: "_apt",
+            group: "_apt",
+            mount_options: ["dmode=777", "fmode=666"],
+          }
+        end
+
+        file_to_disk = File.realpath("tmp").to_s + "/disk.vdi"
+        vbox.customize ['createhd', '--filename', file_to_disk, '--size', 4*1024, '--format', 'VDI'] # Size is in MiB
+        vbox.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+      end
+
+      node_config.vm.provider :libvirt do |libvirt, override_config|
+        libvirt.cpus = 2
+        libvirt.memory = node[:memory] || 4096
+        override_config.vm.synced_folder './', '/vagrant', :nfs =>true, :mount_options => ["vers=3"]
+      end
+
+      node_config.ssh.forward_agent = true
+
+      node_config.vm.provision "shell", inline: <<-EOF
+      groupadd -g 1010 jenkins
+      useradd -u 1010 -g 1010 -s /bin/bash -m -k /etc/skel -d /var/lib/jenkins jenkins
+
+      mkfs.ext4 /dev/sdb
+      mkdir /buildtmp
+      #echo "/dev/sdb /buildtmp ext4 defaults 0 0" >> /etc/fstab
+      #mount /buildtmp
+      #chown -R vagrant:vagrant /buildtmp
+    EOF
+    end
+  end
+end
