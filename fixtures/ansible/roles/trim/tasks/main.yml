@@ -1,9 +1,5 @@
 ---
 
-# Maybe we need custom permissions for Jenkins in /etc/sudoers.d/ -> update macrobenchmark targets role in infra repo then.
-
-- hosts: macrobenchmarks-targets
-  tasks:
-  - name: Run the TRIM command
-      become_user: jenkins
-      command: /sbin/fstrim --all
+- name: Run the TRIM command
+  command: /sbin/fstrim --all
+  become: true
