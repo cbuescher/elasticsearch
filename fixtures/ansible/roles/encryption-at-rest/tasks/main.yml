@@ -7,4 +7,3 @@
     - unsupported.yml
   loop_control:
     loop_var: system_item
-  when: launch_encrypted_storage == 'y'
