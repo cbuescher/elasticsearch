@@ -174,7 +174,8 @@ def update_the_cache():
     json_data = json.dumps(
         dict({
             _group: list(ssh_config.keys()),
-            'macrobenchmarks-targets': list(all_hostnames),
+            'elasticsearch-ci-slaves-macrobenchmarks': [i for i in all_hostnames if 'coordinator' in i],
+            'macrobenchmarks-targets': [i for i in all_hostnames if 'target' in i],
             '_meta': meta
         }, **vagrant_groups(ssh_config)))
     cache = open(cache_file, 'w')
