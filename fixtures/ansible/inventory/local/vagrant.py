@@ -10,6 +10,9 @@ Example Vagrant configuration using this script:
       ansible.inventory_file = "./provision/inventory/vagrant.py"
       ansible.verbose = true
     end
+
+requires paramiko
+
 """
 
 # Copyright (C) 2013  Mark Mandel <mark@compoundtheory.com>
