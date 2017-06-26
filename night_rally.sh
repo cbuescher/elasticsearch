@@ -30,6 +30,9 @@ done
 NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 
+ANSIBLE_ALL_TAGS=(encryption-at-rest initialize-data-disk trim)
+ANSIBLE_SKIP_TAGS=( )
+ANSIBLE_SKIP_TAGS_STRING=""
 SELF_UPDATE=NO
 DRY_RUN=NO
 SKIP_S3=NO
@@ -42,6 +45,14 @@ REVISION="latest"
 REPLACE_RELEASE=${RELEASE}
 TARGET_HOST="localhost:9200"
 TAG=""
+
+
+# https://stackoverflow.com/a/8574392
+containsElement () {
+    local e
+    for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+    return 1
+}
 
 for i in "$@"
 do
@@ -118,18 +129,42 @@ then
     popd >/dev/null 2>&1
 fi
 
+############### TO BE CONVERTED TO A FUNCTION ###################
+OLDIFS=$IFS
+IFS=','
+
+for fixture in $FIXTURES
+do
+    if ! containsElement "$fixture" "${ANSIBLE_ALL_TAGS[@]}"; then
+        ANSIBLE_SKIP_TAGS+=("$fixture")
+    fi
+done
+IFS=$OLDIFS
+
+# join tags with a comma (,) character
+ANSIBLE_SKIP_TAGS_STRING=$(printf ",%s" "${ANSIBLE_SKIP_TAGS[@]}")
+ANSIBLE_SKIP_TAGS_STRING=${ANSIBLE_SKIP_TAGS_STRING:1}
+
+pushd . >/dev/null 2>&1
+
+cd fixtures/ansible
+ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml
+ansible-playbook -i inventory/production -u rally playbooks/setup.yml --skip-tags $ANSIBLE_SKIP_TAGS_STRING
+
+popd >/dev/null 2>&1
+
 if [ -n "${OVERRIDE_SRC_DIR}" ]
 then
-	NIGHT_RALLY_OVERRIDE="--override-src-dir=${OVERRIDE_SRC_DIR}"
+    NIGHT_RALLY_OVERRIDE="--override-src-dir=${OVERRIDE_SRC_DIR}"
 else
-	NIGHT_RALLY_OVERRIDE=""
+    NIGHT_RALLY_OVERRIDE=""
 fi
 
 if [ ${DRY_RUN} == YES ]
 then
-	NIGHT_RALLY_DRY_RUN="--dry-run"
+    NIGHT_RALLY_DRY_RUN="--dry-run"
 else
-	NIGHT_RALLY_DRY_RUN=""
+    NIGHT_RALLY_DRY_RUN=""
 fi
 
 # We need to pull down the current state of all reports from the S3 bucket as night_rally might be run on different nodes each day
