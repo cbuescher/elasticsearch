@@ -147,7 +147,7 @@ ANSIBLE_SKIP_TAGS_STRING=${ANSIBLE_SKIP_TAGS_STRING:1}
 
 pushd . >/dev/null 2>&1
 
-cd fixtures/ansible
+cd ${NIGHT_RALLY_HOME}/fixtures/ansible
 ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml
 ansible-playbook -i inventory/production -u rally playbooks/setup.yml --skip-tags $ANSIBLE_SKIP_TAGS_STRING
 
