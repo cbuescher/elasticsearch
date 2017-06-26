@@ -5,6 +5,6 @@
   hosts: macrobenchmarks-targets
   gather_facts: true
   roles:
+    - { role: trim, tags: trim }
     - { role: initialize-data-disk, tags: initialize-data-disk }
     - { role: encryption-at-rest, tags: encryption-at-rest }
-    - { role: trim, tags: trim }
