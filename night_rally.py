@@ -213,8 +213,8 @@ class NightlyCommand(SourceBasedCommand):
                          NightlyCommand.CONFIG_NAME, user_tag=None, override_src_dir=override_src_dir)
 
     def runnable(self, track, challenge, car):
-        # temporarily disable all 1gb benchmarks
-        return car != "1gheap"
+        # Run 1gb benchmarks  only every other day
+        return car != "1gheap" or self.effective_start_date.day % 2 == 1
 
 
 class AdHocCommand(SourceBasedCommand):
