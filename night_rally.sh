@@ -47,13 +47,6 @@ TARGET_HOST="localhost:9200"
 TAG=""
 
 
-# https://stackoverflow.com/a/8574392
-containsElement () {
-    local e
-    for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
-    return 1
-}
-
 for i in "$@"
 do
 case ${i} in
@@ -130,26 +123,28 @@ then
 fi
 
 ############### TO BE CONVERTED TO A FUNCTION ###################
-OLDIFS=$IFS
-IFS=','
-
-for fixture in $FIXTURES
+for fixture in "${ANSIBLE_ALL_TAGS[@]}"
 do
-    if ! containsElement "$fixture" "${ANSIBLE_ALL_TAGS[@]}"; then
+    if [[ $FIXTURES != *$fixture* ]] ; then
         ANSIBLE_SKIP_TAGS+=("$fixture")
     fi
 done
-IFS=$OLDIFS
 
-# join tags with a comma (,) character
-ANSIBLE_SKIP_TAGS_STRING=$(printf ",%s" "${ANSIBLE_SKIP_TAGS[@]}")
-ANSIBLE_SKIP_TAGS_STRING=${ANSIBLE_SKIP_TAGS_STRING:1}
+if [[ ${#ANSIBLE_SKIP_TAGS[@]} == 0 ]]; then
+    ANSIBLE_SKIP_TAGS_STRING=""
+else
+    # join tags with a comma (,) character
+    ANSIBLE_SKIP_TAGS_STRING=$(printf ",%s" "${ANSIBLE_SKIP_TAGS[@]}")
+    ANSIBLE_SKIP_TAGS_STRING=${ANSIBLE_SKIP_TAGS_STRING:1}
+    ANSIBLE_SKIP_TAGS_STRING="--skip-tags $ANSIBLE_SKIP_TAGS_STRING"
+fi
 
 pushd . >/dev/null 2>&1
 
 cd ${NIGHT_RALLY_HOME}/fixtures/ansible
+echo "About to run ansible-playbook ... with '$ANSIBLE_SKIP_TAGS_STRING'"
 ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml
-ansible-playbook -i inventory/production -u rally playbooks/setup.yml --skip-tags $ANSIBLE_SKIP_TAGS_STRING
+ansible-playbook -i inventory/production -u rally playbooks/setup.yml $ANSIBLE_SKIP_TAGS_STRING
 
 popd >/dev/null 2>&1
 
