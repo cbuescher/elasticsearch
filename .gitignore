@@ -97,3 +97,7 @@ target/
 
 #Pickles
 *.pk
+
+#Vagrant
+.vagrant/
+*.vdi

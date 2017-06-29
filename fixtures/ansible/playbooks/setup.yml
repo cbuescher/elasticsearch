@@ -1,0 +1,10 @@
+---
+
+- name: run fixtures on macrobenchmarks targets
+# =============================================
+  hosts: macrobenchmarks-targets
+  gather_facts: true
+  roles:
+    - { role: trim, tags: trim }
+    - { role: initialize-data-disk, tags: initialize-data-disk }
+    - { role: encryption-at-rest, tags: encryption-at-rest }

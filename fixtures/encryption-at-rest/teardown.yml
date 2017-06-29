@@ -1,9 +1,0 @@
----
-
-# This is just a NOOP placeholder. In reality we will replace the encrypted volume again with a plain ext4 volume.
-- hosts: macrobenchmarks-targets
-  tasks:
-  - name: Delete the encrypted data volume
-      become_user: jenkins
-      command: echo "NOOP"
-      when: false

@@ -1,0 +1,5 @@
+---
+
+- name: Run the TRIM command
+  command: /sbin/fstrim --all
+  become: true

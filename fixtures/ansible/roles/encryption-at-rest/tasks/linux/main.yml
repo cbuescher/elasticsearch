@@ -1,0 +1,97 @@
+---
+
+- include: '{{ distribution_item }}'
+  become: true
+  with_first_found:
+    - '{{ distribution_id }}.yml'
+    - '{{ distribution }}.yml'
+    - '{{ os_family }}.yml'
+  loop_control:
+    loop_var: distribution_item
+
+- name: umount data volume if applicable
+  mount:
+    src: '{{ data_device }}'
+    name: '{{ data_disk_mount_point }}'
+    fstype: '{{ default_linux_os_filesystem }}'
+    opts: 'defaults'
+    dump: 0
+    passno: 2
+    state: unmounted
+
+- name: remove data volume entry from fstab if applicable
+  mount:
+    src: '{{ data_device }}'
+    name: '{{ data_disk_mount_point }}'
+    fstype: '{{ default_linux_os_filesystem }}'
+    opts: 'defaults'
+    dump: 0
+    passno: 2
+    state: absent
+
+- name: populate passphrase file for encrypted device
+  copy:
+    content: '{{ encrypted_volume_passphrase }}'
+    dest: '{{ encrypted_volume_passphrase_file }}'
+    owner: root
+    group: root
+    mode: 0400
+
+- name: set up encrypted volume
+  shell: >
+    echo {{ encrypted_volume_passphrase }} | cryptsetup luksFormat {{ encrypted_device }}
+  register: luks_format_success
+
+- fail: msg="Unable to format {{ encrypted_device }} with LUKS"
+  when: luks_format_success | failed
+
+- name: setup LUKS slot key from file for the encrypted volume
+  shell: >
+    echo {{ encrypted_volume_passphrase }} | cryptsetup luksAddKey '{{ encrypted_device }}' '{{ encrypted_volume_passphrase_file }}'
+
+- name: open encrypted volume with LUKS
+  shell: >
+    echo {{ encrypted_volume_passphrase }} | cryptsetup open {{ encrypted_device }} {{ encrypted_volume_name }} --key-file {{ encrypted_volume_passphrase_file }}
+  register: luks_open_success
+
+- fail: msg="Unable to open {{ encrypted_device }} with LUKS"
+  when: luks_open_success | failed
+
+- name: format encrypted block device
+  command: mkfs.'{{ default_linux_os_filesystem }}' /dev/mapper/'{{ encrypted_volume_name }}'
+
+- name: retrieve UUID of encrypted block device
+  command: blkid -s UUID -o value '{{ encrypted_device }}'
+
+# The dir below, for the typical case of /var/lib/jenkins, will be re-owned by jenkins:jenkins by the jenkins_user role
+# when the user gets created
+- name: ensure presence of mount dir for encrypted volume
+  file:
+    path: '{{ encrypted_mount_point }}'
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0755'
+
+- name: configure crypttab to auto open encrypted volume
+  lineinfile:
+    dest: /etc/crypttab
+    line: '{{ encrypted_volume_name }} {{ encrypted_device }} {{ encrypted_volume_passphrase_file }}'
+
+- name: configure fstab and automatically mount encrypted volume
+  mount:
+    src: '/dev/mapper/{{ encrypted_volume_name }}'
+    name: '{{ encrypted_mount_point }}'
+    fstype: '{{ default_linux_os_filesystem }}'
+    opts: 'defaults'
+    dump: 0
+    passno: 2
+    state: mounted
+
+- name: ensure encrypted volume mount dir has the right ownership
+  file:
+    path: '{{ encrypted_mount_point }}'
+    state: directory
+    owner: jenkins
+    group: jenkins
+    mode: '0755'

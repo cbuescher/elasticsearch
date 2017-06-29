@@ -1,0 +1,6 @@
+---
+
+- name: install the cryptsetup package
+  package:
+    name: cryptsetup
+    state: present

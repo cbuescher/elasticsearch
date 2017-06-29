@@ -1,0 +1,1 @@
+Runs `fstrim` at the beginning of each benchmark to ensure repeatable conditions as [some workloads are quite sensitive](https://www.elastic.co/blog/is-your-elasticsearch-trimmed) w.r.t. trimming. 
