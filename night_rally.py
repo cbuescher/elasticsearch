@@ -223,11 +223,12 @@ class AdHocCommand(SourceBasedCommand):
 
 
 class ReleaseCommand(BaseCommand):
-    def __init__(self, effective_start_date, target_host, root_dir, distribution_version, configuration_name):
+    def __init__(self, effective_start_date, target_host, root_dir, distribution_version, configuration_name, tag):
         super().__init__(effective_start_date, target_host, root_dir)
         self.configuration_name = configuration_name
         self.pipeline = "from-distribution"
         self.distribution_version = distribution_version
+        self._tag = tag
 
     def runnable(self, track, challenge, car):
         # cannot run "sorted" challenges - it's a 6.0+ feature
@@ -243,9 +244,8 @@ class ReleaseCommand(BaseCommand):
                                           self.target_host, self.configuration_name, self.tag(), RALLY_BINARY)
         return cmd
 
-    @staticmethod
-    def tag():
-        return "env:bare"
+    def tag(self):
+        return self._tag
 
 
 class DockerCommand(BaseCommand):
@@ -601,7 +601,7 @@ def report(tracks, default_setup_per_track, reader, reporter):
             reporter.write_meta_report(track, meta_metrics["source_revision"])
 
 
-def copy_results_for_release_comparison(effective_start_date, dry_run):
+def copy_results_for_release_comparison(effective_start_date, dry_run, tag):
     if not dry_run:
         import client
         import elasticsearch.helpers
@@ -631,7 +631,7 @@ def copy_results_for_release_comparison(effective_start_date, dry_run):
             # pseudo version for stable comparisons
             src["distribution-version"] = "master"
             src["environment"] = "release"
-            src["user-tag"] = ReleaseCommand.tag()
+            src["user-tag"] = tag
             release_results.append(src)
         if release_results:
             logger.info("Copying %d result documents for [%s] to release environment." % (len(release_results), ts))
@@ -725,6 +725,10 @@ def parse_args():
         help="The Elasticsearch node that should be targeted",
         required=True)
     parser.add_argument(
+        "--fixtures",
+        help="A comma-separated list of fixtures that have been run",
+        required=True)
+    parser.add_argument(
         "--dry-run",
         help="Does not do anything, just output",
         default=False,
@@ -757,6 +761,7 @@ def main():
     nightly_mode = args.mode == "nightly"
     root_dir = config["root.dir"] if not args.override_root_dir else args.override_root_dir
     tag = args.tag
+    release_tag = "env:ear" if "encryption-at-rest" in args.fixtures else "env:bare"
 
     if release_mode:
         # use always the same name for release comparison benchmarks
@@ -765,7 +770,7 @@ def main():
             command = DockerCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
             tag = command.tag()
         else:
-            command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
+            command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name, release_tag)
             tag = command.tag()
     elif adhoc_mode:
         # copy data from templates directory to our dedicated output directory
@@ -781,7 +786,7 @@ def main():
     replace_release = args.replace_release if args.replace_release else args.release
 
     if nightly_mode:
-        copy_results_for_release_comparison(args.effective_start_date, args.dry_run)
+        copy_results_for_release_comparison(args.effective_start_date, args.dry_run, release_tag)
         # we want to deactivate old release entries, not old nightly entries
         deactivate_outdated_results(args.effective_start_date, "release", args.release, tag, args.dry_run)
     else:

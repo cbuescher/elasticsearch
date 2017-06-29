@@ -139,14 +139,17 @@ else
     ANSIBLE_SKIP_TAGS_STRING="--skip-tags $ANSIBLE_SKIP_TAGS_STRING"
 fi
 
-pushd . >/dev/null 2>&1
-
-cd ${NIGHT_RALLY_HOME}/fixtures/ansible
 echo "About to run ansible-playbook ... with '$ANSIBLE_SKIP_TAGS_STRING'"
-ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml
-ansible-playbook -i inventory/production -u rally playbooks/setup.yml $ANSIBLE_SKIP_TAGS_STRING
+if [ ${DRY_RUN} == NO ]
+then
+    pushd . >/dev/null 2>&1
 
-popd >/dev/null 2>&1
+    cd ${NIGHT_RALLY_HOME}/fixtures/ansible
+    ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml
+    ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
+
+    popd >/dev/null 2>&1
+fi
 
 if [ -n "${OVERRIDE_SRC_DIR}" ]
 then
@@ -202,7 +205,7 @@ fi
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE} --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --revision="${REVISION}" --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}" --tag="${TAG}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE} --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}" --tag="${TAG}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
