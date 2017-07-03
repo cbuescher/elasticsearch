@@ -234,6 +234,9 @@ class ReleaseCommand(BaseCommand):
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if int(self.distribution_version[0]) < 6:
             return "sorted" not in challenge
+        # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
+        if car == "1gheap":
+            return False
         return True
 
     def command_line(self, track, challenge, car):
@@ -256,7 +259,7 @@ class DockerCommand(BaseCommand):
         self.distribution_version = distribution_version.replace("Docker ", "")
 
     def runnable(self, track, challenge, car):
-        if car in ["two_nodes", "verbose_iw"]:
+        if car in ["two_nodes", "verbose_iw", "1gheap"]:
             return False
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if int(self.distribution_version[0]) < 6:
