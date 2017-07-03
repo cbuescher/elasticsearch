@@ -231,12 +231,12 @@ class ReleaseCommand(BaseCommand):
         self._tag = tag
 
     def runnable(self, track, challenge, car):
-        # cannot run "sorted" challenges - it's a 6.0+ feature
-        if int(self.distribution_version[0]) < 6:
-            return "sorted" not in challenge
         # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
         if car == "1gheap":
             return False
+        # cannot run "sorted" challenges - it's a 6.0+ feature
+        if int(self.distribution_version[0]) < 6:
+            return "sorted" not in challenge
         return True
 
     def command_line(self, track, challenge, car):
@@ -770,16 +770,21 @@ def main():
         # use always the same name for release comparison benchmarks
         env_name = sanitize(args.mode)
         if args.release.startswith("Docker"):
+            logger.info("Running Docker release benchmarks for release [%s] against [%s]." % (args.release, args.target_host))
             command = DockerCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
             tag = command.tag()
         else:
+            logger.info("Running release benchmarks for release [%s] against [%s] (release tag is [%s])."
+                        % (args.release, args.target_host, release_tag))
             command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name, release_tag)
             tag = command.tag()
     elif adhoc_mode:
+        logger.info("Running adhoc benchmarks for revision [%s] against [%s]." % (args.revision, args.target_host))
         # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
         command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.tag, args.override_src_dir)
     else:
+        logger.info("Running nightly benchmarks against [%s]." % args.target_host)
         env_name = NightlyCommand.CONFIG_NAME
         command = NightlyCommand(args.effective_start_date, args.target_host, root_dir, args.override_src_dir)
 
