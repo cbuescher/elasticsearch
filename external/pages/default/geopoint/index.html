@@ -26,50 +26,25 @@
 
     <script type="text/javascript">
 var charts = {
-  init: function() {
+  init: function(resultsChart, comparisonChart) {
+    this.resultsChart = resultsChart;
+    this.comparisonChart = comparisonChart;
     charts.toggleCompare($("#checkToggleCompare")[0]);
   },
 
   showResults: function() {
-    var annotationSource = false;
-
-    charts.indexingThroughput = chartingLib.renderChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', 'indexing_throughput_annotations.json');
-    charts.totalTimes = chartingLib.renderChart('indexing_total_times', 'Total times', 'Time [min]', 'indexing_total_times_annotations.json');
-    charts.segmentMemory = chartingLib.renderChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', annotationSource);
-    charts.cpuUsage = chartingLib.renderChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', 'indexing_cpu_usage_annotations.json')
-    charts.diskUsage = chartingLib.renderChart('disk_usage', 'Index disk usage', '[GB]', 'disk_usage_annotations.json'),
-    charts.segmentCounts = chartingLib.renderChart('segment_counts', 'Index segment counts', 'Segment count', 'segment_counts_annotations.json'),
-    charts.queryLatency = chartingLib.renderChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', 'search_latency_queries_annotations.json'),
-    charts.statsLatency = chartingLib.renderChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', annotationSource),
-    charts.gcTimes = chartingLib.renderChart('gc_times', 'GC times', 'Total GC runtime [s]', 'gc_times_annotations.json')
-
-    chartingLib.synchronize([
-      charts.indexingThroughput,
-      charts.totalTimes,
-      charts.segmentMemory,
-      charts.cpuUsage,
-      charts.diskUsage,
-      charts.segmentCounts,
-      charts.queryLatency,
-      charts.statsLatency,
-      charts.gcTimes
-    ]);
+    this.showChart(this.resultsChart);
   },
 
   compare: function() {
-    // workaround for a deficiency in dygraphs bar charts and CSV data sources
-    var versions = ["1.7.6", "2.4.5", "5.4.0", "master", "Docker 5.4.0"];
-
-    charts.indexingThroughput = chartingLib.renderBarChart('indexing_throughput', 'Indexing throughput', 'Mean Throughput [docs/s]', versions);
-    charts.totalTimes = chartingLib.renderBarChart('indexing_total_times', 'Total times', 'Time [min]', versions);
-    charts.segmentMemory = chartingLib.renderBarChart('segment_total_memory', 'Segment total heap used', 'Heap used [MB]', versions);
-    charts.cpuUsage = chartingLib.renderBarChart('indexing_cpu_usage', 'Indexing CPU usage', 'CPU usage [%]', versions)
-    charts.diskUsage = chartingLib.renderBarChart('disk_usage', 'Index disk usage', '[GB]', versions),
-    charts.segmentCounts = chartingLib.renderBarChart('segment_counts', 'Index segment counts', 'Segment count', versions),
-    charts.queryLatency = chartingLib.renderBarChart('search_latency_queries', 'Search Latency', '99th Percentile Latency [ms]', versions),
-    charts.statsLatency = chartingLib.renderBarChart('search_latency_stats', 'Stats Latency', '99th Percentile Latency [ms]', versions),
-    charts.gcTimes = chartingLib.renderBarChart('gc_times', 'GC times', 'Total GC runtime [s]', versions)
+    this.showChart(this.comparisonChart);
   },
+
+
+  showChart: function(chartId) {
+    $("#charts").html("<iframe id=\"charts\" src=\"https://elasticsearch-benchmark-analytics.elastic.co/app/kibana#/dashboard/" + chartId + "?embed=true&_g=(refreshInterval%3A(display%3AOff%2Cpause%3A!f%2Cvalue%3A0)%2Ctime%3A(from%3Anow-1y%2Cmode%3Aquick%2Cto%3Anow))\" height=\"100%\" width=\"100%\" frameBorder=\"0\"></iframe>");
+  },
+
 
   toggleCompare: function(e) {
     if (e.checked) {
@@ -79,9 +54,13 @@ var charts = {
     }
   }
 }
-
-
     </script>
+
+    <style>
+body,html,.main-display-area,.col-md-12 {
+   height:100%;
+}
+    </style>
 </head>
 
 <body>
@@ -101,19 +80,8 @@ var charts = {
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
                 <li><a href="../geonames/index.html">Geonames</a></li>
-                <li class="dropdown active">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Geopoint <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="#indexing_throughput">Indexing Throughput</a></li>
-                        <li><a href="#indexing_total_times">Total times</a></li>
-                        <li><a href="#segment_total_memory">Segment total heap used</a></li>
-                        <!--<li><a href="#indexing_cpu_usage">Indexing CPU usage</a></li>-->
-                        <li><a href="#disk_usage">Index disk usage</a></li>
-                        <li><a href="#segment_counts">Index segment counts</a></li>
-                        <li><a href="#search_latency_queries">Search Latency</a></li>
-                        <li><a href="#search_latency_stats">Stats Latency</a></li>
-                        <li><a href="#gc_times">GC times</a></li>
-                    </ul>
+                <li class="active">
+                    <a href="#">Geopoint</a>
                 </li>
                 <li><a href="../percolator/index.html">Percolator</a></li>
                 <li><a href="../pmc/index.html">PMC</a></li>
@@ -127,39 +95,13 @@ var charts = {
 
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
-            <h3>Overview</h3>
-            <p>The geopoint data set contains geo data from PlanetOSM. They are stored with type <code>geo_point</code>. The purpose of the
-                benchmark is to evaluate the performance of different geo queries in Elasticsearch. We run the following variations (which
-                we call "challenges" in Rally):</p>
-            <ul>
-                <li><strong>Append</strong>: Indexes the whole document corpus using Elasticsearch default settings. We only adjust the
-                    number of replicas as we benchmark a single node cluster and Rally will only start the benchmark if the cluster turns
-                    green. Document ids are unique so all index operations are append only. After that a couple of queries are run in
-                    parallel by multiple clients.
-                </li>
-                <li><strong>Id Conflicts</strong>: Indexes the whole document corpus using a setup that will lead to a larger indexing
-                    throughput than the default settings. Rally will produce duplicate ids in 25% of all documents (not configurable) so we
-                    can simulate a scenario with appends most of the time and some updates in between.
-                </li>
-            </ul>
-            <p>The benchmarks are run either for an out of the box configuration of Elasticsearch ("default settings") or with a larger heap
-                of 4GB ("4g heap"). For more details please refer to the <a
-                        href="https://github.com/elastic/rally-tracks/blob/master/geopoint/track.json">geopoint track specification</a> and
-                have a look at our <a href="../index.html">benchmarking methodology</a>).</p>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <h3>Results</h3>
             <div class="alert alert-success alert-dismissible" role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <strong>Hint</strong> Click and drag to zoom. Double-click to zoom out.
-            </div>
-            <div class="alert alert-success alert-dismissible" role="alert">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <strong>Hint</strong> Click a data point to see the diff between it and the previous race.
+                <strong>Hint</strong> These diagrams are just provided as an overview. Please go to the
+                <a href="https://elasticsearch-benchmark-analytics.elastic.co/app/kibana#/dashboard/00bf2a80-3973-11e7-8727-77c9f451e7f2">Kibana dashboard</a>
+                if you want to analyze the results in more detail.
             </div>
             <div>
                 <input type="checkbox" id="checkToggleCompare" onClick="charts.toggleCompare(this)">
@@ -168,97 +110,11 @@ var charts = {
         </div>
     </div>
 
-    <div class="row">
-        <!-- weird, dygraph needs label div *before* the graph in the DOM, otherwise it will not work -->
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_indexing_throughput_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="indexing_throughput" id="indexing_throughput"></a>
-            <div id="chart_indexing_throughput" class="benchmark-chart"></div>
+    <div class="row" style="height:220em">
+        <div class="col-md-12">
+            <div id="charts" style="width:100%; height:100%"></div>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_indexing_total_times_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="indexing_total_times" id="indexing_total_times"></a>
-            <div id="chart_indexing_total_times" class="benchmark-chart"></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_segment_total_memory_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="segment_total_memory" id="segment_total_memory"></a>
-            <div id="chart_segment_total_memory" class="benchmark-chart"></div>
-        </div>
-    </div>
-
-    <div class="row" style="display:none">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_indexing_cpu_usage_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="indexing_cpu_usage" id="indexing_cpu_usage"></a>
-            <div id="chart_indexing_cpu_usage" class="benchmark-chart"></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_disk_usage_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="disk_usage" id="disk_usage"></a>
-            <div id="chart_disk_usage" class="benchmark-chart"></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_segment_counts_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="segment_counts" id="segment_counts"></a>
-            <div id="chart_segment_counts" class="benchmark-chart"></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_search_latency_queries_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="search_latency_queries" id="search_latency_queries"></a>
-            <div id="chart_search_latency_queries" class="benchmark-chart"></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_search_latency_stats_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="search_latency_stats" id="search_latency_stats"></a>
-            <div id="chart_search_latency_stats" class="benchmark-chart"></div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2 col-md-push-10">
-            <div id="chart_gc_times_labels"></div>
-        </div>
-        <div class="col-md-10 col-md-pull-2">
-            <a name="gc_times" id="gc_times"></a>
-            <div id="chart_gc_times" class="benchmark-chart"></div>
-        </div>
-    </div>
-
 </div> <!-- /container -->
 
 
@@ -267,12 +123,10 @@ var charts = {
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="../assets/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="../assets/js/dygraph-combined.js"></script>
-<script type="text/javascript" src="../assets/js/synchronizer.js"></script>
-<script type="text/javascript" src="../assets/js/charts.js"></script>
 <script>
-  $(document).ready(charts.init);
-
+  $(document).ready(function() {
+    charts.init("00bf2a80-3973-11e7-8727-77c9f451e7f2", "99a96120-6236-11e7-9b79-cdddacd7f84a");
+  });
 
 </script>
 </body>
