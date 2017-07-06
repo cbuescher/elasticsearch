@@ -62,6 +62,10 @@ tracks["logging"] = [
     ["append-no-conflicts", "1gheap"],
 ]
 
+tracks["noaa"] = [
+    ["append-no-conflicts", "defaults"],
+]
+
 # default challenge / car per track
 defaults = {
     "geonames": ("append-no-conflicts", "defaults"),
@@ -71,6 +75,7 @@ defaults = {
     "nyc_taxis": ("append-no-conflicts", "4gheap"),
     "nested": ("nested-search-challenge", "4gheap"),
     "logging": ("append-no-conflicts", "4gheap"),
+    "noaa": ("append-no-conflicts", "defaults"),
 }
 
 config = {
