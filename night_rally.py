@@ -485,14 +485,24 @@ class Reporter:
         p = self._output_report_path(track)
         if not self.compare_mode:
             self._write_report("%s/%s.csv" % (p, report_name), formatted_data)
-        self._insert_comparison_data("%s/%s_comparison.csv" % (p, report_name), formatted_data)
+        output_path = "%s/%s_comparison.csv" % (p, report_name)
+        # noinspection PyBroadException
+        try:
+            self._insert_comparison_data(output_path, formatted_data)
+        except BaseException:
+            logger.exception("Failed to write comparison data to [%s]." % output_path)
+
         # write the comparison data again for our adhoc benchmark templates. master is always considered our baseline for adhoc benchmarks.
         # We could support arbitrary baselines but the problem is the graphing library that is pretty picky about the data in the source
         # CSV file and that's why we limit ourselves to master as a baseline for the moment.
         if self.release_name == "master":
             adhoc_path = self._adhoc_template_path(track)
             logger.info("Writing comparison data for [%s] also to template directory [%s]." % (self.release_name, adhoc_path))
-            self._insert_comparison_data("%s/%s_comparison.csv" % (adhoc_path, report_name), formatted_data)
+            # noinspection PyBroadException
+            try:
+                self._insert_comparison_data("%s/%s_comparison.csv" % (adhoc_path, report_name), formatted_data)
+            except BaseException:
+                logger.exception("Failed to write comparison data for [%s] to template directory [%s]." % (self.release_name, adhoc_path))
 
     def copy_template(self):
         # prevent stupid mistakes
