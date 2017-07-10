@@ -1,12 +1,10 @@
 import argparse
 import collections
-import csv
 import datetime
 import errno
 import fileinput
 import logging
 import os
-import re
 import shutil
 import time
 
@@ -307,317 +305,9 @@ def run_rally(tracks, command, dry_run=False, system=os.system):
     return rally_failure
 
 
-def v(d, k):
-    try:
-        return d[k]
-    except KeyError:
-        return ""
-
-
 #################################################
 # Reporting
 #################################################
-
-METRICS_TO_KEY = {
-    "Median Throughput": "median_indexing_throughput",
-    "Total Young Gen GC": "young_gen_gc",
-    "Total Old Gen GC": "old_gen_gc",
-    "Indexing time": "indexing_time",
-    "Refresh time": "refresh_time",
-    "Flush time": "flush_time",
-    "Merge time": "merge_time",
-    "Merge throttle time": "merge_throttle_time",
-    "Segment count": "segment_count",
-    "Index size": "index_size",
-    "Totally written": "totally_written",
-    "Heap used for segments.*": "mem_segments",
-    "Heap used for doc values.*": "mem_doc_values",
-    "Heap used for terms": "mem_terms",
-    "Heap used for norms": "mem_norms",
-    "Heap used for points": "mem_points",
-    "Heap used for stored fields": "mem_fields",
-    "99(\.0)?th percentile service time": "query_latency_p99",
-    "Merge time \(.*": "merge_time_parts"
-}
-
-META_METRICS_TO_KEY = {
-    "Elasticsearch source revision": "source_revision"
-}
-
-
-def is_default_setup(default_setup, current_setup):
-    current_challenge, current_car = current_setup
-    default_challenge, default_car = default_setup
-
-    return current_challenge == default_challenge and current_car == default_car
-
-
-def is_multi_valued(metric_key):
-    return metric_key in ["query_latency_p99", "merge_time_parts"]
-
-
-def is_indexing_operation(op_name):
-    return op_name.startswith("index") and not op_name.endswith("stats")
-
-
-def key_for(metric_pattern, metric_key, metric_name, op_name):
-    # force full regex match
-    if re.match("^%s$" % metric_pattern, metric_name):
-        if metric_key == "median_indexing_throughput":
-            if is_indexing_operation(op_name):
-                return metric_key
-            else:
-                return None
-        elif metric_key == "query_latency_p99":
-            if op_name == "index-stats":
-                return "latency_indices_stats_p99"
-            elif op_name == "node-stats":
-                return "latency_nodes_stats_p99"
-            elif is_indexing_operation(op_name) or op_name == "force-merge":
-                return None
-        return metric_key
-    return None
-
-
-def meta_key_for(metric_pattern, metric_key, metric_name):
-    if re.match(metric_pattern, metric_name):
-        return metric_key
-    return None
-
-
-def extract_metrics(source_report):
-    metrics = {}
-    for row in csv.reader(source_report):
-        lap = row[0]
-        # Don't consider any metrics except the final one
-        if lap == "All":
-            for metric_pattern, metric_key in METRICS_TO_KEY.items():
-                metric_name = row[1]
-                op_name = row[2]
-                metric_value = row[3]
-
-                final_key = key_for(metric_pattern, metric_key, metric_name, op_name)
-                if final_key:
-                    if is_multi_valued(final_key):
-                        if final_key not in metrics:
-                            metrics[final_key] = []
-                        metrics[final_key].append(metric_value)
-                    else:
-                        metrics[final_key] = metric_value
-    return metrics
-
-
-def extract_meta_metrics(source_meta_report):
-    meta_metrics = {}
-    for row in csv.reader(source_meta_report):
-        for metric_pattern, metric_key in META_METRICS_TO_KEY.items():
-            metric_name = row[0]
-            metric_value = row[1]
-            final_key = meta_key_for(metric_pattern, metric_key, metric_name)
-            if final_key:
-                if is_multi_valued(final_key):
-                    if final_key not in meta_metrics:
-                        meta_metrics[final_key] = []
-                    meta_metrics[final_key].append(metric_value)
-                else:
-                    meta_metrics[final_key] = metric_value
-    return meta_metrics
-
-
-def insert(lines, replace_release, new_release_name, data):
-    new_lines = []
-    found = False
-    for line in lines:
-        if line.startswith(replace_release):
-            new_lines.append("%s,%s" % (new_release_name, data))
-            found = True
-        else:
-            new_lines.append(line)
-    if not found:
-        new_lines.append("%s,%s" % (new_release_name, data))
-    return new_lines
-
-
-class MetricReader:
-    def __init__(self, effective_start_date, root_dir):
-        self.timestamp = date_for_path(effective_start_date)
-        self.root_dir = root_dir
-        self.report_root_dir = config["report.base.dir"]
-
-    def metrics(self, track, challenge, car):
-        report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv" % (self.root_dir, self.report_root_dir, self.timestamp, track, challenge, car)
-        if not os.path.isfile(report_path):
-            logger.warn("[%s] does not exist. Skipping track [%s], challenge [%s], car [%s]."
-                        % (report_path, track, challenge, car))
-            return None
-
-        with open(report_path) as csvfile:
-            return extract_metrics(csvfile)
-
-    def meta_metrics(self, track, challenge, car):
-        meta_report_path = "%s/%s/rally/%s/%s/%s/%s/report.csv.meta" % (self.root_dir, self.report_root_dir, self.timestamp, track, challenge, car)
-        if not os.path.isfile(meta_report_path):
-            logger.warn("Could not find [%s]. No git meta-data will be available for this trial run." % meta_report_path)
-            return None
-
-        with open(meta_report_path) as csvfile:
-            return extract_meta_metrics(csvfile)
-
-
-class Reporter:
-    def __init__(self, root_dir, effective_start_date, adhoc_mode, compare_mode, dry_run, replace_release, release_name):
-        self.report_timestamp = date_for_cmd_param(effective_start_date)
-        self.report_root_dir = config["report.base.dir"]
-        self.root_dir = root_dir
-        self.adhoc_mode = adhoc_mode
-        self.compare_mode = compare_mode
-        self.dry_run = dry_run
-        self.replace_release = replace_release
-        self.release_name = release_name
-        self.adhoc_template_root_path = "%s/%s/templates" % (self.root_dir, self.report_root_dir)
-        if self.adhoc_mode:
-            self.output_root_path = "%s/%s/out/%s" % (self.root_dir, self.report_root_dir, sanitize(self.release_name))
-        else:
-            self.output_root_path = "%s/%s/out" % (self.root_dir, self.report_root_dir)
-
-    def __call__(self, track, report_name, data):
-        formatted_data = "%s\n" % ",".join(data)
-        p = self._output_report_path(track)
-        if not self.compare_mode:
-            self._write_report("%s/%s.csv" % (p, report_name), formatted_data)
-        output_path = "%s/%s_comparison.csv" % (p, report_name)
-        # noinspection PyBroadException
-        try:
-            self._insert_comparison_data(output_path, formatted_data)
-        except BaseException:
-            logger.exception("Failed to write comparison data to [%s]." % output_path)
-
-        # write the comparison data again for our adhoc benchmark templates. master is always considered our baseline for adhoc benchmarks.
-        # We could support arbitrary baselines but the problem is the graphing library that is pretty picky about the data in the source
-        # CSV file and that's why we limit ourselves to master as a baseline for the moment.
-        if self.release_name == "master":
-            adhoc_path = self._adhoc_template_path(track)
-            logger.info("Writing comparison data for [%s] also to template directory [%s]." % (self.release_name, adhoc_path))
-            # noinspection PyBroadException
-            try:
-                self._insert_comparison_data("%s/%s_comparison.csv" % (adhoc_path, report_name), formatted_data)
-            except BaseException:
-                logger.exception("Failed to write comparison data for [%s] to template directory [%s]." % (self.release_name, adhoc_path))
-
-    def copy_template(self):
-        # prevent stupid mistakes
-        if self.adhoc_mode:
-            logger.info("Copying most recent templates from [%s] to [%s]." % (self.adhoc_template_root_path, self.output_root_path))
-            if not self.dry_run:
-                # ensure that the target directory does NOT exist
-                shutil.rmtree(self.output_root_path, ignore_errors=True)
-                shutil.copytree(self.adhoc_template_root_path, self.output_root_path)
-
-    def write_meta_report(self, track, revision):
-        if not self.compare_mode:
-            with open("%s/source_revision.csv" % self._output_report_path(track), "a") as f:
-                f.write("%s,%s\n" % (self.report_timestamp, revision))
-
-    def _output_report_path(self, track):
-            return "%s/%s" % (self.output_root_path, track)
-
-    def _adhoc_template_path(self, track):
-        return "%s/%s" % (self.adhoc_template_root_path, track)
-
-    def _write_report(self, file_name, data):
-        with open(file_name, "a") as of:
-            of.write("%s,%s" % (self.report_timestamp, data))
-
-    def _insert_comparison_data(self, file_name, data):
-        # in ad-hoc mode we're bound to a constant name due graphing library constraints (it cannot get the data series name from the CSV)
-        series_name = "Adhoc" if self.adhoc_mode else self.release_name
-        with open(file_name, "r+") as f:
-            lines = f.readlines()
-            new_lines = insert(lines, self.replace_release, series_name, data)
-            f.seek(0)
-            f.writelines(new_lines)
-            f.truncate()
-
-
-def report(tracks, default_setup_per_track, reader, reporter):
-    """
-    Publishes all data from the provided trial run.
-
-    :param tracks: A hash of all tracks that have been run and their challenges.
-    :param default_setup_per_track: A hash of the default challenge / car per track.
-    :param reader: A ``Reader`` instance that can read the race results.
-    :param reporter: A ``Reporter`` instance that can write the result files.
-
-    """
-
-    for track, setups in tracks.items():
-        segment_count_metrics = []
-        indexing_throughput_metrics = []
-        meta_metrics = None
-        for setup in setups:
-            challenge, car = setup
-            current_is_default = is_default_setup(default_setup_per_track[track], setup)
-
-            metrics = reader.metrics(track, challenge, car)
-            if not metrics:
-                continue
-            meta_metrics = reader.meta_metrics(track, challenge, car)
-
-            # "verbose_iw" is just a tool to get the merge time parts stats. We actually do not care about segment counts and the indexing
-            # throughput in this case. So we'll just skip it.
-            if car != "verbose_iw":
-                # Beware: this one is one column per series!
-                segment_count_metrics.append(metrics.get("segment_count", ""))
-                indexing_throughput_metrics.append(metrics.get("median_indexing_throughput", ""))
-
-            if "merge_time_parts" in metrics:
-                reporter(track, "merge_parts", metrics["merge_time_parts"])
-
-            if current_is_default:
-                if "cpu_usage" in metrics:
-                    reporter(track, "indexing_cpu_usage", [metrics["cpu_usage"]])
-
-                if "young_gen_gc" in metrics or "old_gen_gc" in metrics:
-                    reporter(track, "gc_times", [v(metrics, "young_gen_gc"), v(metrics, "old_gen_gc")])
-
-                if "latency_indices_stats_p99" in metrics or "latency_nodes_stats_p99" in metrics:
-                    reporter(track, "search_latency_stats", [v(metrics, "latency_indices_stats_p99"), v(metrics, "latency_nodes_stats_p99")])
-
-                if "mem_segments" in metrics:
-                    # Date,Total heap used (MB),Doc values (MB),Terms (MB),Norms (MB),Stored fields (MB),Points (MB)
-                    total_memory = [v(metrics, "mem_segments"),
-                                    v(metrics, "mem_doc_values"),
-                                    v(metrics, "mem_terms"),
-                                    v(metrics, "mem_norms"),
-                                    v(metrics, "mem_fields"),
-                                    v(metrics, "mem_points")]
-                    reporter(track, "segment_total_memory", total_memory)
-
-                if "indexing_time" in metrics:
-                    # Date,Indexing time (min),Merge time (min),Refresh time (min),Flush time (min),Merge throttle time (min)
-                    total_times = [v(metrics, "indexing_time"),
-                                   v(metrics, "merge_time"),
-                                   v(metrics, "refresh_time"),
-                                   v(metrics, "flush_time"),
-                                   v(metrics, "merge_throttle_time")]
-                    reporter(track, "indexing_total_times", total_times)
-
-                if "index_size" in metrics or "totally_written" in metrics:
-                    # Date,Final index size,Total bytes written
-                    reporter(track, "disk_usage", [v(metrics, "index_size"), v(metrics, "totally_written")])
-
-                if "query_latency_p99" in metrics:
-                    reporter(track, "search_latency_queries", metrics["query_latency_p99"])
-
-        if len(segment_count_metrics) > 0:
-            reporter(track, "segment_counts", segment_count_metrics)
-
-        if len(indexing_throughput_metrics) > 0:
-            reporter(track, "indexing_throughput", indexing_throughput_metrics)
-
-        if meta_metrics and "source_revision" in meta_metrics:
-            reporter.write_meta_report(track, meta_metrics["source_revision"])
-
 
 def copy_results_for_release_comparison(effective_start_date, dry_run, tag):
     if not dry_run:
@@ -734,10 +424,6 @@ def parse_args():
         help=argparse.SUPPRESS,
         default=None)
     parser.add_argument(
-        "--override-root-dir",
-        help=argparse.SUPPRESS,
-        default=None)
-    parser.add_argument(
         "--tag",
         help=argparse.SUPPRESS,
         default=None)
@@ -767,20 +453,18 @@ def parse_args():
         "--release",
         help="Specify release string to use for comparison reports",
         default="master")
-    # Deprecated
-    parser.add_argument(
-        "--replace-release",
-        help="Specify the release string to replace for comparison reports")
 
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+
     release_mode = args.mode == "release"
     adhoc_mode = args.mode == "adhoc"
     nightly_mode = args.mode == "nightly"
-    root_dir = config["root.dir"] if not args.override_root_dir else args.override_root_dir
+
+    root_dir = config["root.dir"]
     tag = args.tag
     release_tag = "env:ear" if "encryption-at-rest" in args.fixtures else "env:bare"
     docker_benchmark = args.release.startswith("Docker ")
@@ -810,20 +494,14 @@ def main():
 
     configure_rally(env_name, args.dry_run)
     rally_failure = run_rally(tracks, command, args.dry_run)
-    # TODO dm: Remove this for new Kibana-based charts - we use a different logic there (only one series per major release and tag).
-    replace_release = args.replace_release if args.replace_release else args.release
 
     if nightly_mode:
         copy_results_for_release_comparison(args.effective_start_date, args.dry_run, release_tag)
         # we want to deactivate old release entries, not old nightly entries
-        deactivate_outdated_results(args.effective_start_date, "release", release, tag, args.dry_run)
+        deactivate_outdated_results(args.effective_start_date, "release", release, release_tag, args.dry_run)
     else:
+        # TODO: I think we need to set here also `release_tag` instead of `tag`. `tag` is usually not set and thus it would remove everything
         deactivate_outdated_results(args.effective_start_date, env_name, release, tag, args.dry_run)
-    # TODO dm: Remove this for new Kibana-based charts
-    reader = MetricReader(args.effective_start_date, root_dir)
-    reporter = Reporter(root_dir, args.effective_start_date, adhoc_mode, release_mode, args.dry_run, replace_release, args.release)
-    reporter.copy_template()
-    report(tracks, defaults, reader, reporter)
     if rally_failure:
         exit(1)
 

@@ -1,8 +1,0 @@
-[
-  {
-    "series": "Id Conflicts / 4G heap",
-    "x": "2016-09-08 01:10:48",
-    "shortText": "E",
-    "text": "Switch from sequential to random conflicts"
-  }
-]

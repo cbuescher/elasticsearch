@@ -15,10 +15,7 @@
 # fail this script immediately if any command fails with a non-zero exit code
 set -e
 
-
 S3_ROOT_BUCKET="s3://elasticsearch-benchmarks.elastic.co"
-LOCAL_REPORT_ROOT="${HOME}/.rally/benchmarks/reports"
-LOCAL_REPORT_OUT="${LOCAL_REPORT_ROOT}/out"
 
 # see http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
@@ -29,6 +26,8 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
+# Night Rally is *always* the master for assets
+ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/*"
 
 ANSIBLE_ALL_TAGS=(encryption-at-rest initialize-data-disk trim)
 ANSIBLE_SKIP_TAGS=( )
@@ -42,7 +41,6 @@ MODE="nightly"
 RELEASE="master"
 # only needed for ad-hoc benchmarks
 REVISION="latest"
-REPLACE_RELEASE=${RELEASE}
 TARGET_HOST="localhost:9200"
 TAG=""
 
@@ -80,10 +78,6 @@ case ${i} in
     ;;
     --release=*)
     RELEASE="${i#*=}"
-    shift # past argument=value
-    ;;
-    --replace-release=*)
-    REPLACE_RELEASE="${i#*=}"
     shift # past argument=value
     ;;
     --tag=*)
@@ -165,47 +159,12 @@ else
     NIGHT_RALLY_DRY_RUN=""
 fi
 
-# We need to pull down the current state of all reports from the S3 bucket as night_rally might be run on different nodes each day
-if [ ${SKIP_S3} == NO ]
-then
-    echo "Syncing previous results from ${S3_ROOT_BUCKET}"
-    if [ ${DRY_RUN} == NO ]
-    then
-        aws s3 sync "${S3_ROOT_BUCKET}/" "${LOCAL_REPORT_OUT}/"
-    fi
-else
-    echo "Skipping download from ${S3_ROOT_BUCKET}"
-fi
-
-# Night Rally is *always* the master for assets
-ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/default/*"
-ASSET_TARGET="${LOCAL_REPORT_OUT}/"
-echo "Copying most recent assets from ${ASSET_SOURCE} to ${ASSET_TARGET}"
-if [ ${DRY_RUN} == NO ]
-then
-    cp -R ${ASSET_SOURCE} ${ASSET_TARGET}
-fi
-
-# Only copy if the target directory does not exist! Otherwise we overwrite csv files with data.
-ADHOC_TEMPLATE_ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/adhoc/*"
-ADHOC_TEMPLATE_ASSET_TARGET="${LOCAL_REPORT_ROOT}/templates"
-if [ ! -d "${ADHOC_TEMPLATE_ASSET_TARGET}" ]; then
-    echo "Copying most recent adhoc benchmark templates from ${ADHOC_TEMPLATE_ASSET_SOURCE} to ${ADHOC_TEMPLATE_ASSET_TARGET}"
-    if [ ${DRY_RUN} == NO ]
-    then
-        mkdir -p ${ADHOC_TEMPLATE_ASSET_TARGET}
-        cp -R ${ADHOC_TEMPLATE_ASSET_SOURCE} ${ADHOC_TEMPLATE_ASSET_TARGET}
-    fi
-fi
-
-
-
 #****************************
 # START NO FAIL
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE} --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --replace-release="${REPLACE_RELEASE}" --tag="${TAG}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE} --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --tag="${TAG}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
@@ -222,16 +181,15 @@ set -e
 
 if [ ${SKIP_S3} == NO ]
 then
-    echo "Uploading results to ${S3_ROOT_BUCKET}"
+    echo "Uploading assets to ${S3_ROOT_BUCKET}"
     if [ ${DRY_RUN} == NO ]
     then
-        #s3cmd sync --guess-mime-type -P ~/.rally/benchmarks/reports/out/ ${S3_ROOT_BUCKET}/
-        # --acl "public-read"           - let everyone read the report files
-        # --cache-control max-age=86400 - ensure that report files expire after one day so users always see fresh data
-        aws s3 sync --acl "public-read" --cache-control max-age=86400 "${LOCAL_REPORT_OUT}/" "${S3_ROOT_BUCKET}/"
+        # --acl "public-read"           - let everyone read the assets
+        # --cache-control max-age=86400 - ensure that asset files expire after one day so users always see assets
+        aws s3 sync --acl "public-read" --cache-control max-age=86400 "${ASSET_SOURCE}/" "${S3_ROOT_BUCKET}/"
     fi
 else
-    echo "Skipping upload from results to ${S3_ROOT_BUCKET}"
+    echo "Skipping upload of assets to ${S3_ROOT_BUCKET}"
 fi
 
 # Exit with the same exit code as night_rally.py

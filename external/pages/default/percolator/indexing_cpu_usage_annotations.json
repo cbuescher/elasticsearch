@@ -1,8 +1,0 @@
-[
-  {
-    "series": "Defaults (%)",
-    "x": "2016-08-31 02:00:01",
-    "shortText": "A",
-    "text": "Changed benchmarking approach: Cannot determine CPU usage per phase. May be added later again"
-  }
-]
