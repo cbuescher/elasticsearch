@@ -1,5 +1,4 @@
 import argparse
-import collections
 import datetime
 import errno
 import fileinput
@@ -8,79 +7,7 @@ import os
 import shutil
 import time
 
-tracks = collections.OrderedDict()
-
-tracks["nested"] = [
-    ["nested-search-challenge", "4gheap"],
-    ["nested-search-challenge", "1gheap"]
-]
-
-tracks["geonames"] = [
-    ["append-no-conflicts", "defaults"],
-    ["append-no-conflicts-index-only", "4gheap"],
-    ["append-sorted-no-conflicts", "4gheap"],
-    ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only-1-replica", "two_nodes"],
-    ["append-no-conflicts-index-only", "verbose_iw"],
-    ["append-no-conflicts", "1gheap"],
-]
-
-tracks["percolator"] = [
-    ["append-no-conflicts", "4gheap"],
-    ["append-no-conflicts", "1gheap"]
-]
-
-tracks["geopoint"] = [
-    ["append-no-conflicts", "defaults"],
-    ["append-no-conflicts-index-only", "4gheap"],
-    ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only-1-replica", "two_nodes"],
-    ["append-no-conflicts", "1gheap"],
-]
-
-tracks["pmc"] = [
-    ["append-no-conflicts-index-only", "defaults"],
-    ["append-no-conflicts", "4gheap"],
-    ["append-sorted-no-conflicts", "4gheap"],
-    ["append-fast-with-conflicts", "4gheap"],
-    ["append-no-conflicts-index-only-1-replica", "two_nodes"],
-    ["append-no-conflicts", "1gheap"],
-]
-
-tracks["nyc_taxis"] = [
-    ["append-no-conflicts", "4gheap"],
-    ["append-sorted-no-conflicts-index-only", "4gheap"],
-    ["append-no-conflicts", "1gheap"],
-]
-
-tracks["logging"] = [
-    ["append-no-conflicts-index-only", "defaults"],
-    ["append-no-conflicts", "4gheap"],
-    ["append-sorted-no-conflicts", "4gheap"],
-    ["append-no-conflicts", "1gheap"],
-]
-
-tracks["noaa"] = [
-    ["append-no-conflicts", "defaults"],
-]
-
-# default challenge / car per track
-defaults = {
-    "geonames": ("append-no-conflicts", "defaults"),
-    "percolator": ("append-no-conflicts", "4gheap"),
-    "geopoint": ("append-no-conflicts", "defaults"),
-    "pmc": ("append-no-conflicts", "4gheap"),
-    "nyc_taxis": ("append-no-conflicts", "4gheap"),
-    "nested": ("nested-search-challenge", "4gheap"),
-    "logging": ("append-no-conflicts", "4gheap"),
-    "noaa": ("append-no-conflicts", "defaults"),
-}
-
-config = {
-    "root.dir": "%s/.rally/benchmarks" % os.getenv("HOME"),
-    "report.base.dir": "reports"
-}
-
+ROOT = os.path.dirname(os.path.realpath(__file__))
 RALLY_BINARY = "rally --skip-update"
 
 # console logging
@@ -148,8 +75,7 @@ def sanitize(text):
 
 def configure_rally(configuration_name, dry_run):
     user_home = os.getenv("HOME")
-    root = os.path.dirname(os.path.realpath(__file__))
-    source = "%s/resources/rally-template.ini" % root
+    source = "%s/resources/rally-template.ini" % ROOT
     destination = "%s/.rally/rally-%s.ini" % (user_home, configuration_name)
     logger.info("Copying rally configuration from [%s] to [%s]" % (source, destination))
     if not dry_run:
@@ -169,12 +95,9 @@ class BaseCommand:
         self.target_host = target_host
         self.root_dir = root_dir
         self.ts = date_for_cmd_param(effective_start_date)
-        self.report_root_dir = config["report.base.dir"]
 
     def report_path(self, track, challenge, car):
-        return "%s/%s/rally/%s/%s/%s/%s/report.csv" % (self.root_dir, self.report_root_dir,
-                                                       date_for_path(self.effective_start_date), track,
-                                                       challenge, car)
+        return "%s/reports/rally/%s/%s/%s/%s/report.csv" % (self.root_dir, date_for_path(self.effective_start_date), track, challenge, car)
 
     def runnable(self, track, challenge, car):
         return True
@@ -288,20 +211,22 @@ def run_rally(tracks, command, dry_run=False, system=os.system):
         runner = logger.info
     else:
         runner = system
-    for track, setups in tracks.items():
-        for setup in setups:
-            challenge, car = setup
-            if command.runnable(track, challenge, car):
-                logger.info("Running Rally on track [%s] with challenge [%s] and car [%s]" % (track, challenge, car))
+    for track in tracks:
+        track_name = track["track"]
+        for combination in track["combinations"]:
+            challenge = combination["challenge"]
+            car = combination["car"]
+            if command.runnable(track_name, challenge, car):
+                logger.info("Running Rally on track [%s] with challenge [%s] and car [%s]" % (track_name, challenge, car))
                 start = time.perf_counter()
-                if runner(command.command_line(track, challenge, car)):
+                if runner(command.command_line(track_name, challenge, car)):
                     rally_failure = True
-                    logger.error("Failed to run track [%s]. Please check the logs." % track)
+                    logger.error("Failed to run track [%s]. Please check the logs." % track_name)
                 stop = time.perf_counter()
                 logger.info("Finished running on track [%s] with challenge [%s] and car [%s] in [%f] seconds." % (
-                    track, challenge, car, (stop - start)))
+                    track_name, challenge, car, (stop - start)))
             else:
-                logger.info("Skipping track [%s], challenge [%s] and car [%s] (not supported by command)." % (track, challenge, car))
+                logger.info("Skipping track [%s], challenge [%s] and car [%s] (not supported by command)." % (track_name, challenge, car))
     return rally_failure
 
 
@@ -457,6 +382,12 @@ def parse_args():
     return parser.parse_args()
 
 
+def load_tracks():
+    import json
+    with open("%s/resources/tracks.json" % ROOT, "r") as tracks_file:
+        return json.load(tracks_file)
+
+
 def main():
     args = parse_args()
 
@@ -464,11 +395,13 @@ def main():
     adhoc_mode = args.mode == "adhoc"
     nightly_mode = args.mode == "nightly"
 
-    root_dir = config["root.dir"]
     tag = args.tag
     release_tag = "env:ear" if "encryption-at-rest" in args.fixtures else "env:bare"
     docker_benchmark = args.release.startswith("Docker ")
     release = args.release.replace("Docker ", "")
+
+    tracks = load_tracks()
+    root_dir = "%s/.rally/benchmarks" % os.getenv("HOME")
 
     if release_mode:
         # use always the same name for release comparison benchmarks
@@ -500,7 +433,6 @@ def main():
         # we want to deactivate old release entries, not old nightly entries
         deactivate_outdated_results(args.effective_start_date, "release", release, release_tag, args.dry_run)
     else:
-        # TODO: I think we need to set here also `release_tag` instead of `tag`. `tag` is usually not set and thus it would remove everything
         deactivate_outdated_results(args.effective_start_date, env_name, release, tag, args.dry_run)
     if rally_failure:
         exit(1)

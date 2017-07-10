@@ -1,58 +1,7 @@
 import uuid
 import json
 import os
-
-all_tracks_and_challenges = {
-    "nested": [
-        ["nested-search-challenge", "4gheap"],
-    ],
-    "geonames": [
-        ["append-no-conflicts", "defaults"],
-        ["append-no-conflicts-index-only", "4gheap"],
-        ["append-sorted-no-conflicts", "4gheap"],
-        ["append-fast-with-conflicts", "4gheap"],
-        ["append-no-conflicts-index-only-1-replica", "two_nodes"],
-    ],
-    "percolator": [
-        ["append-no-conflicts", "4gheap"],
-    ],
-    "geopoint": [
-        ["append-no-conflicts", "defaults"],
-        ["append-no-conflicts-index-only", "4gheap"],
-        ["append-fast-with-conflicts", "4gheap"],
-        ["append-no-conflicts-index-only-1-replica", "two_nodes"],
-    ],
-    "pmc": [
-        ["append-no-conflicts-index-only", "defaults"],
-        ["append-no-conflicts", "4gheap"],
-        ["append-sorted-no-conflicts", "4gheap"],
-        ["append-fast-with-conflicts", "4gheap"],
-        ["append-no-conflicts-index-only-1-replica", "two_nodes"],
-    ],
-    "nyc_taxis": [
-        ["append-no-conflicts", "4gheap"],
-        ["append-sorted-no-conflicts-index-only", "4gheap"],
-    ],
-    "logging": [
-        ["append-no-conflicts-index-only", "defaults"],
-        ["append-no-conflicts", "4gheap"],
-        ["append-sorted-no-conflicts", "4gheap"],
-    ],
-    "noaa": [
-        ["append-no-conflicts", "defaults"]
-    ]
-}
-
-defaults = {
-    "geonames": ("append-no-conflicts", "defaults"),
-    "percolator": ("append-no-conflicts", "4gheap"),
-    "geopoint": ("append-no-conflicts", "defaults"),
-    "pmc": ("append-no-conflicts", "4gheap"),
-    "nyc_taxis": ("append-no-conflicts", "4gheap"),
-    "nested": ("nested-search-challenge", "4gheap"),
-    "logging": ("append-no-conflicts", "4gheap"),
-    "noaa": ("append-no-conflicts", "defaults"),
-}
+import sys
 
 
 def challenges(track_name):
@@ -69,18 +18,20 @@ def find_challenge(all_challenges, name):
     return None
 
 
-def generate_index_ops():
+def generate_index_ops(tracks):
     def tracks_for_index():
         all_tracks = []
-        for track, challenges_cars in all_tracks_and_challenges.items():
+        for track_structure in tracks:
+            track = track_structure["track"]
             challenges_of_track = challenges(track)
-            cci = []
-            for cc in challenges_cars:
-                challenge = cc[0]
-                car = cc[1]
-                index_op = find_challenge(challenges_of_track, challenge)["schedule"][0]["operation"]
-                cci.append((challenge, car, index_op))
-            all_tracks.append((track, cci))
+            for combination in track_structure["combinations"]:
+                if combination.get("release-charts", True):
+                    challenge = combination["challenge"]
+                    car = combination["car"]
+                    cci = []
+                    index_op = find_challenge(challenges_of_track, challenge)["schedule"][0]["operation"]
+                    cci.append((challenge, car, index_op))
+                    all_tracks.append((track, cci))
         return all_tracks
 
     structures = []
@@ -93,7 +44,8 @@ def generate_index_ops():
             if idx > 0:
                 filters = filters + ","
             label = "%s-%s" % (challenge, car)
-            filters = filters + "{\"input\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"operation:%s AND challenge:%s AND car:%s\"}}},\"label\":\"%s\"}" % (index_op, challenge, car, label)
+            filters = filters + "{\"input\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"operation:%s AND challenge:%s AND car:%s\"}}},\"label\":\"%s\"}" % (
+            index_op, challenge, car, label)
 
         s = {
             "_id": str(uuid.uuid4()),
@@ -115,7 +67,8 @@ def generate_index_ops():
                             "\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],"
                             "\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},"
                             "\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,"
-                            "\"style\":{},\"title\":{\"text\":\"Median Indexing Throughput [docs/s]\"},\"type\":\"value\"}]},\"title\":\"%s\",\"type\":\"histogram\"}" % (filters, title),
+                            "\"style\":{},\"title\":{\"text\":\"Median Indexing Throughput [docs/s]\"},\"type\":\"value\"}]},\"title\":\"%s\",\"type\":\"histogram\"}" % (
+                            filters, title),
                 "uiStateJSON": "{\"vis\":{\"legendOpen\":true}}",
                 "description": "",
                 "version": 1,
@@ -129,25 +82,29 @@ def generate_index_ops():
     return structures
 
 
-def default_tracks():
+def default_tracks(tracks):
     all_tracks = []
-    for track, challenge_car in defaults.items():
-        challenge, car = challenge_car
-        default_challenge = challenges(track)[0]
-        # default challenge is usually the first one. No need for complex logic
-        assert default_challenge["default"]
-        # filter queries
-        queries = [t["operation"] for t in default_challenge["schedule"] if
-                   not (t["operation"].startswith("index") or t["operation"] in ["force-merge", "node-stats"])]
-        all_tracks.append((track, challenge, car, queries))
+    for track_structure in tracks:
+        for combination in track_structure["combinations"]:
+            if combination.get("default-combination", False):
+                track = track_structure["track"]
+                challenge = combination["challenge"]
+                car = combination["car"]
+                default_challenge = challenges(track)[0]
+                # default challenge is usually the first one. No need for complex logic
+                assert default_challenge["default"]
+                # filter queries
+                queries = [t["operation"] for t in default_challenge["schedule"] if
+                           not (t["operation"].startswith("index") or t["operation"] in ["force-merge", "node-stats"])]
+                all_tracks.append((track, challenge, car, queries))
 
     return all_tracks
 
 
-def generate_queries():
+def generate_queries(tracks):
     # output JSON structures
     structures = []
-    for track, challenge, car, queries in default_tracks():
+    for track, challenge, car, queries in default_tracks(tracks):
         for q in queries:
             title = "release-%s-%s-p99-latency" % (track, q)
             label = "Query Latency [ms]"
@@ -189,10 +146,10 @@ def generate_queries():
     return structures
 
 
-def generate_io():
+def generate_io(tracks):
     # output JSON structures
     structures = []
-    for track, challenge, car, queries in default_tracks():
+    for track, challenge, car, queries in default_tracks(tracks):
         title = "release-%s-io" % track
 
         s = {
@@ -205,7 +162,8 @@ def generate_io():
                 "description": "",
                 "version": 1,
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":{\"query\":\"environment:release AND active:true AND track:%s AND challenge:%s AND car:%s\",\"analyze_wildcard\":true}},\"filter\":[]}" % (track, challenge, car)
+                    "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":{\"query\":\"environment:release AND active:true AND track:%s AND challenge:%s AND car:%s\",\"analyze_wildcard\":true}},\"filter\":[]}" % (
+                    track, challenge, car)
                 }
             }
         }
@@ -214,9 +172,9 @@ def generate_io():
     return structures
 
 
-def generate_gc():
+def generate_gc(tracks):
     structures = []
-    for track, challenge, car, queries in default_tracks():
+    for track, challenge, car, queries in default_tracks(tracks):
         title = "release-%s-gc" % track
         s = {
             "_id": str(uuid.uuid4()),
@@ -228,7 +186,8 @@ def generate_gc():
                 "description": "",
                 "version": 1,
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":{\"query\":\"environment:release AND active:true AND track:%s AND challenge:%s AND car:%s\",\"analyze_wildcard\":true}},\"filter\":[]}" % (track, challenge, car)
+                    "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":{\"query\":\"environment:release AND active:true AND track:%s AND challenge:%s AND car:%s\",\"analyze_wildcard\":true}},\"filter\":[]}" % (
+                    track, challenge, car)
                 }
             }
         }
@@ -237,8 +196,22 @@ def generate_gc():
     return structures
 
 
+def load_tracks(track_filter):
+    import json
+    root = os.path.dirname(os.path.realpath(__file__))
+    with open("%s/resources/tracks.json" % root, "r") as tracks_file:
+        all_tracks = json.load(tracks_file)
+    if track_filter:
+        return [t for t in all_tracks if t["track"] == track_filter]
+    else:
+        return all_tracks
+
+
 def main():
-    structures = generate_index_ops() + generate_queries() + generate_io() + generate_gc()
+    track_filter = sys.argv[1] if len(sys.argv) > 1 else None
+    tracks = load_tracks(track_filter)
+
+    structures = generate_index_ops(tracks) + generate_queries(tracks) + generate_io(tracks) + generate_gc(tracks)
     print(json.dumps(structures, indent=4))
 
 

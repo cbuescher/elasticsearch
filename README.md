@@ -1,12 +1,13 @@
 ## Night Rally
 
-Night Rally is a set of driver scripts for [running nightly macrobenchmarks for Elasticsearch](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic). The macrobenchmarks themselves are executed by [Rally](https://github.com/elastic/rally) and [publishing the results](https://elasticsearch-benchmarks.elastic.co/).
+Night Rally is a set of driver scripts for [running nightly macrobenchmarks for Elasticsearch](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic) and [publishing the results](https://elasticsearch-benchmarks.elastic.co/). The macrobenchmarks themselves are executed by [Rally](https://github.com/elastic/rally).
 
 ### Prerequisites
 
 * Python 3.4+ available as `python3` on the path (verify with: `python3 --version` which should print `Python 3.4.0` (or higher))
 * `pip3` available on the path (verify with `pip3 --version`)
 * `awscli` available on the command line and properly set up to write to the bucket `s3://elasticsearch-benchmarks.elasticsearch.org`.
+* `Ansible` available on the command line (only needed in our nightly benchmarking environment)
 * All prerequisites for [Rally](https://github.com/elastic/rally)
 
 Night Rally is only tested on Mac OS X and Linux.
@@ -16,7 +17,7 @@ Night Rally is only tested on Mac OS X and Linux.
 1. Clone this repo: `git clone git@github.com:elastic/night-rally.git`
 2. Ensure that all prerequisites of [Rally](https://github.com/elastic/rally) are properly setup. Hint. It is *not* required to install Rally manually. Just ensure that its prerequisites are installed.
 
-Now you can invoke night_rally regularly with the startup script `night_rally.sh` e.g. via cron. The script can also self-update if invoked as `night_rally.sh --self-update`. 
+Now you can invoke Night Rally regularly with the startup script `night_rally.sh` e.g. via cron. The script can also self-update if invoked as `night_rally.sh --self-update`. 
 
 
 ### How do I ...?
@@ -50,9 +51,10 @@ For more details, please issue `python3 admin.py delete annotation --help`.
  
 The following steps are necessary to add a new track: 
 
-1. Copy a directory in `external/pages` and adjust the names accordingly.
-2. Adjust the menu structure in all other files (if this happens more often, we should think about using a template engine for that...)
-3. Add your track and the challenges to run in the `tracks` hash in `night_rally.py`
+1. Add your track and the challenges to run in `resources/track.json`
+2. Create nightly and release charts and the corresponding dashboards on the Kibana instance https://ece78408d8df7290d4ad6e3ffac5af6a.us-east-1.aws.found.io (it's mapped to be publicly reachable). You can generate release charts with `python3 generate_release_charts.py YOUR_TRACK_NAME`. At the moment there is no such generator for nightly charts though.
+3. Copy a directory in `external/pages`, adjust the names accordingly and reference the UUID of the dashboards that you've created in step 2.
+4. Adjust the menu structure in all other files (if this happens more often, we should think about using a template engine for that...)
 
 If you're finished, please submit a PR. After the PR is merged, the new track will show up after the next benchmark.
 
@@ -61,11 +63,11 @@ If you're finished, please submit a PR. After the PR is merged, the new track wi
 
 Suppose we want to publish a new release benchmark of the Elasticsearch release `5.3.1` on our benchmark page. To do that, start a new [macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic/) with the following parameters:
 
-* MODE: release
-* RELEASE: 5.3.1
-* TARGET_HOST: Just use the default value
+* `MODE`: `release`
+* `RELEASE`: `5.3.1`
+* `TARGET_HOST`: Just use the default value
 
-The results will show up automatically as soon as the build is finished
+The results will show up automatically as soon as the build is finished.
 
 #### Run an ad-hoc benchmark
 

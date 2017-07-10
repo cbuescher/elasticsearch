@@ -1,0 +1,175 @@
+[
+  {
+    "track": "nested",
+    "combinations": [
+      {
+        "challenge": "nested-search-challenge",
+        "car": "4gheap",
+        "#COMMENT": "We typically show only GC, IO etc. charts for this combination. For all others we don't show charts. The implicit default is `false`. Note that at least one combination for each track should have set this value to true.",
+        "default-combination": true
+      },
+      {
+        "challenge": "nested-search-challenge",
+        "car": "1gheap",
+        "#COMMENT": "This means that we do not want to generate any release comparison charts for this combinations. The (implicit) default is `true`",
+        "release-charts": false
+      }
+    ]
+  },
+  {
+    "track": "geonames",
+    "combinations": [
+      {
+        "challenge": "append-no-conflicts",
+        "car": "defaults",
+        "default-combination": true
+      },
+      {
+        "challenge": "append-no-conflicts-index-only",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-sorted-no-conflicts",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-fast-with-conflicts",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-no-conflicts-index-only-1-replica",
+        "car": "two_nodes"
+      },
+      {
+        "challenge": "append-no-conflicts",
+        "car": "1gheap",
+        "release-charts": false
+      }
+    ]
+  },
+  {
+    "track": "percolator",
+    "combinations": [
+      {
+        "challenge": "append-no-conflicts",
+        "car": "4gheap",
+        "default-combination": true
+      },
+      {
+        "challenge": "append-no-conflicts",
+        "car": "1gheap",
+        "release-charts": false
+      }
+    ]
+  },
+  {
+    "track": "geopoint",
+    "combinations": [
+      {
+        "challenge": "append-no-conflicts",
+        "car": "defaults",
+        "default-combination": true
+      },
+      {
+        "challenge": "append-no-conflicts-index-only",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-fast-with-conflicts",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-no-conflicts-index-only-1-replica",
+        "car": "two_nodes"
+      },
+      {
+        "challenge": "append-no-conflicts",
+        "car": "1gheap",
+        "release-charts": false
+      }
+    ]
+  },
+  {
+    "track": "pmc",
+    "combinations": [
+      {
+        "challenge": "append-no-conflicts-index-only",
+        "car": "defaults"
+      },
+      {
+        "challenge": "append-no-conflicts",
+        "car": "4gheap",
+        "default-combination": true
+      },
+      {
+        "challenge": "append-sorted-no-conflicts",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-fast-with-conflicts",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-no-conflicts-index-only-1-replica",
+        "car": "two_nodes"
+      },
+      {
+        "challenge": "append-no-conflicts",
+        "car": "1gheap",
+        "release-charts": false
+      }
+    ]
+  },
+  {
+    "track": "nyc_taxis",
+    "combinations": [
+      {
+        "challenge": "append-no-conflicts",
+        "car": "4gheap",
+        "default-combination": true
+      },
+      {
+        "challenge": "append-sorted-no-conflicts-index-only",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-no-conflicts",
+        "car": "1gheap",
+        "release-charts": false
+      }
+    ]
+  },
+  {
+    "track": "logging",
+    "combinations": [
+      {
+        "challenge": "append-no-conflicts-index-only",
+        "car": "defaults"
+      },
+      {
+        "challenge": "append-no-conflicts",
+        "car": "4gheap",
+        "default-combination": true
+      },
+      {
+        "challenge": "append-sorted-no-conflicts",
+        "car": "4gheap"
+      },
+      {
+        "challenge": "append-no-conflicts",
+        "car": "1gheap",
+        "release-charts": false
+      }
+    ]
+  },
+  {
+    "track": "noaa",
+    "combinations": [
+      {
+        "challenge": "append-no-conflicts",
+        "car": "defaults",
+        "default-combination": true
+      }
+    ]
+  }
+]
