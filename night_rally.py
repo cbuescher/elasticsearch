@@ -261,7 +261,7 @@ class DockerCommand(BaseCommand):
         super().__init__(effective_start_date, target_host, root_dir)
         self.configuration_name = configuration_name
         self.pipeline = "docker"
-        self.distribution_version = distribution_version.replace("Docker ", "")
+        self.distribution_version = distribution_version
 
     def runnable(self, track, challenge, car):
         if car in ["two_nodes", "verbose_iw", "1gheap"]:
@@ -661,56 +661,59 @@ def deactivate_outdated_results(effective_start_date, environment, release, tag,
     Sets all results for the same major release version, environment and tag to active=False except for the records with the provided 
     effective start date.
     """
-    import client
     ts = to_iso8601_short(effective_start_date)
-    logger.info("Activating results only for [%s] on [%s] in environment [%s]." % (release, ts, environment))
-    if not dry_run:
-        body = {
-            "script": {
-                "inline": "ctx._source.active = false",
-                "lang": "painless"
-            },
-            "query": {
-                "bool": {
-                    "filter": [
-                        {
-                            "term": {
-                                "active": True
-                            }
-                        },
-                        {
-                            "term": {
-                                "environment": environment
-                            }
-                        }
-                    ],
-                    "must_not": {
+    logger.info("Activating results only for [%s] on [%s] in environment [%s] and tag [%s]." % (release, ts, environment, tag))
+    body = {
+        "script": {
+            "inline": "ctx._source.active = false",
+            "lang": "painless"
+        },
+        "query": {
+            "bool": {
+                "filter": [
+                    {
                         "term": {
-                            "trial-timestamp": ts
+                            "active": True
                         }
+                    },
+                    {
+                        "term": {
+                            "environment": environment
+                        }
+                    }
+                ],
+                "must_not": {
+                    "term": {
+                        "trial-timestamp": ts
                     }
                 }
             }
         }
-        if release == "master":
-            body["query"]["bool"]["filter"].append({
-                "term": {
-                    "distribution-version": release
-                }
-            })
-        else:
-            body["query"]["bool"]["filter"].append({
-                "term": {
-                    "distribution-major-version": int(release[:release.find(".")])
-                }
-            })
+    }
+    if release == "master":
+        body["query"]["bool"]["filter"].append({
+            "term": {
+                "distribution-version": release
+            }
+        })
+    else:
+        body["query"]["bool"]["filter"].append({
+            "term": {
+                "distribution-major-version": int(release[:release.find(".")])
+            }
+        })
 
-        if tag:
-            body["query"]["bool"]["filter"].append({
-                "term": {
-                    "user-tag": tag
-                }
-            })
+    if tag:
+        body["query"]["bool"]["filter"].append({
+            "term": {
+                "user-tag": tag
+            }
+        })
+    if dry_run:
+        import json
+        logger.info("Would execute update query script\n%s" % json.dumps(body, indent=2))
+    else:
+        import client
         es = client.create_client()
         es.indices.refresh(index="rally-results-*")
         res = es.update_by_query(index="rally-results-*", body=body, size=10000)
@@ -780,18 +783,20 @@ def main():
     root_dir = config["root.dir"] if not args.override_root_dir else args.override_root_dir
     tag = args.tag
     release_tag = "env:ear" if "encryption-at-rest" in args.fixtures else "env:bare"
+    docker_benchmark = args.release.startswith("Docker ")
+    release = args.release.replace("Docker ", "")
 
     if release_mode:
         # use always the same name for release comparison benchmarks
         env_name = sanitize(args.mode)
-        if args.release.startswith("Docker"):
-            logger.info("Running Docker release benchmarks for release [%s] against [%s]." % (args.release, args.target_host))
-            command = DockerCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name)
+        if docker_benchmark:
+            logger.info("Running Docker release benchmarks for release [%s] against [%s]." % (release, args.target_host))
+            command = DockerCommand(args.effective_start_date, args.target_host, root_dir, release, env_name)
             tag = command.tag()
         else:
             logger.info("Running release benchmarks for release [%s] against [%s] (release tag is [%s])."
-                        % (args.release, args.target_host, release_tag))
-            command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, args.release, env_name, release_tag)
+                        % (release, args.target_host, release_tag))
+            command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, release, env_name, release_tag)
             tag = command.tag()
     elif adhoc_mode:
         logger.info("Running adhoc benchmarks for revision [%s] against [%s]." % (args.revision, args.target_host))
@@ -811,9 +816,9 @@ def main():
     if nightly_mode:
         copy_results_for_release_comparison(args.effective_start_date, args.dry_run, release_tag)
         # we want to deactivate old release entries, not old nightly entries
-        deactivate_outdated_results(args.effective_start_date, "release", args.release, tag, args.dry_run)
+        deactivate_outdated_results(args.effective_start_date, "release", release, tag, args.dry_run)
     else:
-        deactivate_outdated_results(args.effective_start_date, env_name, args.release, tag, args.dry_run)
+        deactivate_outdated_results(args.effective_start_date, env_name, release, tag, args.dry_run)
     # TODO dm: Remove this for new Kibana-based charts
     reader = MetricReader(args.effective_start_date, root_dir)
     reporter = Reporter(root_dir, args.effective_start_date, adhoc_mode, release_mode, args.dry_run, replace_release, args.release)
