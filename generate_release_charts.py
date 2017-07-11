@@ -23,15 +23,15 @@ def generate_index_ops(tracks):
         all_tracks = []
         for track_structure in tracks:
             track = track_structure["track"]
+            cci = []
             challenges_of_track = challenges(track)
             for combination in track_structure["combinations"]:
                 if combination.get("release-charts", True):
                     challenge = combination["challenge"]
                     car = combination["car"]
-                    cci = []
                     index_op = find_challenge(challenges_of_track, challenge)["schedule"][0]["operation"]
                     cci.append((challenge, car, index_op))
-                    all_tracks.append((track, cci))
+            all_tracks.append((track, cci))
         return all_tracks
 
     structures = []
@@ -63,7 +63,7 @@ def generate_index_ops(tracks):
                             "\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},"
                             "\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"radiusRatio\":9,\"scale\":\"linear\","
                             "\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Median Indexing Throughput [docs/s]\"},"
-                            "\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":"
+                            "\"drawLinesBetweenPoints\":true,\"mode\":\"normal\",\"show\":\"true\",\"showCircles\":true,\"type\":"
                             "\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],"
                             "\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},"
                             "\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,"
@@ -121,7 +121,7 @@ def generate_queries(tracks):
                                 "\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},"
                                 "\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"radiusRatio\":9,\"scale\":\"linear\",\""
                                 "seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"%s\"},\"drawLinesBetweenPoints\":true,"
-                                "\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],"
+                                "\"mode\":\"normal\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],"
                                 "\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\","
                                 "\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\","
                                 "\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,\"style\":{},"
@@ -157,7 +157,26 @@ def generate_io(tracks):
             "_type": "visualization",
             "_source": {
                 "title": title,
-                "visState": "{\"title\":\"%s\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"filters\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"[Bytes]\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"[Bytes]\"},\"type\":\"value\"}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"median\",\"schema\":\"metric\",\"params\":{\"field\":\"value.single\",\"percents\":[50],\"customLabel\":\"[Bytes]\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"name:index_size\"}}},\"label\":\"Index size\"},{\"input\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"name:bytes_written\"}}},\"label\":\"Bytes written\"}]}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"split\",\"params\":{\"field\":\"distribution-version\",\"size\":10,\"order\":\"asc\",\"orderBy\":\"_term\",\"row\":false}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"user-tag\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"_term\"}}],\"listeners\":{}}" % title,
+                "visState": "{\"title\":\"%s\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,"
+                            "\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},"
+                            "\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":"
+                            "{\"text\":\"filters\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,"
+                            "\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\","
+                            "\"legendPosition\":\"right\",\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\","
+                            "\"label\":\"[Bytes]\"},\"drawLinesBetweenPoints\":true,\"mode\":\"normal\",\"show\":\"true\","
+                            "\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,"
+                            "\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,"
+                            "\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\","
+                            "\"scale\":{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"[Bytes]\"},"
+                            "\"type\":\"value\"}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"median\",\"schema\":\"metric\","
+                            "\"params\":{\"field\":\"value.single\",\"percents\":[50],\"customLabel\":\"[Bytes]\"}},{\"id\":\"2\","
+                            "\"enabled\":true,\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":"
+                            "{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"name:index_size\"}}},\"label\":\"Index size\"},"
+                            "{\"input\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"name:bytes_written\"}}},"
+                            "\"label\":\"Bytes written\"}]}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"split\","
+                            "\"params\":{\"field\":\"distribution-version\",\"size\":10,\"order\":\"asc\",\"orderBy\":\"_term\","
+                            "\"row\":false}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":"
+                            "{\"field\":\"user-tag\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"_term\"}}],\"listeners\":{}}" % title,
                 "uiStateJSON": "{}",
                 "description": "",
                 "version": 1,
@@ -181,7 +200,27 @@ def generate_gc(tracks):
             "_type": "visualization",
             "_source": {
                 "title": title,
-                "visState": "{\"title\":\"%s\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"filters\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":\"right\",\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":\"Total GC Duration [ms]\"},\"drawLinesBetweenPoints\":true,\"mode\":\"stacked\",\"show\":\"true\",\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":\"Total GC Duration [ms]\"},\"type\":\"value\"}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"median\",\"schema\":\"metric\",\"params\":{\"field\":\"value.single\",\"percents\":[50],\"customLabel\":\"Total GC Duration [ms]\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"filters\",\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query_string\":{\"query\":\"name:young_gc_time\",\"analyze_wildcard\":true}}},\"label\":\"Young GC\"},{\"input\":{\"query\":{\"query_string\":{\"query\":\"name:old_gc_time\",\"analyze_wildcard\":true}}},\"label\":\"Old GC\"}]}},{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"split\",\"params\":{\"field\":\"distribution-version\",\"size\":10,\"order\":\"asc\",\"orderBy\":\"_term\",\"row\":false}},{\"id\":\"4\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"user-tag\",\"size\":5,\"order\":\"desc\",\"orderBy\":\"_term\"}}],\"listeners\":{}}" % title,
+                "visState": "{\"title\":\"%s\",\"type\":\"histogram\",\"params\":{\"addLegend\":true,\"addTimeMarker\":false,"
+                            "\"addTooltip\":true,\"categoryAxes\":[{\"id\":\"CategoryAxis-1\",\"labels\":{\"show\":true,\"truncate\":100},"
+                            "\"position\":\"bottom\",\"scale\":{\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":{\"text\":"
+                            "\"filters\"},\"type\":\"category\"}],\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"grid\":"
+                            "{\"categoryLines\":false,\"style\":{\"color\":\"#eee\"}},\"interpolate\":\"linear\",\"legendPosition\":"
+                            "\"right\",\"radiusRatio\":9,\"scale\":\"linear\",\"seriesParams\":[{\"data\":{\"id\":\"1\",\"label\":"
+                            "\"Total GC Duration [ms]\"},\"drawLinesBetweenPoints\":true,\"mode\":\"normal\",\"show\":\"true\","
+                            "\"showCircles\":true,\"type\":\"histogram\",\"valueAxis\":\"ValueAxis-1\"}],\"setYExtents\":false,"
+                            "\"showCircles\":true,\"times\":[],\"valueAxes\":[{\"id\":\"ValueAxis-1\",\"labels\":{\"filter\":false,"
+                            "\"rotate\":0,\"show\":true,\"truncate\":100},\"name\":\"LeftAxis-1\",\"position\":\"left\",\"scale\":"
+                            "{\"mode\":\"normal\",\"type\":\"linear\"},\"show\":true,\"style\":{},\"title\":"
+                            "{\"text\":\"Total GC Duration [ms]\"},\"type\":\"value\"}]},\"aggs\":[{\"id\":\"1\",\"enabled\":true,"
+                            "\"type\":\"median\",\"schema\":\"metric\",\"params\":{\"field\":\"value.single\",\"percents\":[50],"
+                            "\"customLabel\":\"Total GC Duration [ms]\"}},{\"id\":\"2\",\"enabled\":true,\"type\":\"filters\","
+                            "\"schema\":\"segment\",\"params\":{\"filters\":[{\"input\":{\"query\":{\"query_string\":{\"query\":"
+                            "\"name:young_gc_time\",\"analyze_wildcard\":true}}},\"label\":\"Young GC\"},{\"input\":{\"query\":"
+                            "{\"query_string\":{\"query\":\"name:old_gc_time\",\"analyze_wildcard\":true}}},\"label\":\"Old GC\"}]}},"
+                            "{\"id\":\"3\",\"enabled\":true,\"type\":\"terms\",\"schema\":\"split\",\"params\":{\"field\":"
+                            "\"distribution-version\",\"size\":10,\"order\":\"asc\",\"orderBy\":\"_term\",\"row\":false}},{\"id\":\"4\","
+                            "\"enabled\":true,\"type\":\"terms\",\"schema\":\"group\",\"params\":{\"field\":\"user-tag\",\"size\":5,"
+                            "\"order\":\"desc\",\"orderBy\":\"_term\"}}],\"listeners\":{}}" % title,
                 "uiStateJSON": "{}",
                 "description": "",
                 "version": 1,
