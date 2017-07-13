@@ -1,0 +1,1 @@
+Drops the page cache and SLAB objects as documented in https://www.kernel.org/doc/Documentation/sysctl/vm.txt.

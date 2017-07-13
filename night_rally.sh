@@ -29,7 +29,7 @@ NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 # Night Rally is *always* the master for assets
 ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages/*"
 
-ANSIBLE_ALL_TAGS=(encryption-at-rest initialize-data-disk trim)
+ANSIBLE_ALL_TAGS=(encryption-at-rest initialize-data-disk trim drop-caches)
 ANSIBLE_SKIP_TAGS=( )
 ANSIBLE_SKIP_TAGS_STRING=""
 SELF_UPDATE=NO

@@ -1,0 +1,12 @@
+---
+- name: Run sync to minimize the number of dirty objects on the system
+  command: /bin/sync
+  become: true
+
+# Give sync a little bit of time to finish. For rationale see notes in https://linux.die.net/man/8/sync.
+- pause:
+    seconds: 3
+
+- name: Free slab objects and pagecache
+  command: echo 3 > /proc/sys/vm/drop_caches
+  become: true
