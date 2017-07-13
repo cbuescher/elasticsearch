@@ -37,10 +37,6 @@
         "car": "4gheap"
       },
       {
-        "challenge": "append-no-conflicts-index-only-1-replica",
-        "car": "two_nodes"
-      },
-      {
         "challenge": "append-no-conflicts",
         "car": "1gheap",
         "release-charts": false
@@ -79,10 +75,6 @@
         "car": "4gheap"
       },
       {
-        "challenge": "append-no-conflicts-index-only-1-replica",
-        "car": "two_nodes"
-      },
-      {
         "challenge": "append-no-conflicts",
         "car": "1gheap",
         "release-charts": false
@@ -108,10 +100,6 @@
       {
         "challenge": "append-fast-with-conflicts",
         "car": "4gheap"
-      },
-      {
-        "challenge": "append-no-conflicts-index-only-1-replica",
-        "car": "two_nodes"
       },
       {
         "challenge": "append-no-conflicts",
