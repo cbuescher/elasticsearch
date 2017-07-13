@@ -8,3 +8,4 @@
     - { role: trim, tags: trim }
     - { role: initialize-data-disk, tags: initialize-data-disk }
     - { role: encryption-at-rest, tags: encryption-at-rest }
+    - { role: drop-caches, tags: drop-caches }
