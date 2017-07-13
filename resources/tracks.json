@@ -29,6 +29,10 @@
         "car": "4gheap"
       },
       {
+        "challenge": "append-no-conflicts-index-only",
+        "car": "verbose_iw"
+      },
+      {
         "challenge": "append-sorted-no-conflicts",
         "car": "4gheap"
       },
