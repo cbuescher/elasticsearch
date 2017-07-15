@@ -181,13 +181,17 @@ set -e
 
 if [ ${SKIP_S3} == NO ]
 then
-    echo "Uploading assets to ${S3_ROOT_BUCKET}"
-    if [ ${DRY_RUN} == NO ]
+    echo "Uploading assets from [${ASSET_SOURCE}] to [${S3_ROOT_BUCKET}]"
+    if [ ${DRY_RUN} == YES ]
     then
-        # --acl "public-read"           - let everyone read the assets
-        # --cache-control max-age=86400 - ensure that asset files expire after one day so users always see assets
-        aws s3 sync --acl "public-read" --cache-control max-age=86400 "${ASSET_SOURCE}/" "${S3_ROOT_BUCKET}/"
+        AWS_DRY_RUN="--dryrun"
+    else
+        AWS_DRY_RUN=""
     fi
+    # --acl "public-read"           - let everyone read the assets
+    # --cache-control max-age=86400 - ensure that asset files expire after one day so users always see assets
+    aws s3 sync ${AWS_DRY_RUN} --acl "public-read" --cache-control max-age=86400 "${ASSET_SOURCE}/" "${S3_ROOT_BUCKET}/"
+
 else
     echo "Skipping upload of assets to ${S3_ROOT_BUCKET}"
 fi
