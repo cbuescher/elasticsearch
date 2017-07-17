@@ -138,10 +138,6 @@ class NightlyCommand(SourceBasedCommand):
         super().__init__(effective_start_date, target_host, root_dir, "@%s" % to_iso8601(effective_start_date),
                          NightlyCommand.CONFIG_NAME, user_tag=None, override_src_dir=override_src_dir)
 
-    def runnable(self, track, challenge, car):
-        # Run 1gb benchmarks  only every other day
-        return car != "1gheap" or self.effective_start_date.day % 2 == 1
-
 
 class AdHocCommand(SourceBasedCommand):
     def __init__(self, revision, effective_start_date, target_host, root_dir, configuration_name, user_tag, override_src_dir=None):
