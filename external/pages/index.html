@@ -23,6 +23,177 @@
   <![endif]-->
   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 
+  <script type="text/javascript">
+var charts = {
+  init: function(chartSpecs, url) {
+    this.chartSpecs = chartSpecs;
+    uiState = this.readUiStateFromUrl(url);
+    this.restoreUiState(uiState);
+
+    this.currentSpec = this.findSelectedSpec(uiState);
+    this.dateRange = this.findDateRange();
+    this.currentChartType = this.chartType();
+
+    this.buildMenu(this.currentSpec);
+    this.buildOverview();
+    this.installEventHandlers();
+
+    this.render();
+  },
+
+  readUiStateFromUrl: function(url) {
+    var route = url.split('/')[0];
+    if (route === "#tracks") {
+        return url.substring("#tracks/".length).split('/');
+    } else {
+        return [];
+    }
+  },
+
+  restoreUiState: function(uiState) {
+    if (uiState.length >= 2) {
+        $("#checkToggleCompare").prop('checked', uiState[1] === "release");
+    }
+    if (uiState.length >= 3) {
+        $("#dateRangeSelector").val(uiState[2]);
+    }
+  },
+
+  buildMenu: function(activeItem) {
+    var nav = $("#navigation-container");
+    // remove any previous child elements.
+    nav.empty();
+    $.each(this.chartSpecs, function(index, value) {
+        if (value === activeItem) {
+            nav.append("<li class=\"active\"><a href=\"#\">" + value.track + "</a></li>");
+        } else {
+            var navItemId = "nav-item-" + value.id;
+            nav.append("<li><a id=\"" + navItemId + "\" href=\"#\">" + value.track + "</a></li>");
+            $("#" + navItemId).click(function(e) {
+                e.preventDefault();
+                charts.activateSpec(value);
+            });
+        }
+    });
+  },
+
+  buildOverview: function(activeItem) {
+    var nav = $("#tracks-overview-menu");
+    // remove any previous child elements.
+    nav.empty();
+    $.each(this.chartSpecs, function(index, value) {
+        var navItemId = "tracks-overview-nav-item-" + value.id;
+        nav.append("<li><a id=\"" + navItemId + "\" href=\"#\">" + value.track + "</a>: " + value.description + ".</li>");
+        $("#" + navItemId).click(function(e) {
+            e.preventDefault();
+            charts.activateSpec(value);
+        });
+    });
+  },
+
+  installEventHandlers: function() {
+    $("#dateRangeSelector").change(function() {
+        charts.dateRangeChanged();
+    });
+    $("#checkToggleCompare").click(function() {
+        charts.chartTypeChanged();
+    });
+    $("#index-selector").click(function() {
+        charts.selectMethodology();
+    });
+  },
+
+  dateRangeChanged: function() {
+    charts.dateRange = charts.findDateRange();
+    charts.render();
+  },
+
+  chartTypeChanged: function() {
+    charts.currentChartType = charts.chartType();
+    charts.render();
+  },
+
+  selectMethodology: function() {
+    charts.currentSpec = null;
+    charts.buildMenu(charts.currentSpec);
+    charts.render();
+  },
+
+  findSelectedSpec: function(uiState) {
+    if (uiState.length > 0) {
+        var trackName = uiState[0];
+        return this.chartSpecs.find(function(t) {
+            return t.id === trackName;
+        });
+    } else {
+        return null;
+    }
+  },
+
+  findDateRange: function() {
+    return $("#dateRangeSelector option:selected").val();
+  },
+
+  chartType: function() {
+    var e = $("#checkToggleCompare")[0];
+    if (e.checked) {
+        return "release";
+    } else {
+        return "nightly";
+    }
+  },
+
+  activateSpec: function(spec) {
+    this.currentSpec = spec;
+    this.buildMenu(this.currentSpec);
+    this.render();
+  },
+
+  showChart: function(url, dateRange) {
+    $("#charts").html("<iframe id=\"charts\" src=\"" +url + "?embed=true&_g=(refreshInterval%3A(display%3AOff%2Cpause%3A!f%2Cvalue%3A0)%2Ctime%3A(from%3Anow-" + dateRange + "%2Cmode%3Aquick%2Cto%3Anow))\" height=\"100%\" width=\"100%\" frameBorder=\"0\"></iframe>");
+  },
+
+  dashboardUrl: function(chartId) {
+    return "https://elasticsearch-benchmark-analytics.elastic.co/app/kibana#/dashboard/" + chartId;
+  },
+
+  render: function() {
+    $('.methodology').hide();
+    $('.tracks').hide();
+    $("#dateRangeGroup").hide();
+
+    if (charts.currentSpec != null) {
+        var hash = "#tracks/" + charts.currentSpec.id;
+
+        $('.tracks').show();
+        if (charts.currentChartType === "nightly") {
+          hash = hash + "/nightly/" + charts.dateRange;
+          var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly);
+          $("#dateRangeGroup").show();
+          $("#dashboard-url").attr("href", nightlyUrl);
+          charts.showChart(nightlyUrl, charts.dateRange);
+        } else {
+          hash = hash + "/release";
+          var releaseUrl = charts.dashboardUrl(charts.currentSpec.release);
+          $("#dashboard-url").attr("href", releaseUrl);
+          //These charts should be time-independent. Don't use the date range here.
+          charts.showChart(releaseUrl, "5y");
+        }
+        window.location.hash = hash;
+    } else {
+        $('.methodology').show();
+        hash = "";
+        window.location.hash = hash;
+    }
+  }
+}
+    </script>
+
+  <style>
+body,html,.main-display-area,.col-md-12 {
+   height:100%;
+}
+    </style>
 </head>
 
 <body>
@@ -37,37 +208,62 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand active" href="#">Elasticsearch Nightly Benchmarks</a>
+      <a id="index-selector" class="navbar-brand" href="#">Elasticsearch Benchmarks</a>
     </div>
     <div class="navbar-collapse collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="geonames/index.html">Geonames</a></li>
-		<li><a href="geopoint/index.html">Geopoint</a></li>
-		<li><a href="percolator/index.html">Percolator</a></li>
-		<li><a href="pmc/index.html">PMC</a></li>
-        <li><a href="nyc_taxis/index.html">NYC taxis</a></li>
-        <li><a href="nested/index.html">Nested</a></li>
-        <li><a href="logging/index.html">Logging</a></li>
-        <li><a href="noaa/index.html">noaa</a></li>
+      <ul id="navigation-container" class="nav navbar-nav">
       </ul>
     </div><!--/.nav-collapse -->
+
   </div>
 </div>
 
-<div class="container">
+<div class="container tracks">
+  <div class="row">
+    <div class="col-md-8">
+      <h3>Results</h3>
+      <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>Hint</strong> These diagrams are just provided as an overview. Please go to the
+        <a id="dashboard-url" href="#">Kibana dashboard</a> if you want to analyze the results in more detail.
+      </div>
+      <form class="form-horizontal">
+        <div class="checkbox">
+          <label><input type="checkbox" id="checkToggleCompare"> Show release charts</label>
+        </div>
+        <div class="form-group" id="dateRangeGroup">
+          <div class="col-md-4">
+            <label for="dateRangeSelector" class="control-label"> Date range for nightly</label>
+            <select class="form-control" id="dateRangeSelector">
+              <option value="30d" selected>Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="6M">Last 6 months</option>
+              <option value="1y">Last year</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row" style="height:220em">
+    <div class="col-md-12">
+      <div id="charts" style="width:100%; height:100%"></div>
+    </div>
+  </div>
+</div> <!-- /container -->
+
+<!-- main content -->
+
+<div class="container methodology">
   <div class="row">
     <div class="col-md-12">
-    <h3>Overview</h3>
+      <h3>Overview</h3>
       <div class="panel panel-default">
-        <!--
-          <div class="panel-heading">
-            <h3 class="panel-title">Info</h3>
-          </div>
-          -->
         <div class="panel-body">
           <p>On this page are the results of the Elasticsearch nightly benchmarks based on the <a href="https://github.com/elastic/elasticsearch">master</a>
             branch as of that point in time. The Apache Software Foundation also provides a similar page for the <a
-              href="https://people.apache.org/~mikemccand/lucenebench/">Lucene nightly benchmarks</a>.</p>
+                    href="https://people.apache.org/~mikemccand/lucenebench/">Lucene nightly benchmarks</a>.</p>
         </div>
       </div>
     </div>
@@ -76,56 +272,108 @@
   <div class="row">
     <div class="col-md-12">
       <h3>Benchmarks</h3>
-      <ul>
-        <li><a href="geonames/index.html">Geonames</a>: for evaluating the performance of structured data.</li>
-        <li><a href="geopoint/index.html">Geopoint</a>: for evaluating the performance of geo queries.</li>
-        <li><a href="percolator/index.html">Percolator</a>: for evaluating the performance of percolation queries.</li>
-        <li><a href="pmc/index.html">PMC</a>: for evaluating the performance of full text search.</li>
-        <li><a href="nyc_taxis/index.html">NYC taxis</a>: for evaluating the performance for highly structured data.</li>
-        <li><a href="nested/index.html">Nested</a>: for evaluating the performance for nested documents.</li>
-        <li><a href="logging/index.html">Logging</a>: for evaluating the performance of (Web) server logs.</li>
-        <li><a href="noaa/index.html">noaa</a>: for evaluating the performance of range fields.</li>
+      <ul id="tracks-overview-menu">
       </ul>
     </div>
   </div>
 
 
   <div class="row">
-	<div class="col-md-12">
-    <h3>Benchmarking Methodology</h3>
-    <p>All benchmarks are run by <a href="https://github.com/elastic/rally">Rally</a> against the <a href="https://github.com/elastic/elasticsearch/tree/master/">Elasticsearch master branch</a> as of that date. The benchmark uses two bare-metal server-class machines. On one we run the benchmark driver (Rally), on the other one the benchmark candidate (one or at most two Elasticsearch nodes).</p>
+    <div class="col-md-12">
+      <h3>Benchmarking Methodology</h3>
+      <p>All benchmarks are run by <a href="https://github.com/elastic/rally">Rally</a> against the <a href="https://github.com/elastic/elasticsearch/tree/master/">Elasticsearch master branch</a> as of that date. The benchmark uses two bare-metal server-class machines. On one we run the benchmark driver (Rally), on the other one the benchmark candidate (one or at most two Elasticsearch nodes).</p>
 
-    <p>The benchmarks are intentionally not scalability benchmarks but rather show the performance characteristics of Elasticsearch for a single node (or at most two-nodes) and are mainly intended to help the development team spot performance regressions.</p>
-	</div>
+      <p>The benchmarks are intentionally not scalability benchmarks but rather show the performance characteristics of Elasticsearch for a single node (or at most two-nodes) and are mainly intended to help the development team spot performance regressions.</p>
+    </div>
   </div>
 
   <div class="row">
     <div class="col-md-12">
-    <h3>Benchmarking Environment</h3>
-    <h4>Current environment</h4>
+      <h3>Benchmarking Environment</h3>
+      <h4>Current environment</h4>
       <p>All benchmarks are run on bare-metal machines with the following specifications:</p>
-        <ul>
-            <li>CPU: <a href="http://ark.intel.com/products/88196/Intel-Core-i7-6700-Processor-8M-Cache-up-to-4_00-GHz">Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz</a></li>
-            <li>RAM: 32 GB</li>
-          <li>SSD: <a href="http://www.crucial.com/usa/en/storage-ssd-mx200">Crucial MX200</a></li>
-            <li>OS: Linux Kernel version 4.4.0-72</li>
-            <li>JVM: Oracle JDK 1.8.0_131-b11</li>
-        </ul>
-    <h4>History of changes</h4>
-    <ul>
-      <li>2017-06-29: Upgrade JDK from version 1.8.0_101-b13 to 1.8.0_131-b11</li>
-      <li>2017-04-13: Upgrade kernel from version 4.4.0-38 to 4.4.0-72</li>
-    </ul>
-
-    <div>
+      <ul>
+        <li>CPU: <a href="http://ark.intel.com/products/88196/Intel-Core-i7-6700-Processor-8M-Cache-up-to-4_00-GHz">Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz</a></li>
+        <li>RAM: 32 GB</li>
+        <li>SSD: <a href="http://www.crucial.com/usa/en/storage-ssd-mx200">Crucial MX200</a></li>
+        <li>OS: Linux Kernel version 4.4.0-72</li>
+        <li>JVM: Oracle JDK 1.8.0_131-b11</li>
+      </ul>
+      <h4>History of changes</h4>
+      <ul>
+        <li>2017-06-29: Upgrade JDK from version 1.8.0_101-b13 to 1.8.0_131-b11</li>
+        <li>2017-04-13: Upgrade kernel from version 4.4.0-38 to 4.4.0-72</li>
+      </ul>
+    </div>
   </div>
-</div> <!-- /container -->
-
+</div>
 
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="assets/js/bootstrap.min.js"></script>
+<script>
+  $(document).ready(function() {
+    charts.init([
+        {
+            "id": "geonames",
+            "track": "Geonames",
+            "description": "for evaluating the performance of structured data",
+            "nightly": "6893cc90-396b-11e7-8727-77c9f451e7f2",
+            "release": "6687d4f0-3ba5-11e7-aa82-6514dc2fe291"
+        },
+        {
+            "id": "geopoint",
+            "track": "Geopoint",
+            "description": "for evaluating the performance of geo queries",
+            "nightly": "00bf2a80-3973-11e7-8727-77c9f451e7f2",
+            "release": "99a96120-6236-11e7-9b79-cdddacd7f84a"
+        },
+        {
+            "id": "percolator",
+            "track": "Percolator",
+            "description": "for evaluating the performance of percolation queries",
+            "nightly": "336fe450-3974-11e7-8727-77c9f451e7f2",
+            "release": "d5390790-6236-11e7-9b79-cdddacd7f84a"
+        },
+        {
+            "id": "pmc",
+            "track": "PMC",
+            "description": "for evaluating the performance of full text search",
+            "nightly": "aec8bc30-3974-11e7-a937-6fd6f5dfa7da",
+            "release": "5135c090-6237-11e7-9b79-cdddacd7f84a"
+        },
+        {
+            "id": "nyc-taxis",
+            "track": "NYC taxis",
+            "description": "for evaluating the performance for highly structured data",
+            "nightly": "d4c4b420-3974-11e7-a937-6fd6f5dfa7da",
+            "release": "785f3c00-6237-11e7-9b79-cdddacd7f84a"
+        },
+        {
+            "id": "nested",
+            "track": "Nested",
+            "description": "for evaluating the performance for nested documents",
+            "nightly": "f2265f00-3974-11e7-a937-6fd6f5dfa7da",
+            "release": "dcd74bf0-6237-11e7-9b79-cdddacd7f84a"
+        },
+        {
+            "id": "logging",
+            "track": "Logging",
+            "description": "for evaluating the performance of (Web) server logs",
+            "nightly": "1659a4e0-3975-11e7-a937-6fd6f5dfa7da",
+            "release": "1a6a6380-6238-11e7-9b79-cdddacd7f84a"
+        },
+        {
+            "id": "noaa",
+            "track": "noaa",
+            "description": "for evaluating the performance of range fields",
+            "nightly": "b23e0e10-624b-11e7-9388-6d68d624ecea",
+            "release": "681a6900-624b-11e7-9388-6d68d624ecea"
+        }
+    ], window.location.hash);
+  });
+</script>
 </body>
 </html>

@@ -55,8 +55,7 @@ The following steps are necessary to add a new track:
 
 1. Add your track and the challenges to run in `resources/track.json`
 2. Create nightly and release charts and the corresponding dashboards on the Kibana instance https://ece78408d8df7290d4ad6e3ffac5af6a.us-east-1.aws.found.io (it's mapped to be publicly reachable). You can generate release charts with `python3 generate_release_charts.py YOUR_TRACK_NAME`. At the moment there is no such generator for nightly charts though.
-3. Copy a directory in `external/pages`, adjust the names accordingly and reference the UUID of the dashboards that you've created in step 2.
-4. Adjust the menu structure in all other files (if this happens more often, we should think about using a template engine for that...)
+3. Add the name of your track and the UUIDs of the dashboards that you've created in step 2 to the array at the bottom of `external/pages/index.html`.
 
 If you're finished, please submit a PR. After the PR is merged, the new track will show up after the next benchmark.
 
@@ -70,16 +69,3 @@ Suppose we want to publish a new release benchmark of the Elasticsearch release 
 * `TARGET_HOST`: Just use the default value
 
 The results will show up automatically as soon as the build is finished.
-
-#### Run an ad-hoc benchmark
-
-_Note: An ad-hoc benchmark is a benchmark of an arbitrary git commit hash that should be published as a separate data series in our release comparison charts._
-
-Suppose we want to publish the results of the commit hash `66202dc` in the Elasticsearch repo as "Lucene 7 upgrade" on our benchmark page. 
-
-1. Add "Lucene 7 upgrade" to the `versions` array in each `index.html` in `external/pages`. Commit and push your changes.
-2. On the benchmark machine, issue the following command:
-
-```
-night_rally.sh --target-host=target-551504.benchmark.hetzner-dc17.elasticnet.co:39200 --mode=adhoc --revision=66202dc --release="Lucene 7"
-```
