@@ -162,7 +162,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    def test_run_release_benchmark(self):
+    def test_run_release_benchmark_without_plugins(self):
         system_call = RecordingSystemCall(return_value=False)
 
         tracks = [
@@ -181,7 +181,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        cmd = night_rally.ReleaseCommand(start_date, "localhost", "/rally_root", "5.3.0", "release", tag="env:bare")
+        cmd = night_rally.ReleaseCommand(start_date, "localhost", None, "/rally_root", "5.3.0", "release", tag="env:bare")
         night_rally.run_rally(tracks, cmd, system=system_call)
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
@@ -201,6 +201,50 @@ class NightRallyTests(unittest.TestCase):
             ,
             system_call.calls
         )
+
+    def test_run_release_benchmark_with_plugins(self):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "combinations": [
+                    {
+                        "challenge": "append-no-conflicts",
+                        "car": "defaults"
+                    },
+                    {
+                        "challenge": "append-no-conflicts",
+                        "car": "4gheap"
+                    }
+                ]
+            }
+        ]
+        start_date = datetime.datetime(2016, 1, 1)
+        cmd = night_rally.ReleaseCommand(start_date, "localhost", "x-pack:security,monitoring", "/rally_root", "5.3.0", "release",
+                                         tag="env:x-pack")
+        night_rally.run_rally(tracks, cmd, system=system_call)
+        self.assertEqual(2, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --skip-update --configuration-name=release --target-host=localhost --pipeline=from-distribution --quiet "
+                "--distribution-version=5.3.0 --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
+                "--challenge=append-no-conflicts --car=defaults --report-format=csv "
+                "--report-file=/rally_root/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/defaults/report.csv "
+                "--user-tag=\"env:x-pack\" --elasticsearch-plugins=\"x-pack:security,monitoring\" --cluster-health=yellow "
+                "--client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\"",
+
+                "rally --skip-update --configuration-name=release --target-host=localhost --pipeline=from-distribution --quiet "
+                "--distribution-version=5.3.0 --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
+                "--challenge=append-no-conflicts --car=4gheap --report-format=csv "
+                "--report-file=/rally_root/reports/rally/2016-01-01-00-00-00/geonames/append-no-conflicts/4gheap/report.csv "
+                "--user-tag=\"env:x-pack\" --elasticsearch-plugins=\"x-pack:security,monitoring\" --cluster-health=yellow "
+                "--client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\"",
+            ]
+            ,
+            system_call.calls
+        )
+
 
     def test_run_docker_benchmark(self):
         system_call = RecordingSystemCall(return_value=False)

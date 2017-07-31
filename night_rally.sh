@@ -43,6 +43,7 @@ RELEASE="master"
 REVISION="latest"
 TARGET_HOST="localhost:9200"
 TAG=""
+PLUGINS=""
 
 
 for i in "$@"
@@ -86,6 +87,10 @@ case ${i} in
     ;;
     --target-host=*)
     TARGET_HOST="${i#*=}"
+    shift # past argument=value
+    ;;
+    --elasticsearch-plugins=*)
+    PLUGINS="${i#*=}"
     shift # past argument=value
     ;;
     *)
@@ -164,7 +169,7 @@ fi
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE} --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --tag="${TAG}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE} --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --tag="${TAG}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"

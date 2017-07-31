@@ -145,8 +145,9 @@ class AdHocCommand(SourceBasedCommand):
 
 
 class ReleaseCommand(BaseCommand):
-    def __init__(self, effective_start_date, target_host, root_dir, distribution_version, configuration_name, tag):
+    def __init__(self, effective_start_date, target_host, plugins, root_dir, distribution_version, configuration_name, tag):
         super().__init__(effective_start_date, target_host, root_dir)
+        self.plugins = plugins
         self.configuration_name = configuration_name
         self.pipeline = "from-distribution"
         self.distribution_version = distribution_version
@@ -167,6 +168,12 @@ class ReleaseCommand(BaseCommand):
               "--user-tag=\"{9}\"".format(self.distribution_version, self.ts, track, challenge, car,
                                           self.report_path(track, challenge, car), self.pipeline,
                                           self.target_host, self.configuration_name, self.tag(), RALLY_BINARY)
+        if self.plugins:
+            cmd += " --elasticsearch-plugins=\"%s\"" % self.plugins
+            if "x-pack:security" in self.plugins:
+                cmd += " --cluster-health=yellow " \
+                       "--client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
+
         return cmd
 
     def tag(self):
@@ -353,6 +360,10 @@ def parse_args():
         help="The Elasticsearch node that should be targeted",
         required=True)
     parser.add_argument(
+        "--elasticsearch-plugins",
+        help="Elasticsearch plugins to install for the benchmark (default: None)",
+        default=None)
+    parser.add_argument(
         "--fixtures",
         help="A comma-separated list of fixtures that have been run",
         required=True)
@@ -391,8 +402,15 @@ def main():
     adhoc_mode = args.mode == "adhoc"
     nightly_mode = args.mode == "nightly"
 
+    plugins = args.elasticsearch_plugins
+
     tag = args.tag
-    release_tag = "env:ear" if "encryption-at-rest" in args.fixtures else "env:bare"
+    if "encryption-at-rest" in args.fixtures:
+        release_tag = "env:ear"
+    elif "x-pack:security" in plugins:
+        release_tag = "env:x-pack"
+    else:
+        release_tag = "env:bare"
     docker_benchmark = args.release.startswith("Docker ")
     release = args.release.replace("Docker ", "")
 
@@ -403,20 +421,26 @@ def main():
         # use always the same name for release comparison benchmarks
         env_name = sanitize(args.mode)
         if docker_benchmark:
+            if plugins:
+                raise RuntimeError("User specified plugins [%s] but this is not supported for Docker benchmarks." % plugins)
             logger.info("Running Docker release benchmarks for release [%s] against [%s]." % (release, args.target_host))
             command = DockerCommand(args.effective_start_date, args.target_host, root_dir, release, env_name)
             tag = command.tag()
         else:
             logger.info("Running release benchmarks for release [%s] against [%s] (release tag is [%s])."
                         % (release, args.target_host, release_tag))
-            command = ReleaseCommand(args.effective_start_date, args.target_host, root_dir, release, env_name, release_tag)
+            command = ReleaseCommand(args.effective_start_date, args.target_host, plugins, root_dir, release, env_name, release_tag)
             tag = command.tag()
     elif adhoc_mode:
+        if plugins:
+            raise RuntimeError("User specified plugins [%s] but this is not supported for adhoc benchmarks." % plugins)
         logger.info("Running adhoc benchmarks for revision [%s] against [%s]." % (args.revision, args.target_host))
         # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
         command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.tag, args.override_src_dir)
     else:
+        if plugins:
+            raise RuntimeError("User specified plugins [%s] but this is not supported for nightly benchmarks." % plugins)
         logger.info("Running nightly benchmarks against [%s]." % args.target_host)
         env_name = NightlyCommand.CONFIG_NAME
         command = NightlyCommand(args.effective_start_date, args.target_host, root_dir, args.override_src_dir)
