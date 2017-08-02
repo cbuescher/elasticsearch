@@ -398,6 +398,9 @@ def load_tracks():
 def main():
     args = parse_args()
 
+    start_date = args.effective_start_date
+    logger.info("Effective start date is [%s]" % date_for_path(start_date))
+
     release_mode = args.mode == "release"
     adhoc_mode = args.mode == "adhoc"
     nightly_mode = args.mode == "nightly"
@@ -424,12 +427,12 @@ def main():
             if plugins:
                 raise RuntimeError("User specified plugins [%s] but this is not supported for Docker benchmarks." % plugins)
             logger.info("Running Docker release benchmarks for release [%s] against [%s]." % (release, args.target_host))
-            command = DockerCommand(args.effective_start_date, args.target_host, root_dir, release, env_name)
+            command = DockerCommand(start_date, args.target_host, root_dir, release, env_name)
             tag = command.tag()
         else:
             logger.info("Running release benchmarks for release [%s] against [%s] (release tag is [%s])."
                         % (release, args.target_host, release_tag))
-            command = ReleaseCommand(args.effective_start_date, args.target_host, plugins, root_dir, release, env_name, release_tag)
+            command = ReleaseCommand(start_date, args.target_host, plugins, root_dir, release, env_name, release_tag)
             tag = command.tag()
     elif adhoc_mode:
         if plugins:
@@ -437,23 +440,23 @@ def main():
         logger.info("Running adhoc benchmarks for revision [%s] against [%s]." % (args.revision, args.target_host))
         # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
-        command = AdHocCommand(args.revision, args.effective_start_date, args.target_host, root_dir, env_name, args.tag, args.override_src_dir)
+        command = AdHocCommand(args.revision, start_date, args.target_host, root_dir, env_name, args.tag, args.override_src_dir)
     else:
         if plugins:
             raise RuntimeError("User specified plugins [%s] but this is not supported for nightly benchmarks." % plugins)
         logger.info("Running nightly benchmarks against [%s]." % args.target_host)
         env_name = NightlyCommand.CONFIG_NAME
-        command = NightlyCommand(args.effective_start_date, args.target_host, root_dir, args.override_src_dir)
+        command = NightlyCommand(start_date, args.target_host, root_dir, args.override_src_dir)
 
     configure_rally(env_name, args.dry_run)
     rally_failure = run_rally(tracks, command, args.dry_run)
 
     if nightly_mode:
-        copy_results_for_release_comparison(args.effective_start_date, args.dry_run, release_tag)
+        copy_results_for_release_comparison(start_date, args.dry_run, release_tag)
         # we want to deactivate old release entries, not old nightly entries
-        deactivate_outdated_results(args.effective_start_date, "release", release, release_tag, args.dry_run)
+        deactivate_outdated_results(start_date, "release", release, release_tag, args.dry_run)
     else:
-        deactivate_outdated_results(args.effective_start_date, env_name, release, tag, args.dry_run)
+        deactivate_outdated_results(start_date, env_name, release, tag, args.dry_run)
     if rally_failure:
         exit(1)
 
