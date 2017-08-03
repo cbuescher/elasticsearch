@@ -168,6 +168,12 @@ def delete_annotation(es, args):
 
 
 def arg_parser():
+    def positive_number(v):
+        value = int(v)
+        if value <= 0:
+            raise argparse.ArgumentTypeError("must be positive but was %s" % value)
+        return value
+
     parser = argparse.ArgumentParser(description="Admin tool for Elasticsearch benchmarks",
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
 
@@ -188,6 +194,7 @@ def arg_parser():
     list_parser.add_argument(
         "--limit",
         help="Limit the number of search results (default: 20).",
+        type=positive_number,
         default=20,
     )
     list_parser.add_argument(
