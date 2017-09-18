@@ -161,6 +161,7 @@ var charts = {
     $('.methodology').hide();
     $('.tracks').hide();
     $("#dateRangeGroup").hide();
+    $("#releaseLegend").hide();
 
     if (charts.currentSpec != null) {
         var hash = "#tracks/" + charts.currentSpec.id;
@@ -176,6 +177,7 @@ var charts = {
           hash = hash + "/release";
           var releaseUrl = charts.dashboardUrl(charts.currentSpec.release);
           $("#dashboard-url").attr("href", releaseUrl);
+          $("#releaseLegend").show();
           //These charts should be time-independent. Don't use the date range here.
           charts.showChart(releaseUrl, "5y");
         }
@@ -243,6 +245,16 @@ body,html,.main-display-area,.col-md-12 {
           </div>
         </div>
       </form>
+      <div id="releaseLegend">
+        <h4>Legend</h4>
+        <p>We test the following configurations:</p>
+        <ul>
+          <li><code>env:bare</code>: Elasticsearch on an unencrypted drive</li>
+          <li><code>env:ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
+          <li><code>env:x-pack</code>: Elasticsearch on an unencrypted drive but with <a href="https://www.elastic.co/products/x-pack/security">X-Pack Security</a> enabled.</li>
+          <li><code>env:docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
+        </ul>
+      </div>
     </div>
   </div>
 
