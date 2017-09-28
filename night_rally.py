@@ -99,33 +99,51 @@ class BaseCommand:
     def report_path(self, track, challenge, car):
         return "%s/reports/rally/%s/%s/%s/%s/report.csv" % (self.root_dir, date_for_path(self.effective_start_date), track, challenge, car)
 
-    def runnable(self, track, challenge, car):
+    def runnable(self, track, challenge, car, plugins):
         return True
 
-    def command_line(self, track, challenge, car):
+    def command_line(self, track, challenge, car, plugins):
         raise NotImplementedError("abstract method")
 
 
 class SourceBasedCommand(BaseCommand):
-    def __init__(self, effective_start_date, target_host, root_dir, revision, configuration_name, user_tag=None, override_src_dir=None):
+    def __init__(self, effective_start_date, target_host, root_dir, revision, configuration_name, user_tag=None):
         super().__init__(effective_start_date, target_host, root_dir)
         self.revision = revision
         self.configuration_name = configuration_name
         self.pipeline = "from-sources-complete"
-        if override_src_dir is not None:
-            self.override = " --override-src-dir=%s" % override_src_dir
-        else:
-            self.override = ""
+        self.pipeline_with_plugins = "from-sources-complete"
         if user_tag:
             self.user_tag = " --user-tag=\"intention:%s\"" % user_tag
         else:
             self.user_tag = ""
 
-    def command_line(self, track, challenge, car):
-        cmd = "{11} --configuration-name={9} --target-host={8} --pipeline={6} --quiet --revision \"{0}\" " \
-              "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5}{7}{10}". \
-            format(self.revision, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline, self.override,
-                   self.target_host, self.configuration_name, self.user_tag, RALLY_BINARY)
+    def command_line(self, track, challenge, car, plugins):
+        cmd = RALLY_BINARY
+        cmd += " --configuration-name=%s" % self.configuration_name
+        cmd += " --target-host=%s" % self.target_host
+        # force a build if plugins are involved because we do not know whether we've build these plugins before
+        if plugins:
+            cmd += " --pipeline=%s" % self.pipeline_with_plugins
+        else:
+            cmd += " --pipeline=%s" % self.pipeline
+        #cmd += " --quiet"
+        cmd += " --revision \"%s\"" % self.revision
+        cmd += " --effective-start-date \"%s\"" % self.effective_start_date
+        cmd += " --track=%s" % track
+        cmd += " --challenge=%s" % challenge
+        cmd += " --car=%s" % car
+        cmd += " --report-format=csv"
+        cmd += " --report-file=%s" % self.report_path(track, challenge, car)
+        cmd += self.user_tag
+
+        if plugins:
+            self.pipeline_with_plugins = "from-sources-skip-build"
+            cmd += " --elasticsearch-plugins=\"%s\"" % plugins
+            if "x-pack:security" in plugins:
+                cmd += " --cluster-health=yellow"
+                cmd += " --client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
+
         # after we've executed the first benchmark, there is no reason to build again from sources
         self.pipeline = "from-sources-skip-build"
         return cmd
@@ -134,14 +152,14 @@ class SourceBasedCommand(BaseCommand):
 class NightlyCommand(SourceBasedCommand):
     CONFIG_NAME = "nightly"
 
-    def __init__(self, effective_start_date, target_host, root_dir, override_src_dir=None):
+    def __init__(self, effective_start_date, target_host, root_dir):
         super().__init__(effective_start_date, target_host, root_dir, "@%s" % to_iso8601(effective_start_date),
-                         NightlyCommand.CONFIG_NAME, user_tag=None, override_src_dir=override_src_dir)
+                         NightlyCommand.CONFIG_NAME, user_tag=None)
 
 
 class AdHocCommand(SourceBasedCommand):
-    def __init__(self, revision, effective_start_date, target_host, root_dir, configuration_name, user_tag, override_src_dir=None):
-        super().__init__(effective_start_date, target_host, root_dir, revision, configuration_name, user_tag, override_src_dir)
+    def __init__(self, revision, effective_start_date, target_host, root_dir, configuration_name, user_tag):
+        super().__init__(effective_start_date, target_host, root_dir, revision, configuration_name, user_tag)
 
 
 class ReleaseCommand(BaseCommand):
@@ -153,26 +171,38 @@ class ReleaseCommand(BaseCommand):
         self.distribution_version = distribution_version
         self._tag = tag
 
-    def runnable(self, track, challenge, car):
+    def runnable(self, track, challenge, car, plugins):
         # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
         if car == "1gheap":
+            return False
+        # Do not run plugin-specific tracks. We run either the whole suite with or without plugins.
+        if plugins != "":
             return False
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if int(self.distribution_version[0]) < 6:
             return "sorted" not in challenge
         return True
 
-    def command_line(self, track, challenge, car):
-        cmd = "{10} --configuration-name={8} --target-host={7} --pipeline={6} --quiet --distribution-version={0} " \
-              "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5} " \
-              "--user-tag=\"{9}\"".format(self.distribution_version, self.ts, track, challenge, car,
-                                          self.report_path(track, challenge, car), self.pipeline,
-                                          self.target_host, self.configuration_name, self.tag(), RALLY_BINARY)
-        if self.plugins:
-            cmd += " --elasticsearch-plugins=\"%s\"" % self.plugins
-            if "x-pack:security" in self.plugins:
-                cmd += " --cluster-health=yellow " \
-                       "--client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
+    def command_line(self, track, challenge, car, plugins):
+        cmd = RALLY_BINARY
+        cmd += " --configuration-name=%s" % self.configuration_name
+        cmd += " --target-host=%s" % self.target_host
+        cmd += " --pipeline=%s" % self.pipeline
+        cmd += " --quiet"
+        cmd += " --distribution-version=%s" % self.distribution_version
+        cmd += " --effective-start-date \"%s\"" % self.effective_start_date
+        cmd += " --track=%s" % track
+        cmd += " --challenge=%s" % challenge
+        cmd += " --car=%s" % car
+        cmd += " --report-format=csv"
+        cmd += " --report-file=%s" % self.report_path(track, challenge, car)
+        cmd += " --user-tag=\"%s\"" % self.tag()
+
+        if plugins:
+            cmd += " --elasticsearch-plugins=\"%s\"" % plugins
+            if "x-pack:security" in plugins:
+                cmd += " --cluster-health=yellow"
+                cmd += "--client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
 
         return cmd
 
@@ -187,20 +217,33 @@ class DockerCommand(BaseCommand):
         self.pipeline = "docker"
         self.distribution_version = distribution_version
 
-    def runnable(self, track, challenge, car):
+    def runnable(self, track, challenge, car, plugins):
         if car in ["two_nodes", "verbose_iw", "1gheap"]:
+            return False
+        # no plugin installs on Docker
+        if plugins != "":
             return False
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if int(self.distribution_version[0]) < 6:
             return "sorted" not in challenge
         return True
 
-    def command_line(self, track, challenge, car):
-        cmd = "{10} --configuration-name={8} --target-host={7} --pipeline={6} --quiet --distribution-version={0} " \
-              "--effective-start-date \"{1}\" --track={2} --challenge={3} --car={4} --report-format=csv --report-file={5} " \
-              "--cluster-health=yellow --user-tag=\"{9}\"". \
-            format(self.distribution_version, self.ts, track, challenge, car, self.report_path(track, challenge, car), self.pipeline,
-                   self.target_host, self.configuration_name, self.tag(), RALLY_BINARY)
+    def command_line(self, track, challenge, car, plugins):
+        cmd = RALLY_BINARY
+        cmd += " --configuration-name=%s" % self.configuration_name
+        cmd += " --target-host=%s" % self.target_host
+        cmd += " --pipeline=%s" % self.pipeline
+        cmd += " --quiet"
+        cmd += " --distribution-version=%s" % self.distribution_version
+        cmd += " --effective-start-date \"%s\"" % self.effective_start_date
+        cmd += " --track=%s" % track
+        cmd += " --challenge=%s" % challenge
+        cmd += " --car=%s" % car
+        cmd += " --report-format=csv"
+        cmd += " --report-file=%s" % self.report_path(track, challenge, car)
+        cmd += " --user-tag=\"%s\"" % self.tag()
+        # due to the possibility that x-pack is active (that depends on Rally)
+        cmd += " --cluster-health=yellow"
         return cmd
 
     @staticmethod
@@ -219,18 +262,26 @@ def run_rally(tracks, command, dry_run=False, system=os.system):
         for combination in track["combinations"]:
             challenge = combination["challenge"]
             car = combination["car"]
-            if command.runnable(track_name, challenge, car):
-                logger.info("Running Rally on track [%s] with challenge [%s] and car [%s]" % (track_name, challenge, car))
+            plugins = combination.get("plugins", "")
+            info = race_info(track_name, challenge, car, plugins)
+            if command.runnable(track_name, challenge, car, plugins):
+                logger.info("Running Rally on %s" % info)
                 start = time.perf_counter()
-                if runner(command.command_line(track_name, challenge, car)):
+                if runner(command.command_line(track_name, challenge, car, plugins)):
                     rally_failure = True
-                    logger.error("Failed to run track [%s]. Please check the logs." % track_name)
+                    logger.error("Failed to run %s. Please check the logs." % info)
                 stop = time.perf_counter()
-                logger.info("Finished running on track [%s] with challenge [%s] and car [%s] in [%f] seconds." % (
-                    track_name, challenge, car, (stop - start)))
+                logger.info("Finished running on %s in [%f] seconds." % (info, (stop - start)))
             else:
-                logger.info("Skipping track [%s], challenge [%s] and car [%s] (not supported by command)." % (track_name, challenge, car))
+                logger.info("Skipping %s (not supported by command)." % info)
     return rally_failure
+
+
+def race_info(track, challenge, car, plugins):
+    if plugins:
+        return "track [%s] with challenge [%s], car [%s] and plugins [%s]" % (track, challenge, car, plugins)
+    else:
+        return "track [%s] with challenge [%s] and car [%s]" % (track, challenge, car)
 
 
 #################################################
@@ -247,10 +298,29 @@ def copy_results_for_release_comparison(effective_start_date, dry_run, tag):
         es = client.create_client()
         es.indices.refresh(index="rally-results-*")
         ts = to_iso8601_short(effective_start_date)
+        # find all of today's results but exclude "x-pack" ones because we will not have release charts for them (x-pack has
+        # their own dedicated trial runs on releases)
         query = {
             "query": {
-                "term": {
-                    "trial-timestamp": ts
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "trial-timestamp": {
+                                    "value": ts
+                                }
+                            }
+                        }
+                    ],
+                    "must_not": [
+                        {
+                            "term": {
+                                "plugins": {
+                                    "value": "x-pack"
+                                }
+                            }
+                        }
+                    ]
                 }
             }
         }
@@ -348,10 +418,6 @@ def parse_args():
         required=True,
         type=lambda s: datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S"))
     parser.add_argument(
-        "--override-src-dir",
-        help=argparse.SUPPRESS,
-        default=None)
-    parser.add_argument(
         "--tag",
         help=argparse.SUPPRESS,
         default=None)
@@ -440,13 +506,13 @@ def main():
         logger.info("Running adhoc benchmarks for revision [%s] against [%s]." % (args.revision, args.target_host))
         # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
-        command = AdHocCommand(args.revision, start_date, args.target_host, root_dir, env_name, args.tag, args.override_src_dir)
+        command = AdHocCommand(args.revision, start_date, args.target_host, root_dir, env_name, args.tag)
     else:
         if plugins:
             raise RuntimeError("User specified plugins [%s] but this is not supported for nightly benchmarks." % plugins)
         logger.info("Running nightly benchmarks against [%s]." % args.target_host)
         env_name = NightlyCommand.CONFIG_NAME
-        command = NightlyCommand(start_date, args.target_host, root_dir, args.override_src_dir)
+        command = NightlyCommand(start_date, args.target_host, root_dir)
 
     configure_rally(env_name, args.dry_run)
     rally_failure = run_rally(tracks, command, args.dry_run)

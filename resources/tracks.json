@@ -20,6 +20,13 @@
       },
       {
         "challenge": "append-no-conflicts-index-only",
+        "car": "defaults",
+        "plugins": "x-pack:security",
+        "#COMMENT": "Don't include dedicated x-pack graphs in release charts as we run them differently there",
+        "release-charts": false
+      },
+      {
+        "challenge": "append-no-conflicts-index-only",
         "car": "4gheap"
       },
       {
@@ -55,6 +62,12 @@
         "default-combination": true
       },
       {
+        "challenge": "append-no-conflicts",
+        "car": "defaults",
+        "plugins": "x-pack:security",
+        "release-charts": false
+      },
+      {
         "challenge": "append-no-conflicts-index-only",
         "car": "4gheap"
       },
@@ -77,6 +90,12 @@
         "default-combination": true
       },
       {
+        "challenge": "append-no-conflicts-index-only",
+        "car": "4gheap",
+        "plugins": "x-pack:security",
+        "release-charts": false
+      },
+      {
         "challenge": "append-sorted-no-conflicts",
         "car": "4gheap"
       },
@@ -95,6 +114,12 @@
         "default-combination": true
       },
       {
+        "challenge": "append-no-conflicts-index-only",
+        "car": "4gheap",
+        "plugins": "x-pack:security",
+        "release-charts": false
+      },
+      {
         "challenge": "append-sorted-no-conflicts-index-only",
         "car": "4gheap"
       }
@@ -111,6 +136,12 @@
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
+      },
+      {
+        "challenge": "append-no-conflicts-index-only",
+        "car": "4gheap",
+        "plugins": "x-pack:security",
+        "release-charts": false
       },
       {
         "challenge": "append-sorted-no-conflicts",

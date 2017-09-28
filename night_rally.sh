@@ -35,6 +35,7 @@ ANSIBLE_SKIP_TAGS_STRING=""
 SELF_UPDATE=NO
 DRY_RUN=NO
 SKIP_S3=NO
+SKIP_ANSIBLE=NO
 # We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
 START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 MODE="nightly"
@@ -49,6 +50,7 @@ PLUGINS=""
 for i in "$@"
 do
 case ${i} in
+# TODO: Remove this option, it is not recognized by Rally anymore
     --override-src-dir=*)
     OVERRIDE_SRC_DIR="${i#*=}"
     shift # past argument=value
@@ -63,6 +65,10 @@ case ${i} in
     ;;
     --dry-run)
     DRY_RUN=YES
+    shift # past argument with no value
+    ;;
+    --skip-ansible)
+    SKIP_ANSIBLE=YES
     shift # past argument with no value
     ;;
     --skip-s3)
@@ -121,40 +127,37 @@ then
     popd >/dev/null 2>&1
 fi
 
-############### TO BE CONVERTED TO A FUNCTION ###################
-for fixture in "${ANSIBLE_ALL_TAGS[@]}"
-do
-    if [[ $FIXTURES != *$fixture* ]] ; then
-        ANSIBLE_SKIP_TAGS+=("$fixture")
+if [ ${SKIP_ANSIBLE} == NO ]
+then
+    for fixture in "${ANSIBLE_ALL_TAGS[@]}"
+    do
+        if [[ $FIXTURES != *$fixture* ]] ; then
+            ANSIBLE_SKIP_TAGS+=("$fixture")
+        fi
+    done
+
+    if [[ ${#ANSIBLE_SKIP_TAGS[@]} == 0 ]]; then
+        ANSIBLE_SKIP_TAGS_STRING=""
+    else
+        # join tags with a comma (,) character
+        ANSIBLE_SKIP_TAGS_STRING=$(printf ",%s" "${ANSIBLE_SKIP_TAGS[@]}")
+        ANSIBLE_SKIP_TAGS_STRING=${ANSIBLE_SKIP_TAGS_STRING:1}
+        ANSIBLE_SKIP_TAGS_STRING="--skip-tags $ANSIBLE_SKIP_TAGS_STRING"
     fi
-done
 
-if [[ ${#ANSIBLE_SKIP_TAGS[@]} == 0 ]]; then
-    ANSIBLE_SKIP_TAGS_STRING=""
+    echo "About to run ansible-playbook ... with '$ANSIBLE_SKIP_TAGS_STRING'"
+    if [ ${DRY_RUN} == NO ]
+    then
+        pushd . >/dev/null 2>&1
+
+        cd ${NIGHT_RALLY_HOME}/fixtures/ansible
+        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml
+        ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
+
+        popd >/dev/null 2>&1
+    fi
 else
-    # join tags with a comma (,) character
-    ANSIBLE_SKIP_TAGS_STRING=$(printf ",%s" "${ANSIBLE_SKIP_TAGS[@]}")
-    ANSIBLE_SKIP_TAGS_STRING=${ANSIBLE_SKIP_TAGS_STRING:1}
-    ANSIBLE_SKIP_TAGS_STRING="--skip-tags $ANSIBLE_SKIP_TAGS_STRING"
-fi
-
-echo "About to run ansible-playbook ... with '$ANSIBLE_SKIP_TAGS_STRING'"
-if [ ${DRY_RUN} == NO ]
-then
-    pushd . >/dev/null 2>&1
-
-    cd ${NIGHT_RALLY_HOME}/fixtures/ansible
-    ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml
-    ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
-
-    popd >/dev/null 2>&1
-fi
-
-if [ -n "${OVERRIDE_SRC_DIR}" ]
-then
-    NIGHT_RALLY_OVERRIDE="--override-src-dir=${OVERRIDE_SRC_DIR}"
-else
-    NIGHT_RALLY_OVERRIDE=""
+    echo "Skipping Ansible execution."
 fi
 
 if [ ${DRY_RUN} == YES ]
@@ -169,7 +172,7 @@ fi
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${START_DATE}" ${NIGHT_RALLY_OVERRIDE} --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --tag="${TAG}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${START_DATE}" --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --tag="${TAG}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
