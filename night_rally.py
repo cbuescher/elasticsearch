@@ -85,6 +85,7 @@ def configure_rally(configuration_name, dry_run):
         with fileinput.input(files=destination, inplace=True) as f:
             for line in f:
                 print(line
+                      .strip()
                       .replace("~", user_home)
                       .replace("<<ENVIRONMENT>>", configuration_name))
 
