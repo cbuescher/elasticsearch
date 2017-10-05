@@ -29,8 +29,9 @@ def generate_index_ops(tracks):
                 if combination.get("release-charts", True):
                     challenge = combination["challenge"]
                     car = combination["car"]
+                    node_count = int(combination.get("node-count", 1))
                     index_op = find_challenge(challenges_of_track, challenge)["schedule"][0]["operation"]
-                    cci.append((challenge, car, index_op))
+                    cci.append((challenge, car, node_count, index_op))
             all_tracks.append((track, cci))
         return all_tracks
 
@@ -40,12 +41,12 @@ def generate_index_ops(tracks):
 
         filters = ""
         for idx, item in enumerate(cci):
-            challenge, car, index_op = item
+            challenge, car, node_count, index_op = item
             if idx > 0:
                 filters = filters + ","
-            label = "%s-%s" % (challenge, car)
-            filters = filters + "{\"input\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"operation:%s AND challenge:%s AND car:%s\"}}},\"label\":\"%s\"}" % (
-            index_op, challenge, car, label)
+            label = "%s-%s" % (challenge, car) if node_count == 1 else "%s-%s (%d nodes)" % (challenge, car, node_count)
+            filters = filters + "{\"input\":{\"query\":{\"query_string\":{\"analyze_wildcard\":true,\"query\":\"operation:%s AND challenge:%s AND car:%s AND node-count:%d\"}}},\"label\":\"%s\"}" % (
+            index_op, challenge, car, node_count, label)
 
         s = {
             "_id": str(uuid.uuid4()),
@@ -90,13 +91,14 @@ def default_tracks(tracks):
                 track = track_structure["track"]
                 challenge = combination["challenge"]
                 car = combination["car"]
+                node_count = int(combination.get("node-count", 1))
                 default_challenge = challenges(track)[0]
                 # default challenge is usually the first one. No need for complex logic
                 assert default_challenge["default"]
                 # filter queries
                 queries = [t["operation"] for t in default_challenge["schedule"] if
                            not (t["operation"].startswith("index") or t["operation"] in ["force-merge", "node-stats"])]
-                all_tracks.append((track, challenge, car, queries))
+                all_tracks.append((track, challenge, car, node_count, queries))
 
     return all_tracks
 
@@ -104,7 +106,7 @@ def default_tracks(tracks):
 def generate_queries(tracks):
     # output JSON structures
     structures = []
-    for track, challenge, car, queries in default_tracks(tracks):
+    for track, challenge, car, node_count, queries in default_tracks(tracks):
         for q in queries:
             title = "release-%s-%s-p99-latency" % (track, q)
             label = "Query Latency [ms]"
@@ -137,8 +139,8 @@ def generate_queries(tracks):
                     "version": 1,
                     "kibanaSavedObjectMeta": {
                         "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":"
-                                            "{\"query\":\"environment:release AND active:true AND track:%s AND name:%s AND operation:%s AND challenge:%s AND car:%s\",\"analyze_wildcard\":true}},\"filter\":[]}" % (
-                                                track, metric, q, challenge, car)
+                                            "{\"query\":\"environment:release AND active:true AND track:%s AND name:%s AND operation:%s AND challenge:%s AND car:%s AND node-count:%d\",\"analyze_wildcard\":true}},\"filter\":[]}" % (
+                                                track, metric, q, challenge, car, node_count)
                     }
                 }
             }
@@ -149,7 +151,7 @@ def generate_queries(tracks):
 def generate_io(tracks):
     # output JSON structures
     structures = []
-    for track, challenge, car, queries in default_tracks(tracks):
+    for track, challenge, car, node_count, queries in default_tracks(tracks):
         title = "release-%s-io" % track
 
         s = {
@@ -181,8 +183,8 @@ def generate_io(tracks):
                 "description": "",
                 "version": 1,
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":{\"query\":\"environment:release AND active:true AND track:%s AND challenge:%s AND car:%s\",\"analyze_wildcard\":true}},\"filter\":[]}" % (
-                    track, challenge, car)
+                    "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":{\"query\":\"environment:release AND active:true AND track:%s AND challenge:%s AND car:%s AND node-count:%d\",\"analyze_wildcard\":true}},\"filter\":[]}" % (
+                    track, challenge, car, node_count)
                 }
             }
         }
@@ -193,7 +195,7 @@ def generate_io(tracks):
 
 def generate_gc(tracks):
     structures = []
-    for track, challenge, car, queries in default_tracks(tracks):
+    for track, challenge, car, node_count, queries in default_tracks(tracks):
         title = "release-%s-gc" % track
         s = {
             "_id": str(uuid.uuid4()),
@@ -225,8 +227,8 @@ def generate_gc(tracks):
                 "description": "",
                 "version": 1,
                 "kibanaSavedObjectMeta": {
-                    "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":{\"query\":\"environment:release AND active:true AND track:%s AND challenge:%s AND car:%s\",\"analyze_wildcard\":true}},\"filter\":[]}" % (
-                    track, challenge, car)
+                    "searchSourceJSON": "{\"index\":\"rally-results-*\",\"query\":{\"query_string\":{\"query\":\"environment:release AND active:true AND track:%s AND challenge:%s AND car:%s AND node-count:%d\",\"analyze_wildcard\":true}},\"filter\":[]}" % (
+                    track, challenge, car, node_count)
                 }
             }
         }

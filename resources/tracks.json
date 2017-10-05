@@ -23,6 +23,11 @@
         "car": "4gheap"
       },
       {
+        "challenge": "append-no-conflicts-index-only-1-replica",
+        "car": "4gheap",
+        "node-count": 3
+      },
+      {
         "challenge": "append-no-conflicts-index-only",
         "car": "verbose_iw"
       },
@@ -59,6 +64,11 @@
         "car": "4gheap"
       },
       {
+        "challenge": "append-no-conflicts-index-only-1-replica",
+        "car": "4gheap",
+        "node-count": 3
+      },
+      {
         "challenge": "append-fast-with-conflicts",
         "car": "4gheap"
       }
@@ -75,6 +85,11 @@
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
+      },
+      {
+        "challenge": "append-no-conflicts-index-only-1-replica",
+        "car": "4gheap",
+        "node-count": 3
       },
       {
         "challenge": "append-sorted-no-conflicts",
@@ -97,6 +112,11 @@
       {
         "challenge": "append-sorted-no-conflicts-index-only",
         "car": "4gheap"
+      },
+      {
+        "challenge": "append-no-conflicts-index-only-1-replica",
+        "car": "4gheap",
+        "node-count": 3
       }
     ]
   },
@@ -111,6 +131,11 @@
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
+      },
+      {
+        "challenge": "append-no-conflicts-index-only-1-replica",
+        "car": "4gheap",
+        "node-count": 3
       },
       {
         "challenge": "append-sorted-no-conflicts",
