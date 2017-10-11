@@ -179,9 +179,12 @@ class ReleaseCommand(BaseCommand):
         # Do not run plugin-specific tracks. We run either the whole suite with or without plugins.
         if plugins != "":
             return False
+        # noaa does not work on older versions. This should actually be specified in track.json and not here...
+        if int(self.distribution_version[0]) < 5 and track == "noaa":
+            return False
         # cannot run "sorted" challenges - it's a 6.0+ feature
-        if int(self.distribution_version[0]) < 6:
-            return "sorted" not in challenge
+        if int(self.distribution_version[0]) < 6 and "sorted" in challenge:
+            return False
         return True
 
     def command_line(self, track, challenge, car, plugins, target_hosts):
