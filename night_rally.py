@@ -378,7 +378,7 @@ def deactivate_outdated_results(effective_start_date, environment, release, tag,
     logger.info("Activating results only for [%s] on [%s] in environment [%s] and tag [%s]." % (release, ts, environment, tag))
     body = {
         "script": {
-            "inline": "ctx._source.active = false",
+            "source": "ctx._source.active = false",
             "lang": "painless"
         },
         "query": {
