@@ -76,9 +76,9 @@ def list_races(es, args):
     for hit in result["hits"]["hits"]:
         src = hit["_source"]
         races.append([src["trial-timestamp"], src["track"], src["challenge"], src["car"],
-                      src["cluster"]["distribution-version"], src["user-tag"]])
+                      src["cluster"]["distribution-version"], src["cluster"]["revision"], src["user-tag"]])
     if races:
-        print(tabulate.tabulate(races, headers=["Race Timestamp", "Track", "Challenge", "Car", "Version", "User Tag"]))
+        print(tabulate.tabulate(races, headers=["Race Timestamp", "Track", "Challenge", "Car", "Version", "Revision", "User Tag"]))
     else:
         print("No results")
 
