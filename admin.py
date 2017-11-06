@@ -10,37 +10,51 @@ def list_races(es, args):
     limit = args.limit
     environment = args.environment
     track = args.track
+    car = args.car
+    challenge = args.challenge
 
-    if args.track:
-        print("Listing %d most recent races for track %s in environment %s.\n" % (limit, track, environment))
-        query = {
-            "query": {
-                "bool": {
-                    "filter": [
-                        {
-                            "term": {
-                                "environment": environment
-                            }
-                        },
-                        {
-                            "term": {
-                                "track": track
-                            }
+    msg = "Listing %d most recent races for" % limit
+    if track:
+        msg += " track %s" % track
+    if challenge:
+        msg += " challenge %s" % challenge
+    if car:
+        msg += " car %s" % car
+    msg += " in environment %s.\n" % environment
+    print(msg)
+
+    query = {
+        "query": {
+            "bool": {
+                "filter": [
+                    {
+                        "term": {
+                            "environment": environment
                         }
-                    ]
-                }
+                    }
+                ]
+            }
+        }
+    }
+    if track:
+        query["query"]["bool"]["filter"].append({
+            "term": {
+                "track": track
+            }
+        })
+    if challenge:
+        query["query"]["bool"]["filter"].append({
+            "term": {
+                "challenge": challenge
+            }
+        })
 
+    if car:
+        query["query"]["bool"]["filter"].append({
+            "term": {
+                "car": car
             }
-        }
-    else:
-        print("Listing %d most recent races in environment %s.\n" % (limit, environment))
-        query = {
-            "query": {
-                "term": {
-                    "environment": environment
-                }
-            }
-        }
+        })
 
     query["sort"] = [
         {
@@ -51,6 +65,9 @@ def list_races(es, args):
         },
         {
             "challenge": "asc"
+        },
+        {
+            "car": "asc"
         }
     ]
 
@@ -205,6 +222,16 @@ def arg_parser():
     list_parser.add_argument(
         "--track",
         help="Show only records from this track",
+        default=None
+    )
+    list_parser.add_argument(
+        "--car",
+        help="Show only records for this car",
+        default=None
+    )
+    list_parser.add_argument(
+        "--challenge",
+        help="Show only records for this challenge",
         default=None
     )
 
