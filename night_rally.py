@@ -266,7 +266,7 @@ def choose_target_hosts(available_hosts, node_count):
         return available_hosts[:node_count]
 
 
-def run_rally(tracks, available_hosts, command, dry_run=False, system=os.system):
+def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=False, system=os.system):
     rally_failure = False
     if dry_run:
         runner = logger.info
@@ -283,6 +283,11 @@ def run_rally(tracks, available_hosts, command, dry_run=False, system=os.system)
             info = race_info(track_name, challenge, car, plugins, node_count)
             if target_hosts:
                 if command.runnable(track_name, challenge, car, plugins, target_hosts):
+                    if not skip_ansible:
+                        logger.info("Resetting benchmark environment...")
+                        fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures", "ansible")
+                        runner("cd \"%s\" && ansible-playbook -i inventory/production -u rally playbooks/setup.yml "
+                               "--tags=\"drop-caches,trim\" && cd -" % fixtures_dir)
                     logger.info("Running Rally on %s" % info)
                     start = time.perf_counter()
                     if runner(command.command_line(track_name, challenge, car, plugins, target_hosts)):
@@ -447,6 +452,11 @@ def parse_args():
         help=argparse.SUPPRESS,
         default=None)
     parser.add_argument(
+        "--skip-ansible",
+        help=argparse.SUPPRESS,
+        default=False,
+        action="store_true")
+    parser.add_argument(
         "--target-host",
         help="The Elasticsearch node that should be targeted",
         required=True)
@@ -537,7 +547,7 @@ def main():
         command = NightlyCommand(start_date, root_dir)
 
     configure_rally(env_name, args.dry_run)
-    rally_failure = run_rally(tracks, target_hosts, command, args.dry_run)
+    rally_failure = run_rally(tracks, target_hosts, command, args.dry_run, args.skip_ansible)
 
     if nightly_mode:
         copy_results_for_release_comparison(start_date, args.dry_run, release_tag)

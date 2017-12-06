@@ -131,7 +131,7 @@ if [ ${SKIP_ANSIBLE} == NO ]
 then
     for fixture in "${ANSIBLE_ALL_TAGS[@]}"
     do
-        if [[ $FIXTURES != *$fixture* ]] ; then
+        if [[ ${FIXTURES} != *$fixture* ]] ; then
             ANSIBLE_SKIP_TAGS+=("$fixture")
         fi
     done
@@ -167,12 +167,19 @@ else
     NIGHT_RALLY_DRY_RUN=""
 fi
 
+if [ ${SKIP_ANSIBLE} == YES ]
+then
+    SKIP_ANSIBLE_PARAM="--skip-ansible"
+else
+    SKIP_ANSIBLE_PARAM=""
+fi
+
 #****************************
 # START NO FAIL
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${START_DATE}" --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --tag="${TAG}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${START_DATE}" --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} ${SKIP_ANSIBLE_PARAM} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --tag="${TAG}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
