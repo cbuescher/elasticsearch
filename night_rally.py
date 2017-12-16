@@ -286,6 +286,9 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
                     if not skip_ansible:
                         logger.info("Resetting benchmark environment...")
                         fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures", "ansible")
+                        # this is a temporary workaround against hanging builds - restart the actor system
+                        runner("cd \"%s\" && ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml && cd -"
+                               % fixtures_dir)
                         runner("cd \"%s\" && ansible-playbook -i inventory/production -u rally playbooks/setup.yml "
                                "--tags=\"drop-caches,trim\" && cd -" % fixtures_dir)
                     logger.info("Running Rally on %s" % info)
