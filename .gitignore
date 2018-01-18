@@ -101,3 +101,6 @@ target/
 #Vagrant
 .vagrant/
 *.vdi
+
+# Virtualenv for development
+.venv/
