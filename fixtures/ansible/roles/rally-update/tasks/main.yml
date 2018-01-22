@@ -13,6 +13,13 @@
   ignore_errors: true
   become: true
 
+- name: install Rally config file
+  become: true
+  template:
+    src: rally.ini.j2
+    dest: /var/lib/jenkins/.rally/rally-{{ rally_environment }}.ini
+
+
 - name: start rallyd
   command: ./rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['elasticsearch-ci-slaves-macrobenchmarks'][0] }}
   args:

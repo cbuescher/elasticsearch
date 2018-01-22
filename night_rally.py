@@ -1,10 +1,8 @@
 import argparse
 import datetime
 import errno
-import fileinput
 import logging
 import os
-import shutil
 import time
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
@@ -71,23 +69,6 @@ def sanitize(text):
     :param text: A text to sanitize
     """
     return text.lower().replace(" ", "-").replace(".", "_")
-
-
-def configure_rally(configuration_name, dry_run):
-    user_home = os.getenv("HOME")
-    source = "%s/resources/rally-template.ini" % ROOT
-    destination = "%s/.rally/rally-%s.ini" % (user_home, configuration_name)
-    logger.info("Copying rally configuration from [%s] to [%s]" % (source, destination))
-    if not dry_run:
-        ensure_dir("%s/.rally" % user_home)
-        shutil.copyfile(source, destination)
-        # materialize current user home and set environment name
-        with fileinput.input(files=destination, inplace=True) as f:
-            for line in f:
-                print(line
-                      .strip()
-                      .replace("~", user_home)
-                      .replace("<<ENVIRONMENT>>", configuration_name))
 
 
 class BaseCommand:
@@ -546,7 +527,6 @@ def main():
         env_name = NightlyCommand.CONFIG_NAME
         command = NightlyCommand(start_date, root_dir)
 
-    configure_rally(env_name, args.dry_run)
     rally_failure = run_rally(tracks, target_hosts, command, args.dry_run, args.skip_ansible)
 
     if nightly_mode:

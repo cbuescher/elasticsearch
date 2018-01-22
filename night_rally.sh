@@ -146,7 +146,7 @@ then
         pushd . >/dev/null 2>&1
 
         cd ${NIGHT_RALLY_HOME}/fixtures/ansible
-        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml
+        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE}"
         ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
 
         popd >/dev/null 2>&1
