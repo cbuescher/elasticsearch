@@ -1,6 +1,5 @@
 import argparse
 import datetime
-import errno
 import logging
 import os
 import time
@@ -29,11 +28,6 @@ def date_for_cmd_param(d):
     return "{:%Y-%m-%d %H:%M:%S}".format(d)
 
 
-def date_for_path(d):
-    # This relies on the fact that Rally uses the same pattern...
-    return "{:%Y-%m-%d-%H-%M-%S}".format(d)
-
-
 def to_iso8601(d):
     """
     Convert a datetime instance to a ISO-8601 compliant string.
@@ -47,21 +41,6 @@ def to_iso8601_short(d):
     return "{:%Y%m%dT%H%M%SZ}".format(d)
 
 
-def ensure_dir(directory):
-    """
-    Ensure that the provided directory and all of its parent directories exist.
-    This function is safe to execute on existing directories (no op).
-
-    :param directory: The directory to create (if it does not exist).
-    """
-    try:
-        # avoid a race condition by trying to create the checkout directory
-        os.makedirs(directory)
-    except OSError as exception:
-        if exception.errno != errno.EEXIST:
-            raise
-
-
 def sanitize(text):
     """
     Sanitizes the input text so it is safe to use as an environment name in Rally.
@@ -72,14 +51,9 @@ def sanitize(text):
 
 
 class BaseCommand:
-    def __init__(self, effective_start_date, root_dir):
+    def __init__(self, effective_start_date):
         self.effective_start_date = effective_start_date
-        self.root_dir = root_dir
         self.ts = date_for_cmd_param(effective_start_date)
-
-    def report_path(self, track, challenge, car, target_hosts):
-        return "%s/reports/rally/%s/%s/%s/%s/%d/report.csv" \
-               % (self.root_dir, date_for_path(self.effective_start_date), track, challenge, car, len(target_hosts))
 
     def runnable(self, track, challenge, car, plugins, target_hosts):
         return True
@@ -89,8 +63,8 @@ class BaseCommand:
 
 
 class SourceBasedCommand(BaseCommand):
-    def __init__(self, effective_start_date, root_dir, revision, configuration_name, user_tag=None):
-        super().__init__(effective_start_date, root_dir)
+    def __init__(self, effective_start_date, revision, configuration_name, user_tag=None):
+        super().__init__(effective_start_date)
         self.revision = revision
         self.configuration_name = configuration_name
         self.pipeline = "from-sources-complete"
@@ -115,8 +89,6 @@ class SourceBasedCommand(BaseCommand):
         cmd += " --track=%s" % track
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
-        cmd += " --report-format=csv"
-        cmd += " --report-file=%s" % self.report_path(track, challenge, car, target_hosts)
         cmd += self.user_tag
 
         if plugins:
@@ -134,19 +106,19 @@ class SourceBasedCommand(BaseCommand):
 class NightlyCommand(SourceBasedCommand):
     CONFIG_NAME = "nightly"
 
-    def __init__(self, effective_start_date, root_dir):
-        super().__init__(effective_start_date, root_dir, "@%s" % to_iso8601(effective_start_date),
+    def __init__(self, effective_start_date):
+        super().__init__(effective_start_date, "@%s" % to_iso8601(effective_start_date),
                          NightlyCommand.CONFIG_NAME, user_tag=None)
 
 
 class AdHocCommand(SourceBasedCommand):
-    def __init__(self, revision, effective_start_date, root_dir, configuration_name, user_tag):
-        super().__init__(effective_start_date, root_dir, revision, configuration_name, user_tag)
+    def __init__(self, revision, effective_start_date, configuration_name, user_tag):
+        super().__init__(effective_start_date, revision, configuration_name, user_tag)
 
 
 class ReleaseCommand(BaseCommand):
-    def __init__(self, effective_start_date, plugins, root_dir, distribution_version, configuration_name, tag):
-        super().__init__(effective_start_date, root_dir)
+    def __init__(self, effective_start_date, plugins, distribution_version, configuration_name, tag):
+        super().__init__(effective_start_date)
         self.plugins = plugins
         self.configuration_name = configuration_name
         self.pipeline = "from-distribution"
@@ -179,8 +151,6 @@ class ReleaseCommand(BaseCommand):
         cmd += " --track=%s" % track
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
-        cmd += " --report-format=csv"
-        cmd += " --report-file=%s" % self.report_path(track, challenge, car, target_hosts)
         cmd += " --user-tag=\"%s\"" % self.tag()
 
         if plugins:
@@ -196,8 +166,8 @@ class ReleaseCommand(BaseCommand):
 
 
 class DockerCommand(BaseCommand):
-    def __init__(self, effective_start_date, root_dir, distribution_version, configuration_name):
-        super().__init__(effective_start_date, root_dir)
+    def __init__(self, effective_start_date, distribution_version, configuration_name):
+        super().__init__(effective_start_date)
         self.configuration_name = configuration_name
         self.pipeline = "docker"
         self.distribution_version = distribution_version
@@ -206,8 +176,8 @@ class DockerCommand(BaseCommand):
         # we don't support (yet?) clusters with multiple Docker containers
         if len(target_hosts) > 1:
             return False
-        # TODO: verbose_iw should actually work now on Docker. Also 1gheap should not pose a problem.
-        if car in ["two_nodes", "verbose_iw", "1gheap"]:
+        # we are not interested in those metrics for Docker
+        if car in ["verbose_iw"]:
             return False
         # no plugin installs on Docker
         if plugins != "":
@@ -228,8 +198,6 @@ class DockerCommand(BaseCommand):
         cmd += " --track=%s" % track
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
-        cmd += " --report-format=csv"
-        cmd += " --report-file=%s" % self.report_path(track, challenge, car, target_hosts)
         cmd += " --user-tag=\"%s\"" % self.tag()
         # due to the possibility that x-pack is active (that depends on Rally)
         cmd += " --cluster-health=yellow"
@@ -481,7 +449,7 @@ def main():
     args = parse_args()
 
     start_date = args.effective_start_date
-    logger.info("Effective start date is [%s]" % date_for_path(start_date))
+    logger.info("Effective start date is [%s]" % date_for_cmd_param(start_date))
 
     release_mode = args.mode == "release"
     adhoc_mode = args.mode == "adhoc"
@@ -501,7 +469,6 @@ def main():
     release = args.release.replace("Docker ", "")
 
     tracks = load_tracks()
-    root_dir = "%s/.rally/benchmarks" % os.getenv("HOME")
 
     if release_mode:
         # use always the same name for release comparison benchmarks
@@ -510,22 +477,22 @@ def main():
             if plugins:
                 raise RuntimeError("User specified plugins [%s] but this is not supported for Docker benchmarks." % plugins)
             logger.info("Running Docker release benchmarks for release [%s] against %s." % (release, target_hosts))
-            command = DockerCommand(start_date, root_dir, release, env_name)
+            command = DockerCommand(start_date, release, env_name)
             tag = command.tag()
         else:
             logger.info("Running release benchmarks for release [%s] against %s (release tag is [%s])."
                         % (release, target_hosts, release_tag))
-            command = ReleaseCommand(start_date, plugins, root_dir, release, env_name, release_tag)
+            command = ReleaseCommand(start_date, plugins, release, env_name, release_tag)
             tag = command.tag()
     elif adhoc_mode:
         logger.info("Running adhoc benchmarks for revision [%s] against %s." % (args.revision, target_hosts))
         # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
-        command = AdHocCommand(args.revision, start_date, root_dir, env_name, args.tag)
+        command = AdHocCommand(args.revision, start_date, env_name, args.tag)
     else:
         logger.info("Running nightly benchmarks against %s." % target_hosts)
         env_name = NightlyCommand.CONFIG_NAME
-        command = NightlyCommand(start_date, root_dir)
+        command = NightlyCommand(start_date)
 
     rally_failure = run_rally(tracks, target_hosts, command, args.dry_run, args.skip_ansible)
 
