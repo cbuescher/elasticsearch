@@ -51,30 +51,34 @@ def sanitize(text):
 
 
 class BaseCommand:
-    def __init__(self, effective_start_date):
+    def __init__(self, effective_start_date, user_tag):
         self.effective_start_date = effective_start_date
         self.ts = date_for_cmd_param(effective_start_date)
+        self.user_tag = user_tag
 
     def runnable(self, track, challenge, car, plugins, target_hosts):
         return True
 
-    def command_line(self, track, challenge, car, plugins, target_hosts):
+    def command_line(self, track, challenge, car, name, plugins, target_hosts):
         raise NotImplementedError("abstract method")
+
+    def format_tag(self, additional_tags=None):
+        final_tags = {}
+        final_tags.update(self.user_tag)
+        if additional_tags:
+            final_tags.update(additional_tags)
+        return ",".join(["%s:%s" % (k, v) for k, v in final_tags.items()])
 
 
 class SourceBasedCommand(BaseCommand):
-    def __init__(self, effective_start_date, revision, configuration_name, user_tag=None):
-        super().__init__(effective_start_date)
+    def __init__(self, effective_start_date, revision, configuration_name, user_tag):
+        super().__init__(effective_start_date, user_tag)
         self.revision = revision
         self.configuration_name = configuration_name
         self.pipeline = "from-sources-complete"
         self.pipeline_with_plugins = "from-sources-complete"
-        if user_tag:
-            self.user_tag = " --user-tag=\"intention:%s\"" % user_tag
-        else:
-            self.user_tag = ""
 
-    def command_line(self, track, challenge, car, plugins, target_hosts):
+    def command_line(self, track, challenge, car, name, plugins, target_hosts):
         cmd = RALLY_BINARY
         cmd += " --configuration-name=%s" % self.configuration_name
         cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
@@ -83,13 +87,13 @@ class SourceBasedCommand(BaseCommand):
             cmd += " --pipeline=%s" % self.pipeline_with_plugins
         else:
             cmd += " --pipeline=%s" % self.pipeline
-        #cmd += " --quiet"
+        cmd += " --quiet"
         cmd += " --revision \"%s\"" % self.revision
         cmd += " --effective-start-date \"%s\"" % self.effective_start_date
         cmd += " --track=%s" % track
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
-        cmd += self.user_tag
+        cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
 
         if plugins:
             self.pipeline_with_plugins = "from-sources-skip-build"
@@ -106,9 +110,9 @@ class SourceBasedCommand(BaseCommand):
 class NightlyCommand(SourceBasedCommand):
     CONFIG_NAME = "nightly"
 
-    def __init__(self, effective_start_date):
+    def __init__(self, effective_start_date, user_tag):
         super().__init__(effective_start_date, "@%s" % to_iso8601(effective_start_date),
-                         NightlyCommand.CONFIG_NAME, user_tag=None)
+                         NightlyCommand.CONFIG_NAME, user_tag)
 
 
 class AdHocCommand(SourceBasedCommand):
@@ -117,13 +121,12 @@ class AdHocCommand(SourceBasedCommand):
 
 
 class ReleaseCommand(BaseCommand):
-    def __init__(self, effective_start_date, plugins, distribution_version, configuration_name, tag):
-        super().__init__(effective_start_date)
+    def __init__(self, effective_start_date, plugins, distribution_version, configuration_name, user_tag):
+        super().__init__(effective_start_date, user_tag)
         self.plugins = plugins
         self.configuration_name = configuration_name
         self.pipeline = "from-distribution"
         self.distribution_version = distribution_version
-        self._tag = tag
 
     def runnable(self, track, challenge, car, plugins, target_hosts):
         # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
@@ -140,7 +143,7 @@ class ReleaseCommand(BaseCommand):
             return False
         return True
 
-    def command_line(self, track, challenge, car, plugins, target_hosts):
+    def command_line(self, track, challenge, car, name, plugins, target_hosts):
         cmd = RALLY_BINARY
         cmd += " --configuration-name=%s" % self.configuration_name
         cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
@@ -151,23 +154,22 @@ class ReleaseCommand(BaseCommand):
         cmd += " --track=%s" % track
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
-        cmd += " --user-tag=\"%s\"" % self.tag()
+        cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
 
-        if plugins:
-            cmd += " --elasticsearch-plugins=\"%s\"" % plugins
-            if "x-pack:security" in plugins:
+        # note that we will only run with the plugins provided externally but not with plugins provided via track.json!
+        if self.plugins:
+            cmd += " --elasticsearch-plugins=\"%s\"" % self.plugins
+            if "x-pack:security" in self.plugins:
+                # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
                 cmd += " --cluster-health=yellow"
                 cmd += "--client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
 
         return cmd
 
-    def tag(self):
-        return self._tag
-
 
 class DockerCommand(BaseCommand):
-    def __init__(self, effective_start_date, distribution_version, configuration_name):
-        super().__init__(effective_start_date)
+    def __init__(self, effective_start_date, distribution_version, configuration_name, user_tag):
+        super().__init__(effective_start_date, user_tag)
         self.configuration_name = configuration_name
         self.pipeline = "docker"
         self.distribution_version = distribution_version
@@ -187,7 +189,7 @@ class DockerCommand(BaseCommand):
             return "sorted" not in challenge
         return True
 
-    def command_line(self, track, challenge, car, plugins, target_hosts):
+    def command_line(self, track, challenge, car, name, plugins, target_hosts):
         cmd = RALLY_BINARY
         cmd += " --configuration-name=%s" % self.configuration_name
         cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
@@ -198,14 +200,11 @@ class DockerCommand(BaseCommand):
         cmd += " --track=%s" % track
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
-        cmd += " --user-tag=\"%s\"" % self.tag()
+        cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
         # due to the possibility that x-pack is active (that depends on Rally)
+        # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
         cmd += " --cluster-health=yellow"
         return cmd
-
-    @staticmethod
-    def tag():
-        return "env:docker"
 
 
 def choose_target_hosts(available_hosts, node_count):
@@ -226,6 +225,7 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
         for combination in track["combinations"]:
             challenge = combination["challenge"]
             car = combination["car"]
+            name = combination["name"]
             node_count = combination.get("node-count", 1)
             target_hosts = choose_target_hosts(available_hosts, node_count)
             plugins = combination.get("plugins", "")
@@ -239,7 +239,7 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
                                "--tags=\"drop-caches,trim\" && cd -" % fixtures_dir)
                     logger.info("Running Rally on %s" % info)
                     start = time.perf_counter()
-                    if runner(command.command_line(track_name, challenge, car, plugins, target_hosts)):
+                    if runner(command.command_line(track_name, challenge, car, name, plugins, target_hosts)):
                         rally_failure = True
                         logger.error("Failed to run %s. Please check the logs." % info)
                     stop = time.perf_counter()
@@ -267,7 +267,7 @@ def race_info(track, challenge, car, plugins, node_count):
 # Reporting
 #################################################
 
-def copy_results_for_release_comparison(effective_start_date, dry_run, tag):
+def copy_results_for_release_comparison(effective_start_date, dry_run):
     if not dry_run:
         import client
         import elasticsearch.helpers
@@ -316,20 +316,21 @@ def copy_results_for_release_comparison(effective_start_date, dry_run, tag):
             # pseudo version for stable comparisons
             src["distribution-version"] = "master"
             src["environment"] = "release"
-            src["user-tag"] = tag
+            # TODO: Provided for backwards-compatibility (otherwise all graphs would break immediately). Remove me once graphs are migrated.
+            src["user-tag"] = "env:bare"
             release_results.append(src)
         if release_results:
             logger.info("Copying %d result documents for [%s] to release environment." % (len(release_results), ts))
             elasticsearch.helpers.bulk(es, release_results, index=index, doc_type=doc_type)
 
 
-def deactivate_outdated_results(effective_start_date, environment, release, tag, dry_run):
+def deactivate_outdated_results(effective_start_date, environment, release, env_tag, dry_run):
     """
     Sets all results for the same major release version, environment and tag to active=False except for the records with the provided 
     effective start date.
     """
     ts = to_iso8601_short(effective_start_date)
-    logger.info("Activating results only for [%s] on [%s] in environment [%s] and tag [%s]." % (release, ts, environment, tag))
+    logger.info("Activating results only for [%s] on [%s] in environment [%s] and tag [%s]." % (release, ts, environment, env_tag))
     body = {
         "script": {
             "source": "ctx._source.active = false",
@@ -370,10 +371,10 @@ def deactivate_outdated_results(effective_start_date, environment, release, tag,
             }
         })
 
-    if tag:
+    if env_tag and "env" in env_tag:
         body["query"]["bool"]["filter"].append({
             "term": {
-                "user-tag": tag
+                "user-tags.env": env_tag["env"]
             }
         })
     if dry_run:
@@ -396,10 +397,6 @@ def parse_args():
              "trial runs",
         required=True,
         type=lambda s: datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S"))
-    parser.add_argument(
-        "--tag",
-        help=argparse.SUPPRESS,
-        default=None)
     parser.add_argument(
         "--skip-ansible",
         help=argparse.SUPPRESS,
@@ -458,15 +455,17 @@ def main():
     plugins = args.elasticsearch_plugins
     target_hosts = args.target_host.split(",")
 
-    tag = args.tag
-    if "encryption-at-rest" in args.fixtures:
-        release_tag = "env:ear"
-    elif "x-pack:security" in plugins:
-        release_tag = "env:x-pack"
-    else:
-        release_tag = "env:bare"
     docker_benchmark = args.release.startswith("Docker ")
     release = args.release.replace("Docker ", "")
+
+    if "encryption-at-rest" in args.fixtures:
+        release_tag = {"env": "ear"}
+    elif "x-pack:security" in plugins:
+        release_tag = {"env": "x-pack"}
+    elif docker_benchmark:
+        release_tag = {"env": "docker"}
+    else:
+        release_tag = {"env": "bare"}
 
     tracks = load_tracks()
 
@@ -477,31 +476,29 @@ def main():
             if plugins:
                 raise RuntimeError("User specified plugins [%s] but this is not supported for Docker benchmarks." % plugins)
             logger.info("Running Docker release benchmarks for release [%s] against %s." % (release, target_hosts))
-            command = DockerCommand(start_date, release, env_name)
-            tag = command.tag()
+            command = DockerCommand(start_date, release, env_name, release_tag)
         else:
             logger.info("Running release benchmarks for release [%s] against %s (release tag is [%s])."
                         % (release, target_hosts, release_tag))
             command = ReleaseCommand(start_date, plugins, release, env_name, release_tag)
-            tag = command.tag()
     elif adhoc_mode:
         logger.info("Running adhoc benchmarks for revision [%s] against %s." % (args.revision, target_hosts))
         # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
-        command = AdHocCommand(args.revision, start_date, env_name, args.tag)
+        command = AdHocCommand(args.revision, start_date, env_name, release_tag)
     else:
         logger.info("Running nightly benchmarks against %s." % target_hosts)
         env_name = NightlyCommand.CONFIG_NAME
-        command = NightlyCommand(start_date)
+        command = NightlyCommand(start_date, release_tag)
 
     rally_failure = run_rally(tracks, target_hosts, command, args.dry_run, args.skip_ansible)
 
     if nightly_mode:
-        copy_results_for_release_comparison(start_date, args.dry_run, release_tag)
+        copy_results_for_release_comparison(start_date, args.dry_run)
         # we want to deactivate old release entries, not old nightly entries
         deactivate_outdated_results(start_date, "release", release, release_tag, args.dry_run)
     else:
-        deactivate_outdated_results(start_date, env_name, release, tag, args.dry_run)
+        deactivate_outdated_results(start_date, env_name, release, release_tag, args.dry_run)
     if rally_failure:
         exit(1)
 

@@ -4,28 +4,35 @@
     "combinations": [
       {
         "#COMMENT": "We need to start with a configuration where we build all candidates on all machines as we skip the build step afterwards",
+        "name": "geonames-append-4g-3nodes",
         "challenge": "append-no-conflicts-index-only-1-replica",
         "car": "4gheap",
         "node-count": 3
       },
       {
+        "name": "geonames-append-defaults-1node",
         "challenge": "append-no-conflicts",
         "car": "defaults",
+        "#COMMENT": "We typically show only GC, IO etc. charts for this combination. For all others we don't show charts. The implicit default is `false`. Note that at least one combination for each track should have set this value to true.",
         "default-combination": true
       },
       {
+        "name": "geonames-append-4g-1node",
         "challenge": "append-no-conflicts-index-only",
         "car": "4gheap"
       },
       {
+        "name": "geonames-append-verbose_iw-1node",
         "challenge": "append-no-conflicts-index-only",
         "car": "verbose_iw"
       },
       {
+        "name": "geonames-appendsorted-4g-1node",
         "challenge": "append-sorted-no-conflicts",
         "car": "4gheap"
       },
       {
+        "name": "geonames-update-4g-1node",
         "challenge": "append-fast-with-conflicts",
         "car": "4gheap"
       }
@@ -35,9 +42,9 @@
     "track": "nested",
     "combinations": [
       {
+        "name": "nested-append-4g-1node",
         "challenge": "nested-search-challenge",
         "car": "4gheap",
-        "#COMMENT": "We typically show only GC, IO etc. charts for this combination. For all others we don't show charts. The implicit default is `false`. Note that at least one combination for each track should have set this value to true.",
         "default-combination": true
       }
     ]
@@ -46,6 +53,7 @@
     "track": "percolator",
     "combinations": [
       {
+        "name": "percolator-append-4g-1node",
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
@@ -56,20 +64,24 @@
     "track": "geopoint",
     "combinations": [
       {
+        "name": "geopoint-append-defaults-1node",
         "challenge": "append-no-conflicts",
         "car": "defaults",
         "default-combination": true
       },
       {
+        "name": "geopoint-append-4g-1node",
         "challenge": "append-no-conflicts-index-only",
         "car": "4gheap"
       },
       {
+        "name": "geopoint-append-4g-3nodes",
         "challenge": "append-no-conflicts-index-only-1-replica",
         "car": "4gheap",
         "node-count": 3
       },
       {
+        "name": "geopoint-update-4g-1node",
         "challenge": "append-fast-with-conflicts",
         "car": "4gheap"
       }
@@ -79,24 +91,29 @@
     "track": "pmc",
     "combinations": [
       {
+        "name": "pmc-append-defaults-1node",
         "challenge": "append-no-conflicts-index-only",
         "car": "defaults"
       },
       {
+        "name": "pmc-append-4g-1node",
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
       },
       {
+        "name": "pmc-append-4g-3nodes",
         "challenge": "append-no-conflicts-index-only-1-replica",
         "car": "4gheap",
         "node-count": 3
       },
       {
+        "name": "pmc-appendsorted-4g-1node",
         "challenge": "append-sorted-no-conflicts",
         "car": "4gheap"
       },
       {
+        "name": "pmc-update-4g-1node",
         "challenge": "append-fast-with-conflicts",
         "car": "4gheap"
       }
@@ -106,15 +123,18 @@
     "track": "nyc_taxis",
     "combinations": [
       {
+        "name": "nyc_taxis-append-4g-1node",
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
       },
       {
+        "name": "nyc_taxis-appendsorted-4g-1node",
         "challenge": "append-sorted-no-conflicts-index-only",
         "car": "4gheap"
       },
       {
+        "name": "nyc_taxis-append-4g-3nodes",
         "challenge": "append-no-conflicts-index-only-1-replica",
         "car": "4gheap",
         "node-count": 3
@@ -125,20 +145,24 @@
     "track": "http_logs",
     "combinations": [
       {
+        "name": "http_logs-append-defaults-1node",
         "challenge": "append-no-conflicts-index-only",
         "car": "defaults"
       },
       {
+        "name": "http_logs-append-4g-1node",
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
       },
       {
+        "name": "http_logs-append-4g-3nodes",
         "challenge": "append-no-conflicts-index-only-1-replica",
         "car": "4gheap",
         "node-count": 3
       },
       {
+        "name": "http_logs-appendsorted-4g-1node",
         "challenge": "append-sorted-no-conflicts",
         "car": "4gheap"
       }
@@ -148,6 +172,7 @@
     "track": "noaa",
     "combinations": [
       {
+        "name": "noaa-append-default-1node",
         "challenge": "append-no-conflicts",
         "car": "defaults",
         "default-combination": true

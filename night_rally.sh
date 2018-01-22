@@ -43,7 +43,6 @@ RELEASE="master"
 # only needed for ad-hoc benchmarks
 REVISION="latest"
 TARGET_HOST="localhost:9200"
-TAG=""
 PLUGINS=""
 
 
@@ -80,10 +79,6 @@ case ${i} in
     ;;
     --release=*)
     RELEASE="${i#*=}"
-    shift # past argument=value
-    ;;
-    --tag=*)
-    TAG="${i#*=}"
     shift # past argument=value
     ;;
     --target-host=*)
@@ -174,7 +169,7 @@ fi
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${START_DATE}" --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} ${SKIP_ANSIBLE_PARAM} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}" --tag="${TAG}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${START_DATE}" --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} ${SKIP_ANSIBLE_PARAM} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"

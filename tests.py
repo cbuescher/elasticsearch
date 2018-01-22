@@ -181,7 +181,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        cmd = night_rally.ReleaseCommand(start_date, "localhost", None, "/rally_root", "5.3.0", "release", tag="env:bare")
+        cmd = night_rally.ReleaseCommand(start_date, "localhost", None, "/rally_root", "5.3.0", "release", user_tag="env:bare")
         night_rally.run_rally(tracks, cmd, system=system_call)
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
@@ -222,7 +222,7 @@ class NightRallyTests(unittest.TestCase):
         ]
         start_date = datetime.datetime(2016, 1, 1)
         cmd = night_rally.ReleaseCommand(start_date, "localhost", "x-pack:security,monitoring", "/rally_root", "5.3.0", "release",
-                                         tag="env:x-pack")
+                                         user_tag="env:x-pack")
         night_rally.run_rally(tracks, cmd, system=system_call)
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
