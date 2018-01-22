@@ -50,11 +50,6 @@ PLUGINS=""
 for i in "$@"
 do
 case ${i} in
-# TODO: Remove this option, it is not recognized by Rally anymore
-    --override-src-dir=*)
-    OVERRIDE_SRC_DIR="${i#*=}"
-    shift # past argument=value
-    ;;
     --override-effective-start-date=*)
     START_DATE="${i#*=}"
     shift # past argument=value
