@@ -268,13 +268,14 @@ def race_info(track, challenge, car, plugins, node_count):
 #################################################
 
 def copy_results_for_release_comparison(effective_start_date, dry_run):
+    import client
+    es = client.create_client()
+
     if not dry_run:
-        import client
         import elasticsearch.helpers
         """
         Copies all results in the metric store for the given trial timestamp so that they are also available as master release results.
         """
-        es = client.create_client()
         es.indices.refresh(index="rally-results-*")
         ts = to_iso8601_short(effective_start_date)
         # find all of today's results but exclude "x-pack" ones because we will not have release charts for them (x-pack has
@@ -329,6 +330,8 @@ def deactivate_outdated_results(effective_start_date, environment, release, env_
     Sets all results for the same major release version, environment and tag to active=False except for the records with the provided 
     effective start date.
     """
+    import client
+    es = client.create_client()
     ts = to_iso8601_short(effective_start_date)
     logger.info("Activating results only for [%s] on [%s] in environment [%s] and tag [%s]." % (release, ts, environment, env_tag))
     body = {
@@ -381,8 +384,6 @@ def deactivate_outdated_results(effective_start_date, environment, release, env_
         import json
         logger.info("Would execute update query script\n%s" % json.dumps(body, indent=2))
     else:
-        import client
-        es = client.create_client()
         es.indices.refresh(index="rally-results-*")
         res = es.update_by_query(index="rally-results-*", body=body, size=10000)
         logger.info("Result: %s" % res)
