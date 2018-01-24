@@ -7,7 +7,7 @@ def create_client():
 
     def load():
         config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
-        config.read("%s/resources/rally-template.ini" % os.path.dirname(os.path.realpath(__file__)))
+        config.read("%s/fixtures/ansible/roles/rally-update/templates/rally.ini.j2" % os.path.dirname(os.path.realpath(__file__)))
         return config
 
     complete_cfg = load()
