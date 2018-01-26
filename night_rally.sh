@@ -32,7 +32,7 @@ SELF_UPDATE=NO
 DRY_RUN=NO
 SKIP_ANSIBLE=NO
 # We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
-START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
+EFFECTIVE_START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 MODE="nightly"
 RELEASE="master"
 # only needed for ad-hoc benchmarks
@@ -44,8 +44,9 @@ PLUGINS=""
 for i in "$@"
 do
 case ${i} in
-    --override-effective-start-date=*)
-    START_DATE="${i#*=}"
+    --effective-start-date=*)
+    OVERRIDE_START_DATE="${i#*=}"
+    EFFECTIVE_START_DATE=${OVERRIDE_START_DATE:-${EFFECTIVE_START_DATE}}
     shift # past argument=value
     ;;
     --self-update)
@@ -160,7 +161,7 @@ fi
 #****************************
 set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${START_DATE}" --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} ${SKIP_ANSIBLE_PARAM} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}"
+python3 ${NIGHT_RALLY_HOME}/night_rally.py --target-host=${TARGET_HOST} --elasticsearch-plugins="${PLUGINS}" --effective-start-date="${EFFECTIVE_START_DATE}" --mode=${MODE} ${NIGHT_RALLY_DRY_RUN} ${SKIP_ANSIBLE_PARAM} --fixtures="${FIXTURES}" --revision="${REVISION}" --release="${RELEASE}"
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
