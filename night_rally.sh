@@ -15,8 +15,6 @@
 # fail this script immediately if any command fails with a non-zero exit code
 set -e
 
-S3_ROOT_BUCKET="s3://elasticsearch-benchmarks.elastic.co"
-
 # see http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -26,15 +24,12 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# Night Rally is *always* the master for assets
-ASSET_SOURCE="${NIGHT_RALLY_HOME}/external/pages"
 
 ANSIBLE_ALL_TAGS=(encryption-at-rest initialize-data-disk trim drop-caches)
 ANSIBLE_SKIP_TAGS=( )
 ANSIBLE_SKIP_TAGS_STRING=""
 SELF_UPDATE=NO
 DRY_RUN=NO
-SKIP_S3=NO
 SKIP_ANSIBLE=NO
 # We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
 START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
@@ -63,10 +58,6 @@ case ${i} in
     ;;
     --skip-ansible)
     SKIP_ANSIBLE=YES
-    shift # past argument with no value
-    ;;
-    --skip-s3)
-    SKIP_S3=YES
     shift # past argument with no value
     ;;
     --mode=*)
@@ -183,23 +174,6 @@ fi
 # END NO FAIL
 #****************************
 set -e
-
-if [ ${SKIP_S3} == NO ]
-then
-    echo "Uploading assets from [${ASSET_SOURCE}] to [${S3_ROOT_BUCKET}]"
-    if [ ${DRY_RUN} == YES ]
-    then
-        AWS_DRY_RUN="--dryrun"
-    else
-        AWS_DRY_RUN=""
-    fi
-    # --acl "public-read"           - let everyone read the assets
-    # --cache-control max-age=86400 - ensure that asset files expire after one day so users always see assets
-    aws s3 sync ${AWS_DRY_RUN} --acl "public-read" --cache-control max-age=86400 "${ASSET_SOURCE}/" "${S3_ROOT_BUCKET}/"
-
-else
-    echo "Skipping upload of assets to ${S3_ROOT_BUCKET}"
-fi
 
 # Exit with the same exit code as night_rally.py
 exit ${exit_code}
