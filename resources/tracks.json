@@ -172,7 +172,7 @@
     "track": "noaa",
     "combinations": [
       {
-        "name": "noaa-append-default-1node",
+        "name": "noaa-append-defaults-1node",
         "challenge": "append-no-conflicts",
         "car": "defaults",
         "default-combination": true
