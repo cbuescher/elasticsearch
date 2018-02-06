@@ -99,6 +99,7 @@ class SourceBasedCommand(BaseCommand):
             self.pipeline_with_plugins = "from-sources-skip-build"
             cmd += " --elasticsearch-plugins=\"%s\"" % plugins
             if "x-pack:security" in plugins:
+                # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
                 cmd += " --cluster-health=yellow"
                 cmd += " --client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
 
