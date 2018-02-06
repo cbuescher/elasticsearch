@@ -17,6 +17,12 @@
         "default-combination": true
       },
       {
+        "name": "geonames-append-defaults-x-pack-security-1node",
+        "challenge": "append-no-conflicts",
+        "car": "defaults",
+        "plugins": "x-pack:security"
+      },
+      {
         "name": "geonames-append-4g-1node",
         "challenge": "append-no-conflicts-index-only",
         "car": "4gheap"
@@ -70,6 +76,12 @@
         "default-combination": true
       },
       {
+        "name": "geopoint-append-defaults-x-pack-security-1node",
+        "challenge": "append-no-conflicts",
+        "car": "defaults",
+        "plugins": "x-pack:security"
+      },
+      {
         "name": "geopoint-append-4g-1node",
         "challenge": "append-no-conflicts-index-only",
         "car": "4gheap"
@@ -102,6 +114,12 @@
         "default-combination": true
       },
       {
+        "name": "pmc-append-4g-x-pack-security-1node",
+        "challenge": "append-no-conflicts",
+        "car": "4gheap",
+        "plugins": "x-pack:security"
+      },
+      {
         "name": "pmc-append-4g-3nodes",
         "challenge": "append-no-conflicts-index-only-1-replica",
         "car": "4gheap",
@@ -129,6 +147,12 @@
         "default-combination": true
       },
       {
+        "name": "nyc_taxis-append-4g-x-pack-security-1node",
+        "challenge": "append-no-conflicts",
+        "car": "4gheap",
+        "plugins": "x-pack:security"
+      },
+      {
         "name": "nyc_taxis-appendsorted-4g-1node",
         "challenge": "append-sorted-no-conflicts-index-only",
         "car": "4gheap"
@@ -154,6 +178,12 @@
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
+      },
+      {
+        "name": "http_logs-append-4g-x-pack-security-1node",
+        "challenge": "append-no-conflicts",
+        "car": "4gheap",
+        "plugins": "x-pack:security"
       },
       {
         "name": "http_logs-append-4g-3nodes",
