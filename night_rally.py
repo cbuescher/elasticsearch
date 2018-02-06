@@ -101,7 +101,7 @@ class SourceBasedCommand(BaseCommand):
             if "x-pack:security" in plugins:
                 # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
                 cmd += " --cluster-health=yellow"
-                cmd += " --client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
+                cmd += " --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
 
         # after we've executed the first benchmark, there is no reason to build again from sources
         self.pipeline = "from-sources-skip-build"
@@ -163,7 +163,7 @@ class ReleaseCommand(BaseCommand):
             if "x-pack:security" in self.plugins:
                 # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
                 cmd += " --cluster-health=yellow"
-                cmd += "--client-options=\"use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
+                cmd += "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
 
         return cmd
 
