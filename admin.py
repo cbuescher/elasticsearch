@@ -7,6 +7,13 @@ import tabulate
 
 
 def list_races(es, args):
+    def format_dict(d):
+        if d:
+            return ", ".join(["%s=%s" % (k, v) for k, v in d.items()])
+        else:
+            return None
+
+
     limit = args.limit
     environment = args.environment
     track = args.track
@@ -75,10 +82,17 @@ def list_races(es, args):
     races = []
     for hit in result["hits"]["hits"]:
         src = hit["_source"]
+        if "user-tags" in src:
+            user_tags = format_dict(src["user-tags"])
+        elif "user-tag" in src:
+            user_tags = src["user-tag"]
+        else:
+            user_tags = ""
+
         races.append([src["trial-timestamp"], src["track"], src["challenge"], src["car"],
-                      src["cluster"]["distribution-version"], src["cluster"]["revision"], src["user-tag"]])
+                      src["cluster"]["distribution-version"], src["cluster"]["revision"], user_tags])
     if races:
-        print(tabulate.tabulate(races, headers=["Race Timestamp", "Track", "Challenge", "Car", "Version", "Revision", "User Tag"]))
+        print(tabulate.tabulate(races, headers=["Race Timestamp", "Track", "Challenge", "Car", "Version", "Revision", "User Tags"]))
     else:
         print("No results")
 
