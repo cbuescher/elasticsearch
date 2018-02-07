@@ -163,7 +163,7 @@ class ReleaseCommand(BaseCommand):
             if "x-pack:security" in self.plugins:
                 # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
                 cmd += " --cluster-health=yellow"
-                cmd += "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
+                cmd += " --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
 
         return cmd
 
