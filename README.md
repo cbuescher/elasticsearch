@@ -24,6 +24,22 @@ Now you can invoke Night Rally regularly with the startup script `night_rally.sh
 
 ### How do I ...?
 
+#### Compare what has changed in Elasticsearch between two benchmarks
+
+Find the relevant revision One possibility is to run e.g. `python3 admin.py list races --environment=nightly --track=geonames --challenge=append-no-conflicts` which provides the following list:
+
+```
+Race Timestamp    Track     Challenge            Car           Version       Revision    User Tags
+----------------  --------  -------------------  ------------  ------------  ----------  -------------------------------------------------------------
+20180219T183731Z  geonames  append-no-conflicts  ['defaults']  7.0.0-alpha1  ff2164c     env=bare, name=geonames-append-defaults-1node
+20180219T183731Z  geonames  append-no-conflicts  ['defaults']  7.0.0-alpha1  ff2164c     env=bare, name=geonames-append-defaults-x-pack-security-1node
+20180218T182130Z  geonames  append-no-conflicts  ['defaults']  7.0.0-alpha1  df07943     env=bare, name=geonames-append-defaults-1node
+...
+```
+
+You can see the revisions `df07943` and `ff2164c`. If you want to see which commits are included in between, open the Github compare view with https://github.com/elastic/elasticsearch/compare/df07943...ff2164c.
+
+
 #### Add an annotation
 
 To add an annotation, use the admin tool. First find the correct trial timestamp by issuing `python3 admin.py list races --environment=nightly`. You will need the trial timestamp later. Below are examples for common cases:
