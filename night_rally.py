@@ -59,7 +59,7 @@ class BaseCommand:
     def runnable(self, track, challenge, car, plugins, target_hosts):
         return True
 
-    def command_line(self, track, challenge, car, name, plugins, target_hosts):
+    def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
         raise NotImplementedError("abstract method")
 
     def format_tag(self, additional_tags=None):
@@ -78,7 +78,7 @@ class SourceBasedCommand(BaseCommand):
         self.pipeline = "from-sources-complete"
         self.pipeline_with_plugins = "from-sources-complete"
 
-    def command_line(self, track, challenge, car, name, plugins, target_hosts):
+    def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
         cmd = RALLY_BINARY
         cmd += " --configuration-name=%s" % self.configuration_name
         cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
@@ -91,6 +91,8 @@ class SourceBasedCommand(BaseCommand):
         cmd += " --revision \"%s\"" % self.revision
         cmd += " --effective-start-date \"%s\"" % self.effective_start_date
         cmd += " --track=%s" % track
+        if track_params:
+            cmd += " --track-params=\"%s\"" % track_params
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
         cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
@@ -144,7 +146,7 @@ class ReleaseCommand(BaseCommand):
             return False
         return True
 
-    def command_line(self, track, challenge, car, name, plugins, target_hosts):
+    def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
         cmd = RALLY_BINARY
         cmd += " --configuration-name=%s" % self.configuration_name
         cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
@@ -153,6 +155,8 @@ class ReleaseCommand(BaseCommand):
         cmd += " --distribution-version=%s" % self.distribution_version
         cmd += " --effective-start-date \"%s\"" % self.effective_start_date
         cmd += " --track=%s" % track
+        if track_params:
+            cmd += " --track-params=\"%s\"" % track_params
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
         cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
@@ -190,7 +194,7 @@ class DockerCommand(BaseCommand):
             return "sorted" not in challenge
         return True
 
-    def command_line(self, track, challenge, car, name, plugins, target_hosts):
+    def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
         cmd = RALLY_BINARY
         cmd += " --configuration-name=%s" % self.configuration_name
         cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
@@ -199,6 +203,8 @@ class DockerCommand(BaseCommand):
         cmd += " --distribution-version=%s" % self.distribution_version
         cmd += " --effective-start-date \"%s\"" % self.effective_start_date
         cmd += " --track=%s" % track
+        if track_params:
+            cmd += " --track-params=\"%s\"" % track_params
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
         cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
@@ -230,6 +236,7 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
             node_count = combination.get("node-count", 1)
             target_hosts = choose_target_hosts(available_hosts, node_count)
             plugins = combination.get("plugins", "")
+            track_params = combination.get("track-params")
             info = race_info(track_name, challenge, car, plugins, node_count)
             if target_hosts:
                 if command.runnable(track_name, challenge, car, plugins, target_hosts):
@@ -240,7 +247,7 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
                                "--tags=\"drop-caches,trim\" && cd -" % fixtures_dir)
                     logger.info("Running Rally on %s" % info)
                     start = time.perf_counter()
-                    if runner(command.command_line(track_name, challenge, car, name, plugins, target_hosts)):
+                    if runner(command.command_line(track_name, track_params, challenge, car, name, plugins, target_hosts)):
                         rally_failure = True
                         logger.error("Failed to run %s. Please check the logs." % info)
                     stop = time.perf_counter()
