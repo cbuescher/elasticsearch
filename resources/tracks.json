@@ -192,7 +192,8 @@
         "name": "nyc_taxis-append-4g-3nodes",
         "label": "add-4g-3nodes",
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:1",
+        "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
+        "track-params": "{\\\"index_settings\\\": {\\\"index.number_of_replicas\\\": 1}}",
         "car": "4gheap",
         "node-count": 3
       }
