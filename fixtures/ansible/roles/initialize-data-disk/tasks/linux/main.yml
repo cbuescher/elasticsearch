@@ -9,11 +9,10 @@
   loop_control:
     loop_var: distribution_item
 
-- name: check if encrypted storage is already mounted
-  command: grep -q '{{ encrypted_mount_point }}\s' /proc/mounts
-  ignore_errors: true
-  changed_when: false
-  register: encrypted_mount_exists
+# Ensure no open files are present prohibiting us from un-mounting the disk volume later on
+- name: kill processes accessing the encrypted disk volume
+  shell: fuser -k {{ encrypted_mount_point }}
+  failed_when: false
 
 - name: umount encrypted volume if applicable
   mount:

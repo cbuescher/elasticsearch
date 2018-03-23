@@ -3,8 +3,8 @@
 default_linux_os_filesystem: ext4
 
 data_device: /dev/sdb
-data_disk_mount_point: /var/lib/jenkins/.rally/benchmarks/races
 
+data_disk_mount_point: /var/lib/jenkins/.rally/benchmarks/races
 encrypted_mount_point: /var/lib/jenkins/.rally/benchmarks/races
 
 # available device to be used for encryption

@@ -9,6 +9,11 @@
   loop_control:
     loop_var: distribution_item
 
+# Ensure no open files are present prohibiting us from un-mounting the disk volume later on
+- name: kill processes accessing the encrypted/data disk volume
+  shell: fuser -k {{ data_disk_mount_point }}
+  failed_when: false
+
 - name: umount data volume if applicable
   mount:
     src: '{{ data_device }}'
