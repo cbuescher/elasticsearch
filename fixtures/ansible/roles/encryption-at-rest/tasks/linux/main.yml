@@ -33,6 +33,10 @@
     dump: 0
     passno: 2
     state: absent
+  register: remove_mount_result
+  retries: 5
+  delay: 10
+  until: remove_mount_result | success
 
 - name: populate passphrase file for encrypted device
   copy:
