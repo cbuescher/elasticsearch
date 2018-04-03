@@ -9,7 +9,7 @@ import tabulate
 def list_races(es, args):
     def format_dict(d):
         if d:
-            return ", ".join(["%s=%s" % (k, v) for k, v in d.items()])
+            return ", ".join(["%s=%s" % (k, v) for k, v in sorted(d.items())])
         else:
             return None
 
