@@ -23,6 +23,11 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual("lucene-7-upgrade", night_rally.sanitize("lucene-7-upgrade"))
         self.assertEqual("elasticsearch-6_0_0-alpha1-docker", night_rally.sanitize("Elasticsearch 6.0.0-alpha1 Docker"))
 
+    def test_join(self):
+        self.assertEqual("env:bare,name:test", night_rally.join_nullables("env:bare", None, "name:test"))
+        self.assertEqual("name:test", night_rally.join_nullables(None, "name:test"))
+        self.assertEqual("", night_rally.join_nullables(None))
+
     def test_run_two_challenges_successfully(self):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -215,14 +220,14 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=release --target-host=\"localhost\" --pipeline=from-distribution --quiet "
                 "--distribution-version=5.3.0 --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=defaults "
-                "--user-tag=\"env:x-pack,name:geonames-defaults\" --elasticsearch-plugins=\"x-pack:security,monitoring\" --cluster-health=yellow "
+                "--track-params=\"cluster_health:'yellow'\" --challenge=append-no-conflicts --car=defaults "
+                "--user-tag=\"env:x-pack,name:geonames-defaults\" --elasticsearch-plugins=\"x-pack:security,monitoring\" "
                 "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\"",
 
                 "rally --skip-update --configuration-name=release --target-host=\"localhost\" --pipeline=from-distribution --quiet "
                 "--distribution-version=5.3.0 --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=4gheap "
-                "--user-tag=\"env:x-pack,name:geonames-4g\" --elasticsearch-plugins=\"x-pack:security,monitoring\" --cluster-health=yellow "
+                "--track-params=\"cluster_health:'yellow'\" --challenge=append-no-conflicts --car=4gheap "
+                "--user-tag=\"env:x-pack,name:geonames-4g\" --elasticsearch-plugins=\"x-pack:security,monitoring\" "
                 "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\"",
             ]
             ,
@@ -257,13 +262,13 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=release --target-host=\"localhost\" --pipeline=docker --quiet "
                 "--distribution-version=5.3.0 --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=defaults "
-                "--user-tag=\"env:docker,name:geonames-defaults\" --cluster-health=yellow",
+                "--track-params=\"cluster_health:'yellow'\" --challenge=append-no-conflicts --car=defaults "
+                "--user-tag=\"env:docker,name:geonames-defaults\"",
 
                 "rally --skip-update --configuration-name=release --target-host=\"localhost\" --pipeline=docker --quiet "
                 "--distribution-version=5.3.0 --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=4gheap "
-                "--user-tag=\"env:docker,name:geonames-4g\" --cluster-health=yellow"
+                "--track-params=\"cluster_health:'yellow'\" --challenge=append-no-conflicts --car=4gheap "
+                "--user-tag=\"env:docker,name:geonames-4g\""
             ]
             ,
             system_call.calls

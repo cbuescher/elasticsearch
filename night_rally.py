@@ -50,6 +50,18 @@ def sanitize(text):
     return text.lower().replace(" ", "-").replace(".", "_")
 
 
+def join_nullables(*args, join_with=","):
+    """
+
+    Joins the provided arguments by ``join_with``.
+
+    :param args: Arguments to join. Arguments needs to be either ``str`` or None. Arguments that are ``None`` will be skipped.
+    :param join_with: The string that should be used to join invidivual elements.
+    :return: A string containing all arguments that are not ``None`` joined by ``join_with``.
+    """
+    return join_with.join(filter(None, args))
+
+
 class BaseCommand:
     def __init__(self, effective_start_date, user_tag):
         self.effective_start_date = effective_start_date
@@ -91,6 +103,8 @@ class SourceBasedCommand(BaseCommand):
         cmd += " --revision \"%s\"" % self.revision
         cmd += " --effective-start-date \"%s\"" % self.effective_start_date
         cmd += " --track=%s" % track
+        if plugins and "x-pack:security" in plugins:
+            track_params = join_nullables(track_params, "cluster_health:'yellow'")
         if track_params:
             cmd += " --track-params=\"%s\"" % track_params
         cmd += " --challenge=%s" % challenge
@@ -101,8 +115,6 @@ class SourceBasedCommand(BaseCommand):
             self.pipeline_with_plugins = "from-sources-skip-build"
             cmd += " --elasticsearch-plugins=\"%s\"" % plugins
             if "x-pack:security" in plugins:
-                # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
-                cmd += " --cluster-health=yellow"
                 cmd += " --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
 
         # after we've executed the first benchmark, there is no reason to build again from sources
@@ -155,6 +167,8 @@ class ReleaseCommand(BaseCommand):
         cmd += " --distribution-version=%s" % self.distribution_version
         cmd += " --effective-start-date \"%s\"" % self.effective_start_date
         cmd += " --track=%s" % track
+        if self.plugins and "x-pack:security" in self.plugins:
+            track_params = join_nullables(track_params, "cluster_health:'yellow'")
         if track_params:
             cmd += " --track-params=\"%s\"" % track_params
         cmd += " --challenge=%s" % challenge
@@ -165,8 +179,6 @@ class ReleaseCommand(BaseCommand):
         if self.plugins:
             cmd += " --elasticsearch-plugins=\"%s\"" % self.plugins
             if "x-pack:security" in self.plugins:
-                # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
-                cmd += " --cluster-health=yellow"
                 cmd += " --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
 
         return cmd
@@ -203,14 +215,11 @@ class DockerCommand(BaseCommand):
         cmd += " --distribution-version=%s" % self.distribution_version
         cmd += " --effective-start-date \"%s\"" % self.effective_start_date
         cmd += " --track=%s" % track
-        if track_params:
-            cmd += " --track-params=\"%s\"" % track_params
+        # due to the possibility that x-pack is active (that depends on Rally)
+        cmd += " --track-params=\"%s\"" % join_nullables(track_params, "cluster_health:'yellow'")
         cmd += " --challenge=%s" % challenge
         cmd += " --car=%s" % car
         cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
-        # due to the possibility that x-pack is active (that depends on Rally)
-        # TODO: With Rally 0.10.0 we need to provide the expected cluster health as a track parameter.
-        cmd += " --cluster-health=yellow"
         return cmd
 
 
