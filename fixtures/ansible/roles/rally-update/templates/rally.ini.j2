@@ -1,5 +1,5 @@
 [meta]
-config.version = 14
+config.version = 15
 
 [node]
 root.dir = /var/lib/jenkins/.rally/benchmarks
@@ -14,12 +14,8 @@ elasticsearch.src.subdir = elasticsearch
 
 plugin.x-pack.remote.repo.url = git@github.com:elastic/x-pack-elasticsearch.git
 plugin.x-pack.src.subdir = elasticsearch-extra/x-pack-elasticsearch
-plugin.x-pack.build.task = :x-pack-elasticsearch:plugin:assemble
+plugin.x-pack.build.command = ./gradlew :x-pack-elasticsearch:plugin:bundlePlugin
 plugin.x-pack.build.artifact.subdir = plugin/build/distributions
-
-
-[build]
-gradle.bin = /usr/local/bin/gradle
 
 [runtime]
 java.home = /var/lib/jenkins/.java/java8
