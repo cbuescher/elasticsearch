@@ -313,13 +313,25 @@ body,html,.main-display-area,.col-md-12 {
         <li>CPU: <a href="https://ark.intel.com/de/products/97128/Intel-Core-i7-7700-Processor-8M-Cache-up-to-4_20-GHz">Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz</a></li>
         <li>RAM: 32 GB</li>
         <li>SSD: <a href="http://www.samsung.com/semiconductor/products/flash-storage/client-ssd/MZ7LN512HMJP?ia=831">Samsung MZ7LN512HMJP-00000</a></li>
-        <li>OS: Linux kernel version 4.13.0-32</li>
+        <li>OS: Linux kernel version 4.13.0-38</li>
+        <li>OS TUNING:
+          <ul>
+              <li style="font-family:monospace;">/sys/kernel/mm/transparent_hugepage/enabled = always</li>
+              <li style="font-family:monospace;">/sys/kernel/mm/transparent_hugepage/defrag = always</li>
+          </ul>
+      </li>
         <li>JVM: Oracle JDK 1.8.0_131-b11</li>
       </ul>
       <p>All machines are connected via a dedicated 10 GBit switched network.</p>
       <h4>History of changes</h4>
       <ul>
-        <li>2018-02-06: Upgrade kernel from version 4.8.0-53 to 4.13.0-32.</li>
+          <li>2018-04-12:
+              <ul>
+                  <li>Set <a href="https://www.kernel.org/doc/Documentation/vm/transhuge.txt">transparent_hugepage</a> <em style="font-family:monospace;">enabled</em> and <em style="font-family:monospace;">defrag</em> settings to <em style="font-family:monospace;">always</em>. This makes it consistent with the settings before the upgrade to 4.13.0.</li>
+                  <li>Upgrade kernel from version 4.13.0-36 to 4.13.0-38.</li>
+              </ul>
+          <li>2018-02-21: Upgrade kernel from version 4.13.0-32 to 4.13.0-36.</li>
+          <li>2018-02-06: Upgrade kernel from version 4.8.0-53 to 4.13.0-32.</li>
         <li>2017-10-06:
           <ul>
             <li>Change from one load generator and one target machine (connected via 1 GBit switch) to one load generator and three target machines (connected via 10 GBit switch).</li>
