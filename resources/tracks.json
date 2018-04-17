@@ -217,6 +217,13 @@
         "default-combination": true
       },
       {
+        "name": "http_logs-no-src-1node",
+        "label": "add-no-src",
+        "challenge": "append-no-conflicts-index-only",
+        "track-params": "source_enabled:false",
+        "car": "4gheap"
+      },
+      {
         "name": "http_logs-append-4g-x-pack-security-1node",
         "label": "add-4g-security",
         "challenge": "append-no-conflicts",
