@@ -204,35 +204,35 @@
     "combinations": [
       {
         "name": "http_logs-append-defaults-1node",
-        "label": "add-defaults",
+        "label": "defaults",
         "challenge": "append-no-conflicts-index-only",
         "track-params": "number_of_replicas:0",
         "car": "defaults"
       },
       {
         "name": "http_logs-append-4g-1node",
-        "label": "add-4g",
+        "label": "4g",
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
       },
       {
         "name": "http_logs-no-src-1node",
-        "label": "add-no-src",
+        "label": "no-src-4g",
         "challenge": "append-no-conflicts-index-only",
         "track-params": "source_enabled:false",
         "car": "4gheap"
       },
       {
         "name": "http_logs-append-4g-x-pack-security-1node",
-        "label": "add-4g-security",
+        "label": "security-4g",
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "plugins": "x-pack:security"
       },
       {
         "name": "http_logs-append-4g-3nodes",
-        "label": "add-4g-3nodes",
+        "label": "3nodes-4g",
         "challenge": "append-no-conflicts-index-only",
         "track-params": "number_of_replicas:1",
         "car": "4gheap",
@@ -240,7 +240,7 @@
       },
       {
         "name": "http_logs-appendsorted-4g-1node",
-        "label": "add-sorted-4g",
+        "label": "sorted-4g",
         "challenge": "append-sorted-no-conflicts",
         "car": "4gheap"
       }
