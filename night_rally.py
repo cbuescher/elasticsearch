@@ -450,13 +450,18 @@ def parse_args():
         "--release",
         help="Specify release string to use for comparison reports",
         default="master")
+    parser.add_argument(
+        "--tracks",
+        help="Path to the tracks.json file that contains the tracks to run",
+        default=None)
 
     return parser.parse_args()
 
 
-def load_tracks():
+def load_tracks(tracks):
     import json
-    with open("%s/resources/tracks.json" % ROOT, "r") as tracks_file:
+    path = tracks if tracks else "%s/resources/tracks.json" % ROOT
+    with open(path, mode="rt", encoding="utf-8") as tracks_file:
         return json.load(tracks_file)
 
 
@@ -485,7 +490,7 @@ def main():
     else:
         release_tag = {"env": "bare"}
 
-    tracks = load_tracks()
+    tracks = load_tracks(args.tracks)
 
     if release_mode:
         # use always the same name for release comparison benchmarks
