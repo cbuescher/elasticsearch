@@ -20,13 +20,6 @@
         "default-combination": true
       },
       {
-        "name": "geonames-append-defaults-x-pack-security-1node",
-        "label": "add-defaults-security",
-        "challenge": "append-no-conflicts",
-        "car": "defaults",
-        "plugins": "x-pack:security"
-      },
-      {
         "name": "geonames-append-4g-1node",
         "label": "add-4g",
         "challenge": "append-no-conflicts-index-only",
@@ -89,13 +82,6 @@
         "default-combination": true
       },
       {
-        "name": "geopoint-append-defaults-x-pack-security-1node",
-        "label": "add-defaults-security",
-        "challenge": "append-no-conflicts",
-        "car": "defaults",
-        "plugins": "x-pack:security"
-      },
-      {
         "name": "geopoint-append-4g-1node",
         "label": "add-4g",
         "challenge": "append-no-conflicts-index-only",
@@ -136,13 +122,6 @@
         "default-combination": true
       },
       {
-        "name": "pmc-append-4g-x-pack-security-1node",
-        "label": "add-4g-security",
-        "challenge": "append-no-conflicts",
-        "car": "4gheap",
-        "plugins": "x-pack:security"
-      },
-      {
         "name": "pmc-append-4g-3nodes",
         "label": "add-4g-3nodes",
         "challenge": "append-no-conflicts-index-only",
@@ -173,13 +152,6 @@
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "default-combination": true
-      },
-      {
-        "name": "nyc_taxis-append-4g-x-pack-security-1node",
-        "label": "add-4g-security",
-        "challenge": "append-no-conflicts",
-        "car": "4gheap",
-        "plugins": "x-pack:security"
       },
       {
         "name": "nyc_taxis-appendsorted-4g-1node",
@@ -222,13 +194,6 @@
         "challenge": "append-no-conflicts-index-only",
         "track-params": "source_enabled:false",
         "car": "4gheap"
-      },
-      {
-        "name": "http_logs-append-4g-x-pack-security-1node",
-        "label": "security-4g",
-        "challenge": "append-no-conflicts",
-        "car": "4gheap",
-        "plugins": "x-pack:security"
       },
       {
         "name": "http_logs-append-4g-3nodes",
