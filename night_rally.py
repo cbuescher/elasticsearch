@@ -223,6 +223,23 @@ class DockerCommand(BaseCommand):
         return cmd
 
 
+class TelemetryDecorator:
+    def __init__(self, command, telemetry, telemetry_params):
+        self.command = command
+        self.telemetry = telemetry
+        self.telemetry_params = telemetry_params
+
+    def runnable(self, *args):
+        return self.command.runnable(*args)
+
+    def command_line(self, *args):
+        cmd_line = self.command.command_line(*args)
+        cmd_line += " --telemetry=\"{}\"".format(self.telemetry)
+        if self.telemetry_params:
+            cmd_line += " --telemetry-params=\"{}\"".format(self.telemetry_params)
+        return cmd_line
+
+
 def choose_target_hosts(available_hosts, node_count):
     if node_count > len(available_hosts):
         return None
@@ -454,6 +471,14 @@ def parse_args():
         "--tracks",
         help="Path to the tracks.json file that contains the tracks to run",
         default=None)
+    parser.add_argument(
+        "--telemetry",
+        help="Rally telemetry to activate",
+        default=None)
+    parser.add_argument(
+        "--telemetry-params",
+        help="Parameters of Rally telemetry to set",
+        default=None)
 
     return parser.parse_args()
 
@@ -513,6 +538,10 @@ def main():
         logger.info("Running nightly benchmarks against %s." % target_hosts)
         env_name = NightlyCommand.CONFIG_NAME
         command = NightlyCommand(start_date, release_tag)
+
+    if args.telemetry:
+        logger.info("Activating Rally telemetry %s." % args.telemetry)
+        command = TelemetryDecorator(command, args.telemetry, args.telemetry_params)
 
     rally_failure = run_rally(tracks, target_hosts, command, args.dry_run, args.skip_ansible)
 

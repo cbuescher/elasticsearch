@@ -40,6 +40,8 @@ REVISION="latest"
 TARGET_HOST="localhost:9200"
 PLUGINS=""
 TRACKS_FILE=""
+TELEMETRY=""
+TELEMETRY_PARAMS=""
 
 for i in "$@"
 do
@@ -79,6 +81,14 @@ case ${i} in
     ;;
     --tracks=*)
     TRACKS_FILE="${i#*=}"
+    shift # past argument=value
+    ;;
+    --telemetry=*)
+    TELEMETRY="${i#*=}"
+    shift # past argument=value
+    ;;
+    --telemetry-params=*)
+    TELEMETRY_PARAMS="${i#*=}"
     shift # past argument=value
     ;;
     --elasticsearch-plugins=*)
@@ -175,7 +185,10 @@ python3 ${NIGHT_RALLY_HOME}/night_rally.py \
     --fixtures="${FIXTURES}" \
     --revision="${REVISION}" \
     --release="${RELEASE}" \
-    --tracks="${TRACKS_FILE}"
+    --tracks="${TRACKS_FILE}" \
+    --telemetry="${TELEMETRY}" \
+    --telemetry-params="${TELEMETRY_PARAMS}"
+
 exit_code=$?
 
 echo "Killing any lingering Rally processes"

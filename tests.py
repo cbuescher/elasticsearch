@@ -319,6 +319,40 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
+    def test_run_with_telemetry(self):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "combinations": [
+                    {
+                        "name": "geonames-defaults",
+                        "challenge": "append-no-conflicts",
+                        "car": "defaults"
+                    }
+                ]
+            }
+        ]
+        start_date = datetime.datetime(2016, 1, 1)
+        cmd = night_rally.TelemetryDecorator(
+            command=night_rally.NightlyCommand(start_date, {"env": "bare"}),
+            telemetry="jfr,gc,jit",
+            telemetry_params="recording-template:profile"
+        )
+        night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        self.assertEqual(1, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --skip-update --configuration-name=nightly --target-host=\"localhost\" --pipeline=from-sources-complete --quiet "
+                "--revision \"@2016-01-01T00:00:00Z\" --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
+                "--challenge=append-no-conflicts --car=defaults --user-tag=\"env:bare,name:geonames-defaults\" "
+                "--telemetry=\"jfr,gc,jit\" --telemetry-params=\"recording-template:profile\""
+            ]
+            ,
+            system_call.calls
+        )
+
 
 if __name__ == '__main__':
     unittest.main()
