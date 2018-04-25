@@ -549,7 +549,7 @@ def main():
         copy_results_for_release_comparison(start_date, args.dry_run)
         # we want to deactivate old release entries, not old nightly entries
         deactivate_outdated_results(start_date, "release", release, release_tag, args.dry_run)
-    else:
+    elif release_mode:
         deactivate_outdated_results(start_date, env_name, release, release_tag, args.dry_run)
     if rally_failure:
         exit(1)
