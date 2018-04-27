@@ -87,38 +87,39 @@ class SourceBasedCommand(BaseCommand):
         super().__init__(effective_start_date, user_tag)
         self.revision = revision
         self.configuration_name = configuration_name
-        self.pipeline = "from-sources-complete"
-        self.pipeline_with_plugins = "from-sources-complete"
+        self.default_dist_pipeline = "from-sources-complete"
+        self.oss_dist_pipeline = "from-sources-complete"
 
     def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
+        x_pack = "x-pack-security" in car
+
         cmd = RALLY_BINARY
         cmd += " --configuration-name=%s" % self.configuration_name
         cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
-        # force a build if plugins are involved because we do not know whether we've build these plugins before
-        if plugins:
-            cmd += " --pipeline=%s" % self.pipeline_with_plugins
+        if x_pack:
+            cmd += " --pipeline=%s" % self.default_dist_pipeline
+            # after we've executed the first benchmark, there is no reason to build again from sources
+            self.default_dist_pipeline = "from-sources-skip-build"
         else:
-            cmd += " --pipeline=%s" % self.pipeline
+            cmd += " --pipeline=%s" % self.oss_dist_pipeline
+            self.oss_dist_pipeline = "from-sources-skip-build"
+
         cmd += " --quiet"
         cmd += " --revision \"%s\"" % self.revision
         cmd += " --effective-start-date \"%s\"" % self.effective_start_date
         cmd += " --track=%s" % track
-        if plugins and "x-pack:security" in plugins:
+        if x_pack:
+            cmd += " --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
             track_params = join_nullables(track_params, "cluster_health:'yellow'")
+
         if track_params:
             cmd += " --track-params=\"%s\"" % track_params
         cmd += " --challenge=%s" % challenge
-        cmd += " --car=%s" % car
+        cmd += " --car=\"%s\"" % car
         cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
 
         if plugins:
-            self.pipeline_with_plugins = "from-sources-skip-build"
             cmd += " --elasticsearch-plugins=\"%s\"" % plugins
-            if "x-pack:security" in plugins:
-                cmd += " --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
-
-        # after we've executed the first benchmark, there is no reason to build again from sources
-        self.pipeline = "from-sources-skip-build"
         return cmd
 
 

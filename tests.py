@@ -56,11 +56,11 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=nightly --target-host=\"localhost\" --pipeline=from-sources-complete --quiet "
                 "--revision \"@2016-01-01T00:00:00Z\" --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=defaults --user-tag=\"env:bare,name:geonames-defaults\"",
+                "--challenge=append-no-conflicts --car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\"",
 
                 "rally --skip-update --configuration-name=nightly --target-host=\"localhost\" --pipeline=from-sources-skip-build --quiet "
                 "--revision \"@2016-01-01T00:00:00Z\" --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=4gheap --user-tag=\"env:bare,name:geonames-4g\""
+                "--challenge=append-no-conflicts --car=\"4gheap\" --user-tag=\"env:bare,name:geonames-4g\""
             ]
             ,
             system_call.calls
@@ -100,11 +100,11 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=nightly --target-host=\"localhost\" --pipeline=from-sources-complete --quiet "
                 "--revision \"@2016-10-01T00:00:00Z\" --effective-start-date \"2016-10-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=defaults --user-tag=\"env:bare,name:geonames-defaults\"",
+                "--challenge=append-no-conflicts --car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\"",
 
                 "rally --skip-update --configuration-name=nightly --target-host=\"localhost\" --pipeline=from-sources-skip-build --quiet "
                 "--revision \"@2016-10-01T00:00:00Z\" --effective-start-date \"2016-10-01 00:00:00\" --track=percolator "
-                "--challenge=append-no-conflicts --car=4gheap --user-tag=\"env:bare,name:percolator-4g\""]
+                "--challenge=append-no-conflicts --car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\""]
             ,
             system_call.calls
         )
@@ -143,11 +143,11 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=lucene-7 --target-host=\"localhost\" --pipeline=from-sources-complete --quiet "
                 "--revision \"66202dc\" --effective-start-date \"2016-10-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=defaults --user-tag=\"env:bare,name:geonames-defaults\"",
+                "--challenge=append-no-conflicts --car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\"",
                 
                 "rally --skip-update --configuration-name=lucene-7 --target-host=\"localhost\" --pipeline=from-sources-skip-build --quiet "
                 "--revision \"66202dc\" --effective-start-date \"2016-10-01 00:00:00\" --track=percolator "
-                "--challenge=append-no-conflicts --car=4gheap --user-tag=\"env:bare,name:percolator-4g\""]
+                "--challenge=append-no-conflicts --car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\""]
             ,
             system_call.calls
         )
@@ -310,11 +310,11 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=nightly --target-host=\"localhost\" --pipeline=from-sources-complete --quiet "
                 "--revision \"@2016-10-01T00:00:00Z\" --effective-start-date \"2016-10-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=defaults --user-tag=\"env:bare,name:geonames-defaults\"",
+                "--challenge=append-no-conflicts --car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\"",
 
                 "rally --skip-update --configuration-name=nightly --target-host=\"localhost\" --pipeline=from-sources-skip-build --quiet "
                 "--revision \"@2016-10-01T00:00:00Z\" --effective-start-date \"2016-10-01 00:00:00\" --track=percolator "
-                "--challenge=append-no-conflicts --car=4gheap --user-tag=\"env:bare,name:percolator-4g\""]
+                "--challenge=append-no-conflicts --car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\""]
             ,
             system_call.calls
         )
@@ -346,7 +346,7 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=nightly --target-host=\"localhost\" --pipeline=from-sources-complete --quiet "
                 "--revision \"@2016-01-01T00:00:00Z\" --effective-start-date \"2016-01-01 00:00:00\" --track=geonames "
-                "--challenge=append-no-conflicts --car=defaults --user-tag=\"env:bare,name:geonames-defaults\" "
+                "--challenge=append-no-conflicts --car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" "
                 "--telemetry=\"jfr,gc,jit\" --telemetry-params=\"recording-template:profile\""
             ]
             ,

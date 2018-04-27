@@ -12,11 +12,6 @@ env.name = {{rally_environment}}
 remote.repo.url = https://github.com/elastic/elasticsearch.git
 elasticsearch.src.subdir = elasticsearch
 
-plugin.x-pack.remote.repo.url = git@github.com:elastic/x-pack-elasticsearch.git
-plugin.x-pack.src.subdir = elasticsearch-extra/x-pack-elasticsearch
-plugin.x-pack.build.command = ./gradlew :x-pack-elasticsearch:plugin:bundlePlugin
-plugin.x-pack.build.artifact.subdir = plugin/build/distributions
-
 [runtime]
 java.home = /var/lib/jenkins/.java/java8
 java10.home = /var/lib/jenkins/.java/openjdk10
