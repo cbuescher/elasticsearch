@@ -100,9 +100,12 @@ class SourceBasedCommand(BaseCommand):
             cmd += " --pipeline=%s" % self.default_dist_pipeline
             # after we've executed the first benchmark, there is no reason to build again from sources
             self.default_dist_pipeline = "from-sources-skip-build"
+            # as we clean the other distribution (implicitly) by building now, we need to rebuild next time again
+            self.oss_dist_pipeline = "from-sources-complete"
         else:
             cmd += " --pipeline=%s" % self.oss_dist_pipeline
             self.oss_dist_pipeline = "from-sources-skip-build"
+            self.default_dist_pipeline = "from-sources-complete"
 
         cmd += " --quiet"
         cmd += " --revision \"%s\"" % self.revision
