@@ -49,7 +49,8 @@ class NightRallyTests(unittest.TestCase):
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
-                        "car": "defaults"
+                        "car": "defaults",
+                        "car-params": "verbose_iw_logging_enabled:true"
                     },
                     {
                         "name": "geonames-4g",
@@ -68,8 +69,8 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --pipeline=\"from-sources-complete\" "
-                "--revision=\"@2016-01-01T00:00:00Z\"",
+                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --car-params=\"verbose_iw_logging_enabled:true\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "

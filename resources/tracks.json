@@ -50,7 +50,8 @@
         "name": "geonames-append-verbose_iw-1node",
         "challenge": "append-no-conflicts-index-only",
         "track-params": "number_of_replicas:0",
-        "car": "verbose_iw"
+        "car": "4gheap",
+        "car-params": "verbose_iw_logging_enabled:true"
       }
     ]
   },

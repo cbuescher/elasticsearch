@@ -269,6 +269,7 @@ class StandardParams:
             "car": [race_config.car],
             "user-tag": self.format_tag(additional_tags={"name": race_config.name})
         }
+        add_if_present(params, "car-params", race_config.car_params)
         add_if_present(params, "track-params", race_config.track_params)
         return params
 
@@ -357,6 +358,10 @@ class RaceConfig:
     @property
     def car(self):
         return self.combination["car"]
+
+    @property
+    def car_params(self):
+        return self.combination.get("car-params")
 
     @property
     def plugins(self):
