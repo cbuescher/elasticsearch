@@ -468,8 +468,6 @@ def copy_results_for_release_comparison(effective_start_date, dry_run):
             # pseudo version for stable comparisons
             src["distribution-version"] = "master"
             src["environment"] = "release"
-            # TODO: Provided for backwards-compatibility (otherwise all graphs would break immediately). Remove me once graphs are migrated.
-            src["user-tag"] = "env:bare"
             release_results.append(src)
         if release_results:
             logger.info("Copying %d result documents for [%s] to release environment." % (len(release_results), ts))
