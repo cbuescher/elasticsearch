@@ -3,9 +3,13 @@ import datetime
 import logging
 import os
 import time
+import re
+import collections
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
 RALLY_BINARY = "rally --skip-update"
+
+VERSION_PATTERN = re.compile("^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$")
 
 # console logging
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s][%(levelname)s] %(message)s")
@@ -56,199 +60,325 @@ def join_nullables(*args, join_with=","):
     Joins the provided arguments by ``join_with``.
 
     :param args: Arguments to join. Arguments needs to be either ``str`` or None. Arguments that are ``None`` will be skipped.
-    :param join_with: The string that should be used to join invidivual elements.
+    :param join_with: The string that should be used to join individual elements.
     :return: A string containing all arguments that are not ``None`` joined by ``join_with``.
     """
     return join_with.join(filter(None, args))
 
 
-class BaseCommand:
-    def __init__(self, effective_start_date, user_tag):
-        self.effective_start_date = effective_start_date
-        self.ts = date_for_cmd_param(effective_start_date)
-        self.user_tag = user_tag
+def components(version):
+    """
+    Determines components of a version string.
 
-    def runnable(self, track, challenge, car, plugins, target_hosts):
+    :param version: A version string in the format major.minor.path-suffix (suffix is optional)
+    :return: A tuple with four components determining "major", "minor", "patch" and "suffix" (any part except "major" may be `None`)
+    """
+    matches = VERSION_PATTERN.match(version)
+    if matches:
+        if matches.start(4) > 0:
+            return int(matches.group(1)), int(matches.group(2)), int(matches.group(3)), matches.group(4)
+        elif matches.start(3) > 0:
+            return int(matches.group(1)), int(matches.group(2)), int(matches.group(3)), None
+        elif matches.start(2) > 0:
+            return int(matches.group(1)), int(matches.group(2)), None, None
+        elif matches.start(1) > 0:
+            return int(matches.group(1)), None, None, None
+        else:
+            return int(version), None, None, None
+    raise ValueError("version string '{}' does not conform to pattern '{}'".format(version, VERSION_PATTERN.pattern))
+
+
+class BaseCommand:
+    def runnable(self, race_config):
         return True
 
-    def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
-        raise NotImplementedError("abstract method")
+    def command_line(self, race_config):
+        return self.params.command_line(race_config)
+
+
+class SourceBasedCommand(BaseCommand):
+    class SourcePipelineParams:
+        def __init__(self):
+            self.default_dist_pipeline = "from-sources-complete"
+            self.oss_dist_pipeline = "from-sources-complete"
+
+        def __call__(self, race_config):
+            if race_config.x_pack:
+                pipeline = self.default_dist_pipeline
+                # after we've executed the first benchmark, there is no reason to build again from sources
+                self.default_dist_pipeline = "from-sources-skip-build"
+                # as we clean the other distribution (implicitly) by building now, we need to rebuild next time again
+                self.oss_dist_pipeline = "from-sources-complete"
+            else:
+                pipeline = self.oss_dist_pipeline
+                self.oss_dist_pipeline = "from-sources-skip-build"
+                self.default_dist_pipeline = "from-sources-complete"
+            return {"pipeline": pipeline}
+
+    def __init__(self, params, revision):
+        self.params = ParamsFormatter(params=params + [
+            XPackParams(distribution_version="master"),
+            SourceBasedCommand.SourcePipelineParams(),
+            ConstantParam("revision", revision)
+        ])
+
+
+class NightlyCommand(SourceBasedCommand):
+    CONFIG_NAME = "nightly"
+
+    def __init__(self, params, effective_start_date):
+        super().__init__(params, "@%s" % to_iso8601(effective_start_date))
+
+
+class AdHocCommand(SourceBasedCommand):
+    def __init__(self, params, revision):
+        super().__init__(params, revision)
+
+
+class ReleaseCommand(BaseCommand):
+    def __init__(self, params, x_pack_config, distribution_version):
+        self.distribution_version = distribution_version
+        self.params = ParamsFormatter(params=params + [
+            XPackParams(distribution_version, x_pack_config),
+            ConstantParam("distribution-version", distribution_version),
+            ConstantParam("pipeline", "from-distribution")
+        ])
+
+    def runnable(self, race_config):
+        # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
+        if race_config.car == "1gheap":
+            return False
+        # Do not run with special x-pack configs. We run either the whole suite with or without x-pack.
+        if race_config.x_pack:
+            return False
+        # noaa does not work on older versions. This should actually be specified in track.json and not here...
+        if int(self.distribution_version[0]) < 5 and race_config.track == "noaa":
+            return False
+        # cannot run "sorted" challenges - it's a 6.0+ feature
+        if int(self.distribution_version[0]) < 6 and "sorted" in race_config.challenge:
+            return False
+        return True
+
+
+class DockerCommand(BaseCommand):
+    def __init__(self, params, distribution_version):
+        self.pipeline = "docker"
+        self.distribution_version = distribution_version
+        self.params = ParamsFormatter(params=params + [
+            ConstantParam("track-params", "cluster_health:'yellow'"),
+            ConstantParam("distribution-version", distribution_version),
+            ConstantParam("pipeline", "docker")
+        ])
+
+    def runnable(self, race_config):
+        # we don't support (yet?) clusters with multiple Docker containers
+        if len(race_config.target_hosts) > 1:
+            return False
+        # we are not interested in those metrics for Docker
+        if race_config.car in ["verbose_iw"]:
+            return False
+        # no plugin installs on Docker
+        if race_config.x_pack:
+            return False
+        # cannot run "sorted" challenges - it's a 6.0+ feature
+        if int(self.distribution_version[0]) < 6:
+            return "sorted" not in race_config.challenge
+        return True
+
+
+class ParamsFormatter:
+    """
+    Renders the provided (structured) command line parameters as a Rally invocation.
+    """
+    def __init__(self, params):
+        self.params = params
+
+    def command_line(self, race_config):
+        cmd_line_params = collections.OrderedDict()
+        for p in self.params:
+            for k, v in p(race_config).items():
+                if k in cmd_line_params:
+                    # treat as array first, then join them later
+                    cmd_line_params[k] = cmd_line_params[k] + v
+                else:
+                    cmd_line_params[k] = v
+
+        cmd = RALLY_BINARY
+        for k, v in cmd_line_params.items():
+            if isinstance(v, list):
+                cmd += " --{}=\"{}\"".format(k, join_nullables(*v))
+            elif v is None:
+                cmd += " --{}".format(k)
+            else:
+                cmd += " --{}=\"{}\"".format(k, v)
+
+        return cmd
+
+
+def add_if_present(d, k, v):
+    if v:
+        d[k] = v
+
+
+class TelemetryParams:
+    """
+    Extracts telemetry-related parameters.
+    """
+    def __init__(self, telemetry, telemetry_params):
+        self.telemetry = telemetry
+        self.telemetry_params = telemetry_params
+
+    def __call__(self, race_config):
+        params = {
+            "telemetry": self.telemetry
+        }
+        if self.telemetry_params:
+            params["telemetry-params"] = self.telemetry_params
+        return params
+
+
+class ConstantParam:
+    """
+    Extracts a single constant parameter which is provided externally as a key-value pair.
+    """
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+
+    def __call__(self, race_config):
+        return {self.key: self.value}
+
+
+class StandardParams:
+    """
+    Extracts all parameters that are needed for all Rally invocations.
+    """
+    def __init__(self, configuration_name, effective_start_date, user_tag):
+        self.configuration_name = configuration_name
+        self.effective_start_date = effective_start_date
+        self.user_tag = user_tag
+
+    def __call__(self, race_config):
+        params = {
+            "configuration-name": self.configuration_name,
+            "quiet": None,
+            "target-host": race_config.target_hosts,
+            "effective-start-date": self.effective_start_date,
+            "track": race_config.track,
+            "challenge": race_config.challenge,
+            "car": [race_config.car],
+            "user-tag": self.format_tag(additional_tags={"name": race_config.name})
+        }
+        add_if_present(params, "track-params", race_config.track_params)
+        return params
 
     def format_tag(self, additional_tags=None):
         final_tags = {}
         final_tags.update(self.user_tag)
         if additional_tags:
             final_tags.update(additional_tags)
-        return ",".join(["%s:%s" % (k, v) for k, v in final_tags.items()])
+        return ["{}:{}".format(k, v) for k, v in final_tags.items()]
 
 
-class SourceBasedCommand(BaseCommand):
-    def __init__(self, effective_start_date, revision, configuration_name, user_tag):
-        super().__init__(effective_start_date, user_tag)
-        self.revision = revision
-        self.configuration_name = configuration_name
-        self.default_dist_pipeline = "from-sources-complete"
-        self.oss_dist_pipeline = "from-sources-complete"
-
-    def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
-        x_pack = "x-pack-security" in car
-
-        cmd = RALLY_BINARY
-        cmd += " --configuration-name=%s" % self.configuration_name
-        cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
-        if x_pack:
-            cmd += " --pipeline=%s" % self.default_dist_pipeline
-            # after we've executed the first benchmark, there is no reason to build again from sources
-            self.default_dist_pipeline = "from-sources-skip-build"
-            # as we clean the other distribution (implicitly) by building now, we need to rebuild next time again
-            self.oss_dist_pipeline = "from-sources-complete"
+class XPackParams:
+    """
+    Extracts all parameters that are relevant for benchmarking with x-pack. Before Elasticsearch 6.3.0 x-pack is considered a plugin.
+    For later versions it is treated as module.
+    """
+    def __init__(self, distribution_version, override_x_pack=None):
+        if distribution_version == "master":
+            self.treat_as_car = True
         else:
-            cmd += " --pipeline=%s" % self.oss_dist_pipeline
-            self.oss_dist_pipeline = "from-sources-skip-build"
-            self.default_dist_pipeline = "from-sources-complete"
+            major, minor, _, _ = components(distribution_version)
+            self.treat_as_car = major > 6 or (major == 6 and minor >= 3)
 
-        cmd += " --quiet"
-        cmd += " --revision \"%s\"" % self.revision
-        cmd += " --effective-start-date \"%s\"" % self.effective_start_date
-        cmd += " --track=%s" % track
+        self.distribution_version = distribution_version
+        self.override_x_pack = override_x_pack
+
+    def __call__(self, race_config):
+        params = {}
+        x_pack = self.override_x_pack if self.override_x_pack else race_config.x_pack
+        add_if_present(params, "client-options", self.client_options(x_pack))
+        add_if_present(params, "elasticsearch-plugins", self.elasticsearch_plugins(x_pack))
+        add_if_present(params, "car", self.car(x_pack))
+        add_if_present(params, "track-params", self.track_params(x_pack))
+        add_if_present(params, "user-tag", self.user_tags(x_pack))
+        return params
+
+    def client_options(self, x_pack):
+        if x_pack and "security" in x_pack:
+            return "timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'"
+        else:
+            return None
+
+    def elasticsearch_plugins(self, x_pack):
+        if x_pack and not self.treat_as_car:
+            return "x-pack:{}".format(",".join(x_pack))
+        else:
+            return None
+
+    def car(self, x_pack):
+        if x_pack and self.treat_as_car:
+            return ["x-pack-{}".format(cfg) for cfg in x_pack]
+        else:
+            return None
+
+    def track_params(self, x_pack):
         if x_pack:
-            cmd += " --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
-            track_params = join_nullables(track_params, "cluster_health:'yellow'")
+            return "cluster_health:'yellow'"
+        else:
+            return None
 
-        if track_params:
-            cmd += " --track-params=\"%s\"" % track_params
-        cmd += " --challenge=%s" % challenge
-        cmd += " --car=\"%s\"" % car
-        cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
-
-        if plugins:
-            cmd += " --elasticsearch-plugins=\"%s\"" % plugins
-        return cmd
+    def user_tags(self, x_pack):
+        if x_pack:
+            return ["x-pack:true"]
+        else:
+            return None
 
 
-class NightlyCommand(SourceBasedCommand):
-    CONFIG_NAME = "nightly"
+class RaceConfig:
+    def __init__(self, track_name, combination, available_hosts):
+        self.track = track_name
+        self.combination = combination
+        self.available_hosts = available_hosts
 
-    def __init__(self, effective_start_date, user_tag):
-        super().__init__(effective_start_date, "@%s" % to_iso8601(effective_start_date),
-                         NightlyCommand.CONFIG_NAME, user_tag)
+    @property
+    def name(self):
+        return self.combination["name"]
 
+    @property
+    def node_count(self):
+        return self.combination.get("node-count", 1)
 
-class AdHocCommand(SourceBasedCommand):
-    def __init__(self, revision, effective_start_date, configuration_name, user_tag):
-        super().__init__(effective_start_date, revision, configuration_name, user_tag)
+    @property
+    def challenge(self):
+        return self.combination["challenge"]
 
+    @property
+    def car(self):
+        return self.combination["car"]
 
-class ReleaseCommand(BaseCommand):
-    def __init__(self, effective_start_date, plugins, distribution_version, configuration_name, user_tag):
-        super().__init__(effective_start_date, user_tag)
-        self.plugins = plugins
-        self.configuration_name = configuration_name
-        self.pipeline = "from-distribution"
-        self.distribution_version = distribution_version
+    @property
+    def plugins(self):
+        return self.combination.get("plugins", "")
 
-    def runnable(self, track, challenge, car, plugins, target_hosts):
-        # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
-        if car == "1gheap":
-            return False
-        # Do not run plugin-specific tracks. We run either the whole suite with or without plugins.
-        if plugins != "":
-            return False
-        # noaa does not work on older versions. This should actually be specified in track.json and not here...
-        if int(self.distribution_version[0]) < 5 and track == "noaa":
-            return False
-        # cannot run "sorted" challenges - it's a 6.0+ feature
-        if int(self.distribution_version[0]) < 6 and "sorted" in challenge:
-            return False
-        return True
+    @property
+    def track_params(self):
+        return self.combination.get("track-params")
 
-    def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
-        cmd = RALLY_BINARY
-        cmd += " --configuration-name=%s" % self.configuration_name
-        cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
-        cmd += " --pipeline=%s" % self.pipeline
-        cmd += " --quiet"
-        cmd += " --distribution-version=%s" % self.distribution_version
-        cmd += " --effective-start-date \"%s\"" % self.effective_start_date
-        cmd += " --track=%s" % track
-        if self.plugins and "x-pack:security" in self.plugins:
-            track_params = join_nullables(track_params, "cluster_health:'yellow'")
-        if track_params:
-            cmd += " --track-params=\"%s\"" % track_params
-        cmd += " --challenge=%s" % challenge
-        cmd += " --car=%s" % car
-        cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
+    @property
+    def x_pack(self):
+        return self.combination.get("x-pack")
 
-        # note that we will only run with the plugins provided externally but not with plugins provided via track.json!
-        if self.plugins:
-            cmd += " --elasticsearch-plugins=\"%s\"" % self.plugins
-            if "x-pack:security" in self.plugins:
-                cmd += " --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\""
+    @property
+    def target_hosts(self):
+        if self.node_count > len(self.available_hosts):
+            return None
+        else:
+            return self.available_hosts[:self.node_count]
 
-        return cmd
-
-
-class DockerCommand(BaseCommand):
-    def __init__(self, effective_start_date, distribution_version, configuration_name, user_tag):
-        super().__init__(effective_start_date, user_tag)
-        self.configuration_name = configuration_name
-        self.pipeline = "docker"
-        self.distribution_version = distribution_version
-
-    def runnable(self, track, challenge, car, plugins, target_hosts):
-        # we don't support (yet?) clusters with multiple Docker containers
-        if len(target_hosts) > 1:
-            return False
-        # we are not interested in those metrics for Docker
-        if car in ["verbose_iw"]:
-            return False
-        # no plugin installs on Docker
-        if plugins != "":
-            return False
-        # cannot run "sorted" challenges - it's a 6.0+ feature
-        if int(self.distribution_version[0]) < 6:
-            return "sorted" not in challenge
-        return True
-
-    def command_line(self, track, track_params, challenge, car, name, plugins, target_hosts):
-        cmd = RALLY_BINARY
-        cmd += " --configuration-name=%s" % self.configuration_name
-        cmd += " --target-host=\"%s\"" % ",".join(target_hosts)
-        cmd += " --pipeline=%s" % self.pipeline
-        cmd += " --quiet"
-        cmd += " --distribution-version=%s" % self.distribution_version
-        cmd += " --effective-start-date \"%s\"" % self.effective_start_date
-        cmd += " --track=%s" % track
-        # due to the possibility that x-pack is active (that depends on Rally)
-        cmd += " --track-params=\"%s\"" % join_nullables(track_params, "cluster_health:'yellow'")
-        cmd += " --challenge=%s" % challenge
-        cmd += " --car=%s" % car
-        cmd += " --user-tag=\"%s\"" % self.format_tag(additional_tags={"name": name})
-        return cmd
-
-
-class TelemetryDecorator:
-    def __init__(self, command, telemetry, telemetry_params):
-        self.command = command
-        self.telemetry = telemetry
-        self.telemetry_params = telemetry_params
-
-    def runnable(self, *args):
-        return self.command.runnable(*args)
-
-    def command_line(self, *args):
-        cmd_line = self.command.command_line(*args)
-        cmd_line += " --telemetry=\"{}\"".format(self.telemetry)
-        if self.telemetry_params:
-            cmd_line += " --telemetry-params=\"{}\"".format(self.telemetry_params)
-        return cmd_line
-
-
-def choose_target_hosts(available_hosts, node_count):
-    if node_count > len(available_hosts):
-        return None
-    else:
-        return available_hosts[:node_count]
+    def __str__(self):
+        return self.name
 
 
 def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=False, system=os.system):
@@ -260,45 +390,27 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
     for track in tracks:
         track_name = track["track"]
         for combination in track["combinations"]:
-            challenge = combination["challenge"]
-            car = combination["car"]
-            name = combination["name"]
-            node_count = combination.get("node-count", 1)
-            target_hosts = choose_target_hosts(available_hosts, node_count)
-            plugins = combination.get("plugins", "")
-            track_params = combination.get("track-params")
-            info = race_info(track_name, challenge, car, plugins, node_count)
-            if target_hosts:
-                if command.runnable(track_name, challenge, car, plugins, target_hosts):
+            race_cfg = RaceConfig(track_name, combination, available_hosts)
+
+            if race_cfg.target_hosts:
+                if command.runnable(race_cfg):
                     if not skip_ansible:
                         logger.info("Resetting benchmark environment...")
                         fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures", "ansible")
                         runner("cd \"%s\" && ansible-playbook -i inventory/production -u rally playbooks/setup.yml "
                                "--tags=\"drop-caches,trim\" && cd -" % fixtures_dir)
-                    logger.info("Running Rally on %s" % info)
+                    logger.info("Running Rally on [%s]", race_cfg)
                     start = time.perf_counter()
-                    if runner(command.command_line(track_name, track_params, challenge, car, name, plugins, target_hosts)):
+                    if runner(command.command_line(race_cfg)):
                         rally_failure = True
-                        logger.error("Failed to run %s. Please check the logs." % info)
+                        logger.error("Failed to run [%s]. Please check the logs.", race_cfg)
                     stop = time.perf_counter()
-                    logger.info("Finished running on %s in [%f] seconds." % (info, (stop - start)))
+                    logger.info("Finished running on [%s] in [%f] seconds.", race_cfg, (stop - start))
                 else:
-                    logger.info("Skipping %s (not supported by command)." % info)
+                    logger.info("Skipping [%s] (not supported by command).", race_cfg)
             else:
-                logger.info("Skipping %s (not enough target machines available)." % info)
+                logger.info("Skipping [%s] (not enough target machines available).", race_cfg)
     return rally_failure
-
-
-def race_info(track, challenge, car, plugins, node_count):
-    if plugins:
-        msg = "track [%s] with challenge [%s], car [%s] and plugins [%s]" % (track, challenge, car, plugins)
-    else:
-        msg = "track [%s] with challenge [%s] and car [%s]" % (track, challenge, car)
-    if node_count > 1:
-        msg += " on %d nodes" % node_count
-    else:
-        msg += " on one node"
-    return msg
 
 
 #################################################
@@ -333,8 +445,9 @@ def copy_results_for_release_comparison(effective_start_date, dry_run):
                     "must_not": [
                         {
                             "term": {
-                                "plugins": {
-                                    "value": "x-pack"
+                                # see XPackParams#user_tags()
+                                "user-tags.x-pack": {
+                                    "value": "true"
                                 }
                             }
                         }
@@ -446,9 +559,9 @@ def parse_args():
         help="The Elasticsearch node that should be targeted",
         required=True)
     parser.add_argument(
-        "--elasticsearch-plugins",
-        help="Elasticsearch plugins to install for the benchmark (default: None)",
-        default=None)
+        "--x-pack",
+        help="X Pack components to benchmark",
+        default="")
     parser.add_argument(
         "--fixtures",
         help="A comma-separated list of fixtures that have been run",
@@ -504,7 +617,7 @@ def main():
     adhoc_mode = args.mode == "adhoc"
     nightly_mode = args.mode == "nightly"
 
-    plugins = args.elasticsearch_plugins
+    x_pack = args.x_pack.split(",") if args.x_pack else None
     target_hosts = args.target_host.split(",")
 
     docker_benchmark = args.release.startswith("Docker ")
@@ -512,7 +625,7 @@ def main():
 
     if "encryption-at-rest" in args.fixtures:
         release_tag = {"env": "ear"}
-    elif "x-pack:security" in plugins:
+    elif x_pack:
         release_tag = {"env": "x-pack"}
     elif docker_benchmark:
         release_tag = {"env": "docker"}
@@ -520,32 +633,36 @@ def main():
         release_tag = {"env": "bare"}
 
     tracks = load_tracks(args.tracks)
+    params = []
+
+    if args.telemetry:
+        logger.info("Activating Rally telemetry %s." % args.telemetry)
+        params.append(TelemetryParams(args.telemetry, args.telemetry_params))
 
     if release_mode:
         # use always the same name for release comparison benchmarks
         env_name = sanitize(args.mode)
+        params.append(StandardParams(env_name, start_date, release_tag))
         if docker_benchmark:
-            if plugins:
-                raise RuntimeError("User specified plugins [%s] but this is not supported for Docker benchmarks." % plugins)
+            if x_pack:
+                raise RuntimeError("User specified x-pack configuration [%s] but this is not supported for Docker benchmarks." % x_pack)
             logger.info("Running Docker release benchmarks for release [%s] against %s." % (release, target_hosts))
-            command = DockerCommand(start_date, release, env_name, release_tag)
+            command = DockerCommand(params, release)
         else:
             logger.info("Running release benchmarks for release [%s] against %s (release tag is [%s])."
                         % (release, target_hosts, release_tag))
-            command = ReleaseCommand(start_date, plugins, release, env_name, release_tag)
+            command = ReleaseCommand(params, x_pack, release)
     elif adhoc_mode:
         logger.info("Running adhoc benchmarks for revision [%s] against %s." % (args.revision, target_hosts))
         # copy data from templates directory to our dedicated output directory
         env_name = sanitize(args.release)
-        command = AdHocCommand(args.revision, start_date, env_name, release_tag)
+        params.append(StandardParams(env_name, start_date, release_tag))
+        command = AdHocCommand(params, args.revision)
     else:
         logger.info("Running nightly benchmarks against %s." % target_hosts)
         env_name = NightlyCommand.CONFIG_NAME
-        command = NightlyCommand(start_date, release_tag)
-
-    if args.telemetry:
-        logger.info("Activating Rally telemetry %s." % args.telemetry)
-        command = TelemetryDecorator(command, args.telemetry, args.telemetry_params)
+        params.append(StandardParams(env_name, start_date, release_tag))
+        command = NightlyCommand(params, start_date)
 
     rally_failure = run_rally(tracks, target_hosts, command, args.dry_run, args.skip_ansible)
 

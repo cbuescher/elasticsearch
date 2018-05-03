@@ -38,7 +38,7 @@ RELEASE="master"
 # only needed for ad-hoc benchmarks
 REVISION="latest"
 TARGET_HOST="localhost:9200"
-PLUGINS=""
+X_PACK=""
 TRACKS_FILE=""
 TELEMETRY=""
 TELEMETRY_PARAMS=""
@@ -91,8 +91,8 @@ case ${i} in
     TELEMETRY_PARAMS="${i#*=}"
     shift # past argument=value
     ;;
-    --elasticsearch-plugins=*)
-    PLUGINS="${i#*=}"
+    --x-pack=*)
+    X_PACK="${i#*=}"
     shift # past argument=value
     ;;
     *)
@@ -177,7 +177,7 @@ set +e
 # Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
 python3 ${NIGHT_RALLY_HOME}/night_rally.py \
     --target-host=${TARGET_HOST} \
-    --elasticsearch-plugins="${PLUGINS}" \
+    --x-pack="${X_PACK}" \
     --effective-start-date="${EFFECTIVE_START_DATE}" \
     --mode=${MODE} \
     ${NIGHT_RALLY_DRY_RUN} \
