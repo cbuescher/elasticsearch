@@ -37,8 +37,8 @@ preserve_benchmark_candidate = False
 default.url = https://github.com/elastic/rally-teams
 
 [distributions]
-# {# Don't try to replace VERSION - see http://jinja.pocoo.org/docs/2.10/templates/#escaping -#}
-# {% raw -%}
+{# Don't try to replace VERSION - see http://jinja.pocoo.org/docs/2.10/templates/#escaping -#}
+{% raw %}
 release.cache = true
 
 # only support master snapshots
@@ -47,4 +47,4 @@ snapshot.cache=false
 
 plugin.x-pack.snapshot.url=https://snapshots.elastic.co/downloads/elasticsearch-plugins/x-pack/x-pack-{{VERSION}}.zip
 plugins.default.x-pack.snapshot.cache=false
-# {%- endraw %}
+{% endraw %}
