@@ -380,7 +380,6 @@ class XPackParams:
         add_if_present(params, "client-options", self.client_options(x_pack))
         add_if_present(params, "elasticsearch-plugins", self.elasticsearch_plugins(x_pack))
         add_if_present(params, "car", self.car(x_pack))
-        add_if_present(params, "track-params", self.track_params(x_pack))
         add_if_present(params, "user-tag", self.user_tags(x_pack))
         return params
 
@@ -399,12 +398,6 @@ class XPackParams:
     def car(self, x_pack):
         if x_pack and self.treat_as_car:
             return ["x-pack-{}".format(cfg) for cfg in x_pack]
-        else:
-            return None
-
-    def track_params(self, x_pack):
-        if x_pack:
-            return "cluster_health:'yellow'"
         else:
             return None
 

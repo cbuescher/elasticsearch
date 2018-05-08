@@ -289,19 +289,22 @@ class NightRallyTests(unittest.TestCase):
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
-                        "car": "defaults"
+                        "car": "defaults",
+                        "track-params": "bulk_size:3000"
                     },
                     {
                         "name": "geonames-4g",
                         "challenge": "append-no-conflicts",
-                        "car": "4gheap"
+                        "car": "4gheap",
+                        "track-params": "bulk_size:2000"
                     },
                     # should not run this combination - because we filter x-pack configs
                     {
                         "name": "geonames-4g-with-x-pack",
                         "challenge": "append-no-conflicts",
                         "car": "4gheap",
-                        "x-pack": ["security"]
+                        "x-pack": ["security"],
+                        "track-params": "bulk_size:1000"
                     },
 
                 ]
@@ -317,16 +320,16 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:x-pack,name:geonames-defaults,x-pack:true\" "
+                "--car=\"defaults\" --user-tag=\"env:x-pack,name:geonames-defaults,x-pack:true\" --track-params=\"bulk_size:3000\" "
                 "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" --elasticsearch-plugins=\"x-pack:security,monitoring\" "
-                "--track-params=\"cluster_health:'yellow'\" --distribution-version=\"5.3.0\" --pipeline=\"from-distribution\"",
+                "--distribution-version=\"5.3.0\" --pipeline=\"from-distribution\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:x-pack,name:geonames-4g,x-pack:true\" --client-options=\"timeout:60,use_ssl:true"
-                ",verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'\" "
-                "--elasticsearch-plugins=\"x-pack:security,monitoring\" --track-params=\"cluster_health:'yellow'\" "
+                "--car=\"4gheap\" --user-tag=\"env:x-pack,name:geonames-4g,x-pack:true\" --track-params=\"bulk_size:2000\" "
+                "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
+                "basic_auth_password:'rally-password'\" --elasticsearch-plugins=\"x-pack:security,monitoring\" "
                 "--distribution-version=\"5.3.0\" --pipeline=\"from-distribution\"",
             ]
             ,
@@ -375,15 +378,13 @@ class NightRallyTests(unittest.TestCase):
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"defaults,x-pack-security,x-pack-monitoring\" --user-tag=\"env:x-pack,name:geonames-defaults,x-pack:true\" "
                 "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
-                "basic_auth_password:'rally-password'\" --track-params=\"cluster_health:'yellow'\" --distribution-version=\"6.3.0\" "
-                "--pipeline=\"from-distribution\"",
+                "basic_auth_password:'rally-password'\" --distribution-version=\"6.3.0\" --pipeline=\"from-distribution\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"4gheap,x-pack-security,x-pack-monitoring\" --user-tag=\"env:x-pack,name:geonames-4g,x-pack:true\" "
                 "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
-                "basic_auth_password:'rally-password'\" --track-params=\"cluster_health:'yellow'\" --distribution-version=\"6.3.0\" "
-                "--pipeline=\"from-distribution\"",
+                "basic_auth_password:'rally-password'\" --distribution-version=\"6.3.0\" --pipeline=\"from-distribution\"",
             ]
             ,
             system_call.calls
