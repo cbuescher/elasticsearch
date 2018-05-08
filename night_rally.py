@@ -284,11 +284,11 @@ class ParamsFormatter:
         cmd = RALLY_BINARY
         for k, v in cmd_line_params.items():
             if isinstance(v, list):
-                cmd += " --{}={}".format(k, shlex.quote(join_nullables(*v)))
+                cmd += " --{}=\"{}\"".format(k, join_nullables(*v))
             elif v is None:
                 cmd += " --{}".format(k)
             else:
-                cmd += " --{}={}".format(k, shlex.quote(str(v)))
+                cmd += " --{}=\"{}\"".format(k, v)
 
         return cmd
 
