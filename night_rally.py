@@ -243,7 +243,6 @@ class DockerCommand(BaseCommand):
         self.pipeline = "docker"
         self.distribution_version = distribution_version
         self.params = ParamsFormatter(params=params + [
-            ConstantParam("track-params", "cluster_health:'yellow'"),
             ConstantParam("distribution-version", distribution_version),
             ConstantParam("pipeline", "docker")
         ])

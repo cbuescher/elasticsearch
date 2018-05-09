@@ -421,12 +421,12 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:docker,name:geonames-defaults\" --track-params=\"cluster_health:'yellow'\" "
+                "--car=\"defaults\" --user-tag=\"env:docker,name:geonames-defaults\" "
                 "--distribution-version=\"5.3.0\" --pipeline=\"docker\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:docker,name:geonames-4g\" --track-params=\"cluster_health:'yellow'\" "
+                "--car=\"4gheap\" --user-tag=\"env:docker,name:geonames-4g\" "
                 "--distribution-version=\"5.3.0\" --pipeline=\"docker\""
             ]
             ,
