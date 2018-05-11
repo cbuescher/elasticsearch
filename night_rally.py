@@ -202,8 +202,6 @@ class SourceBasedCommand(BaseCommand):
 
 
 class NightlyCommand(SourceBasedCommand):
-    CONFIG_NAME = "nightly"
-
     def __init__(self, params, effective_start_date):
         super().__init__(params, "@%s" % to_iso8601(effective_start_date))
 
@@ -699,6 +697,7 @@ def main():
     release_mode = args.mode == "release"
     adhoc_mode = args.mode == "adhoc"
     nightly_mode = args.mode == "nightly"
+    env_name = sanitize(args.mode)
 
     x_pack = args.x_pack.split(",") if args.x_pack else None
     target_hosts = args.target_host.split(",")
@@ -723,8 +722,6 @@ def main():
         params.append(TelemetryParams(args.telemetry, args.telemetry_params))
 
     if release_mode:
-        # use always the same name for release comparison benchmarks
-        env_name = sanitize(args.mode)
         params.append(StandardParams(env_name, start_date, release_tag))
         if docker_benchmark:
             if x_pack:
@@ -737,13 +734,10 @@ def main():
             command = ReleaseCommand(params, x_pack, release)
     elif adhoc_mode:
         logger.info("Running adhoc benchmarks for revision [%s] against %s." % (args.revision, target_hosts))
-        # copy data from templates directory to our dedicated output directory
-        env_name = sanitize(args.release)
         params.append(StandardParams(env_name, start_date, release_tag))
         command = AdHocCommand(params, args.revision)
     else:
         logger.info("Running nightly benchmarks against %s." % target_hosts)
-        env_name = NightlyCommand.CONFIG_NAME
         params.append(StandardParams(env_name, start_date, release_tag))
         command = NightlyCommand(params, start_date)
 

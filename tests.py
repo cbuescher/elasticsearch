@@ -120,7 +120,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams(night_rally.NightlyCommand.CONFIG_NAME, start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("nightly", start_date, {"env": "bare"})]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -168,7 +168,7 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 10, 1)
-        params = [night_rally.StandardParams(night_rally.NightlyCommand.CONFIG_NAME, start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("nightly", start_date, {"env": "bare"})]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -462,7 +462,7 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 10, 1)
-        params = [night_rally.StandardParams(night_rally.NightlyCommand.CONFIG_NAME, start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("nightly", start_date, {"env": "bare"})]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
 
@@ -505,7 +505,7 @@ class NightRallyTests(unittest.TestCase):
                 telemetry="jfr,gc,jit",
                 telemetry_params="recording-template:profile"
             ),
-            night_rally.StandardParams(night_rally.NightlyCommand.CONFIG_NAME, start_date, {"env": "bare"})]
+            night_rally.StandardParams("nightly", start_date, {"env": "bare"})]
 
         cmd = night_rally.NightlyCommand(params, start_date)
 
