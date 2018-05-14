@@ -10,3 +10,8 @@
 - name: Free slab objects and pagecache
   command: echo 3 > /proc/sys/vm/drop_caches
   become: true
+
+# also request compaction to reduce memory fragmentation
+- name: Request memory compaction
+  command: echo 1 > /proc/sys/vm/compact_memory
+  become: true
