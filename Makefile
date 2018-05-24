@@ -1,4 +1,7 @@
 test:
-	python3 tests.py
+	python3 setup.py test
 
-.PHONY: test
+install:
+	@ ./install.sh
+
+.PHONY: test install

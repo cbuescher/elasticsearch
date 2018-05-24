@@ -1,7 +1,6 @@
 def create_client():
     import configparser
     import os
-    # non-standard! requires setup.py!!
     import elasticsearch
     import certifi
 

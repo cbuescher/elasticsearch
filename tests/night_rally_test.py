@@ -3,12 +3,7 @@ import unittest
 import errno
 
 from unittest import mock
-
-
-if __name__ == "__main__" and __package__ is None:
-    __package__ = "night_rally"
-
-import night_rally
+from night_rally import night_rally
 
 
 class RecordingSystemCall:
@@ -97,7 +92,7 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual("name:test", night_rally.join_nullables(None, "name:test"))
         self.assertEqual("", night_rally.join_nullables(None))
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_two_challenges_successfully(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -140,7 +135,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_two_tracks_successfully(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -188,7 +183,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_adhoc_benchmark(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -236,7 +231,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_release_benchmark_without_plugins(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -278,7 +273,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_release_benchmark_with_plugins(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -336,7 +331,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_release_benchmark_with_x_pack_module(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -390,7 +385,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_docker_benchmark(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -433,7 +428,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_continues_on_error(self, mocked_wait_until_port_is_free):
         self.maxDiff = None
         system_call = RecordingSystemCall(return_value=True)
@@ -483,7 +478,7 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-    @mock.patch('night_rally.wait_until_port_is_free', return_value=True)
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_with_telemetry(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
@@ -522,6 +517,3 @@ class NightRallyTests(unittest.TestCase):
             system_call.calls
         )
 
-
-if __name__ == '__main__':
-    unittest.main()

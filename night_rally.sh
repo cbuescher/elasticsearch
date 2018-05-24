@@ -116,6 +116,9 @@ then
       # this will fail if the user is offline
       git fetch origin --quiet
       git rebase origin/master --quiet
+
+      source install.sh
+
     # else
       # Uncommitted changes - don't upgrade, just run
     fi
@@ -146,7 +149,7 @@ then
     then
         pushd . >/dev/null 2>&1
 
-        cd ${NIGHT_RALLY_HOME}/fixtures/ansible
+        cd ${NIGHT_RALLY_HOME}/night_rally/fixtures/ansible
         ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE}"
         ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
 
@@ -174,8 +177,8 @@ fi
 # START NO FAIL
 #****************************
 set +e
-# Avoid failing before we transferred all results. Usually only a single benchmark trial run fails but lots of other succeed.
-python3 ${NIGHT_RALLY_HOME}/night_rally.py \
+# Avoid failing before cleanup. Usually only a single benchmark trial run fails but lots of other succeed.
+es-night-rally \
     --target-host=${TARGET_HOST} \
     --x-pack="${X_PACK}" \
     --effective-start-date="${EFFECTIVE_START_DATE}" \

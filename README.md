@@ -16,17 +16,21 @@ Night Rally is only tested on Mac OS X and Linux.
 
 ### Getting Started
 
-1. Clone this repo: `git clone git@github.com:elastic/night-rally.git`
-2. Ensure that all prerequisites of [Rally](https://github.com/elastic/rally) are properly setup. Hint. It is *not* required to install Rally manually. Just ensure that its prerequisites are installed.
+1. Ensure that all prerequisites of [Rally](https://github.com/elastic/rally) are properly setup. Hint. It is *not* required to install Rally manually. Just ensure that its prerequisites are installed.
+2. Clone this repo: `git clone git@github.com:elastic/night-rally.git`
+3. Create a virtualenv with `python3 -m venv .venv` and activate it with `./.venv/bin/activate`
+4. Run `make install`
 
 Now you can invoke Night Rally regularly with the startup script `night_rally.sh` e.g. via cron. The script can also self-update if invoked as `night_rally.sh --self-update`. 
 
 
 ### How do I ...?
 
+**Note**: Before you issue any command, activate the virtualenv with `./.venv/bin/activate`.
+
 #### Compare what has changed in Elasticsearch between two benchmarks
 
-Find the relevant revision One possibility is to run e.g. `python3 admin.py list races --environment=nightly --track=geonames --challenge=append-no-conflicts` which provides the following list:
+Find the relevant revision One possibility is to run e.g. `night-rally-admin list races --environment=nightly --track=geonames --challenge=append-no-conflicts` which provides the following list:
 
 ```
 Race Timestamp    Track     Challenge            Car           Version       Revision    User Tags
@@ -42,13 +46,13 @@ You can see the revisions `df07943` and `ff2164c`. If you want to see which comm
 
 #### Add an annotation
 
-To add an annotation, use the admin tool. First find the correct trial timestamp by issuing `python3 admin.py list races --environment=nightly`. You will need the trial timestamp later. Below are examples for common cases:
+To add an annotation, use the admin tool. First find the correct trial timestamp by issuing `night-rally-admin list races --environment=nightly`. You will need the trial timestamp later. Below are examples for common cases:
  
-* Add an annotation for all charts for a specific nightly benchmark trial: `python3 admin.py add annotation --environment=nightly --trial-timestamp=20170502T220213Z --message="Just a test annotation"`
-* Add an annotation for all charts of one track for a specific nightly benchmark trial: `python3 admin.py add annotation --environment=nightly --trial-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`
-* Add an annotation for a specific chart of one track for a specific nightly benchmark trial: `python3 admin.py add annotation --environment=nightly --trial-timestamp=20170502T220213Z --track=geonames --chart=io --message="Just a test annotation"`
+* Add an annotation for all charts for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --trial-timestamp=20170502T220213Z --message="Just a test annotation"`
+* Add an annotation for all charts of one track for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --trial-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`
+* Add an annotation for a specific chart of one track for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --trial-timestamp=20170502T220213Z --track=geonames --chart=io --message="Just a test annotation"`
 
-For more details, please issue `python3 admin.py add annotation --help`.
+For more details, please issue `night-rally-admin add annotation --help`.
 
 **Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
 
@@ -58,10 +62,10 @@ For more details, please issue `python3 admin.py add annotation --help`.
 
 If you have made an error you can also remove specific annotations by id.
 
-1. Issue `python3 admin.py list annotations --environment=nightly` and find the right annotation. Note that only the 20 most recent annotations are shown. You can show more, by specifying `--limit=NUMBER`. 
-2. Suppose the id of the annotation that we want to delete is `AVwM0jAA-dI09MVLDV39`. Then issue `python3 admin.py delete annotation --id=AVwM0jAA-dI09MVLDV39`.
+1. Issue `night-rally-admin list annotations --environment=nightly` and find the right annotation. Note that only the 20 most recent annotations are shown. You can show more, by specifying `--limit=NUMBER`. 
+2. Suppose the id of the annotation that we want to delete is `AVwM0jAA-dI09MVLDV39`. Then issue `night-rally-admin delete annotation --id=AVwM0jAA-dI09MVLDV39`.
 
-For more details, please issue `python3 admin.py delete annotation --help`.
+For more details, please issue `night-rally-admin delete annotation --help`.
 
 **Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
  

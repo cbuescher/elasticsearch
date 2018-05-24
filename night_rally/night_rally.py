@@ -501,7 +501,7 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
 #################################################
 
 def copy_results_for_release_comparison(effective_start_date, dry_run):
-    import client
+    from night_rally import client
     es = client.create_client()
 
     if not dry_run:
@@ -562,7 +562,7 @@ def deactivate_outdated_results(effective_start_date, environment, release, env_
     Sets all results for the same major release version, environment and tag to active=False except for the records with the provided
     effective start date.
     """
-    import client
+    from night_rally import client
     es = client.create_client()
     ts = to_iso8601_short(effective_start_date)
     logger.info("Activating results only for [%s] on [%s] in environment [%s] and tag [%s]." % (release, ts, environment, env_tag))
@@ -622,7 +622,7 @@ def deactivate_outdated_results(effective_start_date, environment, release, env_
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog="night_rally", description="Nightly Elasticsearch benchmarks")
+    parser = argparse.ArgumentParser(prog="es-night-rally", description="Nightly Elasticsearch benchmarks")
 
     parser.add_argument(
         "--effective-start-date",

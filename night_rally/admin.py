@@ -1,8 +1,7 @@
 import os
 import sys
 import argparse
-import client
-# non-standard! requires setup.py!!
+from night_rally import client
 import tabulate
 
 
