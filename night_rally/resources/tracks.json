@@ -152,6 +152,15 @@
         "node-count": 3
       },
       {
+        "name": "pmc-nio-4g-3nodes",
+        "label": "nio-4g",
+        "challenge": "append-no-conflicts-index-only",
+        "track-params": "number_of_replicas:1",
+        "car": "4gheap,unpooled",
+        "plugins": "transport-nio:transport+http",
+        "node-count": 3
+      },
+      {
         "name": "pmc-appendsorted-4g-1node",
         "label": "add-sorted-4g",
         "challenge": "append-sorted-no-conflicts",

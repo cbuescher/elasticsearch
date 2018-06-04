@@ -386,6 +386,89 @@ class NightRallyTests(unittest.TestCase):
         )
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
+    def test_run_release_benchmark_with_transport_nio(self, mocked_wait_until_port_is_free):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "combinations": [
+                    {
+                        "name": "geonames-defaults",
+                        "challenge": "append-no-conflicts",
+                        "car": "defaults",
+                        "plugins": "transport-nio:transport+http"
+                    }
+                ]
+            }
+        ]
+        start_date = datetime.datetime(2016, 1, 1)
+        params = [night_rally.StandardParams("release", start_date, {"env": "bare"})]
+        cmd = night_rally.ReleaseCommand(params, x_pack_config=None, distribution_version="7.0.0")
+
+        night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        self.assertEqual(1, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
+                "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
+                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --elasticsearch-plugins=\"transport-nio:transport+http\" "
+                "--distribution-version=\"7.0.0\" --pipeline=\"from-distribution\"",
+            ]
+            ,
+            system_call.calls
+        )
+
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
+    def test_do_not_run_release_benchmark_with_transport_nio_and_x_pack(self, mocked_wait_until_port_is_free):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "combinations": [
+                    {
+                        "name": "geonames-defaults",
+                        "challenge": "append-no-conflicts",
+                        "car": "defaults",
+                        "plugins": "transport-nio:transport+http"
+                    }
+                ]
+            }
+        ]
+        start_date = datetime.datetime(2016, 1, 1)
+        params = [night_rally.StandardParams("release", start_date, {"env": "x-pack"})]
+        cmd = night_rally.ReleaseCommand(params, ["security", "monitoring"], "7.0.0")
+
+        night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        self.assertEqual(0, len(system_call.calls))
+
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
+    def test_do_not_run_release_benchmark_with_transport_nio_on_old_version(self, mocked_wait_until_port_is_free):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "combinations": [
+                    {
+                        "name": "geonames-defaults",
+                        "challenge": "append-no-conflicts",
+                        "car": "defaults",
+                        "plugins": "transport-nio:transport+http"
+                    }
+                ]
+            }
+        ]
+        start_date = datetime.datetime(2016, 1, 1)
+        params = [night_rally.StandardParams("release", start_date, {"env": "bare"})]
+        # 6.2.0 does not have transport-nio available
+        cmd = night_rally.ReleaseCommand(params, x_pack_config=None, distribution_version="6.2.0")
+
+        night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        self.assertEqual(0, len(system_call.calls))
+
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_docker_benchmark(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 

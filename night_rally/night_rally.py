@@ -214,6 +214,7 @@ class AdHocCommand(SourceBasedCommand):
 class ReleaseCommand(BaseCommand):
     def __init__(self, params, x_pack_config, distribution_version):
         self.distribution_version = distribution_version
+        self.x_pack_config = x_pack_config
         self.params = ParamsFormatter(params=params + [
             XPackParams(distribution_version, x_pack_config),
             ConstantParam("distribution-version", distribution_version),
@@ -223,6 +224,12 @@ class ReleaseCommand(BaseCommand):
     def runnable(self, race_config):
         # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
         if race_config.car == "1gheap":
+            return False
+        # transport-nio has been introduced in Elasticsearch 7.0.
+        if int(self.distribution_version[0]) < 7 and "transport-nio" in race_config.plugins:
+            return False
+        # Currently transport-nio does not support HTTPS
+        if self.x_pack_config and "transport-nio" in race_config.plugins:
             return False
         # Do not run with special x-pack configs. We run either the whole suite with or without x-pack.
         if race_config.x_pack:
@@ -251,6 +258,9 @@ class DockerCommand(BaseCommand):
             return False
         # we are not interested in those metrics for Docker
         if race_config.car in ["verbose_iw"]:
+            return False
+        # transport-nio has been introduced in Elasticsearch 7.0.
+        if int(self.distribution_version[0]) < 7 and "transport-nio" in race_config.plugins:
             return False
         # no plugin installs on Docker
         if race_config.x_pack:
@@ -346,6 +356,7 @@ class StandardParams:
         }
         add_if_present(params, "car-params", race_config.car_params)
         add_if_present(params, "track-params", race_config.track_params)
+        add_if_present(params, "elasticsearch-plugins", race_config.plugins)
         return params
 
     def format_tag(self, additional_tags=None):
