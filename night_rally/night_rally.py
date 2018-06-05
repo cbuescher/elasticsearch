@@ -188,7 +188,11 @@ class SourceBasedCommand(BaseCommand):
                 # as we clean the other distribution (implicitly) by building now, we need to rebuild next time again
                 self.oss_dist_pipeline = "from-sources-complete"
             else:
-                pipeline = self.oss_dist_pipeline
+                if race_config.plugins:
+                    # force rebuild if we run with plugins. They might have not been built yet.
+                    pipeline = "from-sources-complete"
+                else:
+                    pipeline = self.oss_dist_pipeline
                 self.oss_dist_pipeline = "from-sources-skip-build"
                 self.default_dist_pipeline = "from-sources-complete"
             return {"pipeline": pipeline}
