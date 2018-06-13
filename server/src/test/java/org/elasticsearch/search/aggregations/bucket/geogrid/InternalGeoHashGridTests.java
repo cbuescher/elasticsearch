@@ -18,20 +18,27 @@
  */
 package org.elasticsearch.search.aggregations.bucket.geogrid;
 
+import com.carrotsearch.randomizedtesting.annotations.Repeat;
+
 import org.apache.lucene.index.IndexWriter;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.io.stream.Writeable;
 import org.elasticsearch.search.aggregations.InternalAggregations;
-import org.elasticsearch.test.InternalMultiBucketAggregationTestCase;
 import org.elasticsearch.search.aggregations.ParsedMultiBucketAggregation;
+import org.elasticsearch.search.aggregations.ParsedMultiBucketAggregation.ParsedBucket;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.geogrid.InternalGeoHashGrid.Bucket;
 import org.elasticsearch.search.aggregations.pipeline.PipelineAggregator;
+import org.elasticsearch.test.InternalMultiBucketAggregationTestCase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.instanceOf;
+
+@Repeat(iterations=500)
 public class InternalGeoHashGridTests extends InternalMultiBucketAggregationTestCase<InternalGeoHashGrid> {
 
     @Override
@@ -108,6 +115,16 @@ public class InternalGeoHashGridTests extends InternalMultiBucketAggregationTest
     @Override
     protected Class<? extends ParsedMultiBucketAggregation> implementationClass() {
         return ParsedGeoHashGrid.class;
+    }
+
+    @Override
+    protected void assertBucket(MultiBucketsAggregation.Bucket expected, MultiBucketsAggregation.Bucket actual, boolean checkOrder) {
+        super.assertBucket(expected, actual, checkOrder);
+        assertThat(expected, instanceOf(InternalGeoHashGrid.Bucket.class));
+        assertThat(actual, instanceOf(ParsedBucket.class));
+        Object expectedKey = ((InternalGeoHashGrid.Bucket) expected).getKey();
+        Object actualKey = ((ParsedBucket) actual).getKey();
+        assertEquals(expectedKey, actualKey);
     }
 
     @Override
