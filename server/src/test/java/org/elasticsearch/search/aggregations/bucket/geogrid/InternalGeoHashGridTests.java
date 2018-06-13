@@ -21,7 +21,6 @@ package org.elasticsearch.search.aggregations.bucket.geogrid;
 import com.carrotsearch.randomizedtesting.annotations.Repeat;
 
 import org.apache.lucene.index.IndexWriter;
-import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.io.stream.Writeable;
 import org.elasticsearch.search.aggregations.InternalAggregations;
 import org.elasticsearch.search.aggregations.ParsedMultiBucketAggregation;
@@ -38,7 +37,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.instanceOf;
 
-@Repeat(iterations=500)
+@Repeat(iterations=10)
 public class InternalGeoHashGridTests extends InternalMultiBucketAggregationTestCase<InternalGeoHashGrid> {
 
     @Override
@@ -62,8 +61,9 @@ public class InternalGeoHashGridTests extends InternalMultiBucketAggregationTest
             double latitude = randomDoubleBetween(-90.0, 90.0, false);
             double longitude = randomDoubleBetween(-180.0, 180.0, false);
 
-            long geoHashAsLong = GeoHashUtils.longEncode(longitude, latitude, 4);
-            buckets.add(new InternalGeoHashGrid.Bucket(GeoHashType.GEOHASH, geoHashAsLong, randomInt(IndexWriter.MAX_DOCS), aggregations));
+            GeoHashType hashType = randomFrom(GeoHashType.values());
+            long geoHashAsLong = hashType.getHandler().calculateHash(longitude, latitude, 4);
+            buckets.add(new InternalGeoHashGrid.Bucket(hashType, geoHashAsLong, randomInt(IndexWriter.MAX_DOCS), aggregations));
         }
         return new InternalGeoHashGrid(name, size, buckets, pipelineAggregators, metaData);
     }
