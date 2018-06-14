@@ -342,9 +342,10 @@ class StandardParams:
     """
     Extracts all parameters that are needed for all Rally invocations.
     """
-    def __init__(self, configuration_name, effective_start_date, user_tag):
+    def __init__(self, configuration_name, effective_start_date, runtime_jdk, user_tag):
         self.configuration_name = configuration_name
         self.effective_start_date = effective_start_date
+        self.runtime_jdk = runtime_jdk
         self.user_tag = user_tag
 
     def __call__(self, race_config):
@@ -358,6 +359,7 @@ class StandardParams:
             "car": [race_config.car],
             "user-tag": self.format_tag(additional_tags={"name": race_config.name})
         }
+        add_if_present(params, "runtime-jdk", self.runtime_jdk)
         add_if_present(params, "car-params", race_config.car_params)
         add_if_present(params, "track-params", race_config.track_params)
         add_if_present(params, "elasticsearch-plugins", race_config.plugins)
@@ -681,6 +683,10 @@ def parse_args():
         help="Specify release string to use for comparison reports",
         default="master")
     parser.add_argument(
+        "--runtime-jdk",
+        help="The major version of the runtime JDK to use.",
+        default=None)
+    parser.add_argument(
         "--tracks",
         help="Path to the tracks.json file that contains the tracks to run",
         default=None)
@@ -737,7 +743,7 @@ def main():
         params.append(TelemetryParams(args.telemetry, args.telemetry_params))
 
     if release_mode:
-        params.append(StandardParams(env_name, start_date, release_tag))
+        params.append(StandardParams(env_name, start_date, args.runtime_jdk, release_tag))
         if docker_benchmark:
             if x_pack:
                 raise RuntimeError("User specified x-pack configuration [%s] but this is not supported for Docker benchmarks." % x_pack)
@@ -749,11 +755,11 @@ def main():
             command = ReleaseCommand(params, x_pack, release)
     elif adhoc_mode:
         logger.info("Running adhoc benchmarks for revision [%s] against %s." % (args.revision, target_hosts))
-        params.append(StandardParams(env_name, start_date, release_tag))
+        params.append(StandardParams(env_name, start_date, args.runtime_jdk, release_tag))
         command = AdHocCommand(params, args.revision)
     else:
         logger.info("Running nightly benchmarks against %s." % target_hosts)
-        params.append(StandardParams(env_name, start_date, release_tag))
+        params.append(StandardParams(env_name, start_date, args.runtime_jdk, release_tag))
         command = NightlyCommand(params, start_date)
 
     rally_failure = run_rally(tracks, target_hosts, command, args.dry_run, args.skip_ansible)

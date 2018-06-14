@@ -115,7 +115,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("nightly", start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("nightly", start_date, 8, {"env": "bare"})]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -123,12 +123,13 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --car-params=\"verbose_iw_logging_enabled:true\" "
-                "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"",
+                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" "
+                "--car-params=\"verbose_iw_logging_enabled:true\" --pipeline=\"from-sources-complete\" "
+                "--revision=\"@2016-01-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:bare,name:geonames-4g\" --pipeline=\"from-sources-skip-build\" "
+                "--car=\"4gheap\" --user-tag=\"env:bare,name:geonames-4g\" --runtime-jdk=\"8\" --pipeline=\"from-sources-skip-build\" "
                 "--revision=\"@2016-01-01T00:00:00Z\""
             ]
             ,
@@ -163,7 +164,7 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 10, 1)
-        params = [night_rally.StandardParams("nightly", start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("nightly", start_date, 8, {"env": "bare"})]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -171,12 +172,12 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --pipeline=\"from-sources-complete\" "
-                "--revision=\"@2016-10-01T00:00:00Z\"",
+                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"percolator\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\" --pipeline=\"from-sources-skip-build\" "
+                "--car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\" --runtime-jdk=\"8\" --pipeline=\"from-sources-skip-build\" "
                 "--revision=\"@2016-10-01T00:00:00Z\""
             ]
             ,
@@ -211,7 +212,7 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 10, 1)
-        params = [night_rally.StandardParams("lucene-7", start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("lucene-7", start_date, 8, {"env": "bare"})]
         cmd = night_rally.AdHocCommand(params, "66202dc")
 
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -220,12 +221,13 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"lucene-7\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --pipeline=\"from-sources-complete\" "
-                "--revision=\"66202dc\"",
+                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"66202dc\"",
 
                 "rally --skip-update --configuration-name=\"lucene-7\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"percolator\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\" --pipeline=\"from-sources-skip-build\" --revision=\"66202dc\""
+                "--car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-skip-build\" --revision=\"66202dc\""
             ]
             ,
             system_call.calls
@@ -253,7 +255,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("release", start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("release", start_date, 8, {"env": "bare"})]
         cmd = night_rally.ReleaseCommand(params, None, "5.3.0")
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -261,12 +263,12 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --distribution-version=\"5.3.0\" "
+                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" --distribution-version=\"5.3.0\" "
                 "--pipeline=\"from-distribution\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:bare,name:geonames-4g\" --distribution-version=\"5.3.0\" "
+                "--car=\"4gheap\" --user-tag=\"env:bare,name:geonames-4g\" --runtime-jdk=\"8\" --distribution-version=\"5.3.0\" "
                 "--pipeline=\"from-distribution\""
             ]
             ,
@@ -306,7 +308,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("release", start_date, {"env": "x-pack"})]
+        params = [night_rally.StandardParams("release", start_date, 8, {"env": "x-pack"})]
         cmd = night_rally.ReleaseCommand(params, ["security", "monitoring"], "5.3.0")
 
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -315,15 +317,15 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:x-pack,name:geonames-defaults,x-pack:true\" --track-params=\"bulk_size:3000\" "
-                "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
+                "--car=\"defaults\" --user-tag=\"env:x-pack,name:geonames-defaults,x-pack:true\" --runtime-jdk=\"8\" "
+                "--track-params=\"bulk_size:3000\" --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" --elasticsearch-plugins=\"x-pack:security,monitoring\" "
                 "--distribution-version=\"5.3.0\" --pipeline=\"from-distribution\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:x-pack,name:geonames-4g,x-pack:true\" --track-params=\"bulk_size:2000\" "
-                "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
+                "--car=\"4gheap\" --user-tag=\"env:x-pack,name:geonames-4g,x-pack:true\" --runtime-jdk=\"8\" "
+                "--track-params=\"bulk_size:2000\" --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" --elasticsearch-plugins=\"x-pack:security,monitoring\" "
                 "--distribution-version=\"5.3.0\" --pipeline=\"from-distribution\"",
             ]
@@ -361,7 +363,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("release", start_date, {"env": "x-pack"})]
+        params = [night_rally.StandardParams("release", start_date, 8, {"env": "x-pack"})]
         # 6.3.0 is the first version to include x-pack as a module
         cmd = night_rally.ReleaseCommand(params, ["security", "monitoring"], "6.3.0")
 
@@ -372,13 +374,13 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"defaults,x-pack-security,x-pack-monitoring\" --user-tag=\"env:x-pack,name:geonames-defaults,x-pack:true\" "
-                "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
+                "--runtime-jdk=\"8\" --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" --distribution-version=\"6.3.0\" --pipeline=\"from-distribution\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"4gheap,x-pack-security,x-pack-monitoring\" --user-tag=\"env:x-pack,name:geonames-4g,x-pack:true\" "
-                "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
+                "--runtime-jdk=\"8\" --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" --distribution-version=\"6.3.0\" --pipeline=\"from-distribution\"",
             ]
             ,
@@ -403,7 +405,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("release", start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("release", start_date, 8, {"env": "bare"})]
         cmd = night_rally.ReleaseCommand(params, x_pack_config=None, distribution_version="7.0.0")
 
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -412,8 +414,9 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --elasticsearch-plugins=\"transport-nio:transport+http\" "
-                "--distribution-version=\"7.0.0\" --pipeline=\"from-distribution\"",
+                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" "
+                "--elasticsearch-plugins=\"transport-nio:transport+http\" --distribution-version=\"7.0.0\" "
+                "--pipeline=\"from-distribution\""
             ]
             ,
             system_call.calls
@@ -437,7 +440,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("release", start_date, {"env": "x-pack"})]
+        params = [night_rally.StandardParams("release", start_date, 8, {"env": "x-pack"})]
         cmd = night_rally.ReleaseCommand(params, ["security", "monitoring"], "7.0.0")
 
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -461,7 +464,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("release", start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("release", start_date, 8, {"env": "bare"})]
         # 6.2.0 does not have transport-nio available
         cmd = night_rally.ReleaseCommand(params, x_pack_config=None, distribution_version="6.2.0")
 
@@ -490,7 +493,7 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("release", start_date, {"env": "docker"})]
+        params = [night_rally.StandardParams("release", start_date, 8, {"env": "docker"})]
         cmd = night_rally.DockerCommand(params, "5.3.0")
 
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -499,12 +502,12 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:docker,name:geonames-defaults\" "
+                "--car=\"defaults\" --user-tag=\"env:docker,name:geonames-defaults\" --runtime-jdk=\"8\" "
                 "--distribution-version=\"5.3.0\" --pipeline=\"docker\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:docker,name:geonames-4g\" "
+                "--car=\"4gheap\" --user-tag=\"env:docker,name:geonames-4g\" --runtime-jdk=\"8\" "
                 "--distribution-version=\"5.3.0\" --pipeline=\"docker\""
             ]
             ,
@@ -540,7 +543,7 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 10, 1)
-        params = [night_rally.StandardParams("nightly", start_date, {"env": "bare"})]
+        params = [night_rally.StandardParams("nightly", start_date, 8, {"env": "bare"})]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
 
@@ -549,13 +552,13 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --pipeline=\"from-sources-complete\" "
-                "--revision=\"@2016-10-01T00:00:00Z\"",
+                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"percolator\" --challenge=\"append-no-conflicts\" "
-                "--car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\" --pipeline=\"from-sources-skip-build\" "
-                "--revision=\"@2016-10-01T00:00:00Z\""
+                "--car=\"4gheap\" --user-tag=\"env:bare,name:percolator-4g\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-10-01T00:00:00Z\""
             ]
             ,
             system_call.calls
@@ -583,7 +586,7 @@ class NightRallyTests(unittest.TestCase):
                 telemetry="jfr,gc,jit",
                 telemetry_params="recording-template:profile"
             ),
-            night_rally.StandardParams("nightly", start_date, {"env": "bare"})]
+            night_rally.StandardParams("nightly", start_date, 8, {"env": "bare"})]
 
         cmd = night_rally.NightlyCommand(params, start_date)
 
@@ -594,7 +597,7 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --telemetry=\"jfr,gc,jit\" --telemetry-params=\"recording-template:profile\" "
                 "--configuration-name=\"nightly\" --quiet --target-host=\"localhost\" --effective-start-date=\"2016-01-01 00:00:00\" "
                 "--track=\"geonames\" --challenge=\"append-no-conflicts\" --car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\""
-                " --pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\""
+                " --runtime-jdk=\"8\" --pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\""
             ]
             ,
             system_call.calls

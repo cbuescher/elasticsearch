@@ -37,6 +37,7 @@ MODE="nightly"
 RELEASE="master"
 # only needed for ad-hoc benchmarks
 REVISION="latest"
+RUNTIME_JDK="8"
 TARGET_HOST="localhost:9200"
 X_PACK=""
 TRACKS_FILE=""
@@ -69,6 +70,10 @@ case ${i} in
     ;;
     --revision=*)
     REVISION="${i#*=}"
+    shift # past argument=value
+    ;;
+    --runtime-jdk=*)
+    RUNTIME_JDK="${i#*=}"
     shift # past argument=value
     ;;
     --release=*)
@@ -186,6 +191,7 @@ es-night-rally \
     ${NIGHT_RALLY_DRY_RUN} \
     ${SKIP_ANSIBLE_PARAM} \
     --fixtures="${FIXTURES}" \
+    --runtime-jdk="${RUNTIME_JDK}" \
     --revision="${REVISION}" \
     --release="${RELEASE}" \
     --tracks="${TRACKS_FILE}" \
