@@ -13,7 +13,7 @@ remote.repo.url = https://github.com/elastic/elasticsearch.git
 elasticsearch.src.subdir = elasticsearch
 
 [benchmarks]
-local.dataset.cache = ${node:root.dir}/data
+local.dataset.cache = /var/lib/jenkins/.rally/benchmarks/data
 
 [reporting]
 datastore.type = elasticsearch
