@@ -24,5 +24,11 @@
   command: ./rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['elasticsearch-ci-slaves-macrobenchmarks'][0] }}
   args:
     chdir: /var/lib/jenkins/bin
+  environment:
+    JAVA7_HOME: /var/lib/jenkins/.java/java7
+    JAVA8_HOME: /var/lib/jenkins/.java/java8
+    JAVA9_HOME: /var/lib/jenkins/.java/java9
+    JAVA10_HOME: /var/lib/jenkins/.java/java10
+    JAVA11_HOME: /var/lib/jenkins/.java/java11
   become: true
   become_user: jenkins
