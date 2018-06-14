@@ -1,5 +1,5 @@
 [meta]
-config.version = 16
+config.version = 17
 
 [node]
 root.dir = /var/lib/jenkins/.rally/benchmarks
@@ -11,10 +11,6 @@ env.name = {{rally_environment}}
 [source]
 remote.repo.url = https://github.com/elastic/elasticsearch.git
 elasticsearch.src.subdir = elasticsearch
-
-[runtime]
-java.home = /var/lib/jenkins/.java/java8
-java10.home = /var/lib/jenkins/.java/openjdk10
 
 [benchmarks]
 local.dataset.cache = ${node:root.dir}/data
