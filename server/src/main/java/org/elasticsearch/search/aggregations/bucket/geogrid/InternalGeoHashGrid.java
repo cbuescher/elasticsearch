@@ -19,11 +19,13 @@
 package org.elasticsearch.search.aggregations.bucket.geogrid;
 
 import org.apache.lucene.util.PriorityQueue;
+import org.elasticsearch.common.ParseField;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.util.LongObjectPagedHashMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.rest.action.search.RestSearchAction;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.InternalAggregation;
 import org.elasticsearch.search.aggregations.InternalAggregations;
@@ -154,6 +156,8 @@ public class InternalGeoHashGrid extends InternalMultiBucketAggregation<Internal
 
     }
 
+    static final ParseField HASH_TYPE_FIELD = new ParseField("hash_type");
+
     private final int requiredSize;
     private final List<Bucket> buckets;
 
@@ -238,6 +242,17 @@ public class InternalGeoHashGrid extends InternalMultiBucketAggregation<Internal
 
     @Override
     public XContentBuilder doXContentBody(XContentBuilder builder, Params params) throws IOException {
+        // not sure we should re-use RestSearchAction.TYPED_KEYS_PARAM here, but we already use it in
+        // suggestions and aggregations and it should be switched on by every high level client reqeust
+        if (params.paramAsBoolean(RestSearchAction.TYPED_KEYS_PARAM, false)) {
+            if (buckets.isEmpty() == false) {
+                // TODO this assume all types in the buckets are same, but we should really keep this
+                // info in the aggregation itself
+                // TODO the GeoHashType needs a better method to get some sort of ID for it, name() or toString()
+                // seem to brittle for me tbh
+                builder.field(HASH_TYPE_FIELD.getPreferredName(), buckets.get(0).type.toString());
+            }
+        }
         builder.startArray(CommonFields.BUCKETS.getPreferredName());
         for (Bucket bucket : buckets) {
             bucket.toXContent(builder, params);

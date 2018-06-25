@@ -30,6 +30,8 @@ import java.util.List;
 
 public class ParsedGeoHashGrid extends ParsedMultiBucketAggregation<ParsedGeoHashGrid.ParsedBucket> implements GeoHashGrid {
 
+    private GeoHashType type = GeoHashType.DEFAULT;
+
     @Override
     public String getType() {
         return GeoGridAggregationBuilder.NAME;
@@ -40,25 +42,40 @@ public class ParsedGeoHashGrid extends ParsedMultiBucketAggregation<ParsedGeoHas
         return buckets;
     }
 
+    private void setType(String type) {
+        // TODO something less brittle than enum#valueOf() needed I think
+        this.type = GeoHashType.forString(type);
+    }
+
     private static ObjectParser<ParsedGeoHashGrid, Void> PARSER =
             new ObjectParser<>(ParsedGeoHashGrid.class.getSimpleName(), true, ParsedGeoHashGrid::new);
     static {
         declareMultiBucketAggregationFields(PARSER, ParsedBucket::fromXContent, ParsedBucket::fromXContent);
+        PARSER.declareString(ParsedGeoHashGrid::setType, InternalGeoHashGrid.HASH_TYPE_FIELD);
     }
 
     public static ParsedGeoHashGrid fromXContent(XContentParser parser, String name) throws IOException {
         ParsedGeoHashGrid aggregation = PARSER.parse(parser, null);
         aggregation.setName(name);
+        // transfer hash type info to buckets after parsing, this is horrible IMHO but I couldn't make it work
+        // otherwise quickly
+        // TODO don't do it like this!
+        for (ParsedBucket b : aggregation.buckets) {
+            b.hashType = aggregation.type;
+        }
         return aggregation;
     }
 
     public static class ParsedBucket extends ParsedMultiBucketAggregation.ParsedBucket implements GeoHashGrid.Bucket {
 
         private String geohashAsString;
+        private GeoHashType hashType = GeoHashType.DEFAULT;
 
         @Override
         public GeoPoint getKey() {
-            return GeoPoint.fromGeohash(geohashAsString);
+            // TODO in order for this to work, the GeoHashTypeProvider needs to convert back from String -> GeoPoint
+            // return hashType.getHandler().hashStringAsGeoPoint(geohashAsString);
+            return null;
         }
 
         @Override
