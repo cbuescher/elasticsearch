@@ -5,7 +5,8 @@ master_ip = '192.168.180.10'
 
 benchmark_boxes = %w(
 coordinator
-target1
+target01
+memorybenchmark01
 )
 
 nodes = benchmark_boxes.collect do |nodename|

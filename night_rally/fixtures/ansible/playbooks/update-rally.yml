@@ -4,7 +4,7 @@
 # ================================================================
 # First the Rally master (coordinating node which is running on the (only) Jenkins slave node, then the Rally slaves (running
 # on the target machines)
-  hosts: elasticsearch-ci-slaves-macrobenchmarks, macrobenchmarks-targets
+  hosts: coordinating-nodes, target-hosts
   gather_facts: true
   roles:
     - { role: rally-update, tags: rally-update }

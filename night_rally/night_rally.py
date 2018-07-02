@@ -11,8 +11,9 @@ import time
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
 RALLY_BINARY = "rally --skip-update"
-
 VERSION_PATTERN = re.compile("^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$")
+# The port that Elasticsearch is configured to use for rest requests
+TARGET_PORT = 39200
 
 # console logging
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s][%(levelname)s] %(message)s")
@@ -472,6 +473,8 @@ class RaceConfig:
 
 
 def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=False, system=os.system):
+    # Build list of host:port pairs for target hosts
+    available_hosts_with_ports = list(map(lambda x: "{}:{}".format(x, TARGET_PORT), available_hosts))
     rally_failure = False
     if dry_run:
         runner = logger.info
@@ -480,7 +483,7 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
     for track in tracks:
         track_name = track["track"]
         for combination in track["combinations"]:
-            race_cfg = RaceConfig(track_name, combination, available_hosts)
+            race_cfg = RaceConfig(track_name, combination, available_hosts_with_ports)
 
             if race_cfg.target_hosts:
                 if command.runnable(race_cfg):
@@ -495,7 +498,7 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
                     logger.info("Running Rally on [%s]", race_cfg)
                     start = time.perf_counter()
                     try:
-                        wait_until_port_is_free(available_hosts)
+                        wait_until_port_is_free(available_hosts_with_ports)
                         if runner(command.command_line(race_cfg)):
                             rally_failure = True
                             logger.error("Failed to run [%s]. Please check the logs.", race_cfg)

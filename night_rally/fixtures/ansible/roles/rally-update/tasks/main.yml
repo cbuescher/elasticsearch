@@ -21,7 +21,7 @@
 
 
 - name: start rallyd
-  command: ./rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['elasticsearch-ci-slaves-macrobenchmarks'][0] }}
+  command: ./rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating-nodes'][0] }}
   args:
     chdir: /var/lib/jenkins/bin
   environment:

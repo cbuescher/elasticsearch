@@ -176,6 +176,7 @@ def update_the_cache():
             _group: list(ssh_config.keys()),
             'elasticsearch-ci-slaves-macrobenchmarks': [i for i in all_hostnames if 'coordinator' in i],
             'macrobenchmarks-targets': [i for i in all_hostnames if 'target' in i],
+            'memorybenchmarks': [i for i in all_hostnames if 'memorybenchmark' in i],
             '_meta': meta
         }, **vagrant_groups(ssh_config)))
     cache = open(cache_file, 'w')
