@@ -158,7 +158,7 @@
         "name": "pmc-append-4g-3nodes",
         "label": "add-4g-3nodes",
         "charts": ["indexing"],
-        "challenge": "append-no-conflicts-index-only",
+        "challenge": "append-no-conflicts",
         "track-params": "number_of_replicas:1",
         "car": "4gheap",
         "node-count": 3
