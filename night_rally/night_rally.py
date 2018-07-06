@@ -424,42 +424,42 @@ class XPackParams:
 
 
 class RaceConfig:
-    def __init__(self, track_name, combination, available_hosts):
+    def __init__(self, track_name, configuration, available_hosts):
         self.track = track_name
-        self.combination = combination
+        self.configuration = configuration
         self.available_hosts = available_hosts
 
     @property
     def name(self):
-        return self.combination["name"]
+        return self.configuration["name"]
 
     @property
     def node_count(self):
-        return self.combination.get("node-count", 1)
+        return self.configuration.get("node-count", 1)
 
     @property
     def challenge(self):
-        return self.combination["challenge"]
+        return self.configuration["challenge"]
 
     @property
     def car(self):
-        return self.combination["car"]
+        return self.configuration["car"]
 
     @property
     def car_params(self):
-        return self.combination.get("car-params")
+        return self.configuration.get("car-params")
 
     @property
     def plugins(self):
-        return self.combination.get("plugins", "")
+        return self.configuration.get("plugins", "")
 
     @property
     def track_params(self):
-        return self.combination.get("track-params")
+        return self.configuration.get("track-params")
 
     @property
     def x_pack(self):
-        return self.combination.get("x-pack")
+        return self.configuration.get("x-pack")
 
     @property
     def target_hosts(self):
@@ -482,8 +482,8 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
         runner = system
     for track in tracks:
         track_name = track["track"]
-        for combination in track["combinations"]:
-            race_cfg = RaceConfig(track_name, combination, available_hosts_with_ports)
+        for configuration in track["configurations"]:
+            race_cfg = RaceConfig(track_name, configuration, available_hosts_with_ports)
 
             if race_cfg.target_hosts:
                 if command.runnable(race_cfg):

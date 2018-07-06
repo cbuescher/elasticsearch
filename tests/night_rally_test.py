@@ -99,7 +99,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -143,7 +143,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -153,7 +153,7 @@ class NightRallyTests(unittest.TestCase):
             },
             {
                 "track": "percolator",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "percolator-4g",
                         "challenge": "append-no-conflicts",
@@ -191,7 +191,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -201,7 +201,7 @@ class NightRallyTests(unittest.TestCase):
             },
             {
                 "track": "percolator",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "percolator-4g",
                         "challenge": "append-no-conflicts",
@@ -240,7 +240,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -282,7 +282,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -340,7 +340,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -394,7 +394,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -429,7 +429,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -453,7 +453,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -478,7 +478,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -522,7 +522,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
@@ -532,7 +532,7 @@ class NightRallyTests(unittest.TestCase):
             },
             {
                 "track": "percolator",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "percolator-4g",
                         "challenge": "append-no-conflicts",
@@ -571,7 +571,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
-                "combinations": [
+                "configurations": [
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
