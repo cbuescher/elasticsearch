@@ -277,6 +277,14 @@
         "charts": ["indexing"],
         "challenge": "append-sorted-no-conflicts",
         "car": "4gheap"
+      },
+      {
+        "name": "http_logs-grok-no-src-1node",
+        "label": "no-src-4g-grok",
+        "charts": ["indexing"],
+        "challenge": "append-index-only-with-ingest-pipeline",
+        "track-params": "source_enabled:false,ingest_pipeline:'grok'",
+        "car": "4gheap"
       }
     ]
   },
