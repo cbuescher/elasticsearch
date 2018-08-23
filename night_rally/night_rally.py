@@ -242,6 +242,9 @@ class ReleaseCommand(BaseCommand):
         # noaa does not work on older versions. This should actually be specified in track.json and not here...
         if int(self.distribution_version[0]) < 5 and race_config.track == "noaa":
             return False
+        # ingest pipelines were added in 5.0
+        if int(self.distribution_version[0]) < 5 and "ingest-pipeline" in race_config.challenge:
+            return False
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if int(self.distribution_version[0]) < 6 and "sorted" in race_config.challenge:
             return False
