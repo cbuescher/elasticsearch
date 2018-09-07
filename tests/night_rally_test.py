@@ -472,7 +472,7 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(0, len(system_call.calls))
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_docker_benchmark(self, mocked_wait_until_port_is_free):
+    def test_run_docker_5x_benchmark(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
         tracks = [
@@ -494,7 +494,7 @@ class NightRallyTests(unittest.TestCase):
         ]
         start_date = datetime.datetime(2016, 1, 1)
         params = [night_rally.StandardParams("release", start_date, 8, {"env": "docker"})]
-        cmd = night_rally.DockerCommand(params, "5.3.0")
+        cmd = night_rally.DockerCommand(params, "5.6.0")
 
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -503,12 +503,59 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"defaults\" --user-tag=\"env:docker,name:geonames-defaults\" --runtime-jdk=\"8\" "
-                "--distribution-version=\"5.3.0\" --pipeline=\"docker\"",
+                "--distribution-version=\"5.6.0\" --pipeline=\"docker\" --car-params=\"{\\\"additional_cluster_settings\\\": "
+                "{\\\"xpack.security.enabled\\\": \\\"false\\\", \\\"xpack.ml.enabled\\\": \\\"false\\\", "
+                "\\\"xpack.monitoring.enabled\\\": \\\"false\\\", \\\"xpack.watcher.enabled\\\": \\\"false\\\"}}\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"4gheap\" --user-tag=\"env:docker,name:geonames-4g\" --runtime-jdk=\"8\" "
-                "--distribution-version=\"5.3.0\" --pipeline=\"docker\""
+                "--distribution-version=\"5.6.0\" --pipeline=\"docker\" --car-params=\"{\\\"additional_cluster_settings\\\": "
+                "{\\\"xpack.security.enabled\\\": \\\"false\\\", \\\"xpack.ml.enabled\\\": \\\"false\\\", "
+                "\\\"xpack.monitoring.enabled\\\": \\\"false\\\", \\\"xpack.watcher.enabled\\\": \\\"false\\\"}}\""
+            ]
+            ,
+            system_call.calls
+        )
+
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
+    def test_run_docker_6x_benchmark(self, mocked_wait_until_port_is_free):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "configurations": [
+                    {
+                        "name": "geonames-defaults",
+                        "challenge": "append-no-conflicts",
+                        "car": "defaults"
+                    },
+                    {
+                        "name": "geonames-4g",
+                        "challenge": "append-no-conflicts",
+                        "car": "4gheap"
+                    }
+                ]
+            }
+        ]
+        start_date = datetime.datetime(2016, 1, 1)
+        params = [night_rally.StandardParams("release", start_date, 8, {"env": "docker"})]
+        cmd = night_rally.DockerCommand(params, "6.3.0")
+
+        night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        self.assertEqual(2, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
+                "--car=\"defaults\" --user-tag=\"env:docker,name:geonames-defaults\" --runtime-jdk=\"8\" "
+                "--distribution-version=\"6.3.0\" --pipeline=\"docker\"",
+
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
+                "--car=\"4gheap\" --user-tag=\"env:docker,name:geonames-4g\" --runtime-jdk=\"8\" "
+                "--distribution-version=\"6.3.0\" --pipeline=\"docker\""
             ]
             ,
             system_call.calls

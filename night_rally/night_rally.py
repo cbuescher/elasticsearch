@@ -255,10 +255,20 @@ class DockerCommand(BaseCommand):
     def __init__(self, params, distribution_version):
         self.pipeline = "docker"
         self.distribution_version = distribution_version
-        self.params = ParamsFormatter(params=params + [
+
+        docker_params = [
             ConstantParam("distribution-version", distribution_version),
             ConstantParam("pipeline", "docker")
-        ])
+        ]
+        if int(self.distribution_version[0]) < 6:
+            # 5.x needs additional settings as we removed this from Rally in c805ccda0ea05f15bdae22a1eac601bb33a66eae
+            docker_params.append(
+                ConstantParam("car-params", "{\\\"additional_cluster_settings\\\": {\\\"xpack.security.enabled\\\": \\\"false\\\", "
+                                            "\\\"xpack.ml.enabled\\\": \\\"false\\\", \\\"xpack.monitoring.enabled\\\": \\\"false\\\", "
+                                            "\\\"xpack.watcher.enabled\\\": \\\"false\\\"}}")
+            )
+
+        self.params = ParamsFormatter(params=params + docker_params)
 
     def runnable(self, race_config):
         # we don't support (yet?) clusters with multiple Docker containers
