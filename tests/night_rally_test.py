@@ -104,7 +104,9 @@ class NightRallyTests(unittest.TestCase):
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
                         "car": "defaults",
-                        "car-params": "verbose_iw_logging_enabled:true"
+                        "car-params": {
+                            "verbose_iw_logging_enabled": "true"
+                        }
                     },
                     {
                         "name": "geonames-4g",
@@ -124,7 +126,7 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" "
-                "--car-params=\"verbose_iw_logging_enabled:true\" --pipeline=\"from-sources-complete\" "
+                "--car-params=\"{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\"}\" --pipeline=\"from-sources-complete\" "
                 "--revision=\"@2016-01-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
@@ -398,7 +400,7 @@ class NightRallyTests(unittest.TestCase):
                     {
                         "name": "geonames-defaults",
                         "challenge": "append-no-conflicts",
-                        "car": "defaults",
+                        "car": ["defaults", "unpooled"],
                         "plugins": "transport-nio:transport+http"
                     }
                 ]
@@ -414,7 +416,7 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
-                "--car=\"defaults\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" "
+                "--car=\"defaults,unpooled\" --user-tag=\"env:bare,name:geonames-defaults\" --runtime-jdk=\"8\" "
                 "--elasticsearch-plugins=\"transport-nio:transport+http\" --distribution-version=\"7.0.0\" "
                 "--pipeline=\"from-distribution\""
             ]
@@ -487,7 +489,10 @@ class NightRallyTests(unittest.TestCase):
                     {
                         "name": "geonames-4g",
                         "challenge": "append-no-conflicts",
-                        "car": "4gheap"
+                        "car": "4gheap",
+                        "car-params": {
+                            "verbose_iw_logging_enabled": "true"
+                        }
                     }
                 ]
             }
@@ -510,9 +515,10 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"4gheap\" --user-tag=\"env:docker,name:geonames-4g\" --runtime-jdk=\"8\" "
-                "--distribution-version=\"5.6.0\" --pipeline=\"docker\" --car-params=\"{\\\"additional_cluster_settings\\\": "
+                "--car-params=\"{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\", \\\"additional_cluster_settings\\\": "
                 "{\\\"xpack.security.enabled\\\": \\\"false\\\", \\\"xpack.ml.enabled\\\": \\\"false\\\", "
-                "\\\"xpack.monitoring.enabled\\\": \\\"false\\\", \\\"xpack.watcher.enabled\\\": \\\"false\\\"}}\""
+                "\\\"xpack.monitoring.enabled\\\": \\\"false\\\", \\\"xpack.watcher.enabled\\\": \\\"false\\\"}}\" "
+                "--distribution-version=\"5.6.0\" --pipeline=\"docker\""
             ]
             ,
             system_call.calls

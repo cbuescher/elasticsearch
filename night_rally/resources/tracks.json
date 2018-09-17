@@ -8,7 +8,9 @@
         "label": "add-4g-3nodes",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:1",
+        "track-params": {
+          "number_of_replicas": 1
+        },
         "car": "4gheap",
         "node-count": 3
       },
@@ -32,7 +34,9 @@
         "label": "add-4g",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:0",
+        "track-params": {
+          "number_of_replicas": 0
+        },
         "car": "4gheap"
       },
       {
@@ -54,9 +58,13 @@
         "#COMMENT": "Actually, we should not produce graphs for this one because indexing throughput is not that useful here.",
         "charts": [],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:0",
+        "track-params": {
+          "number_of_replicas": 0
+        },
         "car": "4gheap",
-        "car-params": "verbose_iw_logging_enabled:true"
+        "car-params": {
+          "verbose_iw_logging_enabled": "true"
+        }
       }
     ]
   },
@@ -107,7 +115,9 @@
         "label": "add-4g",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:0",
+        "track-params": {
+          "number_of_replicas": 0
+        },
         "car": "4gheap"
       },
       {
@@ -115,7 +125,9 @@
         "label": "add-4g-3nodes",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:1",
+        "track-params": {
+          "number_of_replicas": 1
+        },
         "car": "4gheap",
         "node-count": 3
       },
@@ -136,7 +148,9 @@
         "label": "add-defaults",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:0",
+        "track-params": {
+          "number_of_replicas": 0
+        },
         "car": "defaults"
       },
       {
@@ -159,7 +173,9 @@
         "label": "add-4g-3nodes",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts",
-        "track-params": "number_of_replicas:1",
+        "track-params": {
+          "number_of_replicas": 1
+        },
         "car": "4gheap",
         "node-count": 3
       },
@@ -168,9 +184,16 @@
         "label": "nio-4g-3nodes",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts",
-        "track-params": "number_of_replicas:1",
-        "car": "4gheap,unpooled",
-        "car-params": "{\\\"additional_cluster_settings\\\": {\\\"cache.recycler.page.limit.heap\\\": \\\"13.5%\\\",\\\"cache.recycler.page.weight.bytes\\\": 2}}",
+        "track-params": {
+          "number_of_replicas": 1
+        },
+        "car": ["4gheap", "unpooled"],
+        "car-params": {
+          "additional_cluster_settings": {
+            "cache.recycler.page.limit.heap": "13.5%",
+            "cache.recycler.page.weight.bytes": 2
+          }
+        },
         "plugins": "transport-nio:transport+http",
         "node-count": 3
       },
@@ -213,7 +236,9 @@
         "label": "add-sorted-4g",
         "charts": ["indexing"],
         "challenge": "append-sorted-no-conflicts-index-only",
-        "track-params": "number_of_replicas:0",
+        "track-params": {
+          "number_of_replicas": 0
+        },
         "car": "4gheap"
       },
       {
@@ -222,7 +247,12 @@
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
         "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
-        "track-params": "{\\\"index_settings\\\": {\\\"index.number_of_replicas\\\": 1,\\\"index.number_of_shards\\\": 5}}",
+        "track-params": {
+          "index_settings": {
+            "index.number_of_replicas": 1,
+            "index.number_of_shards": 5
+          }
+        },
         "car": "4gheap",
         "node-count": 3
       }
@@ -236,7 +266,9 @@
         "label": "defaults",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:0",
+        "track-params": {
+          "number_of_replicas": 0
+        },
         "car": "defaults"
       },
       {
@@ -251,7 +283,9 @@
         "label": "no-src-4g",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "source_enabled:false",
+        "track-params": {
+          "source_enabled": false
+        },
         "car": "4gheap"
       },
       {
@@ -267,7 +301,9 @@
         "label": "3nodes-4g",
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
-        "track-params": "number_of_replicas:1",
+        "track-params": {
+          "number_of_replicas": 1
+        },
         "car": "4gheap",
         "node-count": 3
       },
@@ -283,7 +319,10 @@
         "label": "no-src-4g-grok",
         "charts": ["indexing"],
         "challenge": "append-index-only-with-ingest-pipeline",
-        "track-params": "source_enabled:false,ingest_pipeline:'grok'",
+        "track-params": {
+          "source_enabled": false,
+          "ingest_pipeline": "grok"
+        },
         "car": "4gheap"
       }
     ]

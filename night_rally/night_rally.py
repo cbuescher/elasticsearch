@@ -8,6 +8,7 @@ import re
 import shlex
 import socket
 import time
+import json
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
 RALLY_BINARY = "rally --skip-update"
@@ -263,9 +264,10 @@ class DockerCommand(BaseCommand):
         if int(self.distribution_version[0]) < 6:
             # 5.x needs additional settings as we removed this from Rally in c805ccda0ea05f15bdae22a1eac601bb33a66eae
             docker_params.append(
-                ConstantParam("car-params", "{\\\"additional_cluster_settings\\\": {\\\"xpack.security.enabled\\\": \\\"false\\\", "
-                                            "\\\"xpack.ml.enabled\\\": \\\"false\\\", \\\"xpack.monitoring.enabled\\\": \\\"false\\\", "
-                                            "\\\"xpack.watcher.enabled\\\": \\\"false\\\"}}")
+                ConstantParam("car-params", {"additional_cluster_settings": {"xpack.security.enabled": "false",
+                                                                             "xpack.ml.enabled": "false",
+                                                                             "xpack.monitoring.enabled": "false",
+                                                                             "xpack.watcher.enabled": "false"}})
             )
 
         self.params = ParamsFormatter(params=params + docker_params)
@@ -301,15 +303,24 @@ class ParamsFormatter:
         for p in self.params:
             for k, v in p(race_config).items():
                 if k in cmd_line_params:
-                    # treat as array first, then join them later
-                    cmd_line_params[k] = cmd_line_params[k] + v
+                    if isinstance(v, dict):
+                        cmd_line_params[k].update(v)
+                    else:
+                        # treat as array first, then join them later
+                        cmd_line_params[k] = cmd_line_params[k] + v
                 else:
-                    cmd_line_params[k] = v
+                    if isinstance(v, dict):
+                        cmd_line_params[k] = collections.OrderedDict()
+                        cmd_line_params[k].update(v)
+                    else:
+                        cmd_line_params[k] = v
 
         cmd = RALLY_BINARY
         for k, v in cmd_line_params.items():
             if isinstance(v, list):
                 cmd += " --{}=\"{}\"".format(k, join_nullables(*v))
+            elif isinstance(v, dict):
+                cmd += " --{}=\"{}\"".format(k, json.dumps(v).replace('"', '\\"'))
             elif v is None:
                 cmd += " --{}".format(k)
             else:
@@ -370,7 +381,7 @@ class StandardParams:
             "effective-start-date": self.effective_start_date,
             "track": race_config.track,
             "challenge": race_config.challenge,
-            "car": [race_config.car],
+            "car": race_config.car,
             "user-tag": self.format_tag(additional_tags={"name": race_config.name})
         }
         add_if_present(params, "runtime-jdk", self.runtime_jdk)
@@ -456,7 +467,11 @@ class RaceConfig:
 
     @property
     def car(self):
-        return self.configuration["car"]
+        c = self.configuration["car"]
+        if isinstance(c, str):
+            return [c]
+        else:
+            return c
 
     @property
     def car_params(self):
