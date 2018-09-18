@@ -228,26 +228,31 @@ class ReleaseCommand(BaseCommand):
         ])
 
     def runnable(self, race_config):
+        major, minor, _, _ = components(self.distribution_version)
+
         # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
         if race_config.car == "1gheap":
             return False
         # transport-nio has been introduced in Elasticsearch 7.0.
-        if int(self.distribution_version[0]) < 7 and "transport-nio" in race_config.plugins:
+        if major < 7 and "transport-nio" in race_config.plugins:
             return False
         # Currently transport-nio does not support HTTPS
         if self.x_pack_config and "transport-nio" in race_config.plugins:
             return False
-        # Do not run with special x-pack configs. We run either the whole suite with or without x-pack.
-        if race_config.x_pack:
+        # Do not run with special x-pack security configs. We run either the whole suite with or without x-pack.
+        if race_config.x_pack and "security" in race_config.x_pack:
+            return False
+        # ML has been introduced in 5.4.0
+        if race_config.x_pack and "ml" in race_config.x_pack and (major < 5 or (major == 5 and minor < 4)):
             return False
         # noaa does not work on older versions. This should actually be specified in track.json and not here...
-        if int(self.distribution_version[0]) < 5 and race_config.track == "noaa":
+        if major < 5 and race_config.track == "noaa":
             return False
         # ingest pipelines were added in 5.0
-        if int(self.distribution_version[0]) < 5 and "ingest-pipeline" in race_config.challenge:
+        if major < 5 and "ingest-pipeline" in race_config.challenge:
             return False
         # cannot run "sorted" challenges - it's a 6.0+ feature
-        if int(self.distribution_version[0]) < 6 and "sorted" in race_config.challenge:
+        if major < 6 and "sorted" in race_config.challenge:
             return False
         return True
 
@@ -403,7 +408,9 @@ class XPackParams:
     Extracts all parameters that are relevant for benchmarking with x-pack. Before Elasticsearch 6.3.0 x-pack is considered a plugin.
     For later versions it is treated as module.
     """
-    def __init__(self, distribution_version, override_x_pack=None):
+    def __init__(self, distribution_version, additional_modules=None):
+        if additional_modules is None:
+            additional_modules = []
         if distribution_version == "master":
             self.treat_as_car = True
         else:
@@ -411,11 +418,11 @@ class XPackParams:
             self.treat_as_car = major > 6 or (major == 6 and minor >= 3)
 
         self.distribution_version = distribution_version
-        self.override_x_pack = override_x_pack
+        self.additional_modules = additional_modules
 
     def __call__(self, race_config):
         params = {}
-        x_pack = self.override_x_pack if self.override_x_pack else race_config.x_pack
+        x_pack = self.additional_modules + race_config.x_pack
         add_if_present(params, "client-options", self.client_options(x_pack))
         add_if_present(params, "elasticsearch-plugins", self.elasticsearch_plugins(x_pack))
         add_if_present(params, "car", self.car(x_pack))
@@ -487,7 +494,7 @@ class RaceConfig:
 
     @property
     def x_pack(self):
-        return self.configuration.get("x-pack")
+        return self.configuration.get("x-pack", [])
 
     @property
     def target_hosts(self):

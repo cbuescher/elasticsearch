@@ -305,16 +305,22 @@ class NightRallyTests(unittest.TestCase):
                         "x-pack": ["security"],
                         "track-params": "bulk_size:1000"
                     },
-
+                    # should run an ML benchmark
+                    {
+                        "name": "geonames-4g-with-ml",
+                        "challenge": "append-ml",
+                        "car": "4gheap",
+                        "x-pack": ["ml"],
+                    },
                 ]
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
         params = [night_rally.StandardParams("release", start_date, 8, {"env": "x-pack"})]
-        cmd = night_rally.ReleaseCommand(params, ["security", "monitoring"], "5.3.0")
+        cmd = night_rally.ReleaseCommand(params, ["security", "monitoring"], "5.4.0")
 
         night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        self.assertEqual(2, len(system_call.calls))
+        self.assertEqual(3, len(system_call.calls))
         self.assertEqual(
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
@@ -322,14 +328,21 @@ class NightRallyTests(unittest.TestCase):
                 "--car=\"defaults\" --user-tag=\"env:x-pack,name:geonames-defaults,x-pack:true\" --runtime-jdk=\"8\" "
                 "--track-params=\"bulk_size:3000\" --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" --elasticsearch-plugins=\"x-pack:security,monitoring\" "
-                "--distribution-version=\"5.3.0\" --pipeline=\"from-distribution\"",
+                "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"",
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
                 "--car=\"4gheap\" --user-tag=\"env:x-pack,name:geonames-4g,x-pack:true\" --runtime-jdk=\"8\" "
                 "--track-params=\"bulk_size:2000\" --client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" --elasticsearch-plugins=\"x-pack:security,monitoring\" "
-                "--distribution-version=\"5.3.0\" --pipeline=\"from-distribution\"",
+                "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"",
+
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-ml\" "
+                "--car=\"4gheap\" --user-tag=\"env:x-pack,name:geonames-4g-with-ml,x-pack:true\" --runtime-jdk=\"8\" "
+                "--client-options=\"timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
+                "basic_auth_password:'rally-password'\" --elasticsearch-plugins=\"x-pack:security,monitoring,ml\" "
+                "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"",
             ]
             ,
             system_call.calls
