@@ -264,7 +264,24 @@
         },
         "car": "4gheap",
         "node-count": 3
+      },
+      {
+        "name": "nyc_taxis-append-4g-x-pack-security-3nodes",
+        "label": "add-4g-security-3nodes",
+        "charts": ["indexing"],
+        "challenge": "append-no-conflicts-index-only",
+        "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
+        "track-params": {
+          "index_settings": {
+            "index.number_of_replicas": 1,
+            "index.number_of_shards": 5
+          }
+        },
+        "car": "4gheap",
+        "x-pack": ["security"],
+        "node-count": 3
       }
+
     ]
   },
   {
