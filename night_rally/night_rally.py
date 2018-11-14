@@ -437,7 +437,7 @@ class XPackParams:
 
     def elasticsearch_plugins(self, x_pack):
         if x_pack and not self.treat_as_car:
-            return "x-pack:{}".format(",".join(x_pack))
+            return "x-pack:{}".format("+".join(x_pack))
         else:
             return None
 
