@@ -74,8 +74,10 @@ For more details, please issue `night-rally-admin delete annotation --help`.
 The following steps are necessary to add a new track:
 
 1. Add your track and the challenges to run in `resources/track.json`
-2. Create nightly and release charts and the corresponding dashboards on the Kibana instance https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io (it's mapped to be publicly reachable). You can generate release charts with `python3 generate_release_charts.py YOUR_TRACK_NAME`. At the moment there is no such generator for nightly charts though.
-3. Add the name of your track and the UUIDs of the dashboards that you've created in step 2 to the array at the bottom of `external/pages/index.html`.
+2. Generate nightly charts and the corresponding dashboard with Rally: `esrally generate charts --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/tracks.json --chart-type=time-series --output-path=nightly-charts.json`.
+3. Generate release charts and the corresponding dashboard with Rally: `esrally generate charts --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/tracks.json --chart-type=bar --output-path=release-charts.json`
+4. Import the new charts to the corresponding dashboards on the Kibana instance https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
+5. Add the name of your track and the UUIDs of the dashboards that you've created in step two and three to the array at the bottom of `external/pages/index.html`.
 
 If you're finished, please submit a PR. After the PR is merged, the new track will show up after the next benchmark.
 
