@@ -12,7 +12,6 @@ def list_races(es, args):
         else:
             return None
 
-
     limit = args.limit
     environment = args.environment
     track = args.track
@@ -184,7 +183,7 @@ def delete_annotation(es, args):
         if len(annotations) == 1:
             print("Would delete annotation with id [%s]." % annotations[0])
         else:
-            print("Would delete %s annotations: %s." % (len(annotations, annotations)))
+            print("Would delete %s annotations: %s." % (len(annotations), annotations))
     else:
         for annotation_id in annotations:
             try:
