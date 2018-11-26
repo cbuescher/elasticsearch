@@ -387,6 +387,7 @@ class StandardParams:
             "track": race_config.track,
             "challenge": race_config.challenge,
             "car": race_config.car,
+            "client-options": "timeout:240",
             "user-tag": self.format_tag(additional_tags={"name": race_config.name})
         }
         add_if_present(params, "runtime-jdk", self.runtime_jdk)
@@ -431,7 +432,8 @@ class XPackParams:
 
     def client_options(self, x_pack):
         if x_pack and "security" in x_pack:
-            return "timeout:60,use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'"
+            # will get merged with standard options; XPackParams is not meant to be used standalone.
+            return ",use_ssl:true,verify_certs:false,basic_auth_user:'rally',basic_auth_password:'rally-password'"
         else:
             return None
 
