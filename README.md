@@ -76,7 +76,7 @@ The following steps are necessary to add a new track:
 1. Add your track and the challenges to run in `resources/track.json`
 2. Generate nightly charts and the corresponding dashboard with Rally: `esrally generate charts --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/tracks.json --chart-type=time-series --output-path=nightly-charts.json`.
 3. Generate release charts and the corresponding dashboard with Rally: `esrally generate charts --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/tracks.json --chart-type=bar --output-path=release-charts.json`
-4. Import the new charts to the corresponding dashboards on the Kibana instance https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
+4. Import the new charts to the corresponding dashboards on the [Kibana instance](https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io) (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
 5. Add the name of your track and the UUIDs of the dashboards that you've created in step two and three to the array at the bottom of `external/pages/index.html`.
 
 If you're finished, please submit a PR. After the PR is merged, the new track will show up after the next benchmark.
@@ -84,10 +84,9 @@ If you're finished, please submit a PR. After the PR is merged, the new track wi
 
 #### Run a release benchmark
 
-Suppose we want to publish a new release benchmark of the Elasticsearch release `5.3.1` on our benchmark page. To do that, start a new [macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic/) with the following parameters:
+Suppose we want to publish a new release benchmark of the Elasticsearch release `6.5.0` on our benchmark page. To do that, start a new [macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic/) with the following parameters:
 
 * `MODE`: `release`
-* `RELEASE`: `5.3.1`
-* `TARGET_HOST`: Just use the default value
+* `RELEASE`: `6.5.0`
 
 The results will show up automatically as soon as the build is finished.
