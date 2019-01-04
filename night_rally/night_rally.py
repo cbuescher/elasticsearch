@@ -535,7 +535,8 @@ def run_rally(tracks, available_hosts, command, dry_run=False, skip_ansible=Fals
                     logger.info("Running Rally on [%s]", race_cfg)
                     start = time.perf_counter()
                     try:
-                        wait_until_port_is_free(available_hosts_with_ports)
+                        if not dry_run:
+                            wait_until_port_is_free(available_hosts_with_ports)
                         if runner(command.command_line(race_cfg)):
                             rally_failure = True
                             logger.error("Failed to run [%s]. Please check the logs.", race_cfg)
