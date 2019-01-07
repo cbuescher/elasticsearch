@@ -310,6 +310,11 @@
         "charts": ["indexing"],
         "challenge": "append-no-conflicts-index-only",
         "track-params": {
+          "index_settings": {
+            "index.number_of_shards": 5,
+            "index.number_of_replicas": 0,
+            "index.soft_deletes.enabled": false
+          },
           "source_enabled": false
         },
         "car": "4gheap"
@@ -346,6 +351,11 @@
         "charts": ["indexing"],
         "challenge": "append-index-only-with-ingest-pipeline",
         "track-params": {
+          "index_settings": {
+            "index.number_of_shards": 5,
+            "index.number_of_replicas": 0,
+            "index.soft_deletes.enabled": false
+          },
           "source_enabled": false,
           "ingest_pipeline": "grok"
         },
