@@ -243,51 +243,6 @@ class NightRallyTests(unittest.TestCase):
         )
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_track_with_soft_deletes_and_src_disabled(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-        self.maxDiff=None
-        tracks = [
-            {
-                "track": "http_logs",
-                "configurations": [
-                    {
-                        "name": "http_logs-no-src-1node",
-                        "challenge": "append-no-conflicts-index-only",
-                        "car": "4gheap",
-                        "track-params": {
-                            "index_settings": {
-                                "index.number_of_shards": 5,
-                                "index.number_of_replicas": 0,
-                                "index.soft_deletes.enabled": False
-                            },
-                            "source_enabled": False
-                        }
-                    }
-                ]
-            }
-        ]
-
-        start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("nightly", start_date, 8, {"env": "bare"})]
-        cmd = night_rally.NightlyCommand(params, start_date)
-        night_rally.run_rally(tracks, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        self.assertEqual(1, len(system_call.calls))
-        self.assertEqual(
-            [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
-                "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"http_logs\" "
-                "--challenge=\"append-no-conflicts-index-only\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"env:bare,name:http_logs-no-src-1node\" --runtime-jdk=\"8\" "
-                "--track-params=\"{\\\"index_settings\\\": {\\\"index.number_of_shards\\\": 5, "
-                "\\\"index.number_of_replicas\\\": 0, \\\"index.soft_deletes.enabled\\\": false}, "
-                "\\\"source_enabled\\\": false}\" "
-                "--pipeline=\"from-sources-complete\" "
-                "--revision=\"@2016-01-01T00:00:00Z\""            ]
-            ,
-            system_call.calls
-        )
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_release_benchmark_without_plugins(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
