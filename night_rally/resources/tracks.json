@@ -27,6 +27,11 @@
         "charts": ["indexing"],
         "challenge": "append-no-conflicts",
         "car": "defaults",
+        "car-params": {
+          "xpack_ml_enabled": false,
+          "xpack_monitoring_enabled": false,
+          "xpack_watcher_enabled": false
+        },
         "x-pack": ["security"]
       },
       {
@@ -108,6 +113,11 @@
         "charts": ["indexing"],
         "challenge": "append-no-conflicts",
         "car": "defaults",
+        "car-params": {
+          "xpack_ml_enabled": false,
+          "xpack_monitoring_enabled": false,
+          "xpack_watcher_enabled": false
+        },
         "x-pack": ["security"]
       },
       {
@@ -166,6 +176,11 @@
         "charts": ["indexing"],
         "challenge": "append-no-conflicts",
         "car": "4gheap",
+        "car-params": {
+          "xpack_ml_enabled": false,
+          "xpack_monitoring_enabled": false,
+          "xpack_watcher_enabled": false
+        },
         "x-pack": ["security"]
       },
       {
@@ -230,6 +245,11 @@
         "charts": [],
         "challenge": "append-ml",
         "car": "4gheap",
+        "car-params": {
+          "xpack_security_enabled": false,
+          "xpack_monitoring_enabled": false,
+          "xpack_watcher_enabled": false
+        },
         "x-pack": ["ml"]
       },
       {
@@ -238,6 +258,11 @@
         "charts": ["indexing"],
         "challenge": "append-no-conflicts",
         "car": "4gheap",
+        "car-params": {
+          "xpack_ml_enabled": false,
+          "xpack_monitoring_enabled": false,
+          "xpack_watcher_enabled": false
+        },
         "x-pack": ["security"]
       },
       {
@@ -278,6 +303,11 @@
           }
         },
         "car": "4gheap",
+        "car-params": {
+          "xpack_ml_enabled": false,
+          "xpack_monitoring_enabled": false,
+          "xpack_watcher_enabled": false
+        },
         "x-pack": ["security"],
         "node-count": 3
       }
@@ -320,6 +350,11 @@
         "charts": ["indexing"],
         "challenge": "append-no-conflicts",
         "car": "4gheap",
+        "car-params": {
+          "xpack_ml_enabled": false,
+          "xpack_monitoring_enabled": false,
+          "xpack_watcher_enabled": false
+        },
         "x-pack": ["security"]
       },
       {
