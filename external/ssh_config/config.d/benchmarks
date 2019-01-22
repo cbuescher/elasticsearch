@@ -1,0 +1,69 @@
+# Night Rally load driver and target machines section
+Host night-rally-1
+  Hostname worker-746202.build.fsn1-dc4.hetzner.elasticnet.co
+
+Host night-rally-2
+  Hostname target-746203.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+Host night-rally-3
+  Hostname target-746204.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+Host night-rally-4
+  Hostname target-746205.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+# Night Rally Group 1
+Host night-rally-5
+  Hostname worker-953730.build.fsn1-dc14.hetzner.elasticnet.co
+
+Host night-rally-6
+  Hostname target-953729.benchmark.fsn1-dc14.hetzner.elasticnet.co
+
+Host night-rally-7
+  Hostname target-953732.benchmark.fsn1-dc14.hetzner.elasticnet.co
+
+Host night-rally-8
+  Hostname target-953733.benchmark.fsn1-dc14.hetzner.elasticnet.co
+
+# Night Rally Group 2
+Host night-rally-9
+  Hostname worker-953731.build.fsn1-dc14.hetzner.elasticnet.co
+
+Host night-rally-10
+  Hostname target-953734.benchmark.fsn1-dc14.hetzner.elasticnet.co
+
+Host night-rally-11
+  Hostname target-953735.benchmark.fsn1-dc14.hetzner.elasticnet.co
+
+Host night-rally-12
+  Hostname target-953736.benchmark.fsn1-dc14.hetzner.elasticnet.co
+# End Night Rally load driver and target machines section
+
+# Memory benchmark machines
+Host lowmem-rally-1
+  Hostname memory-869742.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+Host lowmem-rally-2
+  Hostname memory-869743.benchmark.fsn1-dc4.hetzner.elasticnet.co
+# End Memory benchmark machines
+
+# Longrun benchmarks section
+Host long-run-rally-1
+  Hostname longrun-669376.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+Host long-run-rally-2
+  Hostname longrun-669377.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+Host long-run-rally-3
+  Hostname longrun-669378.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+Host long-run-rally-4
+  Hostname longrun-669380.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+# End Longrun benchmarks section
+
+Host microbenchmark
+  Hostname 148.251.138.133
+  # AKA worker-349501.build.fsn1-dc12.hetzner.elasticnet.co
+
+Host adhoc-rally-1
+  Hostname worker-775501.build.fsn1-dc4.hetzner.elasticnet.co

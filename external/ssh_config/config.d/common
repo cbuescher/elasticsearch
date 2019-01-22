@@ -1,0 +1,5 @@
+Host *rally* microbenchmark *.hetzner.elasticnet.co wopr*
+  StrictHostKeyChecking No
+  UserKnownHostsFile /dev/null
+  ProxyCommand vault ssh -role bastion -mode otp -user-known-hosts-file=~/.ssh/config.d/.known_hosts %r@bastion-europe-west1.gcp.elasticnet.co -W %h:%p
+  User <yourlocalsshuser>
