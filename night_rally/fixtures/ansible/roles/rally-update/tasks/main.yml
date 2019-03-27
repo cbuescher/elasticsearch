@@ -29,7 +29,7 @@
     JAVA8_HOME: /var/lib/jenkins/.java/java8
     JAVA9_HOME: /var/lib/jenkins/.java/java9
     JAVA10_HOME: /var/lib/jenkins/.java/java10
-    JAVA11_HOME: /var/lib/jenkins/.java/java11
+    JAVA11_HOME: /var/lib/jenkins/.java/openjdk11
     JAVA12_HOME: /var/lib/jenkins/.java/openjdk12
   become: true
   become_user: jenkins
