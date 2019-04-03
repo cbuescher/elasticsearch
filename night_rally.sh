@@ -37,7 +37,7 @@ MODE="nightly"
 RELEASE="master"
 # only needed for ad-hoc benchmarks
 REVISION="latest"
-RUNTIME_JDK="8"
+RUNTIME_JDK="11"
 TARGET_HOST="localhost:9200"
 X_PACK=""
 TRACKS_FILE=""
