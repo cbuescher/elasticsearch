@@ -17,7 +17,7 @@ set -e
 
 # see http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+while [[ -h $SOURCE ]]; do # resolve $SOURCE until the file is no longer a symlink
   DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
   SOURCE="$(readlink "$SOURCE")"
   [[ ${SOURCE} != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
@@ -28,19 +28,24 @@ NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 ANSIBLE_ALL_TAGS=(encryption-at-rest initialize-data-disk trim drop-caches)
 ANSIBLE_SKIP_TAGS=( )
 ANSIBLE_SKIP_TAGS_STRING=""
-SELF_UPDATE=NO
+# Don't update night-rally by default, unless specified by env var
+SELF_UPDATE=${SELF_UPDATE:-NO}
 DRY_RUN=NO
 SKIP_ANSIBLE=NO
 # We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
 EFFECTIVE_START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
+# Deploy different Cloud credentials when running inside Vagrant
+IN_VAGRANT=${IN_VAGRANT:NO}
 MODE="nightly"
-RELEASE="master"
+TEST_MODE=${TEST_MODE:NO}
+VERSION="master"
+RELEASE_LICENSE=${RELEASE_LICENSE:-oss}
 # only needed for ad-hoc benchmarks
 REVISION="latest"
 RUNTIME_JDK="11"
 TARGET_HOST="localhost:9200"
-X_PACK=""
-TRACKS_FILE=""
+RELEASE_X_PACK_COMPONENTS=${RELEASE_X_PACK_COMPONENTS:-""}
+RACE_CONFIGS_FILE=""
 TELEMETRY=""
 TELEMETRY_PARAMS=""
 
@@ -68,6 +73,14 @@ case ${i} in
     MODE="${i#*=}"
     shift # past argument=value
     ;;
+    --test-mode)
+    TEST_MODE=YES
+    shift # past argument with no value
+    ;;
+    --in-vagrant=*)
+    IN_VAGRANT=YES
+    shift # past argument=value
+    ;;
     --revision=*)
     REVISION="${i#*=}"
     shift # past argument=value
@@ -76,16 +89,20 @@ case ${i} in
     RUNTIME_JDK="${i#*=}"
     shift # past argument=value
     ;;
-    --release=*)
-    RELEASE="${i#*=}"
+    --version=*)
+    VERSION="${i#*=}"
+    shift # past argument=value
+    ;;
+    --release-license=*)
+    RELEASE_LICENSE="${i#*=}"
     shift # past argument=value
     ;;
     --target-host=*)
     TARGET_HOST="${i#*=}"
     shift # past argument=value
     ;;
-    --tracks=*)
-    TRACKS_FILE="${i#*=}"
+    --race-configs=*)
+    RACE_CONFIGS_FILE="${i#*=}"
     shift # past argument=value
     ;;
     --telemetry=*)
@@ -96,8 +113,8 @@ case ${i} in
     TELEMETRY_PARAMS="${i#*=}"
     shift # past argument=value
     ;;
-    --x-pack=*)
-    X_PACK="${i#*=}"
+    --release-x-pack-components=*)
+    RELEASE_X_PACK_COMPONENTS="${i#*=}"
     shift # past argument=value
     ;;
     *)
@@ -107,7 +124,9 @@ case ${i} in
 esac
 done
 
-if [ ${SELF_UPDATE} == YES ]
+MODE_PREFIX=${MODE%:*}
+
+if [[ $SELF_UPDATE == YES ]]
 then
     pushd . >/dev/null 2>&1
     cd ${NIGHT_RALLY_HOME} >/dev/null 2>&1
@@ -131,11 +150,19 @@ then
     popd >/dev/null 2>&1
 fi
 
-if [ ${SKIP_ANSIBLE} == NO ]
+if [[ $SKIP_ANSIBLE == NO ]]
 then
+    # $MODE may contain the `encryption-at-rest` fixture
+    # TODO: consider removing this and expecting encryption-at-rest to be explicitly set in fixtures when we
+    # have an automatic invocation script.
+    ALL_FIXTURES=${FIXTURES}
+    if [[ ${MODE} == *encryption-at-rest* && ${FIXTURES} != *encryption-at-rest* ]]; then
+        ALL_FIXTURES="${FIXTURES},encryption-at-rest"
+    fi
+
     for fixture in "${ANSIBLE_ALL_TAGS[@]}"
     do
-        if [[ ${FIXTURES} != *$fixture* ]] ; then
+        if [[ ${ALL_FIXTURES} != *$fixture* ]] ; then
             ANSIBLE_SKIP_TAGS+=("$fixture")
         fi
     done
@@ -150,12 +177,13 @@ then
     fi
 
     echo "About to run ansible-playbook ... with '$ANSIBLE_SKIP_TAGS_STRING'"
-    if [ ${DRY_RUN} == NO ]
+    if [[ $DRY_RUN == NO ]]
     then
         pushd . >/dev/null 2>&1
 
         cd ${NIGHT_RALLY_HOME}/night_rally/fixtures/ansible
-        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE}"
+        # TODO remove "-new" after cutover
+        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE_PREFIX}-new in_vagrant=${IN_VAGRANT}"
         ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
 
         popd >/dev/null 2>&1
@@ -164,45 +192,50 @@ else
     echo "Skipping Ansible execution."
 fi
 
-if [ ${DRY_RUN} == YES ]
+if [[ $DRY_RUN == YES ]]
 then
     NIGHT_RALLY_DRY_RUN="--dry-run"
 else
     NIGHT_RALLY_DRY_RUN=""
 fi
 
-if [ ${SKIP_ANSIBLE} == YES ]
+if [[ $SKIP_ANSIBLE == YES ]]
 then
     SKIP_ANSIBLE_PARAM="--skip-ansible"
 else
     SKIP_ANSIBLE_PARAM=""
 fi
 
+NIGHT_RALLY_COMMAND="es-night-rally \
+    --target-host=${TARGET_HOST} \
+    --effective-start-date=\"${EFFECTIVE_START_DATE}\" \
+    --mode=${MODE} \
+    ${NIGHT_RALLY_DRY_RUN} \
+    ${SKIP_ANSIBLE_PARAM} \
+    --runtime-jdk=\"${RUNTIME_JDK}\" \
+    --revision=\"${REVISION}\" \
+    --version=\"${VERSION}\" \
+    --release-license=\"${RELEASE_LICENSE}\" \
+    --release-x-pack-components=\"${RELEASE_X_PACK_COMPONENTS}\" \
+    --race-configs=\"${RACE_CONFIGS_FILE}\" \
+    --telemetry=\"${TELEMETRY}\" \
+    --telemetry-params=\"${TELEMETRY_PARAMS}\""
+
 #****************************
 # START NO FAIL
 #****************************
 set +e
 # Avoid failing before cleanup. Usually only a single benchmark trial run fails but lots of other succeed.
-es-night-rally \
-    --target-host=${TARGET_HOST} \
-    --x-pack="${X_PACK}" \
-    --effective-start-date="${EFFECTIVE_START_DATE}" \
-    --mode=${MODE} \
-    ${NIGHT_RALLY_DRY_RUN} \
-    ${SKIP_ANSIBLE_PARAM} \
-    --fixtures="${FIXTURES}" \
-    --runtime-jdk="${RUNTIME_JDK}" \
-    --revision="${REVISION}" \
-    --release="${RELEASE}" \
-    --tracks="${TRACKS_FILE}" \
-    --telemetry="${TELEMETRY}" \
-    --telemetry-params="${TELEMETRY_PARAMS}"
+if [[ ${TEST_MODE} == YES ]]; then
+    NIGHT_RALLY_COMMAND="${NIGHT_RALLY_COMMAND} --test-mode"
+fi
 
+eval ${NIGHT_RALLY_COMMAND}
 exit_code=$?
 
 echo "Killing any lingering Rally processes"
 # Also don't fail if there are no lingering Rally processes
-if [ ${DRY_RUN} == NO ]
+if [[ $DRY_RUN == NO ]]
 then
     killall -q esrally
 fi

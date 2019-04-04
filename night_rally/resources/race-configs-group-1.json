@@ -1,0 +1,526 @@
+[
+  {
+    "track": "geonames",
+    "flavors": [
+      {
+        "name": "oss",
+        "licenses": [
+          {
+            "name": "oss",
+            "configurations": [
+              {
+                "#COMMENT": "We need to start with a configuration where we build all candidates on all machines as we skip the build step afterwards",
+                "name": "geonames-append-4g-3nodes",
+                "label": "add-4g-3nodes",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 1
+                },
+                "car": "4gheap",
+                "node-count": 3
+              },
+              {
+                "name": "geonames-append-1node",
+                "label": "add-defaults",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "defaults"
+              },
+              {
+                "name": "geonames-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap"
+              },
+              {
+                "name": "geonames-appendsorted-4g-1node",
+                "label": "add-sorted-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-sorted-no-conflicts",
+                "car": "4gheap"
+              },
+              {
+                "name": "geonames-update-4g-1node",
+                "label": "update-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-fast-with-conflicts",
+                "car": "4gheap"
+              },
+              {
+                "name": "geonames-append-verbose_iw-1node",
+                "#COMMENT": "Actually, we should not produce graphs for this one because indexing throughput is not that useful here.",
+                "charts": [],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap",
+                "car-params": {
+                  "verbose_iw_logging_enabled": "true"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "basic",
+            "configurations": [
+              {
+                "#COMMENT": "We need to start with a configuration where we build all candidates on all machines as we skip the build step afterwards",
+                "name": "geonames-append-4g-3nodes",
+                "label": "add-4g-3nodes",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 1
+                },
+                "car": "4gheap",
+                "node-count": 3
+              },
+              {
+                "name": "geonames-append-1node",
+                "label": "add-defaults",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "defaults"
+              },
+              {
+                "name": "geonames-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap"
+              },
+              {
+                "name": "geonames-appendsorted-4g-1node",
+                "label": "add-sorted-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-sorted-no-conflicts",
+                "car": "4gheap"
+              },
+              {
+                "name": "geonames-update-4g-1node",
+                "label": "update-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-fast-with-conflicts",
+                "car": "4gheap"
+              },
+              {
+                "name": "geonames-append-verbose_iw-1node",
+                "#COMMENT": "Actually, we should not produce graphs for this one because indexing throughput is not that useful here.",
+                "charts": [],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap",
+                "car-params": {
+                  "verbose_iw_logging_enabled": "true"
+                }
+              }
+            ]
+          },
+          {
+            "name": "trial",
+            "configurations": [
+              {
+                "name": "geonames-append-defaults-1node",
+                "label": "add-defaults-security",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "track": "geopoint",
+    "flavors": [
+      {
+        "name": "oss",
+        "licenses": [
+          {
+            "name": "oss",
+            "configurations": [
+              {
+                "name": "geopoint-append-4g-3nodes",
+                "label": "add-4g-3nodes",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 1
+                },
+                "car": "4gheap",
+                "node-count": 3
+              },
+              {
+                "name": "geopoint-append-defaults-1node",
+                "label": "add-defaults",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "defaults"
+              },
+              {
+                "name": "geopoint-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap"
+              },
+              {
+                "name": "geopoint-update-4g-1node",
+                "label": "update-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-fast-with-conflicts",
+                "car": "4gheap"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "basic",
+            "configurations": [
+              {
+                "name": "geopoint-append-4g-3nodes",
+                "label": "add-4g-3nodes",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 1
+                },
+                "car": "4gheap",
+                "node-count": 3
+              },
+              {
+                "name": "geopoint-append-defaults-1node",
+                "label": "add-defaults",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "defaults"
+              },
+              {
+                "name": "geopoint-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap"
+              },
+              {
+                "name": "geopoint-update-4g-1node",
+                "label": "update-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-fast-with-conflicts",
+                "car": "4gheap"
+              }
+            ]
+          },
+          {
+            "name": "trial",
+            "configurations": [
+              {
+                "name": "geopoint-append-defaults-1node",
+                "label": "add-defaults-security",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "track": "percolator",
+    "flavors": [
+      {
+        "name": "oss",
+        "licenses": [
+          {
+            "name": "oss",
+            "configurations": [
+              {
+                "name": "percolator-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "4gheap"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "basic",
+            "configurations": [
+              {
+                "name": "percolator-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "4gheap"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "track": "nyc_taxis",
+    "flavors": [
+      {
+        "name": "oss",
+        "licenses": [
+          {
+            "name": "oss",
+            "configurations": [
+              {
+                "name": "nyc_taxis-append-4g-3nodes",
+                "label": "add-4g-3nodes",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
+                "track-params": {
+                  "index_settings": {
+                    "index.number_of_replicas": 1,
+                    "index.number_of_shards": 5
+                  }
+                },
+                "car": "4gheap",
+                "node-count": 3
+              },
+              {
+                "name": "nyc_taxis-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "4gheap"
+              },
+              {
+                "name": "nyc_taxis-appendsorted-4g-1node",
+                "label": "add-sorted-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-sorted-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "basic",
+            "configurations": [
+              {
+                "name": "nyc_taxis-append-4g-3nodes",
+                "label": "add-4g-3nodes",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
+                "track-params": {
+                  "index_settings": {
+                    "index.number_of_replicas": 1,
+                    "index.number_of_shards": 5
+                  }
+                },
+                "car": "4gheap",
+                "node-count": 3
+              },
+              {
+                "name": "nyc_taxis-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "4gheap"
+              },
+              {
+                "name": "nyc_taxis-appendsorted-4g-1node",
+                "label": "add-sorted-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-sorted-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap"
+              }
+            ]
+          },
+          {
+            "name": "trial",
+            "configurations": [
+              {
+                "name": "nyc_taxis-append-4g-3nodes",
+                "label": "add-4g-security-3nodes",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
+                "track-params": {
+                  "index_settings": {
+                    "index.number_of_replicas": 1,
+                    "index.number_of_shards": 5
+                  }
+                },
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ],
+                "node-count": 3
+              },
+              {
+                "name": "nyc_taxis-append-4g-1node",
+                "label": "add-4g-security",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
+              },
+              {
+                "name": "nyc_taxis-ml-4g-1node",
+                "label": "ml-4g",
+                "#COMMENT": "Don't generate any standard charts but we'll create ML-specific charts",
+                "charts": [],
+                "challenge": "append-ml",
+                "car": "4gheap",
+                "x-pack": [
+                  "ml"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

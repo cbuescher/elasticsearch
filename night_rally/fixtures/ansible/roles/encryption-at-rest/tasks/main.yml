@@ -1,6 +1,6 @@
 ---
 
-- include: '{{ system_item }}'
+- include_tasks: '{{ system_item }}'
   become: '{{ system != "win32nt" }}'
   with_first_found:
     - '{{ system }}/main.yml'

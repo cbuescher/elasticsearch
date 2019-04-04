@@ -6,7 +6,7 @@ Night Rally is a set of driver scripts for [running nightly macrobenchmarks for 
 
 ### Prerequisites
 
-* Python 3.4+ available as `python3` on the path (verify with: `python3 --version` which should print `Python 3.4.0` (or higher))
+* Python 3.5+ available as `python3` on the path (verify with: `python3 --version` which should print `Python 3.5.0` (or higher))
 * `pip3` available on the path (verify with `pip3 --version`)
 * `awscli` available on the command line and properly set up to write to the bucket `s3://elasticsearch-benchmarks.elasticsearch.org`.
 * `Ansible` available on the command line (only needed in our nightly benchmarking environment)
@@ -71,22 +71,78 @@ For more details, please issue `night-rally-admin delete annotation --help`.
 
 #### Add a new track
 
+Benchmarks get executed in two environments, group-1 / group-2 (see [infra repo](https://github.com/elastic/infra/blob/master/ansible/inventory/production/hetzner/benchmarks)).
+
 The following steps are necessary to add a new track:
 
-1. Add your track and the challenges to run in `resources/track.json`
-2. Generate nightly charts and the corresponding dashboard with Rally: `esrally generate charts --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/tracks.json --chart-type=time-series --output-path=nightly-charts.json`.
-3. Generate release charts and the corresponding dashboard with Rally: `esrally generate charts --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/tracks.json --chart-type=bar --output-path=release-charts.json`
+1. Add your track and the challenges to run in `resources/race-configs-group-1.json` or `resources/race-configs-group-2.json`.
+2. Generate nightly charts and the corresponding dashboards with Rally: `esrally --configuration-name=nightly-new generate charts --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/track*json --chart-type=time-series --output-path=nightly-charts.json`
+3. Generate release charts and the corresponding dashboard with Rally: `esrally --configuration-name=release-new generate charts --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/track*json --chart-type=bar --output-path=release-charts.json`
 4. Import the new charts to the corresponding dashboards on the [Kibana instance](https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io) (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
 5. Add the name of your track and the UUIDs of the dashboards that you've created in step two and three to the array at the bottom of `external/pages/index.html`.
 
-If you're finished, please submit a PR. After the PR is merged, the new track will show up after the next benchmark.
-
+If you're finished, please submit a PR. After the PR is merged, we will deploy the new page using the script in `external/pages/deploy.sh` and the dashboards for the new track will show up immediately.
 
 #### Run a release benchmark
 
-Suppose we want to publish a new release benchmark of the Elasticsearch release `6.5.0` on our benchmark page. To do that, start a new [macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic/) with the following parameters:
+Suppose we want to publish a new release benchmark of the Elasticsearch release `6.6.1` on our benchmark page. To do that, start two jobs:
+
+- [target group-1 macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/)
+- [target group-2 macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/)
 
 * `MODE`: `release`
-* `RELEASE`: `6.5.0`
+* `RELEASE_LICENSE`: `oss` (default)
+* `VERSION`: `6.6.1`
 
 The results will show up automatically as soon as the build is finished.
+
+#### Developing Night Rally
+
+To verify track changes you are encouraged to use the Vagrant workflow.
+It will spin up 4 vm and requires at minimum 21GB of RAM (each target node uses 5GB ram, load driver 1GB). This configuration supports only release benchmarks, as nightlies require java11 and more RAM; read below on how to iterate on nightlies.
+Rally will run in test mode so the whole run will take just a few minutes.
+
+##### Iterating on release benchmarks
+
+1. `cd night_rally/fixtures/ansible`
+2. `vagrant up`
+3. `vagrant ssh /coord/` # ssh'es to the coordinating node
+4. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
+5. `sudo -iu jenkins`
+6. Take a look at `./test_release.sh` before running it; you can specify the corresponding options that would be defined by JJB e.g. mode="release:x-pack"
+
+Results will be sent to the Elastic Cloud cluster `night-rally-tests` (details in LastPass).
+
+To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
+
+##### Iterating on nightly benchmarks
+
+1. `cd night_rally/fixtures/ansible`
+2. Specify the following environment variables:
+    ```
+    export VAGRANT_TARGET_MEMORY=7168
+    export VAGRANT_ENABLE_BUILD=true
+    ```
+    
+    The reason for increasing memory for the target-nodes is that the additional build step, enabled with `VAGRANT_ENABLE_BUILD`, requires additional memory.)
+3. `vagrant up`
+4. `vagrant ssh /coord/` # ssh'es to the coordinating node
+5. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
+6. `sudo -iu jenkins`
+7. Run `./test_nightly.sh`
+
+Results will be sent to the Elastic Cloud cluster `night-rally-tests` (details in LastPass).
+
+To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
+
+##### Testing fixtures
+
+You can also simulate the application of fixtures like encryption-at-rest.
+By default all fixtures are commented out to speed things up (see `/var/lib/jenkins/env_test_script`), but can be overridden by setting an environment variable before running the corresponding test script.
+For example setting:
+
+```
+export FIXTURES=drop-caches,trim,initialize-data-disk,encryption-at-rest
+```
+
+and running `./test_release.sh` will cause all these fixtures to be executed, simulating the expected behavior from the Jenkins job.

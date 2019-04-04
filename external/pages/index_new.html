@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="shortcut icon" href="assets/favicon.ico">
+
+  <title>Elasticsearch Benchmarks</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="assets/css/Supernice.css" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="assets/css/navbar-fixed-top.css" rel="stylesheet">
+
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+  <![endif]-->
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+
+  <script type="text/javascript">
+var charts = {
+  init: function(chartSpecs, url) {
+    this.chartSpecs = chartSpecs;
+    uiState = this.readUiStateFromUrl(url);
+    this.restoreUiState(uiState);
+
+    this.currentSpec = this.findSelectedSpec(uiState);
+    this.dateRange = this.findDateRange();
+    this.currentChartType = this.chartType();
+    this.currentDistributionType = this.distributionType();
+
+    this.buildMenu(this.currentSpec);
+    this.buildOverview();
+    this.installEventHandlers();
+
+    this.render();
+  },
+
+  readUiStateFromUrl: function(url) {
+    var route = url.split('/')[0];
+    if (route === "#tracks") {
+        return url.substring("#tracks/".length).split('/');
+    } else {
+        return [];
+    }
+  },
+
+  restoreUiState: function(uiState) {
+    if (uiState.length >= 2) {
+        $("#checkToggleCompare").prop('checked', uiState[1] === "release");
+    }
+    if (uiState.length >= 3) {
+        $("#dateRangeSelector").val(uiState[2]);
+    }
+  },
+
+  buildMenu: function(activeItem) {
+    var nav = $("#navigation-container");
+    // remove any previous child elements.
+    nav.empty();
+    $.each(this.chartSpecs, function(index, value) {
+        if (value === activeItem) {
+            nav.append("<li class=\"active\"><a href=\"#\">" + value.track + "</a></li>");
+        } else {
+            var navItemId = "nav-item-" + value.id;
+            nav.append("<li><a id=\"" + navItemId + "\" href=\"#\">" + value.track + "</a></li>");
+            $("#" + navItemId).click(function(e) {
+                e.preventDefault();
+                charts.activateSpec(value);
+            });
+        }
+    });
+  },
+
+  buildOverview: function(activeItem) {
+    var nav = $("#tracks-overview-menu");
+    // remove any previous child elements.
+    nav.empty();
+    $.each(this.chartSpecs, function(index, value) {
+        var navItemId = "tracks-overview-nav-item-" + value.id;
+        nav.append("<li><a id=\"" + navItemId + "\" href=\"#\">" + value.track + "</a>: " + value.description + ".</li>");
+        $("#" + navItemId).click(function(e) {
+            e.preventDefault();
+            charts.activateSpec(value);
+        });
+    });
+  },
+
+  installEventHandlers: function() {
+    $("#dateRangeSelector").change(function() {
+        charts.dateRangeChanged();
+    });
+    $("#checkToggleCompare").click(function() {
+        charts.chartTypeChanged();
+    });
+    $("#checkSelectDistribution").change(function() {
+        charts.distributionTypeChanged();
+    });
+    $("#index-selector").click(function() {
+        charts.selectMethodology();
+    });
+  },
+
+  dateRangeChanged: function() {
+    charts.dateRange = charts.findDateRange();
+    charts.render();
+  },
+
+  chartTypeChanged: function() {
+    charts.currentChartType = charts.chartType();
+    charts.render();
+  },
+
+  distributionTypeChanged: function() {
+    charts.currentDistributionType = charts.distributionType();
+    charts.render();
+  },
+
+  selectMethodology: function() {
+    charts.currentSpec = null;
+    charts.buildMenu(charts.currentSpec);
+    charts.render();
+  },
+
+  findSelectedSpec: function(uiState) {
+    if (uiState.length > 0) {
+        var trackName = uiState[0];
+        return this.chartSpecs.find(function(t) {
+            return t.id === trackName;
+        });
+    } else {
+        return null;
+    }
+  },
+
+  findDateRange: function() {
+    return $("#dateRangeSelector option:selected").val();
+  },
+
+  chartType: function() {
+    var e = $("#checkToggleCompare")[0];
+    if (e.checked) {
+        return "release";
+    } else {
+        return "nightly";
+    }
+  },
+
+  distributionType: function() {
+    return $("#checkSelectDistribution").children("option:selected").val().toLowerCase();
+  },
+
+  activateSpec: function(spec) {
+    this.currentSpec = spec;
+    this.buildMenu(this.currentSpec);
+    this.render();
+  },
+
+  showChart: function(url, dateRange) {
+    $("#charts").html("<iframe id=\"charts\" src=\"" +url + "?embed=true&_g=(refreshInterval%3A(display%3AOff%2Cpause%3A!f%2Cvalue%3A0)%2Ctime%3A(from%3Anow-" + dateRange + "%2Cmode%3Aquick%2Cto%3Anow))\" height=\"100%\" width=\"100%\" frameBorder=\"0\"></iframe>");
+  },
+
+  dashboardUrl: function(chartId) {
+    return "https://elasticsearch-benchmark-analytics.elastic.co/app/kibana#/dashboard/" + chartId;
+  },
+
+  render: function() {
+    $('.methodology').hide();
+    $('.tracks').hide();
+    $("#nightlyOptionsGroup").hide();
+    $("#releaseLegend").hide();
+
+    if (charts.currentSpec != null) {
+        var hash = "#tracks/" + charts.currentSpec.id;
+
+        $('.tracks').show();
+        if (charts.currentChartType === "nightly") {
+          hash = hash + "/nightly/" + charts.currentDistributionType + "/" + charts.dateRange;
+          var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards[charts.currentDistributionType]);
+          $("#nightlyOptionsGroup").show();
+          $("#dashboard-url").attr("href", nightlyUrl);
+          charts.showChart(nightlyUrl, charts.dateRange);
+        } else {
+          hash = hash + "/release";
+          var releaseUrl = charts.dashboardUrl(charts.currentSpec.release_dashboard);
+          $("#dashboard-url").attr("href", releaseUrl);
+          $("#releaseLegend").show();
+          //These charts should be time-independent. Don't use the date range here.
+          charts.showChart(releaseUrl, "5y");
+        }
+        window.location.hash = hash;
+    } else {
+        $('.methodology').show();
+        hash = "";
+        window.location.hash = hash;
+    }
+  }
+}
+    </script>
+
+  <style>
+body,html,.main-display-area,.col-md-12 {
+   height:100%;
+}
+
+.container {
+  /* Bootsrap's default is 1170px */
+  width: 1270px;
+}
+    </style>
+</head>
+
+<body>
+
+<!-- Fixed navbar -->
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a id="index-selector" class="navbar-brand" href="#">Elasticsearch Benchmarks</a>
+    </div>
+    <div class="navbar-collapse collapse">
+      <ul id="navigation-container" class="nav navbar-nav">
+      </ul>
+    </div><!--/.nav-collapse -->
+
+  </div>
+</div>
+
+<div class="container tracks">
+  <div class="row">
+    <div class="col-md-8">
+      <h3>Results</h3>
+      <div class="alert alert-success alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>Hint</strong> These diagrams are just provided as an overview. Please go to the
+        <a id="dashboard-url" href="#">Kibana dashboard</a> if you want to analyze the results in more detail.
+      </div>
+      <form class="form-horizontal">
+        <div class="checkbox">
+          <label><input type="checkbox" id="checkToggleCompare"> Show release charts</label>
+        </div>
+        <div class="form-group" id="nightlyOptionsGroup">
+          <div class="col-md-4">
+            <label for="sel1"> Distribution flavor for nightly</label>
+            <select class="form-control" id="checkSelectDistribution"</select>
+            <option value="oss" selected>OSS</option>
+            <option value="default">Default</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="dateRangeSelector" class="control-label"> Date range for nightly</label>
+            <select class="form-control" id="dateRangeSelector">
+              <option value="30d" selected>Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+              <option value="6M">Last 6 months</option>
+              <option value="1y">Last year</option>
+            </select>
+          </div>
+        </div>
+      </form>
+      <div id="releaseLegend">
+        <h4>Legend</h4>
+        <ul>
+          <li><code>bare</code>: Elasticsearch on an unencrypted drive</li>
+          <li><code>ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
+          <li><code>docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
+          <li><code>oss</code>: Elasticsearch with <a href="https://github.com/elastic/elasticsearch#license">Apache 2.0 license</a></li>
+          <li><code>basic</code>: Elasticsearch with <a href="https://www.elastic.co/subscriptions">commercial Elastic license</a>; see <a href="https://www.elastic.co/products/x-pack/open">x-pack/open</a>.</li>
+          <li><code>trial-security</code>: Elasticsearch with <a href="https://www.elastic.co/products/x-pack/security">X-Pack Security</a> enabled.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="height:270em">
+    <div class="col-md-12">
+      <div id="charts" style="width:100%; height:100%"></div>
+    </div>
+  </div>
+</div> <!-- /container -->
+
+<!-- main content -->
+
+<div class="container methodology">
+  <div class="row">
+    <div class="col-md-12">
+      <h3>Overview</h3>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <p>On this page are the results of the Elasticsearch nightly benchmarks based on the <a href="https://github.com/elastic/elasticsearch">master</a>
+            branch as of that point in time. The Apache Software Foundation also provides a similar page for the <a
+                    href="https://people.apache.org/~mikemccand/lucenebench/">Lucene nightly benchmarks</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h3>Benchmarks</h3>
+      <ul id="tracks-overview-menu">
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-md-12">
+      <h3>Benchmarking Methodology</h3>
+      <p>All benchmarks are run by <a href="https://github.com/elastic/rally">Rally</a> against the <a href="https://github.com/elastic/elasticsearch/tree/master/">Elasticsearch master branch</a> as of that date. The benchmark uses four bare-metal server-class machines. On one we run the benchmark driver (Rally), on the other three the benchmark candidate (one to three Elasticsearch nodes, one per machine). All machines are connected via a dedicated 10 GBit switched network.</p>
+
+      <p>The benchmarks are intentionally not scalability benchmarks but rather show the performance characteristics of Elasticsearch ranging from one node to at most three nodes and are mainly intended to help the development team spot performance regressions.</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h3>Benchmarking Environment</h3>
+      <h4>Current environment</h4>
+      <p>All benchmarks are run on bare-metal machines with the following specifications:</p>
+      <ul>
+        <li>CPU: <a href="https://ark.intel.com/de/products/97128/Intel-Core-i7-7700-Processor-8M-Cache-up-to-4_20-GHz">Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz</a></li>
+        <li>RAM: 32 GB</li>
+        <li>SSD: <a style="font-family:monospace;" href="https://www.micron.com/~/media/documents/products/data-sheet/ssd/1100_ssd.pdf">Micron_1100_MTFDDAK512TBN</a></li>
+        <li>OS: Linux kernel version 4.13.0-45</li>
+        </li>
+        <li>OS TUNING:
+            <ul>
+                <li style="font-family:monospace;">/sys/kernel/mm/transparent_hugepage/enabled = always</li>
+                <li style="font-family:monospace;">/sys/kernel/mm/transparent_hugepage/defrag = always</li>
+            </ul>
+        </li>
+        <li>JVM: OpenJDK 11.0.2</li>
+      </ul>
+      <p>All machines are connected via a dedicated 10 GBit switched network.</p>
+      <h4>History of changes</h4>
+      <ul>
+        <li>2019-04-03:
+          <ul>
+            <li>Run nightly benchmarks with OpenJDK 11.0.2 instead of Oracle JDK 1.8.0_131-b11 (relates <a href="https://github.com/elastic/elasticsearch/pull/40754">elastic/elasticsearch#40754</a>)</li>
+          </ul>
+        </li>
+        <li>2018-10-02:
+          <ul>
+            <li>Replaced data disk (Samsung MZ7LN512HMJP-00000) on first target machine with another model (Micron_M600_MTFDDAK512MBF) resulting in higher performance in some benchmarks.</li>
+          </ul>
+        </li>
+        <li>2018-04-12:
+          <ul>
+            <li>Set <a href="https://www.kernel.org/doc/Documentation/vm/transhuge.txt">transparent_hugepage</a> <em style="font-family:monospace;">enabled</em> and <em style="font-family:monospace;">defrag</em> settings to <em style="font-family:monospace;">always</em>. This makes it consistent with the settings before the upgrade to 4.13.0.</li>
+            <li>Upgrade kernel from version 4.13.0-36 to 4.13.0-38.</li>
+          </ul>
+        </li>
+        <li>2018-02-21: Upgrade kernel from version 4.13.0-32 to 4.13.0-36.</li>
+        <li>2018-02-06: Upgrade kernel from version 4.8.0-53 to 4.13.0-32.</li>
+        <li>2017-10-06:
+          <ul>
+            <li>Change from one load generator and one target machine (connected via 1 GBit switch) to one load generator and three target machines (connected via 10 GBit switch).</li>
+            <li>CPU has changed from <a href="http://ark.intel.com/products/88196/Intel-Core-i7-6700-Processor-8M-Cache-up-to-4_00-GHz">Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz</a> to <a href="https://ark.intel.com/de/products/97128/Intel-Core-i7-7700-Processor-8M-Cache-up-to-4_20-GHz">Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz</a></li>
+            <li>Disk has changed from <a href="http://www.crucial.com/usa/en/storage-ssd-mx200">Crucial MX200</a> to <a href="http://www.samsung.com/semiconductor/products/flash-storage/client-ssd/MZ7LN512HMJP?ia=831">Samsung MZ7LN512HMJP-00000</a></li>
+          </ul>
+        </li>
+        <li>2017-06-29: Upgrade JDK from version 1.8.0_101-b13 to 1.8.0_131-b11</li>
+        <li>2017-06-29: Upgrade kernel from version 4.4.0-72 to 4.8.0-53</li>
+        <li>2017-04-13: Upgrade kernel from version 4.4.0-38 to 4.4.0-72</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script>
+  $(document).ready(function() {
+    charts.init([
+        {
+            "id": "geonames",
+            "track": "Geonames",
+            "description": "for evaluating the performance of structured data",
+            "nightly_dashboards": {
+                "oss": "28008f3a-a63f-4782-9717-09d9c74b539f",
+                "default": "006272bc-c436-4064-8c0b-c61460a79f90",
+            },
+            "release_dashboard": "c696beaa-7845-4e66-bded-b4b6fa5aabe3"
+        },
+        {
+            "id": "geopoint",
+            "track": "Geopoint",
+            "description": "for evaluating the performance of geo queries",
+            "nightly_dashboards": {
+              "oss": "25a7737b-4752-4257-b358-3adcd46a3b0b",
+              "default": "debbdcec-7908-4863-9e54-bbf12655c8db",
+            },
+            "release_dashboard": "fe806523-f37f-4d3a-ae3d-6202e8d732ff"
+        },
+        {
+            "id": "percolator",
+            "track": "Percolator",
+            "description": "for evaluating the performance of percolation queries",
+            "nightly_dashboards": {
+                "oss": "6fde079f-c867-4a33-93fa-69ad4f387829",
+                "default": "61b2e6d8-e119-4553-9d53-0f282ed87f38"
+            },
+            "release_dashboard": "34ac8dcc-dbe6-4f6c-a7d8-bec668cf22d4"
+        },
+        {
+            "id": "pmc",
+            "track": "PMC",
+            "description": "for evaluating the performance of full text search",
+            "nightly_dashboards": {
+                "oss": "ff71f3b6-872d-449c-bfd5-b380a6fdebaf",
+                "default": "65d13223-4c1b-4523-aa47-8d8937293e3c"
+            },
+            "release_dashboard": "022ae289-339f-4dfc-8680-2640bc072b6c"
+        },
+        {
+            "id": "nyc-taxis",
+            "track": "NYC taxis",
+            "description": "for evaluating the performance for highly structured data",
+            "nightly_dashboards": {
+                "oss": "9537ded9-f492-47c4-82dd-114584670a21",
+                "default": "3e586d4d-f15b-470a-888a-54bf68ba4683"
+            },
+            "release_dashboard": "91e68565-eb35-468e-a60d-93d688aa6aa9"
+        },
+        {
+            "id": "nested",
+            "track": "Nested",
+            "description": "for evaluating the performance for nested documents",
+            "nightly_dashboards": {
+              "oss": "dc40e780-0db6-4d17-8ab5-4e0643da71c3",
+              "default": "1b4fff1d-196b-4c5b-a529-b05a7d949220"
+            },
+            "release_dashboard": "f0990795-294b-4662-b0f7-a759dec440a3"
+        },
+        {
+            "id": "http-logs",
+            "track": "HTTP Logs",
+            "description": "for evaluating the performance of (Web) server logs",
+            "nightly_dashboards": {
+                "oss": "45d6b65b-f066-49f9-9cef-0114e1ca7744",
+                "release": "9c1e5719-92d7-478c-a6f3-8e867f30f716"
+            },
+            "release_dashboard": "77189b34-1ac8-4567-96cf-a574e0eff4c9"
+        },
+        {
+            "id": "noaa",
+            "track": "noaa",
+            "description": "for evaluating the performance of range fields",
+            "nightly_dashboards": {
+                "oss": "200fc903-6cb2-421b-a9f7-2e07672107ac",
+                "release": "6576c2b2-87ed-4693-bc05-3d8a96167229"
+            },
+            "release_dashboard": "37f2ef74-15ef-464d-a257-98a85d52fedc"
+        }
+    ], window.location.hash);
+  });
+</script>
+</body>
+</html>

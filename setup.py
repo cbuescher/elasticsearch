@@ -19,13 +19,21 @@ __versionstr__ = VERSION
 long_description = str_from_file("README.md")
 
 install_requires = [
+    # License: Apache 2.0
+    # transitive dependency urllib3: MIT
     "elasticsearch==6.2.0",
+    # License: MIT
     "tabulate==0.8.1",
+    # License: MIT
+    "jsonschema==2.5.1",
+    # always use the latest version, these are certificate files...
+    # License: MPL 2.0
     "certifi"
 ]
 
 tests_require = [
-    "pytest==3.4.2"
+    "pytest==4.2.0",
+    "pytest-cov"
 ]
 
 setup(name="night_rally",

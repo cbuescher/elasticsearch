@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "tracks",
+  "description": "Specification of race configurations for night-rally",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "properties": {
+      "track": {
+        "type": "string",
+        "description": "The name of the Rally track"
+      },
+      "flavors": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The name of the Elasticsearch distribution aka flavor to build; only allowable values, oss/default"
+            },
+            "licenses": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The license type configured for Elasticsearch; allowable values oss/basic/trial"
+                  },
+                  "configurations": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Unique name of the specific benchmark, also used as the name on the chart"
+                        },
+                        "label": {
+                          "type": "string",
+                          "description": "Label to use when displaying charts"
+                        },
+                        "charts": {
+                          "type": "array",
+                          "minItems": 0,
+                          "items": {
+                            "type": "string",
+                            "description": "Chart names to plot results on"
+                          }
+                        },
+                        "challenge": {
+                          "type": "string",
+                          "description": "Name of track's challenge to execute"
+                        },
+                        "track-params": {
+                          "type": "object"
+                        },
+                        "car": {
+                          "type": ["array", "string"],
+                          "description": "Car to use from rally-teams repo"
+                        },
+                        "node-count": {
+                          "type": "integer",
+                          "minimum": 1
+                        }
+                      },
+                      "required": ["name", "charts", "challenge"]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

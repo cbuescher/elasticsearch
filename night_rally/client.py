@@ -1,12 +1,18 @@
-def create_client():
+def create_client(configuration_name=None):
     import configparser
-    import os
     import elasticsearch
     import certifi
+    import pathlib
 
     def load():
         config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
-        config.read("%s/fixtures/ansible/roles/rally-update/templates/rally.ini.j2" % os.path.dirname(os.path.realpath(__file__)))
+        if configuration_name:
+            # invoked from night-rally
+            _rally_ini_path = str(pathlib.Path.home()/".rally"/"rally-{}.ini".format(configuration_name))
+        else:
+            # invoked from e.g. night-rally-admin, ini files not deployed via Ansible
+            _rally_ini_path = str(pathlib.PurePath(__file__).parent/"fixtures/ansible/roles/rally-update/templates/rally.ini.j2")
+        config.read(_rally_ini_path)
         return config
 
     complete_cfg = load()

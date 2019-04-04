@@ -1,6 +1,6 @@
 ---
 
-- include: '{{ distribution_item }}'
+- include_tasks: '{{ distribution_item }}'
   become: true
   with_first_found:
     - '{{ distribution_id }}.yml'
