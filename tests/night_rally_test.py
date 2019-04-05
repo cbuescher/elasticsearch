@@ -352,7 +352,8 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("nightly", start_date, 8, "bare")]
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("nightly", start_date, 8, "bare", race_configs_id=race_configs_id)]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -361,17 +362,17 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-append-1node,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--car-params=\"{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\"}\" "
+                "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--car-params=\"{{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\"}}\" "
                 "--pipeline=\"from-sources-complete\" "
-                "--revision=\"@2016-01-01T00:00:00Z\"",
+                "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts-index-only\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-append-4g-1node,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--track-params=\"{\\\"number_of_replicas\\\": 0}\" --pipeline=\"from-sources-skip-build\" "
-                "--revision=\"@2016-01-01T00:00:00Z\""
+                "--user-tag=\"name:geonames-append-4g-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--track-params=\"{{\\\"number_of_replicas\\\": 0}}\" --pipeline=\"from-sources-skip-build\" "
+                "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
             ]
             ,
             system_call.calls
@@ -436,7 +437,8 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 1, 1)
-        params = [night_rally.StandardParams("nightly", start_date, 8, "bare")]
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("nightly", start_date, 8, "bare", race_configs_id=race_configs_id)]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(4, len(system_call.calls))
@@ -445,30 +447,29 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--car-params=\"{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\"}\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--car-params=\"{{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\"}}\" "
                 "--pipeline=\"from-sources-complete\" "
-                "--revision=\"@2016-01-01T00:00:00Z\"",
+                "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" --pipeline=\"from-sources-skip-build\" "
-                "--revision=\"@2016-01-01T00:00:00Z\"",
+                "--user-tag=\"name:geonames-4g,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:basic\" --runtime-jdk=\"8\" "
-                "--car-params=\"{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\"}\" "
-                "--pipeline=\"from-sources-complete\" "
-                "--revision=\"@2016-01-01T00:00:00Z\"",
+                "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"8\" "
+                "--car-params=\"{{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\"}}\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:bare,license:basic\" --runtime-jdk=\"8\" --pipeline=\"from-sources-skip-build\" "
-                "--revision=\"@2016-01-01T00:00:00Z\""
+                "--user-tag=\"name:geonames-4g,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
             ]
             ,
             system_call.calls
@@ -522,7 +523,8 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 10, 1)
-        params = [night_rally.StandardParams("nightly", start_date, 8, "bare")]
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("nightly", start_date, 8, "bare", race_configs_id=race_configs_id)]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -531,14 +533,15 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"",
+                "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:percolator-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" --pipeline=\"from-sources-skip-build\" "
-                "--revision=\"@2016-10-01T00:00:00Z\""
+                "--user-tag=\"name:percolator-4g,setup:bare,race-configs-id:{},license:oss\" "
+                "--runtime-jdk=\"8\" --pipeline=\"from-sources-skip-build\" "
+                "--revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id)
             ]
             ,
             system_call.calls
@@ -650,7 +653,8 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 10, 1)
-        params = [night_rally.StandardParams("nightly", start_date, 8, "bare")]
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("nightly", start_date, 8, "bare", race_configs_id=race_configs_id)]
         cmd = night_rally.NightlyCommand(params, start_date)
         night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(6, len(system_call.calls))
@@ -659,20 +663,20 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"",
+                "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-append-4g-3nodes,setup:bare,license:basic\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"",
+                "--user-tag=\"name:geonames-append-4g-3nodes,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults,trial-license\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:trial\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"",
+                "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:trial\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
                 'rally --skip-update --configuration-name="nightly" --quiet '
                 '--target-host="localhost:39200" --effective-start-date="2016-10-01 00:00:00" '
@@ -680,12 +684,12 @@ class NightRallyTests(unittest.TestCase):
                 '--car="defaults,trial-license,x-pack-security" '
                 '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
                 ',basic_auth_password:\'rally-password\'" '
-                '--user-tag="name:geonames-append-defaults-x-pack-security-1node,setup:bare,license:trial,x-pack:true" '
-                '--runtime-jdk="8" --car-params="{\\"xpack_ml_enabled\\": false, '
-                '\\"xpack_monitoring_enabled\\": false, \\"xpack_watcher_enabled\\": false}" '
-                '--track-params="{\\"number_of_replicas\\": 0}" '
+                '--user-tag="name:geonames-append-defaults-x-pack-security-1node,setup:bare,race-configs-id:{},license:trial,x-pack:true" '
+                '--runtime-jdk="8" --car-params="{{\\"xpack_ml_enabled\\": false, '
+                '\\"xpack_monitoring_enabled\\": false, \\"xpack_watcher_enabled\\": false}}" '
+                '--track-params="{{\\"number_of_replicas\\": 0}}" '
                 # recompile as license has changed
-                '--pipeline="from-sources-complete" --revision="@2016-10-01T00:00:00Z"',
+                '--pipeline="from-sources-complete" --revision="@2016-10-01T00:00:00Z"'.format(race_configs_id),
 
                 'rally --skip-update --configuration-name="nightly" --quiet '
                 '--target-host="localhost:39200" --effective-start-date="2016-10-01 00:00:00" '
@@ -693,10 +697,10 @@ class NightRallyTests(unittest.TestCase):
                 '--car="4gheap,trial-license,x-pack-security" '
                 '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
                 ',basic_auth_password:\'rally-password\'" '
-                '--user-tag="name:percolator-4g,setup:bare,license:trial,x-pack:true" --runtime-jdk="8" '
-                '--car-params="{\\"xpack_ml_enabled\\": false, \\"xpack_monitoring_enabled\\": false, '
-                '\\"xpack_watcher_enabled\\": false}" --pipeline="from-sources-skip-build" '
-                '--revision="@2016-10-01T00:00:00Z"',
+                '--user-tag="name:percolator-4g,setup:bare,race-configs-id:{},license:trial,x-pack:true" --runtime-jdk="8" '
+                '--car-params="{{\\"xpack_ml_enabled\\": false, \\"xpack_monitoring_enabled\\": false, '
+                '\\"xpack_watcher_enabled\\": false}}" --pipeline="from-sources-skip-build" '
+                '--revision="@2016-10-01T00:00:00Z"'.format(race_configs_id),
 
                 'rally --skip-update --configuration-name="nightly" --quiet '
                 '--target-host="localhost:39200" --effective-start-date="2016-10-01 00:00:00" '
@@ -704,10 +708,10 @@ class NightRallyTests(unittest.TestCase):
                 '--car="defaults,trial-license,x-pack-security" '
                 '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
                 ',basic_auth_password:\'rally-password\'" '
-                '--user-tag="name:percolator,setup:bare,license:trial,x-pack:true" --runtime-jdk="8" '
-                '--car-params="{\\"xpack_ml_enabled\\": false, \\"xpack_monitoring_enabled\\": false, '
-                '\\"xpack_watcher_enabled\\": false}" --pipeline="from-sources-skip-build" '
-                '--revision="@2016-10-01T00:00:00Z"'
+                '--user-tag="name:percolator,setup:bare,race-configs-id:{},license:trial,x-pack:true" --runtime-jdk="8" '
+                '--car-params="{{\\"xpack_ml_enabled\\": false, \\"xpack_monitoring_enabled\\": false, '
+                '\\"xpack_watcher_enabled\\": false}}" --pipeline="from-sources-skip-build" '
+                '--revision="@2016-10-01T00:00:00Z"'.format(race_configs_id)
             ]
             ,
             system_call.calls
@@ -762,7 +766,8 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 10, 1)
-        params = [night_rally.StandardParams("lucene-7", start_date, 8, "bare")]
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("lucene-7", start_date, 8, "bare", race_configs_id=race_configs_id)]
         cmd = night_rally.AdHocCommand(params, "66202dc")
 
         night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -772,14 +777,14 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"lucene-7\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-complete\" --revision=\"66202dc\"",
+                "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"66202dc\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"lucene-7\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:percolator-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-skip-build\" --revision=\"66202dc\""
+                "--user-tag=\"name:percolator-4g,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-skip-build\" --revision=\"66202dc\"".format(race_configs_id)
             ]
             ,
             system_call.calls
@@ -819,9 +824,9 @@ class NightRallyTests(unittest.TestCase):
 
         start_date = datetime.datetime(2016, 1, 1)
         release_params= OrderedDict({"license": "oss"})
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss")]
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        cmd = night_rally.ReleaseCommand(params, release_params, "5.3.0", race_configs_id=race_configs_id)
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss", race_configs_id=race_configs_id)]
+        cmd = night_rally.ReleaseCommand(params, release_params, "5.3.0")
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
@@ -829,14 +834,14 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare-oss,license:oss,race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare-oss,race-configs-id:{},license:oss\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"5.3.0\" "
                 "--pipeline=\"from-distribution\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:bare-oss,license:oss,race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-4g,setup:bare-oss,race-configs-id:{},license:oss\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"5.3.0\" "
                 "--pipeline=\"from-distribution\"".format(race_configs_id)
             ]
@@ -922,10 +927,10 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 1, 1)
+        race_configs_id = os.path.basename(get_random_race_configs_id())
         release_params = OrderedDict({"license": "trial", "x-pack-components": ["security", "monitoring"]})
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security")]
-        race_configs_ids = os.path.basename(get_random_race_configs_id())
-        cmd = night_rally.ReleaseCommand(params, release_params, "5.4.0", race_configs_id=race_configs_ids)
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security", race_configs_id=race_configs_id)]
+        cmd = night_rally.ReleaseCommand(params, release_params, "5.4.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(3, len(system_call.calls))
@@ -936,32 +941,32 @@ class NightRallyTests(unittest.TestCase):
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" "
                 "--client-options=\"timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare-trial-security,license:trial,x-pack:true,"
-                "x-pack-components:[\'security\', \'monitoring\'],race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare-trial-security,race-configs-id:{},license:trial,x-pack:true,"
+                "x-pack-components:[\'security\', \'monitoring\']\" "
                 "--runtime-jdk=\"8\" --track-params=\"bulk_size:3000\" "
                 "--elasticsearch-plugins=\"x-pack:security+monitoring\" "
-                "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"".format(race_configs_ids),
+                "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" "
                 "--client-options=\"timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" "
-                "--user-tag=\"name:geonames-4g,setup:bare-trial-security,license:trial,x-pack:true,"
-                "x-pack-components:[\'security\', \'monitoring\'],race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-4g,setup:bare-trial-security,race-configs-id:{},license:trial,x-pack:true,"
+                "x-pack-components:[\'security\', \'monitoring\']\" "
                 "--runtime-jdk=\"8\" --track-params=\"bulk_size:2000\" "
                 "--elasticsearch-plugins=\"x-pack:security+monitoring\" --distribution-version=\"5.4.0\" "
-                "--pipeline=\"from-distribution\"".format(race_configs_ids),
+                "--pipeline=\"from-distribution\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" --challenge=\"append-ml\" "
                 "--car=\"4gheap\" --client-options=\"timeout:240,use_ssl:true,verify_certs:false,"
                 "basic_auth_user:'rally',basic_auth_password:'rally-password'\" "
-                "--user-tag=\"name:geonames-4g-with-ml,setup:bare-trial-security,license:trial,x-pack:true"
-                ",x-pack-components:[\'security\', \'monitoring\'],race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-4g-with-ml,setup:bare-trial-security,race-configs-id:{},license:trial,x-pack:true"
+                ",x-pack-components:[\'security\', \'monitoring\']\" "
                 "--runtime-jdk=\"8\""
                 " --elasticsearch-plugins=\"x-pack:ml+security+monitoring\" "
-                "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"".format(race_configs_ids),
+                "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"".format(race_configs_id),
             ]
             ,
             system_call.calls
@@ -1014,10 +1019,10 @@ class NightRallyTests(unittest.TestCase):
 
         start_date = datetime.datetime(2016, 1, 1)
         release_params = OrderedDict({"license": "trial", "x-pack-components": ["security"]})
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security")]
         race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security", race_configs_id=race_configs_id)]
         # 6.3.0 is the first version to include x-pack as a module
-        cmd = night_rally.ReleaseCommand(params, release_params, "6.3.0", race_configs_id=race_configs_id)
+        cmd = night_rally.ReleaseCommand(params, release_params, "6.3.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -1028,8 +1033,8 @@ class NightRallyTests(unittest.TestCase):
              '--car="defaults,trial-license,x-pack-security" '
              '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
              ',basic_auth_password:\'rally-password\'" '
-             '--user-tag="name:geonames-defaults,setup:bare-trial-security,license:trial,x-pack:true,x-pack-components:[\'security\']'
-             ",race-configs-id:{}\" "
+             "--user-tag=\"name:geonames-defaults,setup:bare-trial-security,race-configs-id:{},license:trial,"
+             "x-pack:true,x-pack-components:[\'security\']\" "
              '--runtime-jdk="8" --distribution-version="6.3.0" '
              '--pipeline="from-distribution"'.format(race_configs_id),
 
@@ -1039,8 +1044,8 @@ class NightRallyTests(unittest.TestCase):
              '--car="4gheap,trial-license,x-pack-security" '
              '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
              ',basic_auth_password:\'rally-password\'" '
-             '--user-tag="name:geonames-4g,setup:bare-trial-security,license:trial,x-pack:true,x-pack-components:[\'security\'],'
-             "race-configs-id:{}\" "
+             "--user-tag=\"name:geonames-4g,setup:bare-trial-security,race-configs-id:{},license:trial,"
+             "x-pack:true,x-pack-components:[\'security\']\" "
              '--runtime-jdk="8" --distribution-version="6.3.0" '
              '--pipeline="from-distribution"'.format(race_configs_id)]
             ,
@@ -1093,9 +1098,9 @@ class NightRallyTests(unittest.TestCase):
 
         start_date = datetime.datetime(2016, 1, 1)
         release_params = OrderedDict({"license": "basic"})
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic")]
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="7.0.0", race_configs_id=race_configs_id)
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
+        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="7.0.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(1, len(system_call.calls))
@@ -1106,7 +1111,7 @@ class NightRallyTests(unittest.TestCase):
                 '--track="geonames" --challenge="append-no-conflicts" '
                 '--car="defaults,basic-license" '
                 '--client-options="timeout:240" '
-                "--user-tag=\"name:geonames-defaults,setup:bare-basic,license:basic,race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare-basic,race-configs-id:{},license:basic\" "
                 '--runtime-jdk="8" '
                 '--distribution-version="7.0.0" --pipeline="from-distribution"'.format(race_configs_id)
             ]
@@ -1145,9 +1150,9 @@ class NightRallyTests(unittest.TestCase):
 
         start_date = datetime.datetime(2016, 1, 1)
         release_params = OrderedDict({"license": "oss"})
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss")]
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="7.0.0", race_configs_id=race_configs_id)
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss",race_configs_id=race_configs_id)]
+        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="7.0.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(1, len(system_call.calls))
@@ -1158,7 +1163,7 @@ class NightRallyTests(unittest.TestCase):
                 '--track="geonames" --challenge="append-no-conflicts" '
                 '--car="defaults,unpooled" '
                 '--client-options="timeout:240" '
-                "--user-tag=\"name:geonames-defaults,setup:bare-oss,license:oss,race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare-oss,race-configs-id:{},license:oss\" "
                 '--runtime-jdk="8" --elasticsearch-plugins="transport-nio:transport+http" '
                 '--distribution-version="7.0.0" --pipeline="from-distribution"'.format(race_configs_id)
             ]
@@ -1195,9 +1200,10 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 1, 1)
+        race_configs_id = os.path.basename(get_random_race_configs_id())
         release_params = {"license": "trial", "x-pack-components": ["security"]}
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security")]
-        cmd = night_rally.ReleaseCommand(params, release_params, "7.0.0", race_configs_id="raceconfigs.json")
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security", race_configs_id=race_configs_id)]
+        cmd = night_rally.ReleaseCommand(params, release_params, "7.0.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(0, len(system_call.calls))
@@ -1237,8 +1243,9 @@ class NightRallyTests(unittest.TestCase):
 
         start_date = datetime.datetime(2016, 1, 1)
         release_params = {"license": "oss", "x-pack-components": ["ml"]}
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss")]
-        cmd = night_rally.ReleaseCommand(params, release_params, "7.0.0", race_configs_id="raceconfigs.json")
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss", race_configs_id=race_configs_id)]
+        cmd = night_rally.ReleaseCommand(params, release_params, "7.0.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(0, len(system_call.calls))
@@ -1272,9 +1279,10 @@ class NightRallyTests(unittest.TestCase):
         ]
         start_date = datetime.datetime(2016, 1, 1)
         release_params = {"license": "oss"}
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss")]
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss", race_configs_id=race_configs_id)]
         # 6.2.0 does not have transport-nio available
-        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="6.2.0", race_configs_id="raceconfigs.json")
+        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="6.2.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(0, len(system_call.calls))
@@ -1315,9 +1323,9 @@ class NightRallyTests(unittest.TestCase):
         ]
         start_date = datetime.datetime(2016, 1, 1)
         release_params = OrderedDict({"license": "oss"})
-        params = [night_rally.StandardParams("release", start_date, 8, "docker-oss")]
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        cmd = night_rally.DockerCommand(params, release_params, "5.6.0", race_configs_id=race_configs_id)
+        params = [night_rally.StandardParams("release", start_date, 8, "docker-oss", race_configs_id=race_configs_id)]
+        cmd = night_rally.DockerCommand(params, release_params, "5.6.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -1326,7 +1334,7 @@ class NightRallyTests(unittest.TestCase):
                 'rally --skip-update --configuration-name="release" --quiet --target-host="localhost:39200" '
                 '--effective-start-date="2016-01-01 00:00:00" --track="geonames" '
                 '--challenge="append-no-conflicts" --car="defaults" --client-options="timeout:240" '
-                "--user-tag=\"name:geonames-defaults,setup:docker-oss,license:oss,race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-defaults,setup:docker-oss,race-configs-id:{},license:oss\" "
                 '--runtime-jdk="8" --distribution-version="5.6.0" '
                 '--pipeline="docker" --car-params="{{\\"additional_cluster_settings\\": '
                 '{{\\"xpack.security.enabled\\": \\"false\\", \\"xpack.ml.enabled\\": \\"false\\", '
@@ -1335,7 +1343,7 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:docker-oss,license:oss,race-configs-id:{}\" --runtime-jdk=\"8\" "
+                "--user-tag=\"name:geonames-4g,setup:docker-oss,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
                 "--car-params=\"{{\\\"verbose_iw_logging_enabled\\\": \\\"true\\\", \\\"additional_cluster_settings\\\": "
                 "{{\\\"xpack.security.enabled\\\": \\\"false\\\", \\\"xpack.ml.enabled\\\": \\\"false\\\", "
                 "\\\"xpack.monitoring.enabled\\\": \\\"false\\\", \\\"xpack.watcher.enabled\\\": \\\"false\\\"}}}}\" "
@@ -1378,9 +1386,9 @@ class NightRallyTests(unittest.TestCase):
         ]
         start_date = datetime.datetime(2016, 1, 1)
         release_params = OrderedDict({"license": "oss"})
-        params = [night_rally.StandardParams("release", start_date, 8, "docker-oss")]
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        cmd = night_rally.DockerCommand(params, release_params, "6.3.0", race_configs_id=race_configs_id)
+        params = [night_rally.StandardParams("release", start_date, 8, "docker-oss", race_configs_id=race_configs_id)]
+        cmd = night_rally.DockerCommand(params, release_params, "6.3.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -1389,14 +1397,14 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:docker-oss,license:oss,race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-defaults,setup:docker-oss,race-configs-id:{},license:oss\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"6.3.0\" "
                 "--pipeline=\"docker\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:docker-oss,license:oss,race-configs-id:{}\" "
+                "--user-tag=\"name:geonames-4g,setup:docker-oss,race-configs-id:{},license:oss\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"6.3.0\" "
                 "--pipeline=\"docker\"".format(race_configs_id)
             ]

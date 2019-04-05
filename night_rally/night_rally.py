@@ -236,11 +236,11 @@ class AdHocCommand(SourceBasedCommand):
 
 
 class ReleaseCommand(BaseCommand):
-    def __init__(self, params, release_params, distribution_version, race_configs_id):
+    def __init__(self, params, release_params, distribution_version):
         self.distribution_version = distribution_version
         self.release_params = release_params
         self.params = ParamsFormatter(params=params + [
-            LicenseParams(distribution_version, release_params, race_configs_id),
+            LicenseParams(distribution_version, release_params),
             ConstantParam("distribution-version", distribution_version),
             ConstantParam("pipeline", "from-distribution")
         ])
@@ -280,12 +280,12 @@ class ReleaseCommand(BaseCommand):
 
 
 class DockerCommand(BaseCommand):
-    def __init__(self, params, release_params, distribution_version, race_configs_id):
+    def __init__(self, params, release_params, distribution_version):
         self.pipeline = "docker"
         self.distribution_version = distribution_version
 
         docker_params = [
-            LicenseParams(distribution_version, release_params, race_configs_id),
+            LicenseParams(distribution_version, release_params),
             ConstantParam("distribution-version", distribution_version),
             ConstantParam("pipeline", "docker")
         ]
@@ -395,11 +395,12 @@ class StandardParams:
     """
     Extracts all parameters that are needed for all Rally invocations.
     """
-    def __init__(self, configuration_name, effective_start_date, runtime_jdk, user_tag_setup, test_mode=False):
+    def __init__(self, configuration_name, effective_start_date, runtime_jdk, user_tag_setup, race_configs_id=None, test_mode=False):
         self.configuration_name = configuration_name
         self.effective_start_date = effective_start_date
         self.runtime_jdk = runtime_jdk
         self.user_tag_setup = user_tag_setup
+        self.race_configs_id = race_configs_id
         self.test_mode = test_mode
 
     def __call__(self, race_config):
@@ -411,9 +412,16 @@ class StandardParams:
             "track": race_config.track,
             "challenge": race_config.challenge,
             "car": race_config.car,
-            "client-options": "timeout:240",
-            "user-tag": self.tags(additional_tags={"name": race_config.name, "setup": self.user_tag_setup})
+            "client-options": "timeout:240"
         }
+
+        additional_tags = {
+            "name": race_config.name,
+            "setup": self.user_tag_setup}
+        if self.race_configs_id:
+            additional_tags["race-configs-id"] = self.race_configs_id
+        params["user-tag"] = self.tags(additional_tags=additional_tags)
+
         add_if_present(params, "runtime-jdk", self.runtime_jdk)
         add_if_present(params, "car-params", race_config.car_params)
         add_if_present(params, "track-params", race_config.track_params)
@@ -434,7 +442,7 @@ class LicenseParams:
     Extracts all license related parameters that affect benchmarking. Before Elasticsearch 6.3.0 x-pack is considered a plugin.
     For later versions it is treated as module.
     """
-    def __init__(self, distribution_version, release_params=None, race_configs_id=None):
+    def __init__(self, distribution_version, release_params=None):
         if distribution_version == "master":
             self.treat_as_car = True
         else:
@@ -443,7 +451,6 @@ class LicenseParams:
 
         self.distribution_version = distribution_version
         self.release_params = release_params
-        self.race_configs_id = race_configs_id
 
     def __call__(self, race_config):
         params = {}
@@ -491,8 +498,6 @@ class LicenseParams:
             user_tags += ["x-pack:true"]
         if self.release_params and "x-pack-components" in self.release_params:
             user_tags += ["x-pack-components:{}".format(self.release_params["x-pack-components"])]
-        if self.race_configs_id:
-            user_tags += ["race-configs-id:{}".format(self.race_configs_id)]
         return user_tags
 
 
@@ -648,6 +653,18 @@ def copy_results_for_release_comparison(effective_start_date, configuration_name
                                 }
                             }
                         },
+                        # also limit by environment in case of multiple night-rally jobs executed at the same time using different env
+                        {
+                            "term": {
+                                "environment": configuration_name
+                            }
+                        },
+                        # and avoid race conditions with >1 night-rally invocations on different hardware using same environment
+                        {
+                              "term": {
+                                  "user-tags.race-configs-id": race_configs_id
+                              }
+                        },
                         {
                             "bool": {
                                 "must_not": [
@@ -681,7 +698,6 @@ def copy_results_for_release_comparison(effective_start_date, configuration_name
             src["environment"] = "release-new"
             # release benchmarks rely on `user-tags.setup` for bar charts and this depends on the license
             src["user-tags"]["setup"] = "bare-{}".format(src["user-tags"]["license"])
-            src["user-tags"]["race-configs-id"] = race_configs_id
             release_results.append(src)
         if release_results:
             logger.info("Copying %d result documents for [%s] to release environment." % (len(release_results), ts))
@@ -946,21 +962,23 @@ def main():
         params.append(TelemetryParams(args.telemetry, args.telemetry_params))
 
     if common_cli_params.is_release:
-        params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk, common_cli_params.setup, args.test_mode))
+        params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk,
+                                     common_cli_params.setup, common_cli_params.race_configs_id, args.test_mode))
         if common_cli_params.is_docker:
             logger.info("Running Docker release benchmarks for release [%s] against %s." % (common_cli_params.version, target_hosts))
-            command = DockerCommand(params, common_cli_params.release_params, common_cli_params.version, common_cli_params.race_configs_id)
+            command = DockerCommand(params, common_cli_params.release_params, common_cli_params.version)
         else:
             logger.info("Running release benchmarks for release [%s] against %s (release tag is [%s])."
                         % (common_cli_params.version, target_hosts, common_cli_params.printable_release_params))
-            command = ReleaseCommand(params, common_cli_params.release_params, common_cli_params.version, common_cli_params.race_configs_id)
+            command = ReleaseCommand(params, common_cli_params.release_params, common_cli_params.version)
     elif common_cli_params.is_adhoc:
         logger.info("Running adhoc benchmarks for revision [%s] against %s." % (args.revision, target_hosts))
         params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk, common_cli_params.setup, args.test_mode))
         command = AdHocCommand(params, args.revision)
     else:
         logger.info("Running nightly benchmarks against %s." % target_hosts)
-        params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk, common_cli_params.setup, args.test_mode))
+        params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk,
+                                     common_cli_params.setup, common_cli_params.race_configs_id, args.test_mode))
         command = NightlyCommand(params, start_date)
 
     rally_failure = run_rally(tracks, common_cli_params.release_params, target_hosts, command, args.dry_run, args.skip_ansible)
