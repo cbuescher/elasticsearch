@@ -55,8 +55,9 @@ var charts = {
     if (uiState.length >= 2) {
         $("#checkToggleCompare").prop('checked', uiState[1] === "release");
     }
-    if (uiState.length >= 3) {
-        $("#dateRangeSelector").val(uiState[2]);
+    if (uiState.length >= 4) {
+        $("#dateRangeSelector").val(uiState[3]);
+        $("#checkSelectDistribution").val(uiState[2]);
     }
   },
 
@@ -454,7 +455,7 @@ body,html,.main-display-area,.col-md-12 {
             "description": "for evaluating the performance of (Web) server logs",
             "nightly_dashboards": {
                 "oss": "45d6b65b-f066-49f9-9cef-0114e1ca7744",
-                "release": "9c1e5719-92d7-478c-a6f3-8e867f30f716"
+                "release": "4805a294-2701-4919-a77a-bfd562b654ff"
             },
             "release_dashboard": "77189b34-1ac8-4567-96cf-a574e0eff4c9"
         },
