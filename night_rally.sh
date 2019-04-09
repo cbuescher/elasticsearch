@@ -118,7 +118,7 @@ case ${i} in
     shift # past argument=value
     ;;
     *)
-    echo "unknown command line option passed to night_rally"
+    echo "unknown command line option [${i}] passed to night_rally"
     exit 1
     ;;
 esac
