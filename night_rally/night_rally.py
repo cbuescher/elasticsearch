@@ -782,6 +782,15 @@ def deactivate_outdated_results(effective_start_date, configuration_name, releas
         logger.info("Result: %s" % res)
 
 
+def non_empty_string(v):
+    if isinstance(v, str):
+        if not v:
+            raise argparse.ArgumentTypeError("must be non-empty")
+    else:
+        raise argparse.ArgumentTypeError("[{}] must be a string.".format(v))
+    return v
+
+
 def parse_args():
     parser = argparse.ArgumentParser(prog="es-night-rally", description="Nightly Elasticsearch benchmarks")
 
@@ -839,6 +848,8 @@ def parse_args():
         "--race-configs",
         help="Relative path to the json file that contains the race configs to run. "
              "The path is relative to <night_rally_repo>/night_rally e.g. resources/race-configs-group-1.json",
+        required=True,
+        type=non_empty_string,
         default=None)
     parser.add_argument(
         "--telemetry",
