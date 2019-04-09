@@ -709,8 +709,6 @@ def deactivate_outdated_results(effective_start_date, configuration_name, releas
     Sets all results for the same major release version, environment, tag and race_configs_id to active=False except for the records
     with the provided effective start date.
     """
-    from night_rally import client
-    es = client.create_client(configuration_name)
     ts = to_iso8601_short(effective_start_date)
     if not environment:
         # TODO change release-new (in the comment) to release after cut-over
@@ -777,6 +775,8 @@ def deactivate_outdated_results(effective_start_date, configuration_name, releas
         import json
         logger.info("Would execute update query script\n%s" % json.dumps(body, indent=2))
     else:
+        from night_rally import client
+        es = client.create_client(configuration_name)
         es.indices.refresh(index="rally-results-*")
         res = es.update_by_query(index="rally-results-*", body=body, size=10000)
         logger.info("Result: %s" % res)
