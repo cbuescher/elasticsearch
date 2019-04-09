@@ -191,7 +191,7 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertEqual("6.5.1", common_cli_params.version)
         self.assertEqual({
             "license": "trial",
-            "x-pack-components": ["security", "monitoring"]},
+            "x-pack-components": ["security","monitoring"]},
             common_cli_params.release_params
         )
         self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
@@ -942,7 +942,7 @@ class NightRallyTests(unittest.TestCase):
                 "--client-options=\"timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare-trial-security,race-configs-id:{},license:trial,x-pack:true,"
-                "x-pack-components:[\'security\', \'monitoring\']\" "
+                "x-pack-components:security,monitoring\" "
                 "--runtime-jdk=\"8\" --track-params=\"bulk_size:3000\" "
                 "--elasticsearch-plugins=\"x-pack:security+monitoring\" "
                 "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"".format(race_configs_id),
@@ -953,7 +953,7 @@ class NightRallyTests(unittest.TestCase):
                 "--client-options=\"timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
                 "basic_auth_password:'rally-password'\" "
                 "--user-tag=\"name:geonames-4g,setup:bare-trial-security,race-configs-id:{},license:trial,x-pack:true,"
-                "x-pack-components:[\'security\', \'monitoring\']\" "
+                "x-pack-components:security,monitoring\" "
                 "--runtime-jdk=\"8\" --track-params=\"bulk_size:2000\" "
                 "--elasticsearch-plugins=\"x-pack:security+monitoring\" --distribution-version=\"5.4.0\" "
                 "--pipeline=\"from-distribution\"".format(race_configs_id),
@@ -963,7 +963,7 @@ class NightRallyTests(unittest.TestCase):
                 "--car=\"4gheap\" --client-options=\"timeout:240,use_ssl:true,verify_certs:false,"
                 "basic_auth_user:'rally',basic_auth_password:'rally-password'\" "
                 "--user-tag=\"name:geonames-4g-with-ml,setup:bare-trial-security,race-configs-id:{},license:trial,x-pack:true"
-                ",x-pack-components:[\'security\', \'monitoring\']\" "
+                ",x-pack-components:security,monitoring\" "
                 "--runtime-jdk=\"8\""
                 " --elasticsearch-plugins=\"x-pack:ml+security+monitoring\" "
                 "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"".format(race_configs_id),
@@ -1034,7 +1034,7 @@ class NightRallyTests(unittest.TestCase):
              '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
              ',basic_auth_password:\'rally-password\'" '
              "--user-tag=\"name:geonames-defaults,setup:bare-trial-security,race-configs-id:{},license:trial,"
-             "x-pack:true,x-pack-components:[\'security\']\" "
+             "x-pack:true,x-pack-components:security\" "
              '--runtime-jdk="8" --distribution-version="6.3.0" '
              '--pipeline="from-distribution"'.format(race_configs_id),
 
@@ -1045,7 +1045,7 @@ class NightRallyTests(unittest.TestCase):
              '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
              ',basic_auth_password:\'rally-password\'" '
              "--user-tag=\"name:geonames-4g,setup:bare-trial-security,race-configs-id:{},license:trial,"
-             "x-pack:true,x-pack-components:[\'security\']\" "
+             "x-pack:true,x-pack-components:security\" "
              '--runtime-jdk="8" --distribution-version="6.3.0" '
              '--pipeline="from-distribution"'.format(race_configs_id)]
             ,

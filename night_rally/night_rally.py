@@ -497,7 +497,7 @@ class LicenseParams:
         if x_pack:
             user_tags += ["x-pack:true"]
         if self.release_params and "x-pack-components" in self.release_params:
-            user_tags += ["x-pack-components:{}".format(self.release_params["x-pack-components"])]
+            user_tags += ["x-pack-components:{}".format(",".join(self.release_params["x-pack-components"]))]
         return user_tags
 
 
