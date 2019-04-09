@@ -863,12 +863,12 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_tracks(tracks):
-    path = os.path.join(ROOT, tracks)
-    with open(path, mode="rt", encoding="utf-8") as tracks_file:
-        tracks_json = json.load(tracks_file)
-    validate_race_configs(tracks_json)
-    return tracks_json
+def load_race_configs(race_configs):
+    path = os.path.join(ROOT, race_configs)
+    with open(path, mode="rt", encoding="utf-8") as race_configs_file:
+        race_configs_json = json.load(race_configs_file)
+    validate_race_configs(race_configs_json)
+    return race_configs_json
 
 
 class CommonCliParams:
@@ -965,7 +965,7 @@ def main():
     )
 
     target_hosts = args.target_host.split(",")
-    tracks = load_tracks(args.race_configs)
+    tracks = load_race_configs(args.race_configs)
     params = []
 
     if args.telemetry:
