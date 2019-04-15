@@ -2,9 +2,6 @@
 
 - name: install production Rally config file
   become: true
-  environment:
-    # needs to be passed explicitly as we are becoming a different user
-    RALLY_METRICS_STORE_CREDENTIAL_PATH: "{{ metrics_store_credential_path | default('')}}"
   template:
     src: rally.ini.j2
     dest: /var/lib/jenkins/.rally/rally-{{ rally_environment }}.ini

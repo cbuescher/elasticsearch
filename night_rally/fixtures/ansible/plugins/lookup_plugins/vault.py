@@ -61,6 +61,8 @@ class LookupModule(LookupBase):
 
         term_split = terms[0].split(" ", 1)
         key = term_split[0]
+        if not key:
+            raise AnsibleError("Key must be non-empty")
 
         try:
             parameters = term_split[1]

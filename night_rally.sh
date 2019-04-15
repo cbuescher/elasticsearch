@@ -28,7 +28,7 @@ NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 if [[ -n $VAULT_SECRET_ID && -n $VAULT_ROLE_ID ]]; then
     export VAULT_TOKEN=$( curl -s -X POST -H "Content-Type: application/json" -L -d "{\"role_id\":\"$VAULT_ROLE_ID\",\"secret_id\":\"$VAULT_SECRET_ID\"}" $VAULT_ADDR/v1/auth/approle/login | jq -r '.auth.client_token')
 fi
-RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-"/secret/rally/cloud/nightly-rally-metrics"}
+export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-"/secret/rally/cloud/nightly-rally-metrics"}
 
 ANSIBLE_ALL_TAGS=(encryption-at-rest initialize-data-disk trim drop-caches)
 ANSIBLE_SKIP_TAGS=( )
@@ -188,7 +188,7 @@ then
 
         cd ${NIGHT_RALLY_HOME}/night_rally/fixtures/ansible
         # TODO remove "-new" after cutover
-        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE_PREFIX}-new in_vagrant=${IN_VAGRANT} metrics_store_credential_path=${RALLY_METRICS_STORE_CREDENTIAL_PATH}"
+        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE_PREFIX}-new in_vagrant=${IN_VAGRANT}"
         ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
 
         popd >/dev/null 2>&1
