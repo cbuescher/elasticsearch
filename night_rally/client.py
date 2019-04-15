@@ -1,4 +1,4 @@
-def create_client(configuration_name=None):
+def create_client(configuration_name):
     import configparser
     import elasticsearch
     import certifi
@@ -6,20 +6,17 @@ def create_client(configuration_name=None):
 
     def load():
         config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
-        if configuration_name:
-            # invoked from night-rally
-            _rally_ini_path = str(pathlib.Path.home()/".rally"/"rally-{}.ini".format(configuration_name))
-        else:
-            # invoked from e.g. night-rally-admin, ini files not deployed via Ansible
-            _rally_ini_path = str(pathlib.PurePath(__file__).parent/"fixtures/ansible/roles/rally-update/templates/rally.ini.j2")
-        config.read(_rally_ini_path)
+        config_file = pathlib.Path.home()/".rally"/"rally-{}.ini".format(configuration_name)
+        if not config_file.exists():
+            raise IOError("Config file [{}] is missing".format(config_file))
+        config.read(str(config_file))
         return config
 
     complete_cfg = load()
     cfg = complete_cfg["reporting"]
-    if cfg["datastore.secure"] == "True":
+    if cfg["datastore.secure"].lower() == "true":
         secure = True
-    elif cfg["datastore.secure"] == "False":
+    elif cfg["datastore.secure"].lower() == "false":
         secure = False
     else:
         raise ValueError("Setting [datastore.secure] is neither [True] nor [False] but [%s]" % cfg["datastore.secure"])

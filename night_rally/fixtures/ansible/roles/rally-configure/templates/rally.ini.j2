@@ -17,11 +17,11 @@ local.dataset.cache = /var/lib/jenkins/.rally/benchmarks/data
 
 [reporting]
 datastore.type = elasticsearch
-datastore.host = cd7752c6d66e403fb5a0498e2a80355a.eu-central-1.aws.cloud.es.io
-datastore.port = 9243
-datastore.secure = True
-datastore.user = elastic
-datastore.password = PRqPDF2C5ZgVT8ENj7MgqyDo
+datastore.host = {{ lookup('vault', lookup('env', 'RALLY_METRICS_STORE_CREDENTIAL_PATH'), 'es_host') }}
+datastore.port = {{ lookup('vault', lookup('env', 'RALLY_METRICS_STORE_CREDENTIAL_PATH'), 'es_port') }}
+datastore.secure = {{ lookup('vault', lookup('env', 'RALLY_METRICS_STORE_CREDENTIAL_PATH'), 'es_secure') }}
+datastore.user = {{ lookup('vault', lookup('env', 'RALLY_METRICS_STORE_CREDENTIAL_PATH'), 'es_username') }}
+datastore.password = {{ lookup('vault', lookup('env', 'RALLY_METRICS_STORE_CREDENTIAL_PATH'), 'es_password') }}
 
 [tracks]
 default.url = https://github.com/elastic/rally-tracks

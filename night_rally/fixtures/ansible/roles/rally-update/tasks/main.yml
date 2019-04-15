@@ -13,20 +13,6 @@
   ignore_errors: true
   become: true
 
-- name: install production Rally config file, if applicable
-  become: true
-  template:
-    src: rally.ini.j2
-    dest: /var/lib/jenkins/.rally/rally-{{ rally_environment }}.ini
-  when: not in_vagrant | default("false") | bool
-
-- name: install vagrant Rally config file, if applicable
-  become: true
-  template:
-    src: rally-vagrant.ini.j2
-    dest: /var/lib/jenkins/.rally/rally-{{ rally_environment }}.ini
-  when: in_vagrant | default("false") | bool
-
 - name: start rallyd
   command: ./rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating-nodes'][0] }}
   args:

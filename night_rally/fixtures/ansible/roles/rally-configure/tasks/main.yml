@@ -1,0 +1,14 @@
+---
+
+- name: install production Rally config file
+  become: true
+  template:
+    src: rally.ini.j2
+    dest: /var/lib/jenkins/.rally/rally-{{ rally_environment }}.ini
+  when: not local_setup | default("true") | bool
+
+- name: install local Rally config file
+  template:
+    src: rally.ini.j2
+    dest: ${HOME}/.rally/rally-{{ rally_environment }}.ini
+  when: local_setup | default("false") | bool

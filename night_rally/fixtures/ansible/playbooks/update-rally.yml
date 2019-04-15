@@ -7,6 +7,7 @@
   hosts: coordinating-nodes, target-hosts
   gather_facts: true
   roles:
+    - { role: rally-configure, tags: rally-configure }
     - { role: rally-update, tags: rally-update }
   serial:
     - 1

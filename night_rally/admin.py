@@ -312,9 +312,9 @@ def arg_parser():
 
 def main():
     parser = arg_parser()
-    es = client.create_client()
-
     args = parser.parse_args()
+
+    es = client.create_client(args.environment)
     if args.subcommand == "list":
         if args.configuration == "races":
             list_races(es, args)

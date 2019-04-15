@@ -1,7 +1,10 @@
 test:
 	python3 setup.py test
 
-install:
+install: configure
 	@ ./install.sh
 
-.PHONY: test install
+configure:
+	@ ./night_rally/fixtures/ansible/configure.sh
+
+.PHONY: test install configure

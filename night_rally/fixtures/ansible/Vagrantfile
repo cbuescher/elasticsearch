@@ -42,6 +42,7 @@ end
 
 def install_jenkins_user
   <<~EOF
+    set +x
     groupadd -g 1010 jenkins
     useradd -u 1010 -g 1010 -s /bin/bash -m -k /etc/skel -d /var/lib/jenkins jenkins
     mkdir /var/lib/jenkins/.ssh
@@ -102,7 +103,6 @@ def install_night_rally_test_script(base_ip, target_node_ip_addresses)
     export FIXTURES=${FIXTURES:-}
     export COORDINATING_NODES=#{base_ip}
     export TARGET_HOSTS="#{target_node_ip_addresses.join(',')}"
-    export IN_VAGRANT=YES
     export TEST_MODE=YES
     EOF2
 
@@ -146,6 +146,17 @@ def symlink_java_8
   "ln -s /usr/lib/jvm/java-8-openjdk-amd64 /var/lib/jenkins/.java/java8"
 end
 
+def pass_additional_jenkins_env_vars
+  <<~EOF
+    set +x
+    cat >>/var/lib/jenkins/.profile <<EOF2
+    export VAULT_ADDR=https://secrets.elastic.co:8200
+    export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-/secret/rally/cloud/vagrant-test-rally-metrics}
+    export IN_VAGRANT=YES
+    EOF2
+  EOF
+end
+
 Vagrant.configure(2) do |config|
   use_cachier = false
   if Vagrant.has_plugin?('vagrant-cachier') and not ENV['VAGRANT_NO_CACHIER']
@@ -183,12 +194,16 @@ Vagrant.configure(2) do |config|
         file_to_disk = File.realpath("vagrantdisk").to_s + "/#{node[:hostname]}_disk.vdi"
         vbox.customize ['createhd', '--filename', file_to_disk, '--size', 4*1024, '--format', 'VDI'] # Size is in MiB
         vbox.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+
+        if node[:hostname] == "coordinator"
+          override_config.vm.synced_folder "#{Dir.home}/", "/home/vagrant/", type: "rsync", rsync__args: ["-r", "--include=.vault-token", "--exclude=*"]
+        end
       end
 
       node_config.ssh.forward_agent = true
-
       node_config.vm.provision "shell", inline: tweak_es_sysctl
       node_config.vm.provision "shell", inline: install_jenkins_user
+      node_config.vm.provision "shell", inline: pass_additional_jenkins_env_vars, env: {"RALLY_METRICS_STORE_CREDENTIAL_PATH" => ENV["VAULT_NIGHT_RALLY_METRICS_STORE_CREDENTIAL_PATH"]}
       node_config.vm.provision "shell", inline: install_rally_user
       node_config.vm.provision "shell", inline: rally_sudoers
       node_config.vm.provision "shell", inline: install_rally_source
@@ -206,7 +221,7 @@ Vagrant.configure(2) do |config|
       # required because installing night_rally needs write access to the `.egg` directory
       if node == nodes.first
         node_config.vm.provision "shell", inline: <<-EOF
-          echo 'sudo rsync -r -o -g --chown=jenkins:jenkins --exclude ".vagrant" --exclude "vagrantdisk" /night_rally /var/lib/jenkins/' \
+          echo 'sudo rsync -r -o -g --chown=jenkins:jenkins --exclude ".vagrant" --exclude "vagrantdisk" /night_rally /home/vagrant/.vault-token /var/lib/jenkins/' \
             >/home/vagrant/update_jenkins_night_rally.sh
           chmod +x update_jenkins_night_rally.sh
           ./update_jenkins_night_rally.sh

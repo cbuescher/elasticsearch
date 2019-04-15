@@ -1,0 +1,9 @@
+---
+
+- name: Configures Rally locally
+# ==============================
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - { role: rally-configure, tags: rally-configure }

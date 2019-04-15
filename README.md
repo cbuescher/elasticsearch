@@ -18,8 +18,9 @@ Night Rally is only tested on Mac OS X and Linux.
 
 1. Ensure that all prerequisites of [Rally](https://github.com/elastic/rally) are properly setup. Hint. It is *not* required to install Rally manually. Just ensure that its prerequisites are installed.
 2. Clone this repo: `git clone git@github.com:elastic/night-rally.git`
-3. Create a virtualenv with `python3 -m venv .venv` and activate it with `./.venv/bin/activate`
-4. Run `make install`
+3. [Setup Vault](https://github.com/elastic/infra/blob/master/docs/vault.md)
+4. Create a virtualenv with `python3 -m venv .venv` and activate it with `./.venv/bin/activate`
+5. Run `make install`
 
 Now you can invoke Night Rally regularly with the startup script `night_rally.sh` e.g. via cron. The script can also self-update if invoked as `night_rally.sh --self-update`.
 
@@ -131,9 +132,44 @@ To iterate on changes, always remember to re-run `./update_jenkins_night_rally.s
 6. `sudo -iu jenkins`
 7. Run `./test_nightly.sh`
 
-Results will be sent to the Elastic Cloud cluster `night-rally-tests` (details in LastPass).
-
 To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
+
+The Vagrant workflow retrieves credentials to the metrics store via Vault so ensure that it is [properly setup](https://github.com/elastic/infra/blob/master/docs/vault.md#github-auth). By default results will be sent to the Elastic Cloud cluster `night-rally-tests` (details in LastPass). In order to write to a different metrics store, you need to:
+
+1. Add credentials to Vault:
+
+    1.1 Create a file containing the cluster properties, e.g. in `~/cluster-creds.json`:
+
+    ```
+    {
+    "es_host": "cloud-host-name.eu-central-1.aws.cloud.es.io",
+    "es_password": "PASSWORD",
+    "es_username": "USERNAME",
+    "es_port": "9243",
+    "cloud_id": "CLOUD_ID_FROM_UI_AT_CLOUD_ELASTIC_CO",
+    "es_secure": "true"
+    }
+    ```
+    1.2 Add the key-value pairs to Vault. Please use `/secret/rally/cloud` as path prefix:
+
+    ```
+    vault write /secret/rally/cloud/your-metrics-cluster-name @cluster-creds.json
+    ```
+    1.3 Check that the data are present
+
+    ```
+    vault read /secret/rally/cloud/your-metrics-cluster-name
+    ```
+
+    1.4 Delete the cluster properties file
+
+    ```
+    rm ~/cluster-creds.json
+    ```
+
+2. `export VAULT_NIGHT_RALLY_METRICS_STORE_CREDENTIAL_PATH=/secret/rally/cloud/your-metrics-cluster-name`
+
+Afterwards you can start the Vagrant boxes.
 
 ##### Testing fixtures
 
