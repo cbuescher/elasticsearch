@@ -167,7 +167,8 @@
                 "name": "geonames-append-defaults-1node",
                 "label": "add-defaults-security",
                 "charts": [
-                  "indexing"
+                  "indexing",
+                  "query"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults",
@@ -303,7 +304,8 @@
                 "name": "geopoint-append-defaults-1node",
                 "label": "add-defaults-security",
                 "charts": [
-                  "indexing"
+                  "indexing",
+                  "query"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults",
@@ -498,7 +500,8 @@
                 "name": "nyc_taxis-append-4g-1node",
                 "label": "add-4g-security",
                 "charts": [
-                  "indexing"
+                  "indexing",
+                  "query"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap",
