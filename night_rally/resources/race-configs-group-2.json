@@ -471,7 +471,7 @@
             "name": "trial",
             "configurations": [
               {
-                "name": "http_logs-append-4g-x-pack-security-1node",
+                "name": "http_logs-append-4g-1node",
                 "label": "security-4g",
                 "charts": [
                   "indexing",
