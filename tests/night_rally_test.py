@@ -113,8 +113,7 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertFalse(common_cli_params.release_params)
 
         self.assertEqual("bare", common_cli_params.setup)
-        # TODO: change "nightly" to "nightly-new" after cutover
-        self.assertEqual("nightly-new", common_cli_params.configuration_name)
+        self.assertEqual("nightly", common_cli_params.configuration_name)
         self.assertEqual("master", common_cli_params.version)
         self.assertFalse(common_cli_params.release_params)
         self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
@@ -137,8 +136,7 @@ class CommonCliParamsTests(unittest.TestCase):
 
         self.assertTrue(common_cli_params.release_params)
         self.assertEqual("bare-oss", common_cli_params.setup)
-        # TODO: change "release" to "release-new" after cutover
-        self.assertEqual("release-new", common_cli_params.configuration_name)
+        self.assertEqual("release", common_cli_params.configuration_name)
         self.assertEqual("6.6.0", common_cli_params.version)
         self.assertEqual({"license": "oss"}, common_cli_params.release_params)
         self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
@@ -161,8 +159,7 @@ class CommonCliParamsTests(unittest.TestCase):
 
         self.assertTrue(common_cli_params.release_params)
         self.assertEqual("bare-trial-security", common_cli_params.setup)
-        # TODO: change "release" to "release-new" after cutover
-        self.assertEqual("release-new", common_cli_params.configuration_name)
+        self.assertEqual("release", common_cli_params.configuration_name)
         self.assertEqual("6.5.3", common_cli_params.version)
         self.assertEqual({"license": "trial", "x-pack-components": ["security"]}, common_cli_params.release_params)
         self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
@@ -186,8 +183,7 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertTrue(common_cli_params.release_params)
         # TODO: be specific about additional plugins
         self.assertEqual("bare-trial-security", common_cli_params.setup)
-        # TODO: change "release" to "release-new" after cutover
-        self.assertEqual("release-new", common_cli_params.configuration_name)
+        self.assertEqual("release", common_cli_params.configuration_name)
         self.assertEqual("6.5.1", common_cli_params.version)
         self.assertEqual({
             "license": "trial",
@@ -214,8 +210,7 @@ class CommonCliParamsTests(unittest.TestCase):
 
         self.assertTrue(common_cli_params.release_params)
         self.assertEqual("ear-oss", common_cli_params.setup)
-        # TODO: change "release" to "release-new" after cutover
-        self.assertEqual("release-new", common_cli_params.configuration_name)
+        self.assertEqual("release", common_cli_params.configuration_name)
         self.assertEqual("6.2.1", common_cli_params.version)
         self.assertEqual({
             "license": "oss"
@@ -242,8 +237,7 @@ class CommonCliParamsTests(unittest.TestCase):
 
         self.assertTrue(common_cli_params.release_params)
         self.assertEqual("docker-oss", common_cli_params.setup)
-        # TODO: change "release" to "release-new" after cutover
-        self.assertEqual("release-new", common_cli_params.configuration_name)
+        self.assertEqual("release", common_cli_params.configuration_name)
         self.assertEqual("6.2.2", common_cli_params.version)
         self.assertTrue({
             "license": "oss"
@@ -284,8 +278,7 @@ class CommonCliParamsTests(unittest.TestCase):
 
         self.assertFalse(common_cli_params.release_params)
         self.assertEqual("bare", common_cli_params.setup)
-        # TODO: change "adhoc" to "adhoc-new" after cutover
-        self.assertEqual("adhoc-new", common_cli_params.configuration_name)
+        self.assertEqual("adhoc", common_cli_params.configuration_name)
         self.assertEqual("lucene-7", common_cli_params.version)
         self.assertFalse(common_cli_params.release_params)
         self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)

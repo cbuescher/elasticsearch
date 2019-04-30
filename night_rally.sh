@@ -187,8 +187,7 @@ then
         pushd . >/dev/null 2>&1
 
         cd ${NIGHT_RALLY_HOME}/night_rally/fixtures/ansible
-        # TODO remove "-new" after cutover
-        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE_PREFIX}-new in_vagrant=${IN_VAGRANT}"
+        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE_PREFIX} in_vagrant=${IN_VAGRANT}"
         ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
 
         popd >/dev/null 2>&1

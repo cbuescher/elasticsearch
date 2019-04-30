@@ -34,9 +34,6 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
 ansible-playbook --connection=local playbooks/configure-rally.yml --extra-vars="rally_environment=nightly local_setup=true"
 ansible-playbook --connection=local playbooks/configure-rally.yml --extra-vars="rally_environment=release local_setup=true"
-# TODO: Remove this after the cutover period.
-ansible-playbook --connection=local playbooks/configure-rally.yml --extra-vars="rally_environment=release-new local_setup=true"
-ansible-playbook --connection=local playbooks/configure-rally.yml --extra-vars="rally_environment=nightly-new local_setup=true"
 unset OBJC_DISABLE_INITIALIZE_FORK_SAFETY
 deactivate
 cd - > /dev/null

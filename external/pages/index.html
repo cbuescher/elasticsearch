@@ -33,6 +33,7 @@ var charts = {
     this.currentSpec = this.findSelectedSpec(uiState);
     this.dateRange = this.findDateRange();
     this.currentChartType = this.chartType();
+    this.currentDistributionType = this.distributionType();
 
     this.buildMenu(this.currentSpec);
     this.buildOverview();
@@ -54,8 +55,9 @@ var charts = {
     if (uiState.length >= 2) {
         $("#checkToggleCompare").prop('checked', uiState[1] === "release");
     }
-    if (uiState.length >= 3) {
-        $("#dateRangeSelector").val(uiState[2]);
+    if (uiState.length >= 4) {
+        $("#dateRangeSelector").val(uiState[3]);
+        $("#checkSelectDistribution").val(uiState[2]);
     }
   },
 
@@ -98,6 +100,9 @@ var charts = {
     $("#checkToggleCompare").click(function() {
         charts.chartTypeChanged();
     });
+    $("#checkSelectDistribution").change(function() {
+        charts.distributionTypeChanged();
+    });
     $("#index-selector").click(function() {
         charts.selectMethodology();
     });
@@ -110,6 +115,11 @@ var charts = {
 
   chartTypeChanged: function() {
     charts.currentChartType = charts.chartType();
+    charts.render();
+  },
+
+  distributionTypeChanged: function() {
+    charts.currentDistributionType = charts.distributionType();
     charts.render();
   },
 
@@ -143,6 +153,10 @@ var charts = {
     }
   },
 
+  distributionType: function() {
+    return $("#checkSelectDistribution").children("option:selected").val().toLowerCase();
+  },
+
   activateSpec: function(spec) {
     this.currentSpec = spec;
     this.buildMenu(this.currentSpec);
@@ -160,7 +174,7 @@ var charts = {
   render: function() {
     $('.methodology').hide();
     $('.tracks').hide();
-    $("#dateRangeGroup").hide();
+    $("#nightlyOptionsGroup").hide();
     $("#releaseLegend").hide();
 
     if (charts.currentSpec != null) {
@@ -168,14 +182,14 @@ var charts = {
 
         $('.tracks').show();
         if (charts.currentChartType === "nightly") {
-          hash = hash + "/nightly/" + charts.dateRange;
-          var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly);
-          $("#dateRangeGroup").show();
+          hash = hash + "/nightly/" + charts.currentDistributionType + "/" + charts.dateRange;
+          var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards[charts.currentDistributionType]);
+          $("#nightlyOptionsGroup").show();
           $("#dashboard-url").attr("href", nightlyUrl);
           charts.showChart(nightlyUrl, charts.dateRange);
         } else {
           hash = hash + "/release";
-          var releaseUrl = charts.dashboardUrl(charts.currentSpec.release);
+          var releaseUrl = charts.dashboardUrl(charts.currentSpec.release_dashboard);
           $("#dashboard-url").attr("href", releaseUrl);
           $("#releaseLegend").show();
           //These charts should be time-independent. Don't use the date range here.
@@ -238,7 +252,14 @@ body,html,.main-display-area,.col-md-12 {
         <div class="checkbox">
           <label><input type="checkbox" id="checkToggleCompare"> Show release charts</label>
         </div>
-        <div class="form-group" id="dateRangeGroup">
+        <div class="form-group" id="nightlyOptionsGroup">
+          <div class="col-md-4">
+            <label for="sel1"> Distribution flavor for nightly</label>
+            <select class="form-control" id="checkSelectDistribution"</select>
+            <option value="oss" selected>OSS</option>
+            <option value="default">Default</option>
+            </select>
+          </div>
           <div class="col-md-4">
             <label for="dateRangeSelector" class="control-label"> Date range for nightly</label>
             <select class="form-control" id="dateRangeSelector">
@@ -252,13 +273,22 @@ body,html,.main-display-area,.col-md-12 {
       </form>
       <div id="releaseLegend">
         <h4>Legend</h4>
+        <!--Remove the following line when release benchmarks on new env have been run-->
         <p>We test the following configurations:</p>
-        <ul>
-          <li><code>env:bare</code>: Elasticsearch on an unencrypted drive</li>
-          <li><code>env:ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
-          <li><code>env:x-pack</code>: Elasticsearch on an unencrypted drive but with <a href="https://www.elastic.co/products/x-pack/security">X-Pack Security</a> enabled.</li>
-          <li><code>env:docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
-        </ul>
+          <ul>
+              <!--Remove this when release benchmarks on new env have been run-->
+              <li><code>env:bare</code>: Elasticsearch on an unencrypted drive</li>
+              <li><code>env:ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
+              <li><code>env:x-pack</code>: Elasticsearch on an unencrypted drive but with <a href="https://www.elastic.co/products/x-pack/security">X-Pack Security</a> enabled.</li>
+              <li><code>env:docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
+              <!--Enable this when release benchmarks on new env have been run-->
+              <!--<li><code>bare</code>: Elasticsearch on an unencrypted drive</li>-->
+              <!--<li><code>ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>-->
+              <!--<li><code>docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>-->
+              <!--<li><code>oss</code>: Elasticsearch with <a href="https://github.com/elastic/elasticsearch#license">Apache 2.0 license</a></li>-->
+              <!--<li><code>basic</code>: Elasticsearch with <a href="https://www.elastic.co/subscriptions">commercial Elastic license</a>; see <a href="https://www.elastic.co/products/x-pack/open">x-pack/open</a>.</li>-->
+              <!--<li><code>trial-security</code>: Elasticsearch with <a href="https://www.elastic.co/products/x-pack/security">X-Pack Security</a> enabled.</li>-->
+          </ul>
       </div>
     </div>
   </div>
@@ -312,12 +342,8 @@ body,html,.main-display-area,.col-md-12 {
       <ul>
         <li>CPU: <a href="https://ark.intel.com/de/products/97128/Intel-Core-i7-7700-Processor-8M-Cache-up-to-4_20-GHz">Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz</a></li>
         <li>RAM: 32 GB</li>
-        <li>SSD:
-            <ul>
-                <li>Data disk of first target machine: <a style="font-family:monospace;" href="https://www.micron.com/~/media/documents/products/data-sheet/ssd/m600_2_5_ssd.pdf">Micron_M600_MTFDDAK512MBF</a></li>
-                <li>Every other disk: <span style="font-family:monospace;">SAMSUNG MZ7LN512HMJP-00000</span></li>
-            </ul>
-            <li>OS: Linux kernel version 4.13.0-38</li>
+        <li>SSD: <a style="font-family:monospace;" href="https://www.micron.com/~/media/documents/products/data-sheet/ssd/1100_ssd.pdf">Micron_1100_MTFDDAK512TBN</a></li>
+        <li>OS: Linux kernel version 4.13.0-45</li>
         </li>
         <li>OS TUNING:
             <ul>
@@ -330,24 +356,28 @@ body,html,.main-display-area,.col-md-12 {
       <p>All machines are connected via a dedicated 10 GBit switched network.</p>
       <h4>History of changes</h4>
       <ul>
-          <li>2019-04-03:
-              <ul>
-                  <li>Run nightly benchmarks with OpenJDK 11.0.2 instead of Oracle JDK 1.8.0_131-b11 (relates <a href="https://github.com/elastic/elasticsearch/pull/40754">elastic/elasticsearch#40754</a>)</li>
-              </ul>
-          </li>
-          <li>2018-10-02:
-              <ul>
-                  <li>Replaced data disk (Samsung MZ7LN512HMJP-00000) on first target machine with another model (Micron_M600_MTFDDAK512MBF) resulting in higher performance in some benchmarks.</li>
-              </ul>
-          </li>
-          <li>2018-04-12:
-              <ul>
-                  <li>Set <a href="https://www.kernel.org/doc/Documentation/vm/transhuge.txt">transparent_hugepage</a> <em style="font-family:monospace;">enabled</em> and <em style="font-family:monospace;">defrag</em> settings to <em style="font-family:monospace;">always</em>. This makes it consistent with the settings before the upgrade to 4.13.0.</li>
-                  <li>Upgrade kernel from version 4.13.0-36 to 4.13.0-38.</li>
-              </ul>
-          </li>
-          <li>2018-02-21: Upgrade kernel from version 4.13.0-32 to 4.13.0-36.</li>
-          <li>2018-02-06: Upgrade kernel from version 4.8.0-53 to 4.13.0-32.</li>
+        <li>2019-04-25</li>
+        <ul>
+          <li>Switch to new benchmarking hardware and add benchmarks for default distribution</li>
+        </ul>
+        <li>2019-04-03:
+          <ul>
+            <li>Run nightly benchmarks with OpenJDK 11.0.2 instead of Oracle JDK 1.8.0_131-b11 (relates <a href="https://github.com/elastic/elasticsearch/pull/40754">elastic/elasticsearch#40754</a>)</li>
+          </ul>
+        </li>
+        <li>2018-10-02:
+          <ul>
+            <li>Replaced data disk (Samsung MZ7LN512HMJP-00000) on first target machine with another model (Micron_M600_MTFDDAK512MBF) resulting in higher performance in some benchmarks.</li>
+          </ul>
+        </li>
+        <li>2018-04-12:
+          <ul>
+            <li>Set <a href="https://www.kernel.org/doc/Documentation/vm/transhuge.txt">transparent_hugepage</a> <em style="font-family:monospace;">enabled</em> and <em style="font-family:monospace;">defrag</em> settings to <em style="font-family:monospace;">always</em>. This makes it consistent with the settings before the upgrade to 4.13.0.</li>
+            <li>Upgrade kernel from version 4.13.0-36 to 4.13.0-38.</li>
+          </ul>
+        </li>
+        <li>2018-02-21: Upgrade kernel from version 4.13.0-32 to 4.13.0-36.</li>
+        <li>2018-02-06: Upgrade kernel from version 4.8.0-53 to 4.13.0-32.</li>
         <li>2017-10-06:
           <ul>
             <li>Change from one load generator and one target machine (connected via 1 GBit switch) to one load generator and three target machines (connected via 10 GBit switch).</li>
@@ -375,57 +405,81 @@ body,html,.main-display-area,.col-md-12 {
             "id": "geonames",
             "track": "Geonames",
             "description": "for evaluating the performance of structured data",
-            "nightly": "62eb53fd-8536-48f3-83a3-def89754e12b",
-            "release": "0ca16d5e-2c30-4661-890f-fd6657641de4"
+            "nightly_dashboards": {
+                "oss": "ff4554d2-33c0-4c05-8368-4cc03180d383",
+                "default": "beac270a-fc0d-4a36-924c-01f269a2e7cb",
+            },
+            "release_dashboard": "0ca16d5e-2c30-4661-890f-fd6657641de4"
         },
         {
             "id": "geopoint",
             "track": "Geopoint",
             "description": "for evaluating the performance of geo queries",
-            "nightly": "f0fe3ba1-0086-4026-9e09-12ff5d51ea21",
-            "release": "b82de00c-9fbc-4edf-9109-eb9f5dcbfe07"
+            "nightly_dashboards": {
+              "oss": "e62ff188-43f4-4175-abc9-3478a9c5a37a",
+              "default": "14b1fef8-1eac-4d88-91f6-4253e432c42b",
+            },
+            "release_dashboard": "b82de00c-9fbc-4edf-9109-eb9f5dcbfe07"
         },
         {
             "id": "percolator",
             "track": "Percolator",
             "description": "for evaluating the performance of percolation queries",
-            "nightly": "91ba8df0-10b1-4703-9b08-78582784b8c3",
-            "release": "d1d8793e-0433-4209-a9ba-d7ec8f0752bb"
+            "nightly_dashboards": {
+                "oss": "ecc3e3f9-06e0-4bc5-92cc-3a7edf8a9664",
+                "default": "2994034b-4ba5-4843-b0f9-70130d4a991b"
+            },
+            "release_dashboard": "d1d8793e-0433-4209-a9ba-d7ec8f0752bb"
         },
         {
             "id": "pmc",
             "track": "PMC",
             "description": "for evaluating the performance of full text search",
-            "nightly": "7db7b93d-b989-4a49-b257-e264f575a355",
-            "release": "c86ca09c-7eb8-40e7-bda4-a826a0e6946e"
+            "nightly_dashboards": {
+                "oss": "9937c260-6128-43e1-8b03-a66b83ee8561",
+                "default": "a39bebdc-94d9-4fd7-8e8a-c892b64fdc51"
+            },
+            "release_dashboard": "c86ca09c-7eb8-40e7-bda4-a826a0e6946e"
         },
         {
             "id": "nyc-taxis",
             "track": "NYC taxis",
             "description": "for evaluating the performance for highly structured data",
-            "nightly": "d1749d74-637a-4a97-8697-36f4656e3726",
-            "release": "73fb1704-cb13-4c87-8317-2dc9d55164d6"
+            "nightly_dashboards": {
+                "oss": "281308e6-e46a-4d05-8585-14fe65592e87",
+                "default": "86aea39a-43df-4517-8880-fb016f4cafbd"
+            },
+            "release_dashboard": "73fb1704-cb13-4c87-8317-2dc9d55164d6"
         },
         {
             "id": "nested",
             "track": "Nested",
             "description": "for evaluating the performance for nested documents",
-            "nightly": "925a3981-fed8-47cd-a802-02a948a394db",
-            "release": "42939a4e-b2db-44d6-a4ab-a1cf89976d83"
+            "nightly_dashboards": {
+              "oss": "058401cc-5db3-4860-89e1-55119c00687e",
+              "default": "61879fc7-b3aa-4a33-8cf1-64a01d980384"
+            },
+            "release_dashboard": "42939a4e-b2db-44d6-a4ab-a1cf89976d83"
         },
         {
             "id": "http-logs",
             "track": "HTTP Logs",
             "description": "for evaluating the performance of (Web) server logs",
-            "nightly": "f4c9ef21-197b-4841-9b32-0eaee1e0ec66",
-            "release": "616efa32-123b-4a4b-9c3b-897bfae465e9"
+            "nightly_dashboards": {
+                "oss": "2f0a45ae-7c2d-468d-9917-cf99e3ec8190",
+                "default": "68626bfe-ab4a-415f-91d0-f335a230da4b"
+            },
+            "release_dashboard": "616efa32-123b-4a4b-9c3b-897bfae465e9"
         },
         {
             "id": "noaa",
             "track": "noaa",
             "description": "for evaluating the performance of range fields",
-            "nightly": "4cbe7b9e-bd8b-4a52-aa25-97bdc950ec14",
-            "release": "0a4fc231-f292-44da-bfbe-47628331ef1c"
+            "nightly_dashboards": {
+                "oss": "87c1f40d-7737-43d6-b383-6946f804fd20",
+                "default": "9ee686e1-7f0b-4c53-82c8-5fb8f0e3943f"
+            },
+            "release_dashboard": "0a4fc231-f292-44da-bfbe-47628331ef1c"
         }
     ], window.location.hash);
   });

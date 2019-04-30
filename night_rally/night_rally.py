@@ -694,8 +694,7 @@ def copy_results_for_release_comparison(effective_start_date, configuration_name
             src = hit["_source"]
             # pseudo version for stable comparisons
             src["distribution-version"] = "master"
-            # TODO: remove "-new" after cutover to the new environment has been completed
-            src["environment"] = "release-new"
+            src["environment"] = "release"
             # release benchmarks rely on `user-tags.setup` for bar charts and this depends on the license
             src["user-tags"]["setup"] = "bare-{}".format(src["user-tags"]["license"])
             release_results.append(src)
@@ -711,8 +710,7 @@ def deactivate_outdated_results(effective_start_date, configuration_name, releas
     """
     ts = to_iso8601_short(effective_start_date)
     if not environment:
-        # TODO change release-new (in the comment) to release after cut-over
-        # for release benchmarks environment is explicitly set to release-new
+        # for release benchmarks environment is explicitly set to release
         environment = configuration_name
     logger.info("Activating results only for [%s] on [%s] in environment [%s], tag [%s] and race-config-id [%s]." %
                 (release, ts, environment, release_tag, race_configs_id))
@@ -923,11 +921,10 @@ class CommonCliParams:
 
     @property
     def configuration_name(self):
-        # TODO: remove "-new" after cutover to the new environment has been completed
         if ":" in self._mode:
-            return sanitize(self._mode.split(":")[0]+"-new")
+            return sanitize(self._mode.split(":")[0])
         else:
-            return sanitize(self._mode+"-new")
+            return sanitize(self._mode)
 
     @property
     def is_nightly(self):
@@ -1002,7 +999,6 @@ def main():
             args.dry_run
         )
         # we want to deactivate old release entries, not old nightly entries
-        # TODO: replace release-new with release after cutover
         deactivate_outdated_results(
             start_date,
             common_cli_params.configuration_name,
@@ -1010,7 +1006,7 @@ def main():
             common_cli_params.setup,
             common_cli_params.race_configs_id,
             args.dry_run,
-            environment="release-new"
+            environment="release"
 
         )
     elif common_cli_params.is_release:
