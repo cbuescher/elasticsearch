@@ -23,7 +23,7 @@
                 "node-count": 3
               },
               {
-                "name": "geonames-append-1node",
+                "name": "geonames-append-defaults-1node",
                 "label": "add-defaults",
                 "charts": [
                   "indexing",
@@ -103,7 +103,7 @@
                 "node-count": 3
               },
               {
-                "name": "geonames-append-1node",
+                "name": "geonames-append-defaults-1node",
                 "label": "add-defaults",
                 "charts": [
                   "indexing",
