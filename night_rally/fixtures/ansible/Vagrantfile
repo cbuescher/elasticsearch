@@ -67,8 +67,19 @@ def install_rally_user
   EOF
 end
 
+def install_vault
+  <<~EOF
+    CUR_HOME=$HOME
+    curl -fsS -o ${CUR_HOME}/vault.zip https://releases.hashicorp.com/vault/1.1.1/vault_1.1.1_linux_amd64.zip
+    sudo unzip ${CUR_HOME}/vault.zip -d /usr/local/bin
+    sudo chmod +x /usr/local/bin/vault
+    rm ${CUR_HOME}/vault.zip
+  EOF
+end
+
 def install_rally_source
   <<~EOF
+    apt-get install -y python-virtualenv
     apt-get install -y python3-pip
     sudo -iu jenkins bash -c '
     pip3 install --user setuptools;
@@ -220,8 +231,9 @@ Vagrant.configure(2) do |config|
       # Make a local copy of night_rally under the jenkins user home dir on the coordinator
       # required because installing night_rally needs write access to the `.egg` directory
       if node == nodes.first
+        node_config.vm.provision "shell", inline: install_vault
         node_config.vm.provision "shell", inline: <<-EOF
-          echo 'sudo rsync -r -o -g --chown=jenkins:jenkins --exclude ".vagrant" --exclude "vagrantdisk" /night_rally /home/vagrant/.vault-token /var/lib/jenkins/' \
+          echo 'sudo rsync -r -o -g --chown=jenkins:jenkins --exclude ".vagrant" --exclude ".venv" --exclude "vagrantdisk" /night_rally /home/vagrant/.vault-token /var/lib/jenkins/' \
             >/home/vagrant/update_jenkins_night_rally.sh
           chmod +x update_jenkins_night_rally.sh
           ./update_jenkins_night_rally.sh
