@@ -307,6 +307,11 @@ def arg_parser():
         help="Id of the annotation to delete. Separate multiple ids with a comma.",
         required=True
     )
+    delete_parser.add_argument(
+        "--environment",
+        help="Environment (default: nightly)",
+        default="nightly"
+    )
     return parser
 
 
