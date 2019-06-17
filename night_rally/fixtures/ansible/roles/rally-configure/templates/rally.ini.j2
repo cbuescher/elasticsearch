@@ -2,8 +2,8 @@
 config.version = 17
 
 [node]
-root.dir = /var/lib/jenkins/.rally/benchmarks
-src.root.dir = /var/lib/jenkins/.rally/benchmarks/src
+root.dir = {{rally_homedir}}/.rally/benchmarks
+src.root.dir = {{rally_homedir}}/.rally/benchmarks/src
 
 [system]
 env.name = {{rally_environment}}
@@ -13,7 +13,7 @@ remote.repo.url = https://github.com/elastic/elasticsearch.git
 elasticsearch.src.subdir = elasticsearch
 
 [benchmarks]
-local.dataset.cache = /var/lib/jenkins/.rally/benchmarks/data
+local.dataset.cache = {{rally_homedir}}/.rally/benchmarks/data
 
 [reporting]
 datastore.type = elasticsearch
