@@ -155,7 +155,11 @@ def install_java(major_ver)
 end
 
 def symlink_java_8
-  "ln -s /usr/lib/jvm/java-8-openjdk-amd64 /var/lib/jenkins/.java/java8"
+  <<~EOF
+    ln -s /usr/lib/jvm/java-8-openjdk-amd64 /var/lib/jenkins/.java/java8
+    # dangling symlinks cause issues to certain gradle versions
+    rm -f /usr/lib/jvm/java-8-openjdk-amd64/src.zip
+  EOF
 end
 
 def pass_additional_jenkins_env_vars
