@@ -87,7 +87,8 @@ def install_rally_source
     mkdir src bin;
     cd src;
     git clone https://github.com/elastic/rally.git;
-    rally/rally configure;
+    cd rally;
+    ./rally configure;
     cd /var/lib/jenkins;
     ln -s $PWD/src/rally/rally $PWD/bin/rally;
     ln -s $PWD/src/rally/rallyd $PWD/bin/rallyd;
