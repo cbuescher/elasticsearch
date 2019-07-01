@@ -37,6 +37,8 @@ ANSIBLE_SKIP_TAGS_STRING=""
 SELF_UPDATE=${SELF_UPDATE:-NO}
 DRY_RUN=NO
 SKIP_ANSIBLE=NO
+# Optionally, allow skipping Rally's auto-update mechanism. Applicable in Vagrant only.
+SKIP_RALLY_UPDATE=${SKIP_RALLY_UPDATE:-NO}
 # We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
 EFFECTIVE_START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
 # Deploy different Cloud credentials when running inside Vagrant
@@ -64,6 +66,10 @@ case ${i} in
     ;;
     --self-update)
     SELF_UPDATE=YES
+    shift # past argument with no value
+    ;;
+    --skip-rally-update)
+    SKIP_RALLY_UPDATE=YES
     shift # past argument with no value
     ;;
     --dry-run)
@@ -187,7 +193,7 @@ then
         pushd . >/dev/null 2>&1
 
         cd ${NIGHT_RALLY_HOME}/night_rally/fixtures/ansible
-        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE_PREFIX} in_vagrant=${IN_VAGRANT}"
+        ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${MODE_PREFIX} in_vagrant=${IN_VAGRANT} skip_rally_update=${SKIP_RALLY_UPDATE}"
         ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
 
         popd >/dev/null 2>&1

@@ -97,13 +97,13 @@ Suppose we want to publish a new release benchmark of the Elasticsearch release 
 
 The results will show up automatically as soon as the build is finished.
 
-#### Developing Night Rally
+#### Developing Night Rally / Rally
 
-To verify track changes you are encouraged to use the Vagrant workflow.
+To verify changes in the Night Rally repo (e.g. in race-configs) or changes in Rally itself that could potentially affect scheduled benchmarks, you are encouraged to use the Vagrant workflow.
 It will spin up 4 vm and requires at minimum 21GB of RAM (each target node uses 5GB ram, load driver 1GB). This configuration supports only release benchmarks, as nightlies require java11 and more RAM; read below on how to iterate on nightlies.
-Rally will run in test mode so the whole run will take just a few minutes.
+Rally will run in [test mode](https://esrally.readthedocs.io/en/stable/command_line_reference.html?highlight=test-mode#test-mode) so the whole run will take just a few minutes.
 
-##### Iterating on release benchmarks
+##### Iterating on release benchmarks while testing changes to night-rally
 
 1. `cd night_rally/fixtures/ansible`
 2. `vagrant up`
@@ -116,7 +116,7 @@ Results will be sent to the Elastic Cloud cluster `night-rally-tests` (details i
 
 To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
 
-##### Iterating on nightly benchmarks
+##### Iterating on nightly benchmarks while testing changes to night-rally
 
 1. `cd night_rally/fixtures/ansible`
 2. Specify the following environment variables:
@@ -134,6 +134,31 @@ To iterate on changes, always remember to re-run `./update_jenkins_night_rally.s
 
 To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
 
+##### Iterating on release or nightly benchmarks while testing changes on Rally
+
+If you want to verify your on-going Rally work or a Rally PR against a full nightly or release run, use the following steps: 
+
+1. Specify the Rally repo and branch using the following environment variables:
+    ```
+    export RALLY_REPO=https://github.com/elastic/rally.git
+    export RALLY_BRANCH=master
+    ```
+
+    - `RALLY_REPO` can point to any repo e.g. your own fork. Defaults to `https://github.com/elastic/rally.git` if unset.
+    - `RALLY_BRANCH` optionally, the branch name. Defaults to `master` if unset.
+    - `RALLY_SHA`: optionally, checkout a specific commit from the specified branch. If unset, the latest commit of `RALLY_BRANCH` will be used.
+    
+2. Choose any of the previous workflows (Iterating on release/nightly benchmarks) and continue with the steps there.
+
+3. If you are working with the `master` branch and don't want Rally to auto-update specify:
+    ```
+    export SKIP_RALLY_UPDATE=YES
+    ```
+
+    before running `./test_nightly.sh` or `./test_release.sh`.
+    
+    More details about the specifics of Rally self-update [here](https://esrally.readthedocs.io/en/stable/developing.html?highlight=skip-update).
+    
 The Vagrant workflow retrieves credentials to the metrics store via Vault so ensure that it is [properly setup](https://github.com/elastic/infra/blob/master/docs/vault.md#github-auth). By default results will be sent to the Elastic Cloud cluster `night-rally-tests` (details in LastPass). In order to write to a different metrics store, you need to:
 
 1. Add credentials to Vault:
