@@ -256,8 +256,8 @@ body,html,.main-display-area,.col-md-12 {
           <div class="col-md-4">
             <label for="sel1"> Distribution flavor for nightly</label>
             <select class="form-control" id="checkSelectDistribution"</select>
-            <option value="oss" selected>OSS</option>
-            <option value="default">Default</option>
+            <option value="default" selected>Default</option>
+            <option value="oss">OSS</option>
             </select>
           </div>
           <div class="col-md-4">
@@ -276,18 +276,12 @@ body,html,.main-display-area,.col-md-12 {
         <!--Remove the following line when release benchmarks on new env have been run-->
         <p>We test the following configurations:</p>
           <ul>
-              <!--Remove this when release benchmarks on new env have been run-->
-              <li><code>env:bare</code>: Elasticsearch on an unencrypted drive</li>
-              <li><code>env:ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
-              <li><code>env:x-pack</code>: Elasticsearch on an unencrypted drive but with <a href="https://www.elastic.co/products/x-pack/security">X-Pack Security</a> enabled.</li>
-              <li><code>env:docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
-              <!--Enable this when release benchmarks on new env have been run-->
-              <!--<li><code>bare</code>: Elasticsearch on an unencrypted drive</li>-->
-              <!--<li><code>ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>-->
-              <!--<li><code>docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>-->
-              <!--<li><code>oss</code>: Elasticsearch with <a href="https://github.com/elastic/elasticsearch#license">Apache 2.0 license</a></li>-->
-              <!--<li><code>basic</code>: Elasticsearch with <a href="https://www.elastic.co/subscriptions">commercial Elastic license</a>; see <a href="https://www.elastic.co/products/x-pack/open">x-pack/open</a>.</li>-->
-              <!--<li><code>trial-security</code>: Elasticsearch with <a href="https://www.elastic.co/products/x-pack/security">X-Pack Security</a> enabled.</li>-->
+              <li><code>bare</code>: Elasticsearch on an unencrypted drive</li>
+              <li><code>ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
+              <li><code>docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
+              <li><code>oss</code>: Elasticsearch with <a href="https://github.com/elastic/elasticsearch#license">Apache 2.0 license</a></li>
+              <li><code>basic</code>: Elasticsearch with <a href="https://www.elastic.co/subscriptions">commercial Elastic license</a>; see <a href="https://www.elastic.co/products/x-pack/open">x-pack/open</a>.</li>
+              <li><code>trial-security</code>: Elasticsearch with <a href="https://www.elastic.co/products/x-pack/security">X-Pack Security</a> enabled.</li>
           </ul>
       </div>
     </div>
