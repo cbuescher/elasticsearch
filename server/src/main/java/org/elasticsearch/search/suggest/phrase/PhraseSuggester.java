@@ -102,6 +102,7 @@ public final class PhraseSuggester extends Suggester<PhraseSuggestionContext> {
                         suggestion.maxErrors(), suggestion.getShardSize(), wordScorer, suggestion.confidence(), suggestion.gramSize());
             }
 
+            System.out.println("PhraseSuggester >>> Checker cutoff: " + checkerResult.cutoffScore + ", " + suggestion.gramSize() + ", " + wordScorer.getClass() );
             PhraseSuggestion.Entry resultEntry = buildResultEntry(suggestion, spare, checkerResult.cutoffScore);
             response.addTerm(resultEntry);
 

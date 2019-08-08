@@ -39,6 +39,7 @@ import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.suggest.Suggest.Suggestion.Entry;
 import org.elasticsearch.search.suggest.Suggest.Suggestion.Entry.Option;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
+import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -288,6 +289,13 @@ public class Suggest implements Iterable<Suggest.Suggestion<? extends Entry<? ex
                 return toReduce.get(0);
             } else if (toReduce.isEmpty()) {
                 return null;
+            }
+            System.out.println("Reducing:");
+            int ind = 0;
+            for (Suggestion sg : toReduce) {
+                PhraseSuggestion ps = (PhraseSuggestion) sg;
+                System.out.println("cutoff " + ind + ": "+ ps.getEntries().get(0).getCutoffScore());
+                ind++;
             }
             Suggestion<T> leader = toReduce.get(0);
             List<T> entries = leader.entries;

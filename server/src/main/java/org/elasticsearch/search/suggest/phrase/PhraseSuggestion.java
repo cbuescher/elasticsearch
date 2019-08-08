@@ -20,6 +20,7 @@
 package org.elasticsearch.search.suggest.phrase;
 
 import org.elasticsearch.common.ParseField;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.io.stream.StreamOutput;
 import org.elasticsearch.common.text.Text;
@@ -116,7 +117,10 @@ public class PhraseSuggestion extends Suggest.Suggestion<PhraseSuggestion.Entry>
         @Override
         public void addOption(Option option) {
             if (option.getScore() > this.cutoffScore) {
+                System.out.println("Adding option " + Strings.toString(option) + ", cutoff at: " + this.cutoffScore);
                 this.options.add(option);
+            } else {
+                System.out.println("-----> Skipping option " + Strings.toString(option) + ", cutoff at: " + this.cutoffScore);
             }
         }
 

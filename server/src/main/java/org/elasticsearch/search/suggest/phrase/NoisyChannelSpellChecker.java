@@ -30,6 +30,7 @@ import org.elasticsearch.search.suggest.phrase.DirectCandidateGenerator.Candidat
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 final class NoisyChannelSpellChecker {
@@ -109,8 +110,18 @@ final class NoisyChannelSpellChecker {
             for (int i = 0; i < candidates.length; i++) {
                 candidates[i] = candidateSets[i].originalTerm;
             }
-            double inputPhraseScore = scorer.score(candidates, candidateSets);
+            double inputPhraseScore = scorer.score(candidates, candidateSets, false);
             cutoffScore = inputPhraseScore * confidence;
+            if (true) {
+                System.out.println(">" + cutoffScore + "< Scorer: " + scorer);
+                System.out.println(">" + cutoffScore + "< inputPhraseScore: " + scorer.score(candidates, candidateSets, true));
+                System.out.println(">" + cutoffScore + "< confidence: " + confidence);
+                System.out.println(">" + cutoffScore + "< candidates: " + Arrays.toString(candidates));
+                for (CandidateSet cs : candidateSets) {
+                    System.out.println(">" + cutoffScore + "< cs original: " + cs.originalTerm);
+                    System.out.println(">" + cutoffScore + "< cs candidates: " + Arrays.toString(cs.candidates));
+                }
+            }
         }
         Correction[] bestCandidates = scorer.findBestCandiates(candidateSets, maxErrors, cutoffScore);
 

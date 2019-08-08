@@ -96,7 +96,7 @@ final class CandidateScorer {
     private void updateTop(CandidateSet[] candidates, Candidate[] path,
                                 PriorityQueue<Correction> corrections, double cutoffScore, double score) throws IOException {
         score = Math.exp(score);
-        assert Math.abs(score - score(path, candidates)) < 0.00001 : "cur_score=" + score + ", path_score=" + score(path,candidates);
+        assert Math.abs(score - score(path, candidates, false)) < 0.00001 : "cur_score=" + score + ", path_score=" + score(path,candidates, false);
         if (score > cutoffScore) {
             if (corrections.size() < maxNumCorrections) {
                 Candidate[] c = new Candidate[candidates.length];
@@ -111,11 +111,22 @@ final class CandidateScorer {
         }
     }
 
-    public double score(Candidate[] path, CandidateSet[] candidates) throws IOException {
+    public double score(Candidate[] path, CandidateSet[] candidates, boolean debug) throws IOException {
         double score = 0.0d;
         for (int i = 0; i < candidates.length; i++) {
            score += scorer.score(path, candidates, i, gramSize);
+           if (debug) {
+               System.out.println(i + " - Score increase: " + score + ", exp: " + Math.exp(score));
+           }
         }
         return Math.exp(score);
+    }
+
+    @Override
+    public String toString() {
+        return "CandidateScorer ["
+                + "scorer=" + scorer
+                + ", maxNumCorrections=" + maxNumCorrections
+                + ", gramSize=" + gramSize + "]";
     }
 }

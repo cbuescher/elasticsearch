@@ -296,7 +296,7 @@ public final class DirectCandidateGenerator extends CandidateGenerator {
             return "Candidate [term=" + term.utf8ToString()
                     + ", stringDistance=" + stringDistance
                     + ", score=" + score
-                    + ", termStats=" + termStats
+                    + ", termStats=" + termStats.docFreq + " | " + termStats.totalTermFreq
                     + (userInput ? ", userInput" : "") + "]";
         }
 
@@ -310,14 +310,24 @@ public final class DirectCandidateGenerator extends CandidateGenerator {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
             Candidate other = (Candidate) obj;
             if (term == null) {
-                if (other.term != null) return false;
+                if (other.term != null) {
+                    return false;
+                }
             } else {
-                if (!term.equals(other.term)) return false;
+                if (!term.equals(other.term)) {
+                    return false;
+                }
             }
             return true;
         }

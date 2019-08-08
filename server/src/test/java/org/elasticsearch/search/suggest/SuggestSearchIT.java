@@ -38,6 +38,7 @@ import org.elasticsearch.script.TemplateScript;
 import org.elasticsearch.search.suggest.phrase.DirectCandidateGeneratorBuilder;
 import org.elasticsearch.search.suggest.phrase.Laplace;
 import org.elasticsearch.search.suggest.phrase.LinearInterpolation;
+import org.elasticsearch.search.suggest.phrase.PhraseSuggestion;
 import org.elasticsearch.search.suggest.phrase.PhraseSuggestionBuilder;
 import org.elasticsearch.search.suggest.phrase.StupidBackoff;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
@@ -760,7 +761,7 @@ public class SuggestSearchIT extends ESIntegTestCase {
     }
 
     // see #3469
-    public void testEmptyShards() throws IOException, InterruptedException {
+    public void testEmptyShards() throws IOException, InterruptedException, ExecutionException {
         XContentBuilder mappingBuilder = XContentFactory.jsonBuilder().
                 startObject().
                     startObject("type1").
@@ -775,6 +776,7 @@ public class SuggestSearchIT extends ESIntegTestCase {
         assertAcked(prepareCreate("test").setSettings(Settings.builder()
                 .put(indexSettings())
                 .put(IndexSettings.MAX_SHINGLE_DIFF_SETTING.getKey(), 4)
+                //.put("index.refresh_interval", -1)  // comment to make test fail reproducably
                 .put("index.analysis.analyzer.suggest.tokenizer", "standard")
                 .putList("index.analysis.analyzer.suggest.filter", "lowercase", "shingler")
                 .put("index.analysis.filter.shingler.type", "shingle")
@@ -798,6 +800,7 @@ public class SuggestSearchIT extends ESIntegTestCase {
 
 
         index("test", "type1", "11", "foo", "bar");
+        Thread.sleep(3000);  // <- this usually causes a refresh and another segment creation if not  "index.refresh_interval" = -1
         index("test", "type1", "12", "foo", "bar");
         index("test", "type1", "2", "name", "An other title about equal length");
         refresh();
@@ -819,6 +822,7 @@ public class SuggestSearchIT extends ESIntegTestCase {
         index("test", "type1", "1", "name", "Just testing the suggestions api");
         refresh();
 
+        System.out.println("Interesting part starts here ---------------------------------------------------");
         searchResponse = client().prepareSearch()
                 .setSize(0)
                 .suggest(
@@ -828,8 +832,12 @@ public class SuggestSearchIT extends ESIntegTestCase {
 
         assertNoFailures(searchResponse);
         suggest = searchResponse.getSuggest();
+        System.out.println(Strings.toString(suggest));
+        System.out.println(((PhraseSuggestion.Entry) suggest.getSuggestion("did_you_mean").getEntries().get(0)).getCutoffScore());
         assertSuggestionSize(suggest, 0, 3, "did_you_mean");
         assertSuggestion(suggest, 0, 0, "did_you_mean", "testing suggestions");
+        assertSuggestion(suggest, 0, 1, "did_you_mean", "testing sugestion");
+        assertSuggestion(suggest, 0, 2, "did_you_mean", "tetsting suggestions");
     }
 
     /**

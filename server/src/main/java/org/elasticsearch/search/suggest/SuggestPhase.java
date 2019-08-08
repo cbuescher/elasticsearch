@@ -20,6 +20,7 @@ package org.elasticsearch.search.suggest;
 
 import org.apache.lucene.util.CharsRefBuilder;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.cluster.routing.ShardRouting;
 import org.elasticsearch.search.SearchPhase;
 import org.elasticsearch.search.internal.SearchContext;
 import org.elasticsearch.search.suggest.Suggest.Suggestion;
@@ -46,10 +47,37 @@ public class SuggestPhase implements SearchPhase {
         if (suggest == null) {
             return;
         }
+        ShardRouting routingEntry = context.indexShard().routingEntry();
+//        switch (routingEntry.getId()) {
+//            case 0: try {
+//                Thread.sleep(1);
+//            } catch (InterruptedException e1) {
+//                throw new RuntimeException(e1);
+//            }
+//            break;
+//            case 2: try {
+//                Thread.sleep(500);
+//            } catch (InterruptedException e1) {
+//                throw new RuntimeException(e1);
+//            }
+//            case 3: try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e1) {
+//                throw new RuntimeException(e1);
+//            }
+//            break;
+//            default:
+//                try {
+//                    Thread.sleep(2000);
+//                } catch (InterruptedException e1) {
+//                    throw new RuntimeException(e1);
+//                }
+//                break;
+//        }
+        System.out.println("Executing suggest phase on IndexShard: " + routingEntry);
         try {
             CharsRefBuilder spare = new CharsRefBuilder();
             final List<Suggestion<? extends Entry<? extends Option>>> suggestions = new ArrayList<>(suggest.suggestions().size());
-
             for (Map.Entry<String, SuggestionSearchContext.SuggestionContext> entry : suggest.suggestions().entrySet()) {
                 SuggestionSearchContext.SuggestionContext suggestion = entry.getValue();
                 Suggester<SuggestionContext> suggester = suggestion.getSuggester();
@@ -58,6 +86,14 @@ public class SuggestPhase implements SearchPhase {
                 if (result != null) {
                     assert entry.getKey().equals(result.name);
                     suggestions.add(result);
+                }
+            }
+            System.out.println("Adding " + suggestions.size() + " suggestion, " + routingEntry);
+            for (int i = 0; i < suggestions.size(); i++) {
+                int entries = suggestions.get(i).getEntries().size();
+                for (int j = 0; j < entries; j++) {
+                    int options = suggestions.get(i).getEntries().get(j).getOptions().size();
+                    System.out.println("Options added:  " + options  + ", " + routingEntry);
                 }
             }
             context.queryResult().suggest(new Suggest(suggestions));
