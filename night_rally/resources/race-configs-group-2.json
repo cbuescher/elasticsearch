@@ -149,12 +149,36 @@
                 "car": "4gheap"
               },
               {
+                "name": "pmc-nio-4g-1node",
+                "label": "nio-4g-1node",
+                "charts": [
+                  "indexing",
+                  "query"
+                ],
+                "challenge": "append-no-conflicts",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": [
+                  "4gheap",
+                  "unpooled"
+                ],
+                "car-params": {
+                  "additional_cluster_settings": {
+                    "cache.recycler.page.limit.heap": "13.5%",
+                    "cache.recycler.page.weight.bytes": 2
+                  }
+                },
+                "plugins": "transport-nio:transport+http",
+                "node-count": 1
+              },
+              {
                 "name": "pmc-nio-4g-3nodes",
                 "label": "nio-4g-3nodes",
                 "charts": [
                   "indexing"
                 ],
-                "challenge": "append-no-conflicts",
+                "challenge": "append-no-conflicts-index-only",
                 "track-params": {
                   "number_of_replicas": 1
                 },
@@ -238,12 +262,36 @@
                 "car": "4gheap"
               },
               {
+                "name": "pmc-nio-4g-1node",
+                "label": "nio-4g-1node",
+                "charts": [
+                  "indexing",
+                  "query"
+                ],
+                "challenge": "append-no-conflicts",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": [
+                  "4gheap",
+                  "unpooled"
+                ],
+                "car-params": {
+                  "additional_cluster_settings": {
+                    "cache.recycler.page.limit.heap": "13.5%",
+                    "cache.recycler.page.weight.bytes": 2
+                  }
+                },
+                "plugins": "transport-nio:transport+http",
+                "node-count": 1
+              },
+              {
                 "name": "pmc-nio-4g-3nodes",
                 "label": "nio-4g-3nodes",
                 "charts": [
                   "indexing"
                 ],
-                "challenge": "append-no-conflicts",
+                "challenge": "append-no-conflicts-index-only",
                 "track-params": {
                   "number_of_replicas": 1
                 },
