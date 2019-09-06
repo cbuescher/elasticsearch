@@ -64,19 +64,6 @@
                 ],
                 "challenge": "append-fast-with-conflicts",
                 "car": "4gheap"
-              },
-              {
-                "name": "geonames-append-verbose_iw-1node",
-                "#COMMENT": "Actually, we should not produce graphs for this one because indexing throughput is not that useful here.",
-                "charts": [],
-                "challenge": "append-no-conflicts-index-only",
-                "track-params": {
-                  "number_of_replicas": 0
-                },
-                "car": "4gheap",
-                "car-params": {
-                  "verbose_iw_logging_enabled": "true"
-                }
               }
             ]
           }
@@ -144,19 +131,6 @@
                 ],
                 "challenge": "append-fast-with-conflicts",
                 "car": "4gheap"
-              },
-              {
-                "name": "geonames-append-verbose_iw-1node",
-                "#COMMENT": "Actually, we should not produce graphs for this one because indexing throughput is not that useful here.",
-                "charts": [],
-                "challenge": "append-no-conflicts-index-only",
-                "track-params": {
-                  "number_of_replicas": 0
-                },
-                "car": "4gheap",
-                "car-params": {
-                  "verbose_iw_logging_enabled": "true"
-                }
               }
             ]
           },

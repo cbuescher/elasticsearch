@@ -304,9 +304,6 @@ class DockerCommand(BaseCommand):
         # we don't support (yet?) clusters with multiple Docker containers
         if len(race_config.target_hosts) > 1:
             return False
-        # we are not interested in those metrics for Docker
-        if race_config.car in ["verbose_iw"]:
-            return False
         # transport-nio has been introduced in Elasticsearch 7.0.
         if int(self.distribution_version[0]) < 7 and "transport-nio" in race_config.plugins:
             return False
