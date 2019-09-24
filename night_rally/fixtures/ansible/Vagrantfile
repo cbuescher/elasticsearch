@@ -258,10 +258,15 @@ Vagrant.configure(2) do |config|
 
       node_config.vm.provision "shell", inline: install_night_rally_test_script(base_ip, target_node_ip_addresses)
 
+      # Java 11 is used by default for release benchmarks, so should be installed always
+      # https://github.com/elastic/night-rally/issues/114#issuecomment-534100792
+      if node != nodes.first
+        node_config.vm.provision "shell", inline: install_java(11)
+      end
+
       # To allow building Elasticsearch (nightlies) install the minimum set of java versions required on target nodes
       if node != nodes.first && install_build_requirements
         node_config.vm.provision "shell", inline: install_java(12)
-        node_config.vm.provision "shell", inline: install_java(11)
         node_config.vm.provision "shell", inline: symlink_java_8
       end
 
