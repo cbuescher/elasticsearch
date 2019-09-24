@@ -85,6 +85,7 @@ end
 
 def install_rally_source(rally_repo, rally_branch, rally_sha)
   <<~EOF
+    apt-get update
     apt-get install -y python-virtualenv
     apt-get install -y python3-pip
     sudo -iu jenkins bash -c '
