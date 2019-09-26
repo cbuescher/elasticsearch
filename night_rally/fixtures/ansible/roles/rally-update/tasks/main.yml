@@ -14,7 +14,7 @@
   become: true
 
 - name: start rallyd
-  command: ./rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating-nodes'][0] }}
+  command: ./rallyd --skip-update start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating-nodes'][0] }}
   args:
     chdir: /var/lib/jenkins/bin
   environment:
@@ -29,7 +29,7 @@
   when: not in_vagrant | default("false") | bool
 
 - name: start rallyd in vagrant env, if applicable
-  command: ./rallyd {{ '--skip-update' if skip_rally_update | default("false") | bool else '' }} start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating-nodes'][0] }}
+  command: ./rallyd --skip-update start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating-nodes'][0] }}
   args:
     chdir: /var/lib/jenkins/bin
   environment:

@@ -406,6 +406,7 @@ class StandardParams:
             "quiet": None,
             "target-host": race_config.target_hosts,
             "effective-start-date": self.effective_start_date,
+            "track-repository": race_config.track_repository,
             "track": race_config.track,
             "challenge": race_config.challenge,
             "car": race_config.car,
@@ -499,8 +500,9 @@ class LicenseParams:
 
 
 class RaceConfig:
-    def __init__(self, track_name, configuration, available_hosts):
+    def __init__(self, track_name, track_repository, configuration, available_hosts):
         self.track = track_name
+        self.track_repository = track_repository
         self.configuration = configuration
         self.available_hosts = available_hosts
 
@@ -573,6 +575,7 @@ def run_rally(tracks, release_params, available_hosts, command, dry_run=False, s
 
     for track in tracks:
         track_name = track["track"]
+        track_repository = track.get("track-repository", "default")
 
         for flavor_config in track["flavors"]:
             for license_config in flavor_config["licenses"]:
@@ -588,7 +591,7 @@ def run_rally(tracks, release_params, available_hosts, command, dry_run=False, s
                     # TODO refactor encapsulation in Release/Docker Command
                     configuration["license"] = release_params["license"] if release_params else license_config["name"]
 
-                    race_cfg = RaceConfig(track_name, configuration, available_hosts_with_ports)
+                    race_cfg = RaceConfig(track_name, track_repository, configuration, available_hosts_with_ports)
 
                     if race_cfg.target_hosts:
                         if command.runnable(race_cfg):
@@ -815,6 +818,9 @@ def parse_args():
         default=False,
         action="store_true")
     parser.add_argument(
+        "--environment",
+        help="The name of the benchmarking environment")
+    parser.add_argument(
         "--mode",
         help="In which mode to run?",
         default="nightly",
@@ -874,12 +880,14 @@ class CommonCliParams:
     def __init__(self,
                  mode="nightly",
                  version="master",
+                 configuration_name=None,
                  release_license=None,
                  release_x_pack_components=None,
                  race_configs_id=None
                  ):
         self.version = version
         self._mode = mode
+        self.configuration_name = configuration_name
         self.release_params = OrderedDict()
         self._release_x_pack_components = release_x_pack_components
         self._release_license = release_license
@@ -917,13 +925,6 @@ class CommonCliParams:
         return setup
 
     @property
-    def configuration_name(self):
-        if ":" in self._mode:
-            return sanitize(self._mode.split(":")[0])
-        else:
-            return sanitize(self._mode)
-
-    @property
     def is_nightly(self):
         return self._mode.startswith("nightly")
 
@@ -953,6 +954,7 @@ def main():
     common_cli_params = CommonCliParams(
         mode=args.mode,
         version=version_to_benchmark,
+        configuration_name=args.environment,
         release_license=args.release_license,
         release_x_pack_components=args.release_x_pack_components,
         race_configs_id=args.race_configs

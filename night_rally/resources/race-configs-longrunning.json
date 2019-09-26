@@ -1,0 +1,38 @@
+[
+  {
+    "track-repository": "eventdata",
+    "track": "eventdata",
+    "flavors": [
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "basic",
+            "configurations": [
+              {
+                "name": "continuous-index-and-query",
+                "label": "continuous-index-and-query",
+                "challenge": "elasticlogs-continuous-index-and-query",
+                "charts": [],
+                "track-params": {
+                  "number_of_replicas": 1,
+                  "shard_count": 3,
+                  "p1_bulk_indexing_clients": 32,
+                  "p1_bulk_size": 1000,
+                  "p1_duration_secs": 28800,
+                  "p2_bulk_indexing_clients": 12,
+                  "p2_bulk_size": 1000,
+                  "p2_ops": 30,
+                  "max_rolledover_indices": 25,
+                  "rollover_max_size": "30gb"
+                },
+                "car": ["8gheap", "ea"],
+                "x-pack": ["security"]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
