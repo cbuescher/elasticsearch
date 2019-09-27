@@ -18,7 +18,7 @@ default_cpus = 2
 default_target_node_count = 3
 target_node_ip_addresses = successive_ips(base_ip, default_target_node_count)
 # Memory settings in MB
-default_load_driver_memory = ENV.fetch("VAGRANT_LOAD_DRIVER_MEMORY", "2048")
+default_load_driver_memory = 2048
 default_target_memory = ENV.fetch("VAGRANT_TARGET_MEMORY", "5120")
 
 install_build_requirements = ENV["VAGRANT_ENABLE_BUILD"].to_s.downcase=="true"
@@ -141,13 +141,6 @@ def install_night_rally_test_script(base_ip, target_node_ip_addresses)
     source /var/lib/jenkins/env_test_script
     night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-1.json" --effective-start-date="" --mode="release" --version="6.7.0" --release-license="oss" --release-x-pack-components=""
     night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-2.json" --effective-start-date="" --mode="release" --version="6.7.0" --release-license="oss" --release-x-pack-components=""
-    EOF2
-
-    cat >/var/lib/jenkins/test_longrunning.sh <<"EOF2"
-    #!/usr/bin/env bash
-    set -e
-    source /var/lib/jenkins/env_test_script
-    /var/lib/jenkins/night_rally/external/scripts/long-running-benchmarks.sh
     EOF2
 
     chown jenkins:jenkins /var/lib/jenkins/test_*.sh

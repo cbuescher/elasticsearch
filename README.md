@@ -134,23 +134,6 @@ To iterate on changes, always remember to re-run `./update_jenkins_night_rally.s
 
 To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
 
-##### Iterating on long-running benchmarks while testing changes to night-rally
-
-1. `cd night_rally/fixtures/ansible`
-2. Specify the following environment variables:
-    ```
-    # long-running benchmarks run with 8GB of heap
-    export VAGRANT_TARGET_MEMORY=10240
-    export VAGRANT_ENABLE_BUILD=true
-    ```
-3. `vagrant up`
-4. `vagrant ssh /coord/` # ssh'es to the coordinating node
-5. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
-6. `sudo -iu jenkins`
-7. Run `./test_longrunning.sh`
-
-To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
-
 ##### Iterating on release or nightly benchmarks while testing changes on Rally
 
 If you want to verify your on-going Rally work or a Rally PR against a full nightly or release run, use the following steps: 
@@ -172,7 +155,7 @@ If you want to verify your on-going Rally work or a Rally PR against a full nigh
     export SKIP_RALLY_UPDATE=YES
     ```
 
-    before running any of `./test_*.sh`.
+    before running `./test_nightly.sh` or `./test_release.sh`.
     
     More details about the specifics of Rally self-update [here](https://esrally.readthedocs.io/en/stable/developing.html?highlight=skip-update).
     
