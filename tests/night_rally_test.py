@@ -1402,6 +1402,48 @@ class NightRallyTests(unittest.TestCase):
         )
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
+    def test_skip_any_plugins_with_docker(self, mocked_wait_until_port_is_free):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "flavors": [
+                    {
+                        "name": "oss",
+                        "licenses": [
+                            {
+                                "name": "oss",
+                                "configurations": [
+                                    {
+                                        "name": "geonames-defaults",
+                                        "challenge": "append-no-conflicts",
+                                        "car": "defaults",
+                                        "plugins": "transport-nio:transport+http",
+                                    },
+                                    {
+                                        "name": "geonames-4g",
+                                        "challenge": "append-no-conflicts",
+                                        "car": "4gheap",
+                                        "plugins": "transport-nio:transport+http",
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+        start_date = datetime.datetime(2016, 1, 1)
+        release_params = OrderedDict({"license": "oss"})
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("release", start_date, 8, "docker-oss", race_configs_id=race_configs_id)]
+        cmd = night_rally.DockerCommand(params, release_params, "7.3.0")
+
+        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        self.assertEqual(0, len(system_call.calls))
+
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_continues_on_error(self, mocked_wait_until_port_is_free):
         self.maxDiff = None
         system_call = RecordingSystemCall(return_value=True)
