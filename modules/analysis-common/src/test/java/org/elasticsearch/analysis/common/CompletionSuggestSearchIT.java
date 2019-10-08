@@ -28,11 +28,11 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.search.suggest.Suggest.Suggestion.Entry.Option;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.elasticsearch.test.ESSingleNodeTestCase;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -91,39 +91,22 @@ public class CompletionSuggestSearchIT extends ESSingleNodeTestCase {
 
         client().admin().indices().prepareRefresh(INDEX).get();
 
-//        CompletionSuggestionBuilder suggestionBuilder = SuggestBuilders.completionSuggestion(FIELD).prefix("anna").size(20);
-//        SearchResponse searchResponse = client().prepareSearch(INDEX)
-//                .suggest(new SuggestBuilder().addSuggestion("test-suggest", suggestionBuilder)).get();
-//
-//        assertAllSuccessful(searchResponse);
-//        assertThat(searchResponse.getSuggest().getSuggestion("test-suggest"), is(notNullValue()));
-//        List<? extends Option> options = searchResponse.getSuggest().getSuggestion("test-suggest").getEntries().get(0).getOptions();
-//        assertEquals(names.length, options.size());
-//
-//        double[] scores = options.stream().mapToDouble(Option::getScore).toArray();
         double[] expectedScores =  new double[] { 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0 };
-//        for (int i = 0; i < 9; i++) {
-//            assertEquals(expectedScores[i], scores[i], 0.0000001);
-//        }
-
         for (int size = 1; size <= 9; size++) {
-        CompletionSuggestionBuilder suggestionBuilder = SuggestBuilders.completionSuggestion(FIELD).prefix("anna").size(size);
-        SearchResponse searchResponse = client().prepareSearch(INDEX)
-                .suggest(new SuggestBuilder().addSuggestion("test-suggest", suggestionBuilder)).get();
+            CompletionSuggestionBuilder suggestionBuilder = SuggestBuilders.completionSuggestion(FIELD).prefix("anna").size(size);
+            SearchResponse searchResponse = client().prepareSearch(INDEX)
+                    .suggest(new SuggestBuilder().addSuggestion("test-suggest", suggestionBuilder)).get();
 
-        assertAllSuccessful(searchResponse);
-        assertThat(searchResponse.getSuggest().getSuggestion("test-suggest"), is(notNullValue()));
-        List<? extends Option> options = searchResponse.getSuggest().getSuggestion("test-suggest").getEntries().get(0).getOptions();
-        assertEquals(size, options.size());
+            assertAllSuccessful(searchResponse);
+            assertThat(searchResponse.getSuggest().getSuggestion("test-suggest"), is(notNullValue()));
+            List<? extends Option> options = searchResponse.getSuggest().getSuggestion("test-suggest").getEntries().get(0).getOptions();
+            assertEquals(size, options.size());
 
-
-        double[] scores = options.stream().mapToDouble(Option::getScore).toArray();
-        System.out.println(Arrays.toString(scores));
-        for (int i = 0; i < size; i++) {
-            assertEquals(expectedScores[i], scores[i], 0.0000001);
+            double[] scores = options.stream().mapToDouble(Option::getScore).toArray();
+            for (int i = 0; i < size; i++) {
+                assertEquals(expectedScores[i], scores[i], 0.0000001);
+            }
         }
-        }
-
     }
 
     private void createIndexAndMappingAndSettings(Settings settings) throws IOException {
@@ -144,6 +127,75 @@ public class CompletionSuggestSearchIT extends ESSingleNodeTestCase {
                 .setSettings(Settings.builder().put(settings))
                 .addMapping("_doc", mapping)
                 .get());
+    }
+
+    public void test47269() throws Exception {
+        Settings.Builder settingsBuilder = Settings.builder()
+                .put("index.number_of_shards", 1)
+                .put("index.analysis.analyzer.my_analyzer.tokenizer", "whitespace");
+
+        createIndexAndMappingAndSettings(settingsBuilder.build());
+
+        client().prepareIndex(INDEX, TYPE, "1").setSource(jsonBuilder()
+                .startObject()
+                .startObject(FIELD)
+                .startArray("input").value("call_tag_missing").value("another_tag").endArray()
+                .endObject()
+                .endObject()
+        ).get();
+
+        client().prepareIndex(INDEX, TYPE, "2").setSource(jsonBuilder()
+                .startObject()
+                .startObject(FIELD)
+                .startArray("input").value("call_tag_2").value("another_tag").endArray()
+                .endObject()
+                .endObject()
+        ).get();
+        client().admin().indices().prepareRefresh(INDEX).get();
+
+        CompletionSuggestionBuilder suggestionBuilder = SuggestBuilders.completionSuggestion(FIELD).regex(".*tag").skipDuplicates(true);
+        SearchResponse searchResponse = client().prepareSearch(INDEX)
+                .suggest(new SuggestBuilder().addSuggestion("test-suggest", suggestionBuilder)).get();
+
+        assertAllSuccessful(searchResponse);
+        assertThat(searchResponse.getSuggest().getSuggestion("test-suggest"), is(notNullValue()));
+        List<? extends Option> options = searchResponse.getSuggest().getSuggestion("test-suggest").getEntries().get(0).getOptions();
+        assertEquals(2, options.size());
+        assertEquals("another_tag", options.get(0).getText().string());
+        assertEquals("1", ((CompletionSuggestion.Entry.Option) options.get(0)).getHit().getId());
+        assertEquals("call_tag_2", options.get(1).getText().string());
+        assertEquals("2", ((CompletionSuggestion.Entry.Option) options.get(1)).getHit().getId());
+
+        client().prepareIndex(INDEX, TYPE, "1").setSource(jsonBuilder()
+                .startObject()
+                .startObject(FIELD)
+                .startArray("input").value("call_tag_missing").value("other_tag").endArray()
+                .endObject()
+                .endObject()
+        ).get();
+
+        client().prepareIndex(INDEX, TYPE, "2").setSource(jsonBuilder()
+                .startObject()
+                .startObject(FIELD)
+                .startArray("input").value("call_tag_2").value("other_tag").endArray()
+                .endObject()
+                .endObject()
+        ).get();
+        client().admin().indices().prepareRefresh(INDEX).get();
+
+
+        suggestionBuilder = SuggestBuilders.completionSuggestion(FIELD).regex(".*tag").skipDuplicates(true);
+        searchResponse = client().prepareSearch(INDEX)
+                .suggest(new SuggestBuilder().addSuggestion("test-suggest", suggestionBuilder)).get();
+
+        assertAllSuccessful(searchResponse);
+        assertThat(searchResponse.getSuggest().getSuggestion("test-suggest"), is(notNullValue()));
+        options = searchResponse.getSuggest().getSuggestion("test-suggest").getEntries().get(0).getOptions();
+        assertEquals(2, options.size());
+        assertEquals("call_tag_2", options.get(0).getText().string());
+        assertEquals("2", ((CompletionSuggestion.Entry.Option) options.get(0)).getHit().getId());
+        assertEquals("call_tag_missing", options.get(1).getText().string());
+        assertEquals("1", ((CompletionSuggestion.Entry.Option) options.get(1)).getHit().getId());
     }
 
 }
