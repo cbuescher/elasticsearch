@@ -19,6 +19,7 @@
 
 package org.elasticsearch.analysis.common;
 
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeAction;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.index.query.Operator;
@@ -70,5 +71,72 @@ public class QueryStringWithAnalyzersTests extends ESIntegTestCase {
                         queryStringQuery("foo.baz").defaultOperator(Operator.AND)
                                 .field("field1").field("field2")).get();
         assertHitCount(response, 1L);
+    }
+
+    /**
+     * See #46272
+     */
+    public void testWordDelimterGraphWithLengthFilter() {
+        assertAcked(client().admin().indices().prepareCreate("test")
+                .setSettings(Settings.builder()
+                        .put("number_of_shards", 1)
+                        .put("number_of_replicas", 0)
+                        .put("analysis.analyzer.default.type", "custom")
+                        .putList("analysis.analyzer.default.filter", "words", "length")
+                        .put("analysis.analyzer.default.tokenizer", "whitespace")
+                        .put("analysis.filter.words.type", "word_delimiter_graph")
+                        .put("analysis.filter.words.catenate_all", "true")
+                        .put("analysis.filter.length.type", "length")
+                        .put("analysis.filter.length.min", 2))
+                );
+
+        client().prepareIndex("test").setId("1").setSource(
+                "field1", "3d").get();
+        client().prepareIndex("test").setId("2").setSource(
+                "field1", "printer").get();
+        client().prepareIndex("test").setId("3").setSource(
+                "field1", "3d printer").get();
+        refresh();
+
+        SearchResponse response = client()
+                .prepareSearch("test")
+                .setQuery(
+                        queryStringQuery("3d printer")).get();
+        assertHitCount(response, 3L);
+    }
+
+    public void testWordDelimterGraphWithStop() {
+        assertAcked(client().admin().indices().prepareCreate("test")
+                .setSettings(Settings.builder()
+                        .put("number_of_shards", 1)
+                        .put("number_of_replicas", 0)
+                        .put("analysis.analyzer.my_analyzer.type", "custom")
+                        .putList("analysis.analyzer.my_analyzer.filter", "words", "mystop")
+                        .put("analysis.analyzer.my_analyzer.tokenizer", "whitespace")
+                        .put("analysis.filter.words.type", "word_delimiter_graph")
+                        .put("analysis.filter.words.catenate_all", "true")
+                        .put("analysis.filter.mystop.type", "stop")
+                        .putList("analysis.filter.mystop.stopwords", "3"))
+                .setMapping(
+                        "field1", "type=text,analyzer=my_analyzer"));
+        client().prepareIndex("test").setId("1").setSource(
+                "field1", "3d").get();
+        client().prepareIndex("test").setId("2").setSource(
+                "field1", "printer").get();
+        client().prepareIndex("test").setId("3").setSource(
+                "field1", "3d printer").get();
+        refresh();
+
+        AnalyzeAction.Response analyzeResponse = client().admin().indices().prepareAnalyze("test", "3d printer").setAnalyzer("my_analyzer")
+                .setExplain(true)
+                .get();
+        System.out.println(analyzeResponse.toString());
+
+
+        SearchResponse response = client()
+                .prepareSearch("test")
+                .setQuery(
+                        queryStringQuery("3d printer")).get();
+        assertHitCount(response, 3L);
     }
 }

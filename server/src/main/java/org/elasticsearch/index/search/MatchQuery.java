@@ -41,6 +41,7 @@ import org.apache.lucene.search.spans.SpanOrQuery;
 import org.apache.lucene.search.spans.SpanQuery;
 import org.apache.lucene.search.spans.SpanTermQuery;
 import org.apache.lucene.util.QueryBuilder;
+import org.apache.lucene.util.automaton.MyGraphTokenStreamFiniteStrings;
 import org.apache.lucene.util.graph.GraphTokenStreamFiniteStrings;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.io.stream.StreamInput;
@@ -664,7 +665,7 @@ public class MatchQuery {
         private Query analyzeGraphBoolean(String field, TokenStream source,
                                             BooleanClause.Occur operator, boolean isPrefix) throws IOException {
             source.reset();
-            GraphTokenStreamFiniteStrings graph = new GraphTokenStreamFiniteStrings(source);
+            MyGraphTokenStreamFiniteStrings graph = new MyGraphTokenStreamFiniteStrings(source);
             BooleanQuery.Builder builder = new BooleanQuery.Builder();
             int[] articulationPoints = graph.articulationPoints();
             int lastState = 0;
