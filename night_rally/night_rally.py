@@ -889,7 +889,7 @@ class CommonCliParams:
         self._release_x_pack_components = release_x_pack_components
         self._release_license = release_license
         # For now only used for release benchmarks
-        self.setup = self.__build_setup_string if self.is_release else "bare"
+        self.setup = self.__build_setup_string()
 
         if self.is_release:
             if self._release_x_pack_components:
@@ -904,7 +904,6 @@ class CommonCliParams:
         # we need it in user tags to help deactivating old release results
         self.race_configs_id = os.path.basename(race_configs_id)
 
-    @property
     def __build_setup_string(self):
         # is in the form "<bare|ear|docker>-[<license>]-[<x-pack-components>]"
         # examples: "bare-oss", "ear-oss", "bare-trial-security", "bare-basic"

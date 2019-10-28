@@ -113,7 +113,7 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertFalse(common_cli_params.is_docker)
         self.assertFalse(common_cli_params.release_params)
 
-        self.assertEqual("bare", common_cli_params.setup)
+        self.assertEqual("bare-oss", common_cli_params.setup)
         self.assertEqual("nightly", common_cli_params.configuration_name)
         self.assertEqual("master", common_cli_params.version)
         self.assertFalse(common_cli_params.release_params)
@@ -274,7 +274,7 @@ class CommonCliParamsTests(unittest.TestCase):
             mode="adhoc",
             configuration_name="adhoc",
             version="lucene-7",
-            release_license="oss",
+            release_license="trial",
             release_x_pack_components=CommonCliParamsTests.default_release_x_pack_components,
             race_configs_id=race_configs_id
         )
@@ -285,7 +285,7 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertFalse(common_cli_params.is_docker)
 
         self.assertFalse(common_cli_params.release_params)
-        self.assertEqual("bare", common_cli_params.setup)
+        self.assertEqual("bare-trial", common_cli_params.setup)
         self.assertEqual("adhoc", common_cli_params.configuration_name)
         self.assertEqual("lucene-7", common_cli_params.version)
         self.assertFalse(common_cli_params.release_params)
