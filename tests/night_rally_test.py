@@ -376,6 +376,52 @@ class NightRallyTests(unittest.TestCase):
         )
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
+    def test_overwrite_runtime_jdk_successfully(self, mocked_wait_until_port_is_free):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "flavors": [
+                    {
+                        "name": "oss",
+                        "licenses": [
+                            {
+                                "name": "oss",
+                                "configurations": [
+                                    {
+                                        "name": "geonames-append-1node",
+                                        "challenge": "append-no-conflicts",
+                                        "car": "defaults",
+                                        "runtime-jdk": "13"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+
+        start_date = datetime.datetime(2016, 1, 1)
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+        params = [night_rally.StandardParams("nightly", start_date, 8, "bare", race_configs_id=race_configs_id)]
+        cmd = night_rally.NightlyCommand(params, start_date)
+        night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        self.assertEqual(
+            [
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
+                "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"13\" "
+                "--pipeline=\"from-sources-complete\" "
+                "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
+            ]
+            ,
+            system_call.calls
+        )
+
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_two_mixed_license_challenges_successfully(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 

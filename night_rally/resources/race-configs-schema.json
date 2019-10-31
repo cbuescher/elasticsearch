@@ -68,6 +68,10 @@
                           "type": ["array", "string"],
                           "description": "Car to use from rally-teams repo"
                         },
+                        "runtime-jdk": {
+                          "type": "string",
+                          "description": "Runtime jdk to use, overwrites the default"
+                        },
                         "node-count": {
                           "type": "integer",
                           "minimum": 1

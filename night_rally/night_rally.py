@@ -417,7 +417,10 @@ class StandardParams:
             additional_tags["race-configs-id"] = self.race_configs_id
         params["user-tag"] = self.tags(additional_tags=additional_tags)
 
-        add_if_present(params, "runtime-jdk", self.runtime_jdk)
+        if race_config.runtime_jdk:
+            params["runtime-jdk"] = race_config.runtime_jdk
+        else:
+            add_if_present(params, "runtime-jdk", self.runtime_jdk)
         add_if_present(params, "car-params", race_config.car_params)
         add_if_present(params, "track-params", race_config.track_params)
         add_if_present(params, "elasticsearch-plugins", race_config.plugins)
@@ -534,6 +537,10 @@ class RaceConfig:
     @property
     def plugins(self):
         return self.configuration.get("plugins", "")
+    
+    @property
+    def runtime_jdk(self):
+        return self.configuration.get("runtime-jdk")
 
     @property
     def track_params(self):
