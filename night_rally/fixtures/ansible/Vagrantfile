@@ -39,6 +39,7 @@ def rally_sudoers
   # Use single quotes to avoid interpolating EOF2 intended for bash
   # tilde before 'EOF' allows indenting heredoc without passing the extra leading spaces to actual bash command
   <<~'EOF'
+    set -eo pipefail
     cat >/etc/sudoers.d/rally_user <<EOF2
     Defaults:rally !requiretty
     rally ALL = (ALL) NOPASSWD: ALL
@@ -48,7 +49,7 @@ end
 
 def install_jenkins_user
   <<~EOF
-    set +x
+    set -eo pipefail
     groupadd -g 1010 jenkins
     useradd -u 1010 -g 1010 -s /bin/bash -m -k /etc/skel -d /var/lib/jenkins jenkins
     mkdir /var/lib/jenkins/.ssh
@@ -62,6 +63,7 @@ end
 
 def install_rally_user
   <<~EOF
+    set -eo pipefail
     groupadd -g 1011 rally
     useradd -u 1011 -g 1011 -s /bin/bash -m -k /etc/skel -d /home/rally rally
     mkdir /home/rally/.ssh
@@ -75,6 +77,7 @@ end
 
 def install_vault
   <<~EOF
+    set -eo pipefail
     CUR_HOME=$HOME
     curl -fsS -o ${CUR_HOME}/vault.zip https://releases.hashicorp.com/vault/1.1.1/vault_1.1.1_linux_amd64.zip
     sudo unzip ${CUR_HOME}/vault.zip -d /usr/local/bin
@@ -85,6 +88,7 @@ end
 
 def install_rally_source(rally_repo, rally_branch, rally_sha)
   <<~EOF
+    set -eo pipefail
     apt-get update
     apt-get install -y python-virtualenv
     apt-get install -y python3-pip
@@ -128,7 +132,7 @@ def install_night_rally_test_script(base_ip, target_node_ip_addresses)
 
     cat >/var/lib/jenkins/test_nightly.sh <<"EOF2"
     #!/usr/bin/env bash
-    set -e
+    set -eo pipefail
     source /var/lib/jenkins/env_test_script
     # release-license is oss just because it's the default option in the JJB dropdown; will be ignored in nightly mode
     night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-1.json" --effective-start-date="" --mode="nightly" --version="master" --release-license="oss" --release-x-pack-components=""
@@ -137,7 +141,7 @@ def install_night_rally_test_script(base_ip, target_node_ip_addresses)
 
     cat >/var/lib/jenkins/test_release.sh <<"EOF2"
     #!/usr/bin/env bash
-    set -e
+    set -eo pipefail
     source /var/lib/jenkins/env_test_script
     night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-1.json" --effective-start-date="" --mode="release" --version="6.7.0" --release-license="oss" --release-x-pack-components=""
     night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-2.json" --effective-start-date="" --mode="release" --version="6.7.0" --release-license="oss" --release-x-pack-components=""
@@ -145,7 +149,7 @@ def install_night_rally_test_script(base_ip, target_node_ip_addresses)
 
     cat >/var/lib/jenkins/test_longrunning.sh <<"EOF2"
     #!/usr/bin/env bash
-    set -e
+    set -eo pipefail
     source /var/lib/jenkins/env_test_script
     /var/lib/jenkins/night_rally/external/scripts/long-running-benchmarks.sh
     EOF2
@@ -157,6 +161,7 @@ end
 
 def install_java(major_ver)
   <<~EOF
+    set -eo pipefail
     jdk_url=$(curl -fsSL https://jvm-catalog.elastic.co/jdk/latest_openjdk_#{major_ver}_linux | jq -r .url)
     cd /var/lib/jenkins
     mkdir -p .java/openjdk#{major_ver}
@@ -171,6 +176,7 @@ end
 
 def symlink_java_8
   <<~EOF
+    set -eo pipefail
     ln -s /usr/lib/jvm/java-8-openjdk-amd64 /var/lib/jenkins/.java/java8
     # dangling symlinks cause issues to certain gradle versions
     rm -f /usr/lib/jvm/java-8-openjdk-amd64/src.zip
@@ -179,7 +185,7 @@ end
 
 def pass_additional_jenkins_env_vars
   <<~EOF
-    set +x
+    set +x -eo pipefail
     cat >>/var/lib/jenkins/.profile <<EOF2
     export VAULT_ADDR=https://secrets.elastic.co:8200
     export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-/secret/rally/cloud/vagrant-test-rally-metrics}
