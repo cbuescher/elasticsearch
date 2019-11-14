@@ -21,18 +21,18 @@ long_description = str_from_file("README.md")
 install_requires = [
     # License: Apache 2.0
     # transitive dependency urllib3: MIT
-    "elasticsearch==6.2.0",
+    "elasticsearch==7.0.5",
     # License: MIT
-    "tabulate==0.8.1",
+    "tabulate==0.8.5",
     # License: MIT
-    "jsonschema==2.5.1",
+    "jsonschema==3.1.1",
     # always use the latest version, these are certificate files...
     # License: MPL 2.0
     "certifi"
 ]
 
 tests_require = [
-    "pytest==4.2.0",
+    "pytest==5.2.0",
     "pytest-cov"
 ]
 
@@ -51,7 +51,7 @@ setup(name="night_rally",
       test_suite="tests",
       tests_require=tests_require,
       setup_requires=[
-          "pytest-runner==2.10.1",
+          "pytest-runner==5.1",
       ],
       entry_points={
           "console_scripts": [
