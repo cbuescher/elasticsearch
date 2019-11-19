@@ -1,9 +1,9 @@
 {
+  "settings": {
+    "number_of_shards": 1
+  },
   "mappings": {
-    "type": {
-      "_all": {
-        "enabled": false
-      },
+    "_doc": {
       "dynamic_templates": [
         {
           "strings": {
@@ -19,7 +19,7 @@
         "environment": {
           "type": "keyword"
         },
-        "trial-timestamp": {
+        "race-timestamp": {
           "type": "date",
           "fields": {
             "raw": {

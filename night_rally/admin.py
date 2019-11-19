@@ -165,9 +165,10 @@ def add_annotation(es, args):
               (message, environment, trial_timestamp, track, chart))
     else:
         if not es.indices.exists(index="rally-annotations"):
-            body = open("%s/resources/annotation-mapping.json" % os.path.dirname(os.path.realpath(__file__)), "rt").read()
+            cwd = os.path.dirname(os.path.realpath(__file__))
+            body = open(os.path.join(cwd, "resources", "annotation-mapping.json"), "rt").read()
             es.indices.create(index="rally-annotations", body=body)
-        es.index(index="rally-annotations", doc_type="type", body={
+        es.index(index="rally-annotations", doc_type="_doc", body={
             "environment": environment,
             "trial-timestamp": trial_timestamp,
             "track": track,
@@ -187,7 +188,7 @@ def delete_annotation(es, args):
     else:
         for annotation_id in annotations:
             try:
-                es.delete(index="rally-annotations", doc_type="type", id=annotation_id)
+                es.delete(index="rally-annotations", doc_type="_doc", id=annotation_id)
                 print("Successfully deleted [%s]." % annotation_id)
             except elasticsearch.TransportError as e:
                 if e.status_code == 404:
