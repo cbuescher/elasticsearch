@@ -63,7 +63,7 @@ def list_races(es, args):
 
     query["sort"] = [
         {
-            "trial-timestamp": "desc"
+            "race-timestamp": "desc"
         },
         {
             "track": "asc"
@@ -87,7 +87,7 @@ def list_races(es, args):
         else:
             user_tags = ""
 
-        races.append([src["trial-timestamp"], src["track"], src["challenge"], src["car"],
+        races.append([src["race-timestamp"], src["track"], src["challenge"], src["car"],
                       src["cluster"]["distribution-version"], src["cluster"]["revision"], src["track-revision"], src["cluster"]["team-revision"], user_tags])
     if races:
         print(tabulate.tabulate(races, headers=["Race Timestamp", "Track", "Challenge", "Car", "Version", "Revision", "Track Revision", "Team Revision", "User Tags"]))
@@ -131,7 +131,7 @@ def list_annotations(es, args):
         }
     query["sort"] = [
         {
-            "trial-timestamp": "desc"
+            "race-timestamp": "desc"
         },
         {
             "track": "asc"
@@ -145,7 +145,7 @@ def list_annotations(es, args):
     annotations = []
     for hit in result["hits"]["hits"]:
         src = hit["_source"]
-        annotations.append([hit["_id"], src["trial-timestamp"], src.get("track", ""), src.get("chart", ""), src["message"]])
+        annotations.append([hit["_id"], src["race-timestamp"], src.get("track", ""), src.get("chart", ""), src["message"]])
     if annotations:
         print(tabulate.tabulate(annotations, headers=["Annotation Id", "Timestamp", "Track", "Chart", "Message"]))
     else:
@@ -154,15 +154,15 @@ def list_annotations(es, args):
 
 def add_annotation(es, args):
     environment = args.environment
-    trial_timestamp = args.trial_timestamp
+    race_timestamp = args.race_timestamp
     track = args.track
     chart = args.chart
     message = args.message
     dry_run = args.dry_run
 
     if dry_run:
-        print("Would add annotation with message [%s] for environment=[%s], trial timestamp=[%s], track=[%s], chart=[%s]" %
-              (message, environment, trial_timestamp, track, chart))
+        print("Would add annotation with message [%s] for environment=[%s], race timestamp=[%s], track=[%s], chart=[%s]" %
+              (message, environment, race_timestamp, track, chart))
     else:
         if not es.indices.exists(index="rally-annotations"):
             cwd = os.path.dirname(os.path.realpath(__file__))
@@ -170,7 +170,7 @@ def add_annotation(es, args):
             es.indices.create(index="rally-annotations", body=body)
         es.index(index="rally-annotations", doc_type="_doc", body={
             "environment": environment,
-            "trial-timestamp": trial_timestamp,
+            "race-timestamp": race_timestamp,
             "track": track,
             "chart": chart,
             "message": message
@@ -251,7 +251,7 @@ def arg_parser():
     # if no "track" is given -> annotate all tracks
     # "chart" indicates the graph. If no chart, is given, it is empty -> we need to write the queries to that we update all chart
     #
-    # add [annotation] --environment=nightly --trial-timestamp --track --chart --text
+    # add [annotation] --environment=nightly --race-timestamp --track --chart --text
     add_parser = subparsers.add_parser("add", help="Add records")
     add_parser.add_argument(
         "configuration",
@@ -270,8 +270,8 @@ def arg_parser():
         default="nightly"
     )
     add_parser.add_argument(
-        "--trial-timestamp",
-        help="Trial timestamp"
+        "--race-timestamp",
+        help="Race timestamp"
     )
     add_parser.add_argument(
         "--track",

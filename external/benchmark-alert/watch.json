@@ -14,7 +14,7 @@
             "bool": {
               "filter": {
                 "range": {
-                  "trial-timestamp": {
+                  "race-timestamp": {
                     "gte": "now-1w"
                   }
                 }
@@ -47,7 +47,7 @@
                           "aggs": {
                             "series": {
                               "date_histogram": {
-                                "field": "trial-timestamp",
+                                "field": "race-timestamp",
                                 "interval": "day"
                               },
                               "aggs": {

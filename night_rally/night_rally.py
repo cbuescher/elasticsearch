@@ -652,7 +652,7 @@ def copy_results_for_release_comparison(effective_start_date, configuration_name
                     "must": [
                         {
                             "term": {
-                                "trial-timestamp": {
+                                "race-timestamp": {
                                     "value": ts
                                 }
                             }
@@ -692,7 +692,7 @@ def copy_results_for_release_comparison(effective_start_date, configuration_name
         index = None
         doc_type = None
         for hit in result["hits"]["hits"]:
-            # as we query for a specific trial timestamp, all documents are in the same index
+            # as we query for a specific race timestamp, all documents are in the same index
             index = hit["_index"]
             doc_type = hit["_type"]
             src = hit["_source"]
@@ -739,7 +739,7 @@ def deactivate_outdated_results(effective_start_date, configuration_name, releas
                 ],
                 "must_not": {
                     "term": {
-                        "trial-timestamp": ts
+                        "race-timestamp": ts
                     }
                 }
             }

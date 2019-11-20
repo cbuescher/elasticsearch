@@ -49,9 +49,9 @@ You can see the revisions `df07943` and `ff2164c`. If you want to see which comm
 
 To add an annotation, use the admin tool. First find the correct trial timestamp by issuing `night-rally-admin list races --environment=nightly`. You will need the trial timestamp later. Below are examples for common cases:
 
-* Add an annotation for all charts for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --trial-timestamp=20170502T220213Z --message="Just a test annotation"`
-* Add an annotation for all charts of one track for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --trial-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`
-* Add an annotation for a specific chart of one track for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --trial-timestamp=20170502T220213Z --track=geonames --chart=io --message="Just a test annotation"`
+* Add an annotation for all charts for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --message="Just a test annotation"`
+* Add an annotation for all charts of one track for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`
+* Add an annotation for a specific chart of one track for a specific nightly benchmark trial: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --track=geonames --chart=io --message="Just a test annotation"`
 
 For more details, please issue `night-rally-admin add annotation --help`.
 
