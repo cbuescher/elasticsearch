@@ -35,6 +35,16 @@ rally_repo = ENV.fetch("RALLY_REPO", "https://github.com/elastic/rally.git")
 rally_branch = ENV.fetch("RALLY_BRANCH", "master")
 rally_sha = ENV.fetch("RALLY_SHA", "")
 
+def curl_wrapper(max_time=10, retry_max_time=100, silent=true)
+  # Return a curl command prefix that always retries on failure
+  basic_command = "curl -SfL --connect-timeout 5 --max-time #{max_time} --retry 5 --retry-max-time #{retry_max_time}"
+  if silent
+    return basic_command << " -s"
+  else
+    return basic_command
+  end
+end
+
 def rally_sudoers
   # Use single quotes to avoid interpolating EOF2 intended for bash
   # tilde before 'EOF' allows indenting heredoc without passing the extra leading spaces to actual bash command
@@ -79,7 +89,7 @@ def install_vault
   <<~EOF
     set -eo pipefail
     CUR_HOME=$HOME
-    curl -fsS -o ${CUR_HOME}/vault.zip https://releases.hashicorp.com/vault/1.1.1/vault_1.1.1_linux_amd64.zip
+    #{curl_wrapper} -o ${CUR_HOME}/vault.zip https://releases.hashicorp.com/vault/1.1.1/vault_1.1.1_linux_amd64.zip
     sudo unzip ${CUR_HOME}/vault.zip -d /usr/local/bin
     sudo chmod +x /usr/local/bin/vault
     rm ${CUR_HOME}/vault.zip
@@ -87,14 +97,18 @@ def install_vault
 end
 
 def install_rally_source(rally_repo, rally_branch, rally_sha)
+  # Remove OS packages for python3-pip and python3-setuptools; we prefer per account installation of pip3
   <<~EOF
     set -eo pipefail
     apt-get update
+    apt-get purge -y python3\*-pip python3\*-setuptools
     apt-get install -y python-virtualenv
-    apt-get install -y python3-pip
+    apt-get install -y python3-dev
     sudo -iu jenkins bash -c '
-    pip3 install --user setuptools;
     cd /var/lib/jenkins;
+    #{curl_wrapper} https://bootstrap.pypa.io/get-pip.py -o get-pip.py;
+    python3 get-pip.py --user;
+    rm get-pip.py;
     mkdir src bin;
     cd src;
     git clone #{rally_repo} --branch #{rally_branch};
@@ -162,11 +176,11 @@ end
 def install_java(major_ver)
   <<~EOF
     set -eo pipefail
-    jdk_url=$(curl -fsSL https://jvm-catalog.elastic.co/jdk/latest_openjdk_#{major_ver}_linux | jq -r .url)
+    jdk_url=$(#{curl_wrapper} https://jvm-catalog.elastic.co/jdk/latest_openjdk_#{major_ver}_linux | jq -r .url)
     cd /var/lib/jenkins
     mkdir -p .java/openjdk#{major_ver}
     cd .java/openjdk#{major_ver}
-    curl --progress-bar -fSL -o java#{major_ver}.tgz $jdk_url
+    #{curl_wrapper(max_time=300,retry_max_time=1800,silent=false)} --progress-bar -o java#{major_ver}.tgz $jdk_url
     tar zxf java#{major_ver}.tgz --strip-components=1
     rm -f java#{major_ver}.tgz
     cd ../../
