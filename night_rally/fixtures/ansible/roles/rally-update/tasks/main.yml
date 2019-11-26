@@ -24,6 +24,7 @@
     JAVA10_HOME: /var/lib/jenkins/.java/java10
     JAVA11_HOME: /var/lib/jenkins/.java/openjdk11
     JAVA12_HOME: /var/lib/jenkins/.java/openjdk12
+    JAVA13_HOME: /var/lib/jenkins/.java/openjdk13
   become: true
   become_user: jenkins
   when: not in_vagrant | default("false") | bool
@@ -36,6 +37,7 @@
     JAVA8_HOME: /usr/lib/jvm/java-8-openjdk-amd64
     JAVA11_HOME: /var/lib/jenkins/.java/openjdk11
     JAVA12_HOME: /var/lib/jenkins/.java/openjdk12
+    JAVA13_HOME: /var/lib/jenkins/.java/openjdk13
   become: true
   become_user: jenkins
   when: in_vagrant | default("false") | bool
