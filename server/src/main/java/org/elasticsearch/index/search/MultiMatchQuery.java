@@ -23,12 +23,12 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queries.BlendedTermQuery;
+import org.apache.lucene.queries.TermAndBoost;
 import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.DisjunctionMaxQuery;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.lucene.search.Queries;
 import org.elasticsearch.index.mapper.MappedFieldType;
 import org.elasticsearch.index.query.AbstractQueryBuilder;
@@ -181,16 +181,22 @@ public class MultiMatchQuery extends MatchQuery {
 
         @Override
         protected Query newSynonymQuery(Term[] terms) {
-            BytesRef[] values = new BytesRef[terms.length];
+            TermAndBoost[] values = new TermAndBoost[terms.length];
             for (int i = 0; i < terms.length; i++) {
-                values[i] = terms[i].bytes();
+                values[i] = new TermAndBoost(terms[i], 1.0f);
+
             }
             return blendTerms(context, values, tieBreaker, lenient, blendedFields);
         }
 
         @Override
+        protected Query newSynonymQuery(String field, List<TermAndBoost> terms) {
+            return blendTerms(context, terms.toArray(new TermAndBoost[terms.size()]), tieBreaker, lenient, blendedFields);
+        }
+
+        @Override
         protected Query newTermQuery(Term term) {
-            return blendTerm(context, term.bytes(), tieBreaker, lenient, blendedFields);
+            return blendTerm(context, new TermAndBoost(term, 1.0f), tieBreaker, lenient, blendedFields);
         }
 
         @Override
@@ -233,24 +239,24 @@ public class MultiMatchQuery extends MatchQuery {
         }
     }
 
-    static Query blendTerm(QueryShardContext context, BytesRef value, float tieBreaker,
+    static Query blendTerm(QueryShardContext context, TermAndBoost boostedTerm, float tieBreaker,
                            boolean lenient, List<FieldAndBoost> blendedFields) {
 
-        return blendTerms(context, new BytesRef[] {value}, tieBreaker, lenient, blendedFields);
+        return blendTerms(context, new TermAndBoost[] {boostedTerm}, tieBreaker, lenient, blendedFields);
     }
 
-    static Query blendTerms(QueryShardContext context, BytesRef[] values, float tieBreaker,
+    static Query blendTerms(QueryShardContext context, TermAndBoost[] boostedTerms, float tieBreaker,
                             boolean lenient, List<FieldAndBoost> blendedFields) {
 
         List<Query> queries = new ArrayList<>();
-        Term[] terms = new Term[blendedFields.size() * values.length];
-        float[] blendedBoost = new float[blendedFields.size() * values.length];
+        Term[] terms = new Term[blendedFields.size() * boostedTerms.length];
+        float[] blendedBoost = new float[blendedFields.size() * boostedTerms.length];
         int i = 0;
         for (FieldAndBoost ft : blendedFields) {
-            for (BytesRef term : values) {
+            for (TermAndBoost boostedTerm : boostedTerms) {
                 Query query;
                 try {
-                    query = ft.fieldType.termQuery(term, context);
+                    query = ft.fieldType.termQuery(boostedTerm.getTerm().bytes(), context);
                 } catch (RuntimeException e) {
                     if (lenient) {
                         query = newLenientFieldQuery(ft.fieldType.name(), e);
@@ -264,6 +270,8 @@ public class MultiMatchQuery extends MatchQuery {
                     query = bq.getQuery();
                     boost *= bq.getBoost();
                 }
+                // also apply any individual term boost
+                boost *= boostedTerm.getBoost();
                 if (query.getClass() == TermQuery.class) {
                     terms[i] = ((TermQuery) query).getTerm();
                     blendedBoost[i] = boost;
