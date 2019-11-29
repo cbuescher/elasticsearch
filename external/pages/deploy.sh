@@ -5,6 +5,7 @@ set -e
 
 BUCKET_NAME="elasticsearch-benchmarks.elastic.co"
 S3_ROOT_BUCKET="s3://${BUCKET_NAME}"
+INDEX_PAGE_URL="https://${BUCKET_NAME}/index.html"
 
 # see http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
@@ -44,6 +45,10 @@ fi
 # --cache-control max-age=86400 - ensure that asset files expire after one day so users always see assets
 aws s3 sync ${AWS_DRY_RUN} --acl "public-read" --cache-control max-age=86400 --exclude="deploy.sh" "${ASSET_SOURCE}/" "${S3_ROOT_BUCKET}/"
 
+# Wait a bit for bucket to be consistent before we invalidate the cache
+sleep 5
+
+echo "Purging CDN cache for [${INDEX_PAGE_URL}]."
 # The page is served via Fastly. Details on how to wipe away caches in:
 # https://github.com/elastic/infra/issues/10695#issuecomment-521103380
-curl -XPURGE https://${BUCKET_NAME}/index.html
+curl -XPURGE ${INDEX_PAGE_URL}
