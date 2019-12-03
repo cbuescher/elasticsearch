@@ -27,6 +27,7 @@
                   "rollover_max_size": "30gb"
                 },
                 "car": ["8gheap", "ea"],
+                "node-count": 3,
                 "x-pack": ["security"]
               }
             ]
