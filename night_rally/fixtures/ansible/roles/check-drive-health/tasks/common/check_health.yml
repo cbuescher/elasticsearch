@@ -1,0 +1,9 @@
+---
+
+- name: Fail if any locally attached disks don't pass the smartctl health check
+  command: smartctl -a /dev/{{ item.name }}
+  register: smartctloutput
+  failed_when: "'SMART overall-health self-assessment test result: PASSED' not in smartctloutput.stdout"
+  changed_when: false
+  loop: "{{ (phys_disks.stdout | from_json).blockdevices | flatten(levels=1) }}"
+  when: not in_vagrant | default("false") | bool

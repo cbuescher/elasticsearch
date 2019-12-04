@@ -1,0 +1,9 @@
+---
+
+# NOTE: This is also a fixture, but needs to target all hosts, so doesn't live under setup.yml
+- name: check disk health on all hosts
+# ====================================
+  hosts: all
+  gather_facts: true
+  roles:
+    - { role: check-drive-health, tags: check-drive-health }

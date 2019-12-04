@@ -1,0 +1,14 @@
+---
+
+- set_fact:
+    system_tasks: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_os_family | lower }}/main.yml"
+        - unsupported.yml
+
+- block:
+  - include_tasks: "{{ system_tasks }}"
+  - include_tasks: "common/check_health.yml"
+  become: true

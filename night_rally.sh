@@ -32,7 +32,7 @@ if [[ -n $VAULT_SECRET_ID && -n $VAULT_ROLE_ID ]]; then
 fi
 export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-"/secret/rally/cloud/nightly-rally-metrics"}
 
-ANSIBLE_ALL_TAGS=(encryption-at-rest initialize-data-disk trim drop-caches)
+ANSIBLE_ALL_TAGS=(check-drive-health encryption-at-rest initialize-data-disk trim drop-caches)
 ANSIBLE_SKIP_TAGS=( )
 ANSIBLE_SKIP_TAGS_STRING=""
 # Don't update night-rally by default, unless specified by env var
@@ -206,6 +206,7 @@ then
 
         cd ${NIGHT_RALLY_HOME}/night_rally/fixtures/ansible
         ansible-playbook -i inventory/production -u rally playbooks/update-rally.yml --extra-vars="rally_environment=${RALLY_ENVIRONMENT} in_vagrant=${IN_VAGRANT} skip_rally_update=${SKIP_RALLY_UPDATE}"
+        ansible-playbook -i inventory/production -u rally playbooks/check-drive-health.yml ${ANSIBLE_SKIP_TAGS_STRING} --extra-vars="in_vagrant=${IN_VAGRANT}"
         ansible-playbook -i inventory/production -u rally playbooks/setup.yml ${ANSIBLE_SKIP_TAGS_STRING}
 
         popd >/dev/null 2>&1

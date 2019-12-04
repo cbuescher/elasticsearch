@@ -1,0 +1,13 @@
+---
+
+- name: Install system packages for lsblk and smartctl
+  package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - util-linux
+    - smartmontools
+
+- name: Retrieve list of locally attached physical disks
+  shell: lsblk --json --nodeps
+  register: phys_disks
