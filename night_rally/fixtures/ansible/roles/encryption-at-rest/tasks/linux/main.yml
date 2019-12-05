@@ -1,13 +1,16 @@
 ---
 
-- include_tasks: '{{ distribution_item }}'
+- set_fact:
+    distribution_item: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - '{{ ansible_distribution | lower }}.yml'
+        - '{{ ansible_os_family | lower }}.yml'
+
+- block:
+    - include_tasks: "{{ distribution_item }}"
   become: true
-  with_first_found:
-    - '{{ distribution_id }}.yml'
-    - '{{ distribution }}.yml'
-    - '{{ os_family }}.yml'
-  loop_control:
-    loop_var: distribution_item
 
 # Ensure no open files are present prohibiting us from un-mounting the disk volume later on
 - name: kill processes accessing the encrypted/data disk volume

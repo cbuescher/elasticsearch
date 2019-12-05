@@ -1,9 +1,13 @@
 ---
 
-- include_tasks: '{{ system_item }}'
-  become: '{{ system != "win32nt" }}'
-  with_first_found:
-    - '{{ system }}/main.yml'
-    - unsupported.yml
-  loop_control:
-    loop_var: system_item
+- set_fact:
+    system_tasks: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_system | lower }}/main.yml"
+        - unsupported.yml
+
+- block:
+    - include_tasks: "{{ system_tasks }}"
+  become: "{{ ansible_system | lower != 'win32nt' }}"
