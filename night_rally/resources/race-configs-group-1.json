@@ -383,7 +383,7 @@
               },
               {
                 "name": "nyc_taxis-append-4g-g1gc-3nodes",
-                "label": "add-4g-3nodes",
+                "label": "add-4g-g1gc-3nodes",
                 "charts": [
                   "indexing"
                 ],
@@ -401,7 +401,7 @@
               },
               {
                 "name": "nyc_taxis-append-4g-g1gc-1node",
-                "label": "add-4g",
+                "label": "add-4g-g1gc",
                 "charts": [
                   "indexing",
                   "query",
@@ -467,7 +467,7 @@
               },
               {
                 "name": "nyc_taxis-append-4g-g1gc-3nodes",
-                "label": "add-4g-3nodes",
+                "label": "add-4g-g1gc-3nodes",
                 "charts": [
                   "indexing"
                 ],
@@ -485,7 +485,7 @@
               },
               {
                 "name": "nyc_taxis-append-4g-g1gc-1node",
-                "label": "add-4g",
+                "label": "add-4g-g1gc",
                 "charts": [
                   "indexing",
                   "query",
