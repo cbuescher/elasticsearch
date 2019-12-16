@@ -5,7 +5,8 @@ set -e
 
 BUCKET_NAME="elasticsearch-benchmarks.elastic.co"
 S3_ROOT_BUCKET="s3://${BUCKET_NAME}"
-INDEX_PAGE_URL="https://${BUCKET_NAME}/index.html"
+INDEX_PAGE_URL="https://${BUCKET_NAME}/"
+FULL_INDEX_PAGE_URL="${INDEX_PAGE_URL}index.html"
 
 # see http://stackoverflow.com/a/246128
 SOURCE="${BASH_SOURCE[0]}"
@@ -51,4 +52,14 @@ sleep 5
 echo "Purging CDN cache for [${INDEX_PAGE_URL}]."
 # The page is served via Fastly. Details on how to wipe away caches in:
 # https://github.com/elastic/infra/issues/10695#issuecomment-521103380
+#
+# See also Fastly's docs:
+#
+# * How to purge the cache: https://docs.fastly.com/api/purge
+# * How to debug caching: https://docs.fastly.com/en/guides/checking-cache#using-curl
+#
+# Drop both - actually the page is located in index.html but web servers
+# will serve that page by default if "/" is hit.
 curl -XPURGE ${INDEX_PAGE_URL}
+echo "Purging CDN cache for [${FULL_INDEX_PAGE_URL}]."
+curl -XPURGE ${FULL_INDEX_PAGE_URL}
