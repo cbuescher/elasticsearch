@@ -389,13 +389,14 @@ class StandardParams:
     """
     Extracts all parameters that are needed for all Rally invocations.
     """
-    def __init__(self, configuration_name, effective_start_date, runtime_jdk, user_tag_setup, race_configs_id=None, test_mode=False):
+    def __init__(self, configuration_name, effective_start_date, runtime_jdk, user_tag_setup, race_configs_id=None, test_mode=False, exclude_tasks=None):
         self.configuration_name = configuration_name
         self.effective_start_date = effective_start_date
         self.runtime_jdk = runtime_jdk
         self.user_tag_setup = user_tag_setup
         self.race_configs_id = race_configs_id
         self.test_mode = test_mode
+        self.exclude_tasks = exclude_tasks
 
     def __call__(self, race_config):
         params = {
@@ -421,6 +422,7 @@ class StandardParams:
             params["runtime-jdk"] = race_config.runtime_jdk
         else:
             add_if_present(params, "runtime-jdk", self.runtime_jdk)
+        add_if_present(params, "exclude-tasks", race_config.exclude_tasks)
         add_if_present(params, "car-params", race_config.car_params)
         add_if_present(params, "track-params", race_config.track_params)
         add_if_present(params, "elasticsearch-plugins", race_config.plugins)
@@ -533,6 +535,10 @@ class RaceConfig:
     @property
     def car_params(self):
         return self.configuration.get("car-params")
+    
+    @property
+    def exclude_tasks(self):
+        return self.configuration.get("exclude-tasks")
 
     @property
     def plugins(self):
