@@ -395,7 +395,8 @@
                   "segment_memory"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "exclude-tasks": "force-merge-1-seg,refresh-after-force-merge-1-seg,desc-sort-timestamp-after-force-merge-1-seg,asc-sort-timestamp-after-force-merge-1-seg"
               },
               {
                 "name": "http_logs-no-src-1node",
@@ -529,7 +530,8 @@
                 "car": "4gheap",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "exclude-tasks": "force-merge-1-seg,refresh-after-force-merge-1-seg,desc-sort-timestamp-after-force-merge-1-seg,asc-sort-timestamp-after-force-merge-1-seg"
               }
             ]
           }
