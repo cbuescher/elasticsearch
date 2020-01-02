@@ -373,6 +373,34 @@
                 "node-count": 3
               },
               {
+                "name": "http_logs-append-defaults-g1gc-1node",
+                "label": "defaults-g1gc",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "defaults,g1gc",
+                "runtime-jdk": "13"
+              },
+              {
+                "name": "http_logs-append-4g-g1gc-1node",
+                "label": "4g-g1gc",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "4gheap,g1gc",
+                "runtime-jdk": "13",
+                "exclude-tasks": "force-merge-1-seg,refresh-after-force-merge-1-seg,desc-sort-timestamp-after-force-merge-1-seg,asc-sort-timestamp-after-force-merge-1-seg"
+              },
+              {
                 "name": "http_logs-append-defaults-1node",
                 "label": "defaults",
                 "charts": [
@@ -479,6 +507,33 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap"
+              },
+              {
+                "name": "http_logs-append-defaults-g1gc-1node",
+                "label": "defaults-g1gc",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "defaults,g1gc",
+                "runtime-jdk": "13"
+              },
+              {
+                "name": "http_logs-append-4g-g1gc-1node",
+                "label": "4g-g1gc",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "4gheap,g1gc",
+                "runtime-jdk": "13"
               },
               {
                 "name": "http_logs-no-src-1node",
