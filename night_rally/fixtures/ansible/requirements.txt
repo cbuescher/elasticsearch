@@ -1,1 +1,2 @@
+setuptools==44.0.0
 ansible==2.5.15
