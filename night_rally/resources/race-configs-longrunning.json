@@ -16,7 +16,7 @@
                 "charts": [],
                 "track-params": {
                   "number_of_replicas": 1,
-                  "shard_count": 3,
+                  "number_of_shards": 3,
                   "p1_bulk_indexing_clients": 32,
                   "p1_bulk_size": 1000,
                   "p1_duration_secs": 28800,
