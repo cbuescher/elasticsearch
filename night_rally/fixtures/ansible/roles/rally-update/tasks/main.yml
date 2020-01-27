@@ -1,13 +1,5 @@
 ---
 
-- name: stop rallyd
-  command: ./rallyd stop
-  args:
-    chdir: /var/lib/jenkins/bin
-  become: true
-  become_user: jenkins
-  ignore_errors: true
-
 - name: ensure all rally daemon processes have been killed
   command: killall -9 esrallyd
   ignore_errors: true
