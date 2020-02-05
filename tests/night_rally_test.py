@@ -1608,7 +1608,7 @@ class NightRallyTests(unittest.TestCase):
         )
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_with_telemetry(self, mocked_wait_until_port_is_free):
+    def test_run_with_telemetry_from_command_line(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
         tracks = [
             {
@@ -1652,6 +1652,78 @@ class NightRallyTests(unittest.TestCase):
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\""
+            ]
+            ,
+            system_call.calls
+        )
+
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
+    def test_run_with_telemetry_from_race_config(self, mocked_wait_until_port_is_free):
+        system_call = RecordingSystemCall(return_value=False)
+        tracks = [
+            {
+                "track": "geonames",
+                "flavors": [
+                    {
+                        "name": "oss",
+                        "licenses": [
+                            {
+                                "name": "oss",
+                                "configurations": [
+                                    {
+                                        "name": "geonames-defaults",
+                                        "challenge": "append-no-conflicts",
+                                        "car": "defaults",
+                                        "telemetry": ["jfr", "gc", "jit"],
+                                        "telemetry-params": {
+                                            "recording-template": "profile"
+                                        }
+                                    },
+                                    {
+                                        "name": "geonames-4g",
+                                        "challenge": "append-no-conflicts",
+                                        "car": "4gheap",
+                                        "telemetry": "gc"
+                                    },
+                                    {
+                                        "name": "geonames-8g",
+                                        "challenge": "append-no-conflicts",
+                                        "car": "8gheap"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+        start_date = datetime.datetime(2016, 1, 1)
+        params = [night_rally.StandardParams("nightly", start_date, 8, "bare")]
+
+        cmd = night_rally.NightlyCommand(params, start_date)
+
+        night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        self.assertEqual(3, len(system_call.calls))
+        self.assertEqual(
+            [
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
+                "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--telemetry=\"jfr,gc,jit\" --telemetry-params=\"{\\\"recording-template\\\": \\\"profile\\\"}\" "
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"",
+
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
+                "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--telemetry=\"gc\" --pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"",
+
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
+                "--challenge=\"append-no-conflicts\" --car=\"8gheap\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-8g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"",
             ]
             ,
             system_call.calls

@@ -72,6 +72,10 @@
                           "type": "string",
                           "description": "Runtime jdk to use, overwrites the default"
                         },
+                        "telemetry": {
+                          "type": ["array", "string"],
+                          "description": "The telemetry devices to activate for a race"
+                        },
                         "node-count": {
                           "type": "integer",
                           "minimum": 1

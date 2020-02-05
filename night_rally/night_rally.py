@@ -389,14 +389,13 @@ class StandardParams:
     """
     Extracts all parameters that are needed for all Rally invocations.
     """
-    def __init__(self, configuration_name, effective_start_date, runtime_jdk, user_tag_setup, race_configs_id=None, test_mode=False, exclude_tasks=None):
+    def __init__(self, configuration_name, effective_start_date, runtime_jdk, user_tag_setup, race_configs_id=None, test_mode=False):
         self.configuration_name = configuration_name
         self.effective_start_date = effective_start_date
         self.runtime_jdk = runtime_jdk
         self.user_tag_setup = user_tag_setup
         self.race_configs_id = race_configs_id
         self.test_mode = test_mode
-        self.exclude_tasks = exclude_tasks
 
     def __call__(self, race_config):
         params = {
@@ -422,6 +421,8 @@ class StandardParams:
             params["runtime-jdk"] = race_config.runtime_jdk
         else:
             add_if_present(params, "runtime-jdk", self.runtime_jdk)
+        add_if_present(params, "telemetry", race_config.telemetry)
+        add_if_present(params, "telemetry-params", race_config.telemetry_params)
         add_if_present(params, "exclude-tasks", race_config.exclude_tasks)
         add_if_present(params, "car-params", race_config.car_params)
         add_if_present(params, "track-params", race_config.track_params)
@@ -527,10 +528,7 @@ class RaceConfig:
     @property
     def car(self):
         c = self.configuration["car"]
-        if isinstance(c, str):
-            return [c]
-        else:
-            return c
+        return self._as_array(c)
 
     @property
     def car_params(self):
@@ -544,6 +542,15 @@ class RaceConfig:
     def plugins(self):
         return self.configuration.get("plugins", "")
     
+    @property
+    def telemetry(self):
+        t = self.configuration.get("telemetry")
+        return self._as_array(t)
+    
+    @property
+    def telemetry_params(self):
+        return self.configuration.get("telemetry-params")
+
     @property
     def runtime_jdk(self):
         return self.configuration.get("runtime-jdk")
@@ -562,6 +569,12 @@ class RaceConfig:
             return None
         else:
             return self.available_hosts[:self.node_count]
+
+    def _as_array(self, v):
+        if isinstance(v, str):
+            return [v]
+        else:
+            return v
 
     def __str__(self):
         return "{}-{}".format(self.license, self.name)
