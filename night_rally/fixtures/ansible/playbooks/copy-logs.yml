@@ -1,0 +1,53 @@
+---
+- name: archive logs to a persistent directory
+# ============================================
+# Copy subdirectories of `/var/lib/jenkins/.rally/benchmarks/races/` with important data (logs, telemetry)
+# to a directory that doesn't get wiped away between night-rally invocations
+  hosts: target-hosts
+  gather_facts: true
+  become: true
+  become_user: jenkins
+
+  vars:
+    races_dir: '{{ ansible_env.HOME }}/.rally/benchmarks/races/'
+    current_date: '{{ effective_start_date.split(" ")[0] | replace("-", "") }}'
+    arch_dir: '{{ ansible_env.HOME }}/race_archive/{{ current_date }}'
+    dirs_to_preserve:
+      - 'heapdump'
+      - 'logs'
+      - 'telemetry'
+
+  tasks:
+    - name: ensure race archive dir is present
+      file:
+        path: '{{ arch_dir }}'
+        state: directory
+        mode: '0755'
+
+    - name: build list of race paths to preserve
+      find:
+        path: '{{ races_dir }}'
+        recurse: true
+        excludes: 'lost+found'
+        file_type: 'directory'
+        patterns: '{{ dirs_to_preserve }}'
+      register: race_paths
+
+    - name: ensure race archive dir is present
+      file:
+        path: '{{ arch_dir }}/{{ item["path"] | replace(races_dir, "") }}/'
+        state: directory
+        mode: '0755'
+      loop: '{{ race_paths.files }}'
+      no_log: true
+
+    - name: copy race paths to a persistent directory
+      synchronize:
+        src: '{{ item["path"] }}/'
+        dest: '{{ arch_dir }}/{{ item["path"] | replace(races_dir, "") }}/'
+      delegate_to: "{{ inventory_hostname }}"
+      loop: '{{ race_paths.files }}'
+      no_log: true
+
+    - debug:
+        msg: 'All race sub-directories [{{ dirs_to_preserve | join(",") }}] under [{{ races_dir }}] have been successfully copied under [{{ arch_dir }}]'

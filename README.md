@@ -70,6 +70,12 @@ For more details, please issue `night-rally-admin delete annotation --help`.
 
 **Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
 
+#### Find logs, telemetry or heapdumps from older nightly runs
+
+Each nightly execution wipes the data disk on target machines (`~/.var/lib/jenkins/rally/benchmarks/races`) as part of the initial [setup fixture](https://github.com/elastic/night-rally/tree/master/night_rally/fixtures/ansible/roles/initialize-data-disk).
+Important information from earlier nightly executions, specifically the `heapdump`, `logs` and `telemetry` subdirectories from each race id are copied under `/var/lib/jenkins/race_archive/<YYYYMMDD>` on each target machine, for future reference.
+This is done as the last step before the nightly run has finished. 
+
 #### Add a new track
 
 Benchmarks get executed in two environments, group-1 / group-2 (see [infra repo](https://github.com/elastic/infra/blob/master/ansible/inventory/production/hetzner/benchmarks)).

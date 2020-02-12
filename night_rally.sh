@@ -42,7 +42,7 @@ SKIP_ANSIBLE=NO
 # Optionally, allow skipping Rally's auto-update mechanism. Applicable in Vagrant only.
 SKIP_RALLY_UPDATE=${SKIP_RALLY_UPDATE:-NO}
 # We invoke Rally with the current (UTC) timestamp. This determines the version to checkout.
-EFFECTIVE_START_DATE=`date -u "+%Y-%m-%d %H:%M:%S"`
+EFFECTIVE_START_DATE=$(date -u "+%Y-%m-%d %H:%M:%S")
 # Deploy different Cloud credentials when running inside Vagrant
 IN_VAGRANT=${IN_VAGRANT:NO}
 MODE="nightly"
@@ -268,6 +268,15 @@ fi
 # END NO FAIL
 #****************************
 set -e
+
+# Preserve logs in a directory that doesn't get wiped by the initialize-data-disk fixture between invocations
+if [[ $SKIP_ANSIBLE == NO ]]
+then
+  pushd . >/dev/null 2>&1
+  cd "${NIGHT_RALLY_HOME}/night_rally/fixtures/ansible"
+  ansible-playbook -i inventory/production -u rally playbooks/copy-logs.yml --extra-vars "effective_start_date=${EFFECTIVE_START_DATE}"
+  popd >/dev/null 2>&1
+fi
 
 # Exit with the same exit code as night_rally.py
 exit ${exit_code}
