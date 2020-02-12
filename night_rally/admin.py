@@ -87,10 +87,10 @@ def list_races(es, args):
         else:
             user_tags = ""
 
-        races.append([src["race-timestamp"], src["track"], src["challenge"], src["car"],
+        races.append([src["race-timestamp"], src["race-id"], src["track"], src["challenge"], src["car"],
                       src["cluster"]["distribution-version"], src["cluster"]["revision"], src["track-revision"], src["cluster"]["team-revision"], user_tags])
     if races:
-        print(tabulate.tabulate(races, headers=["Race Timestamp", "Track", "Challenge", "Car", "Version", "Revision", "Track Revision", "Team Revision", "User Tags"]))
+        print(tabulate.tabulate(races, headers=["Race Timestamp", "Race Id", "Track", "Challenge", "Car", "Version", "Revision", "Track Revision", "Team Revision", "User Tags"]))
     else:
         print("No results")
 
