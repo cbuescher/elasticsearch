@@ -102,24 +102,38 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     set -eo pipefail
     apt-get update
     apt-get purge -y python3\*-pip python3\*-setuptools
-    apt-get install -y python-virtualenv
-    apt-get install -y python3-dev
-    sudo -iu jenkins bash -c '
-    cd /var/lib/jenkins;
-    #{curl_wrapper} https://bootstrap.pypa.io/get-pip.py -o get-pip.py;
-    python3 get-pip.py --user;
-    rm get-pip.py;
-    mkdir src bin;
-    cd src;
-    git clone #{rally_repo} --branch #{rally_branch};
-    cd rally;
-    if [[ ! -z \"#{rally_sha}\" ]]; then git checkout #{rally_sha}; fi;
-    ./rally configure;
-    cd /var/lib/jenkins;
-    ln -s $PWD/src/rally/rally $PWD/bin/rally;
-    ln -s $PWD/src/rally/rallyd $PWD/bin/rallyd;
-    ln -s $PWD/night_rally/night_rally.sh $PWD/bin/night_rally;
-    '
+    apt-get install -y build-essential curl libbz2-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev llvm wget xz-utils zlib1g-dev python-virtualenv
+    cat >/rally-install.sh <<'EOF2'
+    #!/usr/bin/env bash
+
+    cd /var/lib/jenkins
+    #{curl_wrapper} https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer -o pyenv-installer
+    bash ./pyenv-installer
+    rm pyenv-installer
+    echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> /var/lib/jenkins/.profile
+    echo 'eval "\$(pyenv init -)"' >> /var/lib/jenkins/.profile
+    echo 'eval "\$(pyenv virtualenv-init -)"' >> /var/lib/jenkins/.profile
+    source /var/lib/jenkins/.profile
+    pyenv install 3.6.10
+    pyenv local 3.6.10
+    echo 'pyenv local 3.6.10' >> /var/lib/jenkins/.profile
+    #{curl_wrapper} https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    python3 get-pip.py --user
+    rm ./get-pip.py
+    mkdir src bin
+    cd src
+    git clone #{rally_repo} --branch #{rally_branch}
+    cd rally
+    if [[ ! -z \"#{rally_sha}\" ]]; then git checkout #{rally_sha}; fi
+    ./rally configure
+    cd /var/lib/jenkins
+    ln -s $PWD/src/rally/rally $PWD/bin/rally
+    ln -s $PWD/src/rally/rallyd $PWD/bin/rallyd
+    ln -s $PWD/night_rally/night_rally.sh $PWD/bin/night_rally
+    EOF2
+
+    chmod ugo+x /rally-install.sh
+    sudo -iu jenkins /rally-install.sh
   EOF
 end
 
