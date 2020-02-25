@@ -68,6 +68,15 @@ If you have made an error you can also remove specific annotations by id.
 
 For more details, please issue `night-rally-admin delete annotation --help`.
 
+#### Remove a race
+
+Sometimes we need to redo a benchmark run and then we need to cleanup data from the prior run. In order to do so, `night-rally-admin` can delete all relevant data.
+
+1. Issue `night-rally-admin list races --environment=nightly` and find the race id of the race(s) you need to delete. Note that only the 20 most recent races are shown. You can show more, by specifying `--limit=NUMBER`.
+2. Suppose the id of the race that we want to delete is `53f37522-b761-4e46-9a5c-e7f0d9d9258f`. Then issue `night-rally-admin delete race --id=53f37522-b761-4e46-9a5c-e7f0d9d9258f`. This will remove all data about this race from the metrics store.
+
+For more details, please issue `night-rally-admin delete race --help`.
+
 **Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
 
 #### Find logs, telemetry or heapdumps from older nightly runs

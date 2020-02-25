@@ -197,6 +197,52 @@ def delete_annotation(es, args):
                     raise
 
 
+def delete_race(es, args):
+    import elasticsearch
+
+    def do_delete(index, body, race_id):
+        try:
+            return es.delete_by_query(index=index, body=body)
+        except elasticsearch.TransportError as e:
+            if e.status_code == 404:
+                print("Did not find [%s]." % race_id)
+            else:
+                raise
+
+    environment = args.environment
+    races = args.id.split(",")
+    if args.dry_run:
+        if len(races) == 1:
+            print("Would delete race with id [%s] in environment [%s]." % (races[0], environment))
+        else:
+            print("Would delete %s races: %s in environment [%s]." % (len(races), races, environment))
+    else:
+        for race_id in races:
+            selector = {
+                "query": {
+                    "bool": {
+                        "filter": [
+                            {
+                                "term": {
+                                    "environment": environment
+                                }
+                            },
+                            {
+                                "term": {
+                                    "race-id": race_id
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+            do_delete(index="rally-races-*", body=selector, race_id=race_id)
+            do_delete(index="rally-results-*", body=selector, race_id=race_id)
+            do_delete(index="rally-metrics-*", body=selector, race_id=race_id)
+
+            print("Successfully deleted [%s] in environment [%s]." % (race_id, environment))
+
+
 def arg_parser():
     def positive_number(v):
         value = int(v)
@@ -296,7 +342,7 @@ def arg_parser():
         "configuration",
         metavar="configuration",
         help="",
-        choices=["annotation"])
+        choices=["annotation", "race"])
     delete_parser.add_argument(
         "--dry-run",
         help="Just show what would be done but do not apply the operation.",
@@ -305,7 +351,7 @@ def arg_parser():
     )
     delete_parser.add_argument(
         "--id",
-        help="Id of the annotation to delete. Separate multiple ids with a comma.",
+        help="Ids of the items to delete. Separate multiple ids with a comma.",
         required=True
     )
     delete_parser.add_argument(
@@ -333,6 +379,8 @@ def main():
         add_annotation(es, args)
     elif args.subcommand == "delete" and args.configuration == "annotation":
         delete_annotation(es, args)
+    elif args.subcommand == "delete" and args.configuration == "race":
+        delete_race(es, args)
     else:
         parser.print_help(file=sys.stderr)
         exit(1)

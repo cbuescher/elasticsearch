@@ -30,4 +30,4 @@ def create_client(configuration_name):
     http_auth = (cfg["datastore.user"], cfg["datastore.password"]) if secure else None
     certs = certifi.where() if secure else None
 
-    return elasticsearch.Elasticsearch(hosts=hosts, http_auth=http_auth, ca_certs=certs)
+    return elasticsearch.Elasticsearch(hosts=hosts, http_auth=http_auth, ca_certs=certs, timeout=60)
