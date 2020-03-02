@@ -3,6 +3,7 @@ import sys
 import argparse
 from night_rally import client
 import tabulate
+from datetime import datetime
 
 
 def list_races(es, args):
@@ -17,15 +18,29 @@ def list_races(es, args):
     track = args.track
     car = args.car
     challenge = args.challenge
+    from_date = args.from_date
+    to_date = args.to_date
 
-    msg = "Listing %d most recent races for" % limit
+    if not from_date and not to_date:
+        recent = "most recent "
+    else:
+        recent = ""
+
+    msg = "Listing [{}] {}races for".format(limit, recent)
     if track:
-        msg += " track %s" % track
+        msg += " track [{}]".format(track)
     if challenge:
-        msg += " challenge %s" % challenge
+        msg += " challenge [{}]".format(challenge)
     if car:
-        msg += " car %s" % car
-    msg += " in environment %s.\n" % environment
+        msg += " car [{}]".format(car)
+    if from_date and to_date:
+        msg += " between [{}] and [{}]".format(from_date, to_date)
+    elif from_date:
+        msg += " after [{}]".format(from_date)
+    elif to_date:
+        msg += " before [{}]".format(from_date)
+
+    msg += " in environment [{}].\n".format(environment)
     print(msg)
 
     query = {
@@ -35,6 +50,15 @@ def list_races(es, args):
                     {
                         "term": {
                             "environment": environment
+                        }
+                    },
+                    {
+                        "range": {
+                            "race-timestamp": {
+                                "gte": from_date,
+                                "lte": to_date,
+                                "format": "yyyyMMdd"
+                            }
                         }
                     }
                 ]
@@ -250,6 +274,16 @@ def arg_parser():
             raise argparse.ArgumentTypeError("must be positive but was %s" % value)
         return value
 
+    def valid_date(v):
+        pattern = "%Y%m%d"
+        try:
+            datetime.strptime(v, pattern)
+            # don't convert, just check that the format is correct, we'll use the string value later on anyway
+            return v
+        except ValueError:
+            msg = "[{}] does not conform to the pattern [yyyyMMdd]".format(v)
+            raise argparse.ArgumentTypeError(msg)
+
     parser = argparse.ArgumentParser(description="Admin tool for Elasticsearch benchmarks",
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
 
@@ -291,6 +325,18 @@ def arg_parser():
     list_parser.add_argument(
         "--challenge",
         help="Show only records for this challenge",
+        default=None
+    )
+    list_parser.add_argument(
+        "--from-date",
+        help="Show only records on or after this date (format: yyyyMMdd)",
+        type=valid_date,
+        default=None
+    )
+    list_parser.add_argument(
+        "--to-date",
+        help="Show only records before or on this date (format: yyyyMMdd)",
+        type=valid_date,
         default=None
     )
 
