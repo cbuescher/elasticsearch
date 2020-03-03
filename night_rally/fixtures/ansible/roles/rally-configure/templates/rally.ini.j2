@@ -15,7 +15,7 @@ elasticsearch.src.subdir = elasticsearch
 [benchmarks]
 local.dataset.cache = {{rally_homedir}}/.rally/benchmarks/data
 
-{% set metrics_store = lookup('vault', lookup('env', 'RALLY_METRICS_STORE_CREDENTIAL_PATH')) %}
+{% set metrics_store = lookup('hashi_vault', 'secret=' ~ lookup('env', 'RALLY_METRICS_STORE_CREDENTIAL_PATH')) %}
 [reporting]
 datastore.type = elasticsearch
 datastore.host = {{ metrics_store['es_host'] }}

@@ -1,14 +1,11 @@
 ---
 
-- name: ensure all rally daemon processes have been killed
-  command: killall -9 esrallyd
-  ignore_errors: true
-  become: true
-
 - name: start rallyd
-  command: ./rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating-nodes'][0] }}
+  command: >
+    /bin/bash --login
+    -c "bin/rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating_nodes'][0] }}"
   args:
-    chdir: /var/lib/jenkins/bin
+    chdir: /var/lib/jenkins
   environment:
     JAVA7_HOME: /var/lib/jenkins/.java/java7
     JAVA8_HOME: /var/lib/jenkins/.java/java8
@@ -22,9 +19,11 @@
   when: not in_vagrant | default("false") | bool
 
 - name: start rallyd in vagrant env, if applicable
-  command: ./rallyd {% if skip_rally_update | default(False) | bool %}--skip-update{% endif %} start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating-nodes'][0] }}
+  command: >
+    /bin/bash --login
+    -c "bin/rallyd {% if skip_rally_update | default(False) | bool %}--skip-update{% endif %} start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating_nodes'][0] }}"
   args:
-    chdir: /var/lib/jenkins/bin
+    chdir: /var/lib/jenkins
   environment:
     JAVA8_HOME: /usr/lib/jvm/java-8-openjdk-amd64
     JAVA11_HOME: /var/lib/jenkins/.java/openjdk11

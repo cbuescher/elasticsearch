@@ -2,7 +2,7 @@
 
 - name: run fixtures on target hosts
 # ==================================
-  hosts: target-hosts
+  hosts: target_hosts
   gather_facts: true
   roles:
     - { role: trim, tags: trim }

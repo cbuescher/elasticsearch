@@ -1,3 +1,3 @@
 ---
 rally_environment: nightly
-rally_homedir: '{{lookup("env", "HOME") if local_setup | default("false") | bool else "/var/lib/jenkins" }}'
+rally_homedir: '{{lookup("env", "HOME") if local_setup | default() | bool else "/var/lib/jenkins" }}'

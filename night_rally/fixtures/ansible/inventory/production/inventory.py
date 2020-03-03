@@ -3,8 +3,8 @@
 '''
 Extremely simple dynamic inventory script for Ansible.
 
-Expects TARGET_HOSTS env var to create the target-hosts group
-and COORDINATING_NODES env var to create the coordinating-nodes group.
+Expects TARGET_HOSTS env var to create the target_hosts group
+and COORDINATING_NODES env var to create the coordinating_nodes group.
 '''
 
 import argparse
@@ -17,6 +17,7 @@ except ImportError:
 
 ANSIBLE_SSH_PRIVATE_KEY_FILE = "/var/lib/jenkins/.ssh/rally"
 ANSIBLE_USER = "rally"
+
 
 class Inventory(object):
     def __init__(self):
@@ -37,11 +38,11 @@ class Inventory(object):
         else:
             self.inventory = self.empty_inventory()
 
-        print json.dumps(self.inventory);
+        print(json.dumps(self.inventory))
 
     def build_inventory(self):
-        inventory = self.dynamic_groups(group_name="target-hosts", env_var="TARGET_HOSTS").copy()
-        inventory.update(self.dynamic_groups(group_name="coordinating-nodes", env_var="COORDINATING_NODES"))
+        inventory = self.dynamic_groups(group_name="target_hosts", env_var="TARGET_HOSTS").copy()
+        inventory.update(self.dynamic_groups(group_name="coordinating_nodes", env_var="COORDINATING_NODES"))
         inventory.update(
             {
                 '_meta': {
@@ -77,5 +78,6 @@ class Inventory(object):
         parser.add_argument('--host', action = 'store')
         parser.add_argument('--refresh', action = 'store_true')
         self.args = parser.parse_args()
+
 
 Inventory()

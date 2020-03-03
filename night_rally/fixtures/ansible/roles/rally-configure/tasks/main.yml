@@ -1,6 +1,8 @@
 ---
+
 - name: install Rally config file
-  become: '{{ not local_setup | default("false") | bool }}'
+  become: "{{ not local_setup | default() | bool }}"
+  become_user: "jenkins"
   template:
     src: rally.ini.j2
     dest: "{{ rally_homedir }}/.rally/rally-{{ rally_environment }}.ini"

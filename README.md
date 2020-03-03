@@ -6,24 +6,19 @@ Night Rally is a set of driver scripts for [running nightly macrobenchmarks for 
 
 ### Prerequisites
 
-* Python 3.5+ available as `python3` on the path (verify with: `python3 --version` which should print `Python 3.5.0` (or higher))
-* `pip3` available on the path (verify with `pip3 --version`)
 * `awscli` available on the command line and properly set up to write to the bucket `s3://elasticsearch-benchmarks.elasticsearch.org`.
-* `Ansible` available on the command line (only needed in our nightly benchmarking environment)
 * All prerequisites for [Rally](https://github.com/elastic/rally)
 
 Night Rally is only tested on Mac OS X and Linux.
 
 ### Getting Started
 
-1. Ensure that all prerequisites of [Rally](https://github.com/elastic/rally) are properly setup. Hint. It is *not* required to install Rally manually. Just ensure that its prerequisites are installed.
+1. Ensure that all prerequisites of [Rally](https://github.com/elastic/rally) are properly setup. Hint: It is *not* required to install Rally manually. Just ensure that its prerequisites are installed.
 2. Clone this repo: `git clone git@github.com:elastic/night-rally.git`
 3. [Setup Vault](https://github.com/elastic/infra/blob/master/docs/vault.md)
-4. Create a virtualenv with `python3 -m venv .venv` and activate it with `./.venv/bin/activate`
-5. Run `make install`
+4. Run `make setup`
 
 Now you can invoke Night Rally regularly with the startup script `night_rally.sh` e.g. via cron. The script can also self-update if invoked as `night_rally.sh --self-update`.
-
 
 ### How do I ...?
 

@@ -125,7 +125,8 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     git clone #{rally_repo} --branch #{rally_branch}
     cd rally
     if [[ ! -z \"#{rally_sha}\" ]]; then git checkout #{rally_sha}; fi
-    ./rally configure
+    pip3 install --upgrade pip setuptools
+    pip3 install -e .
     cd /var/lib/jenkins
     ln -s $PWD/src/rally/rally $PWD/bin/rally
     ln -s $PWD/src/rally/rallyd $PWD/bin/rallyd
@@ -279,8 +280,7 @@ Vagrant.configure(2) do |config|
         mkdir -p /var/lib/jenkins/.rally/benchmarks/races
         echo "/dev/sdb /var/lib/jenkins/.rally/benchmarks/races ext4 defaults 0 2" >>/etc/fstab
         mount -a
-        #mount /buildtmp
-        chown -R jenkins:jenkins /var/lib/jenkins/.rally/benchmarks
+        chown -R jenkins:jenkins /var/lib/jenkins/.rally
       EOF
 
       # Make a local copy of night_rally under the jenkins user home dir on the coordinator

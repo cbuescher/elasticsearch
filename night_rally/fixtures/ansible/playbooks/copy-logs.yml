@@ -3,7 +3,7 @@
 # ============================================
 # Copy subdirectories of `/var/lib/jenkins/.rally/benchmarks/races/` with important data (logs, telemetry)
 # to a directory that doesn't get wiped away between night-rally invocations
-  hosts: target-hosts
+  hosts: target_hosts
   gather_facts: true
   become: true
   become_user: jenkins

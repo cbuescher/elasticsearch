@@ -1,11 +1,27 @@
 ---
 
-- name: update Rally on all affected machines before the benchmark
-# ================================================================
-# First the Rally master (coordinating node which is running on the (only) Jenkins slave node, then the Rally slaves (running
-# on the target machines)
-  hosts: coordinating-nodes, target-hosts
+- name: clean up lingering processes before benchmark
+  hosts: all
   gather_facts: true
+
+  pre_tasks:
+    - name: ensure all rally daemon processes have been killed
+      command: killall -9 esrallyd
+      ignore_errors: true
+      become: true
+
+    - name: ensure no java process is running except for the jenkins swarm client
+      shell: >
+        ps -ef | grep -i java | grep -viE "swarm-client|grep" | awk '{print $2}' | xargs kill -9
+      become: true
+
+- name: update Rally on all affected machines before the benchmark
+  # ================================================================
+  # First the Rally master (coordinating node which is running on the (only) Jenkins slave node, then the Rally slaves (running
+  # on the target machines)
+  hosts: coordinating_nodes, target_hosts
+  gather_facts: true
+
   roles:
     - { role: rally-configure, tags: rally-configure }
     - { role: rally-update, tags: rally-update }

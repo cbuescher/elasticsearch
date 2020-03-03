@@ -19,13 +19,17 @@ __versionstr__ = VERSION
 long_description = str_from_file("README.md")
 
 install_requires = [
+    # required for night-rally fixtures and deploying ini files
+    "ansible==2.8.8",
     # License: Apache 2.0
     # transitive dependency urllib3: MIT
     "elasticsearch==7.0.5",
-    # License: MIT
-    "tabulate==0.8.5",
+    # required by hashi_vault ansible plugin
+    "hvac==0.9.1",
     # License: MIT
     "jsonschema==3.1.1",
+    # License: MIT
+    "tabulate==0.8.5",
     # always use the latest version, these are certificate files...
     # License: MPL 2.0
     "certifi"
