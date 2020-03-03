@@ -291,6 +291,9 @@ def arg_parser():
         title="subcommands",
         dest="subcommand",
         help="")
+    # the keyword argument in #add_subparsers() only works in Python 3.7+.
+    # See https://docs.python.org/3.7/library/argparse.html#argparse.ArgumentParser.add_subparsers
+    subparsers.required = True
 
     # list races --max-results=20
     # list annotations --max-results=20
