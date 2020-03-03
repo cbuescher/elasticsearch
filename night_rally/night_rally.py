@@ -631,7 +631,9 @@ def run_rally(tracks, release_params, available_hosts, command, dry_run=False, s
                             try:
                                 if not dry_run:
                                     wait_until_port_is_free(available_hosts_with_ports)
-                                if runner(command.command_line(race_cfg)):
+                                cmd = command.command_line(race_cfg)
+                                logger.info("Executing [%s]", cmd)
+                                if runner(cmd):
                                     rally_failure = True
                                     logger.error("Failed to run [%s]. Please check the logs.", race_cfg)
                                 stop = time.perf_counter()
