@@ -112,6 +112,67 @@ Suppose we want to publish a new release benchmark of the Elasticsearch release 
 
 The results will show up automatically as soon as the build is finished.
 
+#### Retrigger a failed nightly benchmark
+
+Rally allows to benchmark arbitrary (recent) commits in Elasticsearch. Night-Rally uses the concept of an "effective start date" to determine:
+ 
+* Which commit should be benchmarked by Rally.
+* Which race timestamp to use for the nightly charts.
+
+Therefore, we need to ensure we set the corresponding build parameter `EFFECTIVE_START_DATE` in the nightly CI builds. Suppose a benchmark has failed that has originally been run with the effective start date "20200220T180634Z" (look for e.g. `18:13:14 [2020-02-20 18:13:14][INFO] Effective start date is [2020-02-20 18:06:34]` in the Jenkins console ouput).
+
+1. Ensure that [all machines in the affected benchmark environment](42.md#where-are-the-benchmark-machines) are in a clean state (no hanging processes etc.) by logging in to each machine as user `jenkins` (`sudo -iu jenkins`). Then check (and terminate if needed):
+    1. Any leftover Elasticsearch processes: `ps -ef | grep -i java | grep -v swarm-client`. Note that on the load driver machines one Java process, the Jenkins swarm client, is running (and should keep running) so please make sure you don't terminate it accidentally. 
+    2. Any leftover Rally processes: `ps -ef | grep -i rally`
+
+2. Use `night-rally-admin` to determine the race ids of the failed races:
+
+```
+night-rally-admin list races --environment=nightly
+```
+
+The output might look as follows (by default, the 20 most recent races are shown; use `--limit=N` to increase the limit or `--from-date=yyyyMMdd` / `--to-date=yyyyMMdd` to show only the relevant date range):
+
+```
+Race Timestamp    Race Id                               Track       Challenge                               Car                                               Version         Revision                                  Track Revision    Team Revision    User Tags
+----------------  ------------------------------------  ----------  --------------------------------------  ------------------------------------------------  --------------  ----------------------------------------  ----------------  ---------------  --------------------------------------------------------------------------------------------------------------------------
+20200220T180634Z  0afb2330-ba14-43f0-87d8-6c9d45aba057  geonames    append-fast-with-conflicts              ['4gheap']                                        8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=oss, name=geonames-update-4g-1node, race-configs-id=race-configs-group-1.json, setup=bare-oss
+20200220T180634Z  818c8460-00e8-4652-acc8-2adfd74490fb  geonames    append-no-conflicts                     ['defaults', 'basic-license']                     8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=basic, name=geonames-append-defaults-1node, race-configs-id=race-configs-group-1.json, setup=bare-oss
+20200220T180634Z  ce509f1a-97ed-43ea-80a9-d35fc8573f5c  geonames    append-no-conflicts                     ['defaults']                                      8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=oss, name=geonames-append-defaults-1node, race-configs-id=race-configs-group-1.json, setup=bare-oss
+20200220T180634Z  cacdfca0-5d46-4710-9cb1-ae9f9c857b07  geonames    append-no-conflicts-index-only          ['4gheap']                                        8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=oss, name=geonames-append-4g-3nodes, race-configs-id=race-configs-group-1.json, setup=bare-oss
+20200220T180634Z  4915ad96-a45d-4ccb-af3b-cb4dc28bd7c2  geonames    append-no-conflicts-index-only          ['4gheap']                                        8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=oss, name=geonames-append-4g-1node, race-configs-id=race-configs-group-1.json, setup=bare-oss
+20200220T180634Z  b46314e6-98eb-46e8-a30f-91e75e65e7fc  geonames    append-no-conflicts-index-only          ['4gheap', 'basic-license']                       8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=basic, name=geonames-append-4g-3nodes, race-configs-id=race-configs-group-1.json, setup=bare-oss
+20200220T180634Z  7de0c6d5-cda6-4706-8eb6-890ea7e4a5b4  geonames    append-sorted-no-conflicts              ['4gheap']                                        8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=oss, name=geonames-appendsorted-4g-1node, race-configs-id=race-configs-group-1.json, setup=bare-oss
+20200220T180634Z  34b6e37e-67e8-4b65-928a-d498fe7360de  nested      nested-search-challenge                 ['4gheap', 'basic-license']                       8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=basic, name=nested-append-4g-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
+20200220T180634Z  eb2103fb-6621-4fba-acff-e3048c40ccd6  nested      nested-search-challenge                 ['4gheap']                                        8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=oss, name=nested-append-4g-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
+20200220T180634Z  b07deca5-5d8e-41bb-96ee-fb9a3908ceb5  noaa        append-no-conflicts                     ['defaults', 'basic-license']                     8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=basic, name=noaa-append-defaults-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
+20200220T180634Z  d8bc7218-e371-473b-bd14-df88fdea8cff  noaa        append-no-conflicts                     ['defaults']                                      8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=oss, name=noaa-append-defaults-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
+20200220T180634Z  c4af1ac2-540e-4382-9c27-d12f9f46aed9  pmc         append-no-conflicts                     ['4gheap']                                        8.0.0-SNAPSHOT  dc070a541e5ef343bca11fb08715b8b2ba0c2e16  84281be           cb01613          license=oss, name=pmc-append-4g-3nodes, race-configs-id=race-configs-group-2.json, setup=bare-oss
+20200219T215555Z  f8210d48-d169-4adb-87fb-5a45768bd8c3  http_logs   append-index-only-with-ingest-pipeline  ['4gheap']                                        8.0.0-SNAPSHOT  e057f65a7d17c7daea530ba3e451063e31584bc4  84281be           cb01613          license=oss, name=http_logs-grok-no-src-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
+20200219T215555Z  a0afbd05-ebfd-4cc3-b246-08253412bc21  http_logs   append-index-only-with-ingest-pipeline  ['4gheap', 'basic-license']                       8.0.0-SNAPSHOT  e057f65a7d17c7daea530ba3e451063e31584bc4  84281be           cb01613          license=basic, name=http_logs-grok-no-src-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
+20200219T215555Z  aeff2a81-741e-4085-8cdc-fd1a7f4b2c07  http_logs   append-no-conflicts                     ['4gheap', 'g1gc']                                8.0.0-SNAPSHOT  e057f65a7d17c7daea530ba3e451063e31584bc4  84281be           cb01613          license=oss, name=http_logs-append-4g-g1gc-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
+20200219T215555Z  70a8ab49-c0f5-463a-a911-9522d7612eaa  http_logs   append-no-conflicts                     ['4gheap']                                        8.0.0-SNAPSHOT  e057f65a7d17c7daea530ba3e451063e31584bc4  84281be           cb01613          license=oss, name=http_logs-append-4g-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
+...
+``` 
+
+3. Grab the race ids from the affected timestamp and delete the results of all affected race ids:
+
+You can append `--dry-run` to test it first (in this example we show only one id for brevity): 
+
+```
+night-rally-admin delete race --environment=nightly --id="0afb2330-ba14-43f0-87d8-6c9d45aba057" --dry-run
+```
+
+after you've verified that the command is fine, remove `--dry-run` to actually delete the affected data: 
+
+```
+night-rally-admin delete race --environment=nightly --id="0afb2330-ba14-43f0-87d8-6c9d45aba057,818c8460-00e8-4652-acc8-2adfd74490fb,ce509f1a-97ed-43ea-80a9-d35fc8573f5c,cacdfca0-5d46-4710-9cb1-ae9f9c857b07,4915ad96-a45d-4ccb-af3b-cb4dc28bd7c2,b46314e6-98eb-46e8-a30f-91e75e65e7fc,7de0c6d5-cda6-4706-8eb6-890ea7e4a5b4,34b6e37e-67e8-4b65-928a-d498fe7360de,eb2103fb-6621-4fba-acff-e3048c40ccd6,b07deca5-5d8e-41bb-96ee-fb9a3908ceb5,d8bc7218-e371-473b-bd14-df88fdea8cff,c4af1ac2-540e-4382-9c27-d12f9f46aed9,f8210d48-d169-4adb-87fb-5a45768bd8c3,a0afbd05-ebfd-4cc3-b246-08253412bc21,aeff2a81-741e-4085-8cdc-fd1a7f4b2c07,70a8ab49-c0f5-463a-a911-9522d7612eaa"
+```
+
+4. Verify that the data points are gone (reissuing the command from step 2)
+
+5. Retrigger a build via Jenkins. Be sure to set `EFFECTIVE_START_DATE` to the same timestamp (i.e. `2020-02-20 18:06:34` in our example) when triggering the build. This is crucial to ensure that the correct commit is benchmarked!
+
 #### Developing Night Rally / Rally
 
 To verify changes in the Night Rally repo (e.g. in race-configs) or changes in Rally itself that could potentially affect scheduled benchmarks, you are encouraged to use the Vagrant workflow.
