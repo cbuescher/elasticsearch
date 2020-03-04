@@ -24,12 +24,6 @@ while [[ -h $SOURCE ]]; do # resolve $SOURCE until the file is no longer a symli
 done
 NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# Interactive users are required to be logged in already, others (like Jenkins) will expose VAULT_SECRET_ID env variable.
-if [[ -n $VAULT_SECRET_ID && -n $VAULT_ROLE_ID ]]; then
-    export VAULT_TOKEN=$( curl -s -X POST -H "Content-Type: application/json" -L -d "{\"role_id\":\"$VAULT_ROLE_ID\",\"secret_id\":\"$VAULT_SECRET_ID\"}" $VAULT_ADDR/v1/auth/approle/login | jq -r '.auth.client_token')
-    unset VAULT_SECRET_ID
-    unset VAULT_ROLE_ID
-fi
 export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-"/secret/rally/cloud/nightly-rally-metrics"}
 
 ANSIBLE_ALL_TAGS=(check-drive-health encryption-at-rest initialize-data-disk trim drop-caches)
@@ -202,6 +196,13 @@ then
     echo "About to run ansible-playbook ... with '$ANSIBLE_SKIP_TAGS_STRING'"
     if [[ $DRY_RUN == NO ]]
     then
+        # Interactive users are required to be logged in already, others (like Jenkins) will expose VAULT_SECRET_ID env variable.
+        if [[ -n $VAULT_SECRET_ID && -n $VAULT_ROLE_ID ]]; then
+            export VAULT_TOKEN=$( curl -s -X POST -H "Content-Type: application/json" -L -d "{\"role_id\":\"$VAULT_ROLE_ID\",\"secret_id\":\"$VAULT_SECRET_ID\"}" $VAULT_ADDR/v1/auth/approle/login | jq -r '.auth.client_token')
+            unset VAULT_SECRET_ID
+            unset VAULT_ROLE_ID
+        fi
+
         pushd . >/dev/null 2>&1
 
         cd ${NIGHT_RALLY_HOME}/night_rally/fixtures/ansible
