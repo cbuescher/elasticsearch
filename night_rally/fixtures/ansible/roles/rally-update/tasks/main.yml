@@ -1,9 +1,12 @@
 ---
 
+# this is handy for verifying whether skipping a Rally update was explicitly asked
+- debug: var=skip_rally_update
+
 - name: start rallyd
   command: >
     /bin/bash --login
-    -c "bin/rallyd start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating_nodes'][0] }}"
+    -c "bin/rallyd {% if skip_rally_update | default(False) | bool %}--skip-update{% endif %} start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating_nodes'][0] }}"
   args:
     chdir: /var/lib/jenkins
   environment:
