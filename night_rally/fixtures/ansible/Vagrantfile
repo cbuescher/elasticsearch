@@ -102,7 +102,7 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     set -eo pipefail
     apt-get update
     apt-get purge -y python3\*-pip python3\*-setuptools
-    apt-get install -y build-essential curl libbz2-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev llvm wget xz-utils zlib1g-dev python-virtualenv
+    apt-get install -y build-essential curl libbz2-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev llvm wget xz-utils zlib1g-dev
     cat >/rally-install.sh <<'EOF2'
     #!/usr/bin/env bash
 
@@ -125,8 +125,8 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     git clone #{rally_repo} --branch #{rally_branch}
     cd rally
     if [[ ! -z \"#{rally_sha}\" ]]; then git checkout #{rally_sha}; fi
-    pip3 install --upgrade pip setuptools
-    pip3 install -e .
+    python3 -m pip install --upgrade pip setuptools
+    python3 -m pip install --quiet --user --upgrade --editable .
     cd /var/lib/jenkins
     ln -s $PWD/src/rally/rally $PWD/bin/rally
     ln -s $PWD/src/rally/rallyd $PWD/bin/rallyd
