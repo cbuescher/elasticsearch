@@ -1688,7 +1688,8 @@ class NightRallyTests(unittest.TestCase):
                                     {
                                         "name": "geonames-8g",
                                         "challenge": "append-no-conflicts",
-                                        "car": "8gheap"
+                                        "car": "8gheap",
+                                        "on-error": "abort"
                                     }
                                 ]
                             }
@@ -1722,7 +1723,7 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"8gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-8g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--user-tag=\"name:geonames-8g,setup:bare,license:oss\" --runtime-jdk=\"8\" --on-error=\"abort\" "
                 "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"",
             ]
             ,

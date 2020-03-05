@@ -427,6 +427,7 @@ class StandardParams:
         add_if_present(params, "car-params", race_config.car_params)
         add_if_present(params, "track-params", race_config.track_params)
         add_if_present(params, "elasticsearch-plugins", race_config.plugins)
+        add_if_present(params, "on-error", race_config.on_error)
         if self.test_mode:
             params["test-mode"] = None
         return params
@@ -560,6 +561,15 @@ class RaceConfig:
         return self.configuration.get("track-params")
 
     @property
+    def on_error(self):
+        return self.configuration.get("on-error")
+
+    # TODO dm: Temporary workaround for Rally failing with exit code != 0 with --on-error=abort
+    @property
+    def rally_failure_fails_night_rally(self):
+        return self.on_error != "abort"
+
+    @property
     def x_pack(self):
         return self.configuration.get("x-pack", [])
 
@@ -634,7 +644,9 @@ def run_rally(tracks, release_params, available_hosts, command, dry_run=False, s
                                 cmd = command.command_line(race_cfg)
                                 logger.info("Executing [%s]", cmd)
                                 if runner(cmd):
-                                    rally_failure = True
+                                    # TODO dm: This is only here temporarily until Rally will exit with exit code 0 when
+                                    #  --on-error=abort and the condition is met.
+                                    rally_failure = race_cfg.rally_failure_fails_night_rally
                                     logger.error("Failed to run [%s]. Please check the logs.", race_cfg)
                                 stop = time.perf_counter()
                                 logger.info("Finished running on [%s] in [%f] seconds.", race_cfg, (stop - start))

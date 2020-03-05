@@ -76,6 +76,11 @@
                           "type": ["array", "string"],
                           "description": "The telemetry devices to activate for a race"
                         },
+                        "on-error": {
+                          "type": "string",
+                          "enum": ["abort", "continue"],
+                          "description": "How Rally should behave on request errors"
+                        },
                         "node-count": {
                           "type": "integer",
                           "minimum": 1

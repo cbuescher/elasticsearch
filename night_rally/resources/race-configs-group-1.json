@@ -398,7 +398,8 @@
                 },
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "13",
-                "telemetry": "gc",
+                "telemetry": ["gc", "heapdump"],
+                "on-error": "abort",
                 "node-count": 3
               },
               {
@@ -414,7 +415,8 @@
                 "challenge": "append-no-conflicts",
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "13",
-                "telemetry": "gc"
+                "telemetry": ["gc", "heapdump"],
+                "on-error": "abort"
               },
               {
                 "name": "nyc_taxis-appendsorted-4g-1node",
@@ -484,7 +486,8 @@
                 },
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "13",
-                "telemetry": "gc",
+                "telemetry": ["gc", "heapdump"],
+                "on-error": "abort",
                 "node-count": 3
               },
               {
@@ -500,7 +503,8 @@
                 "challenge": "append-no-conflicts",
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "13",
-                "telemetry": "gc"
+                "telemetry": ["gc", "heapdump"],
+                "on-error": "abort"
               },
               {
                 "name": "nyc_taxis-appendsorted-4g-1node",
