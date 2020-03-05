@@ -21,28 +21,6 @@ def list_races(es, args):
     from_date = args.from_date
     to_date = args.to_date
 
-    if not from_date and not to_date:
-        recent = "most recent "
-    else:
-        recent = ""
-
-    msg = "Listing [{}] {}races for".format(limit, recent)
-    if track:
-        msg += " track [{}]".format(track)
-    if challenge:
-        msg += " challenge [{}]".format(challenge)
-    if car:
-        msg += " car [{}]".format(car)
-    if from_date and to_date:
-        msg += " between [{}] and [{}]".format(from_date, to_date)
-    elif from_date:
-        msg += " after [{}]".format(from_date)
-    elif to_date:
-        msg += " before [{}]".format(from_date)
-
-    msg += " in environment [{}].\n".format(environment)
-    print(msg)
-
     query = {
         "query": {
             "bool": {
@@ -124,7 +102,6 @@ def list_annotations(es, args):
     environment = args.environment
     track = args.track
     if track:
-        print("Listing %d most recent annotations in environment %s for track %s.\n" % (limit, environment, track))
         query = {
             "query": {
                 "bool": {
@@ -145,7 +122,6 @@ def list_annotations(es, args):
             }
         }
     else:
-        print("Listing %d most recent annotations in environment %s.\n" % (limit, environment))
         query = {
             "query": {
                 "term": {
