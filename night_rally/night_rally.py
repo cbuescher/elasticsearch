@@ -8,6 +8,7 @@ import re
 import shlex
 import socket
 import time
+import inspect
 import json
 import jsonschema
 
@@ -817,6 +818,70 @@ def deactivate_outdated_results(effective_start_date, configuration_name, releas
         logger.info("Result: %s" % res)
 
 
+def race_meta_data(environment, configuration_name, effective_start_date, race_configs_id, previous, dry_run):
+    """
+
+    :param environment: The environment's name (e.g. "nightly")
+    :param configuration_name: The Rally configuration name (which usually matches the environment name)
+    :param effective_start_date: The effective start date as datetime.
+    :param race_configs_id: Race config id for which to retrieve the race meta-data.
+    :param previous: A bool indicating whether to retrieve details about the race *prior* to the one provided via
+                     ``effective_start_date`` (``previous=True``) or whether to retrieve details about the current
+                     race (``previous=False``).
+    :param dry_run: A bool indicating whether to only simulate retrieval (``dry_run=True``).
+    :return: The matching race meta-data or ``None`` if there is no match.
+    """
+    ts_filter = "lt" if previous else "lte"
+
+    query = {
+        "query": {
+            "bool": {
+                "filter": [
+                    {
+                        "term": {
+                            "environment": environment
+                        }
+                    },
+                    {
+                        "range": {
+                            "race-timestamp": {
+                                ts_filter: to_iso8601_short(effective_start_date)
+                            }
+                        }
+                    },
+                    {
+                        "term": {
+                            "user-tags.race-configs-id": race_configs_id
+                        }
+                    }
+                ]
+            }
+        },
+        "size": 1,
+        "sort": [
+            {
+                "race-timestamp": {
+                    "order": "desc"
+                }
+            }
+        ]
+    }
+    if dry_run:
+        import json
+        logger.info("Would execute query\n%s" % json.dumps(query, indent=2))
+        return None
+    else:
+        from night_rally import client
+        es = client.create_client(configuration_name)
+        es.indices.refresh(index="rally-races-*")
+        result = es.search(index="rally-races-*", body=query)
+        # should have exactly one result
+        if result["hits"]["total"] == 1:
+            return result["hits"]["hits"][0]
+        else:
+            return None
+
+
 def non_empty_string(v):
     if isinstance(v, str):
         if not v:
@@ -1044,6 +1109,43 @@ def main():
             environment="release"
 
         )
+
+        previous = race_meta_data("nightly",
+                                  common_cli_params.configuration_name,
+                                  start_date,
+                                  common_cli_params.race_configs_id,
+                                  previous=True,
+                                  dry_run=args.dry_run)
+        current = race_meta_data("nightly",
+                                 common_cli_params.configuration_name,
+                                 start_date,
+                                 common_cli_params.race_configs_id,
+                                 previous=False,
+                                 dry_run=args.dry_run)
+
+        if previous and current:
+            # be lenient here and always assume that key are absent (may happen due to changes in the data model)
+            msg = """Changes between [{previous_ts}] and [{current_ts}]:
+            
+            * Elasticsearch: https://github.com/elastic/elasticsearch/compare/{previous_es}...{current_es}
+            * Rally: https://github.com/elastic/rally/compare/{previous_rally}...{current_rally}
+            * rally-tracks: https://github.com/elastic/rally-tracks/compare/{previous_tracks}...{current_tracks}
+            * rally-teams: https://github.com/elastic/rally-teams/compare/{previous_teams}...{current_teams}
+            """.format(previous_ts=previous.get("race-timestamp"),
+                       current_ts=current.get("race-timestamp"),
+                       previous_es=previous.get("cluster", {}).get("revision"),
+                       current_es=current.get("cluster", {}).get("revision"),
+                       previous_rally=previous.get("rally-revision"),
+                       current_rally=current.get("rally-revision"),
+                       previous_tracks=previous.get("track-revision"),
+                       current_tracks=current.get("track-revision"),
+                       previous_teams=previous.get("cluster", {}).get("team-revision"),
+                       current_teams=current.get("cluster", {}).get("team-revision"),
+                       )
+            logger.info(inspect.cleandoc(msg))
+        else:
+            logger.info("Cannot determine race meta-data. Skipping summary.")
+
     elif common_cli_params.is_release:
         deactivate_outdated_results(
             start_date,
