@@ -78,7 +78,7 @@ For more details, please issue `night-rally-admin delete race --help`.
 
 Each nightly execution wipes the data disk on target machines (`~/.var/lib/jenkins/rally/benchmarks/races`) as part of the initial [setup fixture](https://github.com/elastic/night-rally/tree/master/night_rally/fixtures/ansible/roles/initialize-data-disk).
 Important information from earlier nightly executions, specifically the `heapdump`, `logs` and `telemetry` subdirectories from each race id are copied under `/var/lib/jenkins/race_archive/<YYYYMMDD>` on each target machine, for future reference.
-This is done as the last step before the nightly run has finished. 
+This is done as the last step before the nightly run has finished.
 
 #### Add a new track
 
@@ -110,14 +110,14 @@ The results will show up automatically as soon as the build is finished.
 #### Retrigger a failed nightly benchmark
 
 Rally allows to benchmark arbitrary (recent) commits in Elasticsearch. Night-Rally uses the concept of an "effective start date" to determine:
- 
+
 * Which commit should be benchmarked by Rally.
 * Which race timestamp to use for the nightly charts.
 
 Therefore, we need to ensure we set the corresponding build parameter `EFFECTIVE_START_DATE` in the nightly CI builds. Suppose a benchmark has failed that has originally been run with the effective start date "20200220T180634Z" (look for e.g. `18:13:14 [2020-02-20 18:13:14][INFO] Effective start date is [2020-02-20 18:06:34]` in the Jenkins console ouput).
 
 1. Ensure that [all machines in the affected benchmark environment](42.md#where-are-the-benchmark-machines) are in a clean state (no hanging processes etc.) by logging in to each machine as user `jenkins` (`sudo -iu jenkins`). Then check (and terminate if needed):
-    1. Any leftover Elasticsearch processes: `ps -ef | grep -i java | grep -v swarm-client`. Note that on the load driver machines one Java process, the Jenkins swarm client, is running (and should keep running) so please make sure you don't terminate it accidentally. 
+    1. Any leftover Elasticsearch processes: `ps -ef | grep -i java | grep -v swarm-client`. Note that on the load driver machines one Java process, the Jenkins swarm client, is running (and should keep running) so please make sure you don't terminate it accidentally.
     2. Any leftover Rally processes: `ps -ef | grep -i rally`
 
 2. Use `night-rally-admin` to determine the race ids of the failed races:
@@ -148,17 +148,17 @@ Race Timestamp    Race Id                               Track       Challenge   
 20200219T215555Z  aeff2a81-741e-4085-8cdc-fd1a7f4b2c07  http_logs   append-no-conflicts                     ['4gheap', 'g1gc']                                8.0.0-SNAPSHOT  e057f65a7d17c7daea530ba3e451063e31584bc4  84281be           cb01613          license=oss, name=http_logs-append-4g-g1gc-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
 20200219T215555Z  70a8ab49-c0f5-463a-a911-9522d7612eaa  http_logs   append-no-conflicts                     ['4gheap']                                        8.0.0-SNAPSHOT  e057f65a7d17c7daea530ba3e451063e31584bc4  84281be           cb01613          license=oss, name=http_logs-append-4g-1node, race-configs-id=race-configs-group-2.json, setup=bare-oss
 ...
-``` 
+```
 
 3. Grab the race ids from the affected timestamp and delete the results of all affected race ids:
 
-You can append `--dry-run` to test it first (in this example we show only one id for brevity): 
+You can append `--dry-run` to test it first (in this example we show only one id for brevity):
 
 ```
 night-rally-admin delete race --environment=nightly --id="0afb2330-ba14-43f0-87d8-6c9d45aba057" --dry-run
 ```
 
-after you've verified that the command is fine, remove `--dry-run` to actually delete the affected data: 
+after you've verified that the command is fine, remove `--dry-run` to actually delete the affected data:
 
 ```
 night-rally-admin delete race --environment=nightly --id="0afb2330-ba14-43f0-87d8-6c9d45aba057,818c8460-00e8-4652-acc8-2adfd74490fb,ce509f1a-97ed-43ea-80a9-d35fc8573f5c,cacdfca0-5d46-4710-9cb1-ae9f9c857b07,4915ad96-a45d-4ccb-af3b-cb4dc28bd7c2,b46314e6-98eb-46e8-a30f-91e75e65e7fc,7de0c6d5-cda6-4706-8eb6-890ea7e4a5b4,34b6e37e-67e8-4b65-928a-d498fe7360de,eb2103fb-6621-4fba-acff-e3048c40ccd6,b07deca5-5d8e-41bb-96ee-fb9a3908ceb5,d8bc7218-e371-473b-bd14-df88fdea8cff,c4af1ac2-540e-4382-9c27-d12f9f46aed9,f8210d48-d169-4adb-87fb-5a45768bd8c3,a0afbd05-ebfd-4cc3-b246-08253412bc21,aeff2a81-741e-4085-8cdc-fd1a7f4b2c07,70a8ab49-c0f5-463a-a911-9522d7612eaa"
@@ -195,7 +195,7 @@ To iterate on changes, always remember to re-run `./update_jenkins_night_rally.s
     export VAGRANT_TARGET_MEMORY=7168
     export VAGRANT_ENABLE_BUILD=true
     ```
-    
+
     The reason for increasing memory for the target-nodes is that the additional build step, enabled with `VAGRANT_ENABLE_BUILD`, requires additional memory.)
 3. `vagrant up`
 4. `vagrant ssh /coord/` # ssh'es to the coordinating node
@@ -224,7 +224,7 @@ To iterate on changes, always remember to re-run `./update_jenkins_night_rally.s
 
 ##### Iterating on release or nightly benchmarks while testing changes on Rally
 
-If you want to verify your on-going Rally work or a Rally PR against a full nightly or release run, use the following steps: 
+If you want to verify your on-going Rally work or a Rally PR against a full nightly or release run, use the following steps:
 
 1. Specify the Rally repo and branch using the following environment variables:
     ```
@@ -235,7 +235,7 @@ If you want to verify your on-going Rally work or a Rally PR against a full nigh
     - `RALLY_REPO` can point to any repo e.g. your own fork. Defaults to `https://github.com/elastic/rally.git` if unset.
     - `RALLY_BRANCH` optionally, the branch name. Defaults to `master` if unset.
     - `RALLY_SHA`: optionally, checkout a specific commit from the specified branch. If unset, the latest commit of `RALLY_BRANCH` will be used.
-    
+
 2. Choose any of the previous workflows (Iterating on release/nightly benchmarks) and continue with the steps there.
 
 3. If you are working with the `master` branch and don't want Rally to auto-update specify:
@@ -244,9 +244,9 @@ If you want to verify your on-going Rally work or a Rally PR against a full nigh
     ```
 
     before running any of `./test_*.sh`.
-    
+
     More details about the specifics of Rally self-update [here](https://esrally.readthedocs.io/en/stable/developing.html?highlight=skip-update).
-    
+
 The Vagrant workflow retrieves credentials to the metrics store via Vault so ensure that it is [properly setup](https://github.com/elastic/infra/blob/master/docs/vault.md#github-auth). By default results will be sent to the Elastic Cloud cluster `night-rally-tests` (details in LastPass). In order to write to a different metrics store, you need to:
 
 1. Add credentials to Vault:
@@ -295,3 +295,121 @@ export FIXTURES=drop-caches,trim,initialize-data-disk,encryption-at-rest
 ```
 
 and running `./test_release.sh` will cause all these fixtures to be executed, simulating the expected behavior from the Jenkins job.
+
+## Common issues with the bare metal environments
+
+The current bare metal environments are documented in [42.md](42.md).
+
+### Swapping network public/private NIC device names after re-bootstrapping the OS
+
+Occasionally there is a need to ask Infra to reinstall the operating system (e.g. due to failed disks).
+Due to random conditions in Hetzner's OS installation scripts this may result in `eth0` / `eth1` NIC device names to get
+swapped. Normally `eth0` is the public IP address, which has strict firewall rules, whereas `eth1` points to the 10Gbps
+internal interconnect NIC which is whitelisted in firewall rules (example rules in the [infra repo](https://github.com/elastic/infra/blob/master/ansible/playbooks/group_vars/longrunbenchmarks/firewall.yml)).
+
+This situation is resolvable following the steps shown below; the example assumes that currently `eth1` is the NIC using
+the public IP and `eth0` the internal interconnect NIC and we want to swap them:
+
+_Step 1: Become root on the server_
+
+``` shell
+dliappis@longrun-669380:~$ sudo su -
+```
+
+_Step 2: Assign the right IP to the right NIC_
+```shell
+# Show IP definitions per interface
+root@longrun-669380 ~ # cat /etc/network/interfaces
+### Hetzner Online GmbH installimage
+
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+iface lo inet6 loopback
+
+auto eth1
+iface eth1 inet static
+  address 94.130.140.197
+  netmask 255.255.255.192
+  gateway 94.130.140.193
+  # route 94.130.140.192/26 via 94.130.140.193
+  up route add -net 94.130.140.192 netmask 255.255.255.192 gw 94.130.140.193 dev eth1
+
+# Switch to use `eth0` for public IP
+root@longrun-669380 ~ # sed -i 's/eth1/eth0/g' /etc/network/interfaces
+
+# Verify changes
+root@longrun-669380 ~ # cat /etc/network/interfaces
+### Hetzner Online GmbH installimage
+
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+iface lo inet6 loopback
+
+auto eth0
+iface eth0 inet static
+  address 94.130.140.197
+  netmask 255.255.255.192
+  gateway 94.130.140.193
+  # route 94.130.140.192/26 via 94.130.140.193
+  up route add -net 94.130.140.192 netmask 255.255.255.192 gw 94.130.140.193 dev eth0
+
+# Check the internal NIC:
+root@longrun-669380 ~ # cat /etc/network/interfaces.d/eth1
+auto eth0
+iface eth0 inet static
+address 192.168.14.80
+netmask 255.255.255.0
+
+# Use the right name for the internal NIC
+root@longrun-669380 ~ # mv /etc/network/interfaces.d/eth0 /etc/network/interfaces.d/eth1
+
+# Ensure eth1 gets the private IP address
+root@longrun-669380 ~ # sed -i 's/eth0/eth1/g' /etc/network/interfaces.d/eth1
+
+# Verify that the internal NIC is eth1 and has the correct private IP
+root@longrun-669380 ~ # cat /etc/network/interfaces.d/eth1
+auto eth1
+iface eth1 inet static
+address 192.168.14.80
+netmask 255.255.255.0
+```
+
+_Step 3: Fix the NIC persistent mappings_
+``` shell
+# Check current NIC mapping
+root@longrun-669380 ~ # cat /etc/udev/rules.d/70-persistent-net.rules
+### Hetzner Online GmbH installimage
+
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:1b:21:db:91:ea", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="90:1b:0e:de:dd:a6", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth1"
+
+# Edit the file and swap `eth0` <--> `eth1`
+root@longrun-669380 ~ # vi /etc/udev/rules.d/70-persistent-net.rules
+
+# Should now look like (note the difference with the MAC address from the previous cat command):
+root@longrun-669380 ~ # cat /etc/udev/rules.d/70-persistent-net.rules
+### Hetzner Online GmbH installimage
+
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="90:1b:0e:de:dd:a6", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:1b:21:db:91:ea", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth1"
+```
+
+_Step 4: Fix the firewall rules_
+```
+# Check whether current firewall rules assume that eth0 is the private NIC
+root@longrun-669380 ~ # grep eth0 /etc/firewall.bash
+iptables -A INPUT -p all -i eth0 -j ACCEPT
+
+# Swap eth0 to eth1 in firewall rules
+root@longrun-669380 ~ # sed -i 's/eth0/eth1/g' /etc/firewall.bash
+```
+
+_Step 5: Reboot_
+
+``` shell
+# reboot
+```
