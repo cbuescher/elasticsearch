@@ -871,14 +871,18 @@ def race_meta_data(environment, configuration_name, effective_start_date, race_c
         logger.info("Would execute query\n%s" % json.dumps(query, indent=2))
         return None
     else:
+        import json
         from night_rally import client
         es = client.create_client(configuration_name)
         es.indices.refresh(index="rally-races-*")
+        logger.info("Executing query\n%s" % json.dumps(query, indent=2))
         result = es.search(index="rally-races-*", body=query)
         # should have exactly one result
         if result["hits"]["total"] == 1:
+            logger.info("Got one result.")
             return result["hits"]["hits"][0]
         else:
+            logger.info("Got %s results.", str(result["hits"]["total"]))
             return None
 
 
