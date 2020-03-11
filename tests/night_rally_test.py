@@ -1729,3 +1729,105 @@ class NightRallyTests(unittest.TestCase):
             ,
             system_call.calls
         )
+
+    @mock.patch("night_rally.client.create_client")
+    def test_finds_race_meta_data(self, client_factory):
+        race = {
+            "rally-version": "1.4.2.dev0 (git revision: 321b158)",
+            "rally-revision": "321b158",
+            "environment": "nightly",
+            "trial-id": "6a7527a5-79ba-4cbf-a41c-d09a4b254b2a",
+            "trial-timestamp": "20200310T200052Z",
+            "race-id": "6a7527a5-79ba-4cbf-a41c-d09a4b254b2a",
+            "race-timestamp": "20200310T200000Z",
+            "pipeline": "from-sources-complete",
+            "user-tags": {
+                "name": "geonames-append-4g-3nodes",
+                "setup": "bare-oss",
+                "race-configs-id": "race-configs-group-1.json",
+                "license": "oss"
+            },
+            "track": "geonames",
+            "car": ["4gheap"],
+            "cluster": {
+                "revision": "1073d09363f5355bd86ac63ca9580d1f677c604e",
+                "distribution-version": "8.0.0-SNAPSHOT",
+                "distribution-flavor": "oss",
+                "team-revision": "cb01613"
+            },
+            "track-revision": "abc6e72",
+            "challenge": "append-no-conflicts-index-only",
+            "track-params": {
+                "number_of_replicas": 1
+            }
+        }
+
+        es = mock.Mock()
+        es.search.return_value = {
+            "took": 2,
+            "timed_out": False,
+            "_shards": {
+                "total": 1,
+                "successful": 1,
+                "skipped": 0,
+                "failed": 0
+            },
+            "hits": {
+                "total": 352,
+                "hits": [
+                    {
+                        "_index": "rally-races-2020-03",
+                        "_type": "_doc",
+                        "_id": "6a7527a5-79ba-4cbf-a41c-d09a4b254b2a",
+                        "_source": race,
+                        "sort": [
+                            1583870452000
+                        ]
+                    }
+                ]
+            }
+        }
+
+        client_factory.return_value = es
+
+        meta_data = night_rally.race_meta_data(environment="nightly",
+                                               configuration_name="nightly",
+                                               effective_start_date=datetime.datetime(year=2020, month=3, day=10, hour=20),
+                                               race_configs_id="race-configs-group-1.json",
+                                               previous=False,
+                                               dry_run=False)
+        self.assertEqual(race, meta_data)
+
+        es.search.assert_called_once_with(index="rally-races-*", body={
+            "query": {
+                "bool": {
+                    "filter": [
+                        {
+                            "term": {
+                                "environment": "nightly"
+                            }
+                        },
+                        {
+                            "range": {
+                                "race-timestamp": {
+                                    "lte": "20200310T200000Z"
+                                }
+                            }
+                        },
+                        {
+                            "term": {
+                                "user-tags.race-configs-id": "race-configs-group-1.json"
+                            }
+                        }
+                    ]
+                }
+            },
+            "size": 1,
+            "sort": [
+                {
+                    "race-timestamp": {
+                        "order": "desc"
+                    }
+                }
+            ]
+        })
