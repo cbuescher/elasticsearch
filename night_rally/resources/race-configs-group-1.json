@@ -398,8 +398,7 @@
                 },
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "13",
-                "telemetry": ["gc", "heapdump", "jfr"],
-                "telemetry-params": ["recording-template:profile"],
+                "telemetry": ["gc", "heapdump"],
                 "on-error": "abort",
                 "node-count": 3
               },
@@ -416,8 +415,7 @@
                 "challenge": "append-no-conflicts",
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "13",
-                "telemetry": ["gc", "heapdump", "jfr"],
-                "telemetry-params": ["recording-template:profile"],
+                "telemetry": ["gc", "heapdump"],
                 "on-error": "abort"
               },
               {
@@ -488,8 +486,7 @@
                 },
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "13",
-                "telemetry": ["gc", "heapdump", "jfr"],
-                "telemetry-params": ["recording-template:profile"],
+                "telemetry": ["gc", "heapdump"],
                 "on-error": "abort",
                 "node-count": 3
               },
@@ -506,8 +503,7 @@
                 "challenge": "append-no-conflicts",
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "13",
-                "telemetry": ["gc", "heapdump", "jfr"],
-                "telemetry-params": ["recording-template:profile"],
+                "telemetry": ["gc", "heapdump"],
                 "on-error": "abort"
               },
               {
