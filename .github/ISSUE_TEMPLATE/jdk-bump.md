@@ -1,27 +1,47 @@
 ---
 name: JDK Bump
 about: Tasks that need to be done to support a new JDK release in benchmarks
-title: Add support for JDK xx in Benchmarks
+title: Add support for JDK $VERSION in Benchmarks
 labels: meta
 assignees: ''
 
 ---
 
+JDK $VERSION should be release on date ([source](https://openjdk.java.net/projects/jdk/$VERSION/)) and we should update our benchmark machines accordingly soon after that date.
+
 ### Rally
 
-* [ ] Create an infra PR to add the new `JAVAx_HOME` in the rally builds (this is needed because Rally builds Elasticsearch from sources)
-* [ ] Add the build and runtime JDK in rally-teams - see e.g. https://github.com/elastic/rally-teams/pull/22
-* [ ] Expose the new environment variable in Rally in `tox.ini`
+* [ ] Create an infra PR to add the new `JAVA$VERSION_HOME` in the rally builds (this is needed because Rally builds Elasticsearch from sources) - e.g. https://github.com/elastic/infra/pull/19281
+* [ ] Add the build and runtime JDK in rally-teams - e.g. https://github.com/elastic/rally-teams/pull/48
+* [ ] Expose the new environment variable in Rally in `tox.ini` - e.g. https://github.com/elastic/rally/pull/953
 
 ### Nightly Benchmarks / Longrunning benchmarks
 
-* [ ] Create an infra PR to add the new JDK for the macrobenchmark machines (nightly, low-mem, longrunning) - see e.g. https://github.com/elastic/infra/pull/9571 (ensure that infra executes Ansible against the machines so the JDK is present there). 
-* [ ] Ensure that our Vagrant workflow still works
-* [ ] (only if the minimum runtime JDK changes) Create an infra PR to bump the runtime JDK in the build definitions of our nightly macrobenchmark builds
-* [ ] (only if the minimum runtime JDK changes) update the runtime JDK in night-rally's config
-* [ ] (only if the minimum runtime JDK changes) update the nightly benchmarks index page to mention that we've bumped the runtime JDK.
+* [ ] Create an infra PR to add the new JDK for the macrobenchmark machines (nightly, low-mem, longrunning) - e.g. https://github.com/elastic/infra/pull/19281 (ensure that infra executes the Ansible commands below against the machines so the JDK is present there). 
+* [ ] Expose `JAVA$VERSION_HOME` when starting the Rally daemon via night-rally - e.g. https://github.com/elastic/night-rally/pull/235
+* [ ] Ensure that our Vagrant workflow still works - e.g. https://github.com/elastic/night-rally/pull/234
 
 ### Microbenchmarks
 
-* [ ] Create an infra PR to add the new JDK for the microbenchmark machine - see e.g. https://github.com/elastic/infra/pull/16664 (ensure that infra executes Ansible against the machines so the JDK is present there). 
-* [ ] Create an infra PR to bump the JDK in microbenchmark builds: e.g. https://github.com/elastic/infra/pull/16663
+* [x] Create an infra PR to add the new JDK for the microbenchmark machine - e.g. https://github.com/elastic/infra/pull/19281 (ensure that infra executes the Ansible commands below against the machines so the JDK is present there). 
+* [x] Create an infra PR to bump the JDK in microbenchmark builds - e.g. https://github.com/elastic/infra/pull/19281
+
+### Ansible
+
+To install the new Java version on all environments, run the following commands after the respective infra PR(s) has been merged from the `ansible` directory in the infra repository:
+
+```
+ansible-playbook -u $SSH_USER -i inventory/production playbooks/longrunbenchmarks.yml --limit longrunbenchmarks --tags java
+
+ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets --tags java
+
+ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit memorybenchmarks --tags java
+
+ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets-group-1 --tags java
+
+ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets-group-2 --tags java
+
+ansible-playbook -u $SSH_USER -i inventory/production playbooks/jenkins_workers.yml --limit elasticsearch-ci-workers-microbenchmarks --tags java
+```
+
+`$SSH_USER` is your remote user name on the bare metal machines.
