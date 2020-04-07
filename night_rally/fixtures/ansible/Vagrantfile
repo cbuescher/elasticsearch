@@ -203,15 +203,6 @@ def install_java(major_ver)
   EOF
 end
 
-def symlink_java_8
-  <<~EOF
-    set -eo pipefail
-    ln -s /usr/lib/jvm/java-8-openjdk-amd64 /var/lib/jenkins/.java/java8
-    # dangling symlinks cause issues to certain gradle versions
-    rm -f /usr/lib/jvm/java-8-openjdk-amd64/src.zip
-  EOF
-end
-
 def pass_additional_jenkins_env_vars
   <<~EOF
     set +x -eo pipefail
@@ -307,9 +298,7 @@ Vagrant.configure(2) do |config|
 
       # To allow building Elasticsearch (nightlies) install the minimum set of java versions required on target nodes
       if node != nodes.first && install_build_requirements
-        node_config.vm.provision "shell", inline: install_java(13)
-        node_config.vm.provision "shell", inline: install_java(12)
-        node_config.vm.provision "shell", inline: symlink_java_8
+        node_config.vm.provision "shell", inline: install_java(14)
       end
 
       ip_address = ip_address.succ
