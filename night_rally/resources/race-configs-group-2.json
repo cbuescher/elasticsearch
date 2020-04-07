@@ -383,7 +383,7 @@
                   "number_of_replicas": 0
                 },
                 "car": "defaults,g1gc",
-                "runtime-jdk": "13",
+                "runtime-jdk": "14",
                 "telemetry": "gc"
               },
               {
@@ -398,7 +398,7 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap,g1gc",
-                "runtime-jdk": "13",
+                "runtime-jdk": "14",
                 "telemetry": "gc",
                 "exclude-tasks": "force-merge-1-seg,refresh-after-force-merge-1-seg,desc-sort-timestamp-after-force-merge-1-seg,asc-sort-timestamp-after-force-merge-1-seg"
               },
@@ -521,7 +521,7 @@
                   "number_of_replicas": 0
                 },
                 "car": "defaults,g1gc",
-                "runtime-jdk": "13",
+                "runtime-jdk": "14",
                 "telemetry": "gc"
               },
               {
@@ -536,7 +536,7 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap,g1gc",
-                "runtime-jdk": "13",
+                "runtime-jdk": "14",
                 "telemetry": "gc"
               },
               {
