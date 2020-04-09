@@ -4,9 +4,10 @@
 - debug: var=skip_rally_update
 
 - name: start rallyd
+  # explicitly unset JAVA_HOME until https://github.com/ansible/ansible/pull/60081 lands on an Ansible release
   command: >
     /bin/bash --login
-    -c "bin/rallyd {% if skip_rally_update | default(False) | bool %}--skip-update{% endif %} start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating_nodes'][0] }}"
+    -c "env -u JAVA_HOME bin/rallyd {% if skip_rally_update | default(False) | bool %}--skip-update{% endif %} start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating_nodes'][0] }}"
   args:
     chdir: /var/lib/jenkins
   environment:
@@ -25,7 +26,7 @@
 - name: start rallyd in vagrant env, if applicable
   command: >
     /bin/bash --login
-    -c "bin/rallyd {% if skip_rally_update | default(False) | bool %}--skip-update{% endif %} start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating_nodes'][0] }}"
+    -c "env -u JAVA_HOME bin/rallyd {% if skip_rally_update | default(False) | bool %}--skip-update{% endif %} start --node-ip {{ inventory_hostname }} --coordinator-ip {{ groups['coordinating_nodes'][0] }}"
   args:
     chdir: /var/lib/jenkins
   environment:
