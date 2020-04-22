@@ -13,8 +13,8 @@ For every task below, after scheduling the job, remember to cancel nightly jobs 
 If your released job seems to be still running, cancel them (use the x button after logging in on Jenkins) and reschedule using the correct effective start date.
 More details in [night-rally docs](https://github.com/elastic/night-rally/blob/master/42.md#what-time-do-the-nightly-benchmarks-start-what-elasticsearch-commit-do-they-choose).
 
-- [ ] mode: `release`, release_license: `oss` - triggered by `your user handle here`  as `link to all triggered builds here`
-- [ ] mode: `release`, release_license: `basic` - triggered by `your user handle here`  as `link to all triggered builds here`
-- [ ] mode: `release`, RELEASE_LICENSE: `trial` + RELEASE_X_PACK_COMPONENTS: `security` - triggered by `your user handle here`  as `link to all triggered builds here`
+- [ ] mode: `release`, runtime_jdk: `bundled`, release_license: `oss` - triggered by `your user handle here`  as `link to all triggered builds here`
+- [ ] mode: `release`, runtime_jdk: `bundled`, release_license: `basic` - triggered by `your user handle here`  as `link to all triggered builds here`
+- [ ] mode: `release`, runtime_jdk: `bundled`, RELEASE_LICENSE: `trial` + RELEASE_X_PACK_COMPONENTS: `security` - triggered by `your user handle here`  as `link to all triggered builds here`
 - [ ] mode: `release:docker` (everything else default i.e. `oss`) - triggered by `your user handle here`  as `link to all triggered builds here`
-- [ ] mode: `release:encryption-at-rest` (everything else default i.e. `oss`) - triggered by `your user handle here`  as `link to all triggered builds here`
+- [ ] mode: `release:encryption-at-rest`, runtime_jdk: `bundled` (everything else default i.e. `oss`) - triggered by `your user handle here`  as `link to all triggered builds here`
