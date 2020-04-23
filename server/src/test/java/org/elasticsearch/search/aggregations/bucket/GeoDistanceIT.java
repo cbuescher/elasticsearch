@@ -428,7 +428,6 @@ public class GeoDistanceIT extends ESIntegTestCase {
         assertThat(bucket, Matchers.notNullValue());
 
         Range geoDistance = bucket.getAggregations().get("geo_dist");
-        // TODO: use diamond once JI-9019884 is fixed
         List<Range.Bucket> buckets = new ArrayList<>(geoDistance.getBuckets());
         assertThat(geoDistance, Matchers.notNullValue());
         assertThat(geoDistance.getName(), equalTo("geo_dist"));

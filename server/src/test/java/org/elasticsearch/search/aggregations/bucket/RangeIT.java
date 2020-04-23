@@ -939,7 +939,6 @@ public class RangeIT extends ESIntegTestCase {
         assertThat(bucket, Matchers.notNullValue());
 
         Range range = bucket.getAggregations().get("range");
-        // TODO: use diamond once JI-9019884 is fixed
         List<Range.Bucket> buckets = new ArrayList<>(range.getBuckets());
         assertThat(range, Matchers.notNullValue());
         assertThat(range.getName(), equalTo("range"));

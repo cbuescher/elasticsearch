@@ -45,7 +45,6 @@ public class Scopes {
 
                 // DCL on a volatile is safe as of Java 5, which we obviously require.
                 @Override
-                @SuppressWarnings("DoubleCheckedLocking")
                 public T get() {
                     if (instance == null) {
                         /*
@@ -112,9 +111,8 @@ public class Scopes {
 
         Scope scope = scoping.getScopeInstance();
 
-        // TODO: use diamond operator once JI-9019884 is fixed
         Provider<T> scoped
-                = scope.scope(key, new ProviderToInternalFactoryAdapter<T>(injector, creator));
+                = scope.scope(key, new ProviderToInternalFactoryAdapter<>(injector, creator));
         return new InternalFactoryToProviderAdapter<>(
                 Initializables.<Provider<? extends T>>of(scoped));
     }
