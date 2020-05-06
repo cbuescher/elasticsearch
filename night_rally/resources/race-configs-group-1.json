@@ -399,7 +399,10 @@
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "14",
                 "telemetry": ["gc", "heapdump", "jfr"],
-                "telemetry-params": ["recording-template:profile"],
+                "telemetry-params": {
+                  "recording-template": "profile",
+                  "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
+                },
                 "on-error": "abort",
                 "node-count": 3
               },
@@ -417,7 +420,10 @@
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "14",
                 "telemetry": ["gc", "heapdump", "jfr"],
-                "telemetry-params": ["recording-template:profile"],
+                "telemetry-params": {
+                  "recording-template": "profile",
+                  "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
+                },
                 "on-error": "abort"
               },
               {
@@ -489,7 +495,10 @@
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "14",
                 "telemetry": ["gc", "heapdump", "jfr"],
-                "telemetry-params": ["recording-template:profile"],
+                "telemetry-params": {
+                  "recording-template": "profile",
+                  "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
+                },
                 "on-error": "abort",
                 "node-count": 3
               },
@@ -507,7 +516,10 @@
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "14",
                 "telemetry": ["gc", "heapdump", "jfr"],
-                "telemetry-params": ["recording-template:profile"],
+                "telemetry-params": {
+                  "recording-template": "profile",
+                  "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
+                },
                 "on-error": "abort"
               },
               {
