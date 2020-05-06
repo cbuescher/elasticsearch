@@ -398,7 +398,7 @@
                 },
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "14",
-                "telemetry": ["gc", "heapdump", "jfr"],
+                "telemetry": ["gc", "heapdump", "jfr", "segment-stats"],
                 "telemetry-params": {
                   "recording-template": "profile",
                   "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
@@ -419,7 +419,7 @@
                 "challenge": "append-no-conflicts",
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "14",
-                "telemetry": ["gc", "heapdump", "jfr"],
+                "telemetry": ["gc", "heapdump", "jfr", "segment-stats"],
                 "telemetry-params": {
                   "recording-template": "profile",
                   "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
@@ -494,7 +494,7 @@
                 },
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "14",
-                "telemetry": ["gc", "heapdump", "jfr"],
+                "telemetry": ["gc", "heapdump", "jfr", "segment-stats"],
                 "telemetry-params": {
                   "recording-template": "profile",
                   "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
@@ -515,7 +515,7 @@
                 "challenge": "append-no-conflicts",
                 "car": "4gheap,g1gc",
                 "runtime-jdk": "14",
-                "telemetry": ["gc", "heapdump", "jfr"],
+                "telemetry": ["gc", "heapdump", "jfr", "segment-stats"],
                 "telemetry-params": {
                   "recording-template": "profile",
                   "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
