@@ -383,50 +383,6 @@
                 "car": "4gheap"
               },
               {
-                "name": "nyc_taxis-append-4g-g1gc-3nodes",
-                "label": "add-4g-g1gc-3nodes",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts-index-only",
-                "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
-                "track-params": {
-                  "index_settings": {
-                    "index.number_of_replicas": 1,
-                    "index.number_of_shards": 5
-                  }
-                },
-                "car": "4gheap,g1gc",
-                "runtime-jdk": "14",
-                "telemetry": ["gc", "heapdump", "jfr", "segment-stats"],
-                "telemetry-params": {
-                  "recording-template": "profile",
-                  "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
-                },
-                "on-error": "abort",
-                "node-count": 3
-              },
-              {
-                "name": "nyc_taxis-append-4g-g1gc-1node",
-                "label": "add-4g-g1gc",
-                "charts": [
-                  "indexing",
-                  "query",
-                  "gc",
-                  "io",
-                  "segment_memory"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "4gheap,g1gc",
-                "runtime-jdk": "14",
-                "telemetry": ["gc", "heapdump", "jfr", "segment-stats"],
-                "telemetry-params": {
-                  "recording-template": "profile",
-                  "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
-                },
-                "on-error": "abort"
-              },
-              {
                 "name": "nyc_taxis-appendsorted-4g-1node",
                 "label": "add-sorted-4g",
                 "charts": [
@@ -477,50 +433,6 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap"
-              },
-              {
-                "name": "nyc_taxis-append-4g-g1gc-3nodes",
-                "label": "add-4g-g1gc-3nodes",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts-index-only",
-                "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
-                "track-params": {
-                  "index_settings": {
-                    "index.number_of_replicas": 1,
-                    "index.number_of_shards": 5
-                  }
-                },
-                "car": "4gheap,g1gc",
-                "runtime-jdk": "14",
-                "telemetry": ["gc", "heapdump", "jfr", "segment-stats"],
-                "telemetry-params": {
-                  "recording-template": "profile",
-                  "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
-                },
-                "on-error": "abort",
-                "node-count": 3
-              },
-              {
-                "name": "nyc_taxis-append-4g-g1gc-1node",
-                "label": "add-4g-g1gc",
-                "charts": [
-                  "indexing",
-                  "query",
-                  "gc",
-                  "io",
-                  "segment_memory"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "4gheap,g1gc",
-                "runtime-jdk": "14",
-                "telemetry": ["gc", "heapdump", "jfr", "segment-stats"],
-                "telemetry-params": {
-                  "recording-template": "profile",
-                  "gc-log-config": "gc*,gc+age=trace,ihop*=trace,gc+heap=trace,gc+humongous=trace,gc+ergo*=trace,safepoint"
-                },
-                "on-error": "abort"
               },
               {
                 "name": "nyc_taxis-appendsorted-4g-1node",
