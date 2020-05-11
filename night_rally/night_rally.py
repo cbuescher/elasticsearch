@@ -182,46 +182,10 @@ class BaseCommand:
 
 
 class SourceBasedCommand(BaseCommand):
-    class SourcePipelineParams:
-        def __init__(self):
-            self.pipeline = "from-sources-complete"
-            self.current_license = None
-            self.current_x_pack = None
-            self.current_plugins = None
-
-        def update_current_params(self, race_config):
-            self.current_license = race_config.license
-            self.current_x_pack = race_config.x_pack
-            self.current_plugins = race_config.plugins
-
-        def requires_rebuild(self, race_config):
-            if not self.current_license:
-                # First execution, build sources
-                return True
-            elif race_config.license != self.current_license:
-                return True
-            elif race_config.license == self.current_license and race_config.x_pack != self.current_x_pack:
-                # ES < 6.3 x-pack components are modules, need to rebuild
-                return True
-            elif race_config.plugins != self.current_plugins:
-                # Force rebuild if we run with plugins. They might have not been built yet.
-                return True
-            else:
-                return False
-
-        def __call__(self, race_config):
-            if self.requires_rebuild(race_config):
-                self.pipeline = "from-sources-complete"
-            else:
-                self.pipeline = "from-sources-skip-build"
-            self.update_current_params(race_config)
-
-            return {"pipeline": self.pipeline}
-
     def __init__(self, params, revision):
         self.params = ParamsFormatter(params=params + [
             LicenseParams(distribution_version="master"),
-            SourceBasedCommand.SourcePipelineParams(),
+            ConstantParam("pipeline", "from-sources-complete"),
             ConstantParam("revision", revision)
         ])
 

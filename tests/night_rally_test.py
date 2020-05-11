@@ -368,7 +368,7 @@ class NightRallyTests(unittest.TestCase):
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts-index-only\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-append-4g-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
-                "--track-params=\"{{\\\"number_of_replicas\\\": 0}}\" --pipeline=\"from-sources-skip-build\" "
+                "--track-params=\"{{\\\"number_of_replicas\\\": 0}}\" --pipeline=\"from-sources-complete\" "
                 "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
             ]
             ,
@@ -538,7 +538,7 @@ class NightRallyTests(unittest.TestCase):
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
@@ -550,7 +550,7 @@ class NightRallyTests(unittest.TestCase):
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
             ]
             ,
             system_call.calls
@@ -621,7 +621,7 @@ class NightRallyTests(unittest.TestCase):
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:percolator-4g,setup:bare,race-configs-id:{},license:oss\" "
-                "--runtime-jdk=\"8\" --pipeline=\"from-sources-skip-build\" "
+                "--runtime-jdk=\"8\" --pipeline=\"from-sources-complete\" "
                 "--revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id)
             ]
             ,
@@ -769,7 +769,6 @@ class NightRallyTests(unittest.TestCase):
                 '--runtime-jdk="8" --car-params="{{\\"xpack_ml_enabled\\": false, '
                 '\\"xpack_monitoring_enabled\\": false, \\"xpack_watcher_enabled\\": false}}" '
                 '--track-params="{{\\"number_of_replicas\\": 0}}" '
-                # recompile as license has changed
                 '--pipeline="from-sources-complete" --revision="@2016-10-01T00:00:00Z"'.format(race_configs_id),
 
                 'rally --skip-update --configuration-name="nightly" --quiet '
@@ -780,7 +779,7 @@ class NightRallyTests(unittest.TestCase):
                 ',basic_auth_password:\'rally-password\'" '
                 '--user-tag="name:percolator-4g,setup:bare,race-configs-id:{},license:trial,x-pack:true" --runtime-jdk="8" '
                 '--car-params="{{\\"xpack_ml_enabled\\": false, \\"xpack_monitoring_enabled\\": false, '
-                '\\"xpack_watcher_enabled\\": false}}" --pipeline="from-sources-skip-build" '
+                '\\"xpack_watcher_enabled\\": false}}" --pipeline="from-sources-complete" '
                 '--revision="@2016-10-01T00:00:00Z"'.format(race_configs_id),
 
                 'rally --skip-update --configuration-name="nightly" --quiet '
@@ -791,7 +790,7 @@ class NightRallyTests(unittest.TestCase):
                 ',basic_auth_password:\'rally-password\'" '
                 '--user-tag="name:percolator,setup:bare,race-configs-id:{},license:trial,x-pack:true" --runtime-jdk="8" '
                 '--car-params="{{\\"xpack_ml_enabled\\": false, \\"xpack_monitoring_enabled\\": false, '
-                '\\"xpack_watcher_enabled\\": false}}" --pipeline="from-sources-skip-build" '
+                '\\"xpack_watcher_enabled\\": false}}" --pipeline="from-sources-complete" '
                 '--revision="@2016-10-01T00:00:00Z"'.format(race_configs_id)
             ]
             ,
@@ -866,7 +865,7 @@ class NightRallyTests(unittest.TestCase):
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:percolator-4g,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-skip-build\" --revision=\"66202dc\"".format(race_configs_id)
+                "--pipeline=\"from-sources-complete\" --revision=\"66202dc\"".format(race_configs_id)
             ]
             ,
             system_call.calls
@@ -1601,7 +1600,7 @@ class NightRallyTests(unittest.TestCase):
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:percolator-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-10-01T00:00:00Z\""
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\""
             ]
             ,
             system_call.calls
@@ -1718,13 +1717,13 @@ class NightRallyTests(unittest.TestCase):
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
-                "--telemetry=\"gc\" --pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"",
+                "--telemetry=\"gc\" --pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"8gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-8g,setup:bare,license:oss\" --runtime-jdk=\"8\" --on-error=\"abort\" "
-                "--pipeline=\"from-sources-skip-build\" --revision=\"@2016-01-01T00:00:00Z\"",
+                "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"",
             ]
             ,
             system_call.calls
