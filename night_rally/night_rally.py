@@ -17,8 +17,9 @@ from collections import OrderedDict
 ROOT = os.path.dirname(os.path.realpath(__file__))
 RALLY_BINARY = "rally --skip-update"
 VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$")
-# The port that Elasticsearch is configured to use for rest requests
-TARGET_PORT = 39200
+# The port that Elasticsearch is configured to use for rest requests.
+TARGET_HTTP_PORT = 9200
+TARGET_TRANSPORT_PORT = 9300
 RACE_CONFIGS_SCHEMA_FILE = "{}/resources/race-configs-schema.json".format(ROOT)
 
 # console logging
@@ -564,7 +565,8 @@ def validate_race_configs(race_configs):
 
 def run_rally(tracks, release_params, available_hosts, command, dry_run=False, skip_ansible=False, system=os.system):
     # Build list of host:port pairs for target hosts
-    available_hosts_with_ports = list(map(lambda x: "{}:{}".format(x, TARGET_PORT), available_hosts))
+    available_hosts_with_http_ports = list(map(lambda h: f"{h}:{TARGET_HTTP_PORT}", available_hosts))
+    available_hosts_with_transport_ports = list(map(lambda h: f"{h}:{TARGET_TRANSPORT_PORT}", available_hosts))
     rally_failure = False
     if dry_run:
         runner = logger.info
@@ -589,7 +591,7 @@ def run_rally(tracks, release_params, available_hosts, command, dry_run=False, s
                     # TODO refactor encapsulation in Release/Docker Command
                     configuration["license"] = release_params["license"] if release_params else license_config["name"]
 
-                    race_cfg = RaceConfig(track_name, track_repository, configuration, available_hosts_with_ports)
+                    race_cfg = RaceConfig(track_name, track_repository, configuration, available_hosts_with_http_ports)
 
                     if race_cfg.target_hosts:
                         if command.runnable(race_cfg):
@@ -605,7 +607,8 @@ def run_rally(tracks, release_params, available_hosts, command, dry_run=False, s
                             start = time.perf_counter()
                             try:
                                 if not dry_run:
-                                    wait_until_port_is_free(available_hosts_with_ports)
+                                    wait_until_port_is_free(available_hosts_with_http_ports)
+                                    wait_until_port_is_free(available_hosts_with_transport_ports)
                                 cmd = command.command_line(race_cfg)
                                 logger.info("Executing [%s]", cmd)
                                 if runner(cmd):

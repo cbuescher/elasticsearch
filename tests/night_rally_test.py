@@ -53,7 +53,7 @@ class VersionsTests(unittest.TestCase):
 
 
 class WaitUntilPortFreeTests(unittest.TestCase):
-    multi_host_string = "192.168.14.3:39200,192.168.14.4:39200,192.168.14.5:39200".split(",")
+    multi_host_string = "192.168.14.3:9200,192.168.14.4:9200,192.168.14.5:9200".split(",")
     single_host_string = "192.168.2.3:9200".split(",")
     single_host_no_port = "192.168.2.4"
 
@@ -357,14 +357,14 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" "
                 "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts-index-only\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-append-4g-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
@@ -410,7 +410,7 @@ class NightRallyTests(unittest.TestCase):
         night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
@@ -456,7 +456,7 @@ class NightRallyTests(unittest.TestCase):
         night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"13\" "
@@ -527,26 +527,26 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(4, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" "
                 "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"8\" "
@@ -611,13 +611,13 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:percolator-4g,setup:bare,race-configs-id:{},license:oss\" "
@@ -741,26 +741,26 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(6, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-append-4g-3nodes,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults,trial-license\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:trial\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
                 'rally --skip-update --configuration-name="nightly" --quiet '
-                '--target-host="localhost:39200" --effective-start-date="2016-10-01 00:00:00" '
+                '--target-host="localhost:9200" --effective-start-date="2016-10-01 00:00:00" '
                 '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
                 '--car="defaults,trial-license,x-pack-security" '
                 '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
@@ -772,7 +772,7 @@ class NightRallyTests(unittest.TestCase):
                 '--pipeline="from-sources-complete" --revision="@2016-10-01T00:00:00Z"'.format(race_configs_id),
 
                 'rally --skip-update --configuration-name="nightly" --quiet '
-                '--target-host="localhost:39200" --effective-start-date="2016-10-01 00:00:00" '
+                '--target-host="localhost:9200" --effective-start-date="2016-10-01 00:00:00" '
                 '--track-repository="default" --track="percolator" --challenge="append-no-conflicts" '
                 '--car="4gheap,trial-license,x-pack-security" '
                 '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
@@ -783,7 +783,7 @@ class NightRallyTests(unittest.TestCase):
                 '--revision="@2016-10-01T00:00:00Z"'.format(race_configs_id),
 
                 'rally --skip-update --configuration-name="nightly" --quiet '
-                '--target-host="localhost:39200" --effective-start-date="2016-10-01 00:00:00" '
+                '--target-host="localhost:9200" --effective-start-date="2016-10-01 00:00:00" '
                 '--track-repository="default" --track="percolator" --challenge="append-no-conflicts" '
                 '--car="defaults,trial-license,x-pack-security" '
                 '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
@@ -855,13 +855,13 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"lucene-7\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"lucene-7\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"eventdata\" --track=\"eventdata\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:eventdata-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"66202dc\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"lucene-7\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"lucene-7\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:percolator-4g,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
@@ -912,14 +912,14 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare-oss,race-configs-id:{},license:oss\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"5.3.0\" "
                 "--pipeline=\"from-distribution\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:bare-oss,race-configs-id:{},license:oss\" "
@@ -1017,7 +1017,7 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(3, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" "
                 "--client-options=\"timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
@@ -1028,7 +1028,7 @@ class NightRallyTests(unittest.TestCase):
                 "--elasticsearch-plugins=\"x-pack:security+monitoring\" "
                 "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" "
                 "--client-options=\"timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
@@ -1039,7 +1039,7 @@ class NightRallyTests(unittest.TestCase):
                 "--elasticsearch-plugins=\"x-pack:security+monitoring\" --distribution-version=\"5.4.0\" "
                 "--pipeline=\"from-distribution\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-ml\" --car=\"4gheap\" "
                 "--client-options=\"timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
@@ -1110,7 +1110,7 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             ['rally --skip-update --configuration-name="release" --quiet '
-             '--target-host="localhost:39200" --effective-start-date="2016-01-01 00:00:00" '
+             '--target-host="localhost:9200" --effective-start-date="2016-01-01 00:00:00" '
              '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
              '--car="defaults,trial-license,x-pack-security" '
              '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
@@ -1121,7 +1121,7 @@ class NightRallyTests(unittest.TestCase):
              '--pipeline="from-distribution"'.format(race_configs_id),
 
              'rally --skip-update --configuration-name="release" --quiet '
-             '--target-host="localhost:39200" --effective-start-date="2016-01-01 00:00:00" '
+             '--target-host="localhost:9200" --effective-start-date="2016-01-01 00:00:00" '
              '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
              '--car="4gheap,trial-license,x-pack-security" '
              '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
@@ -1189,7 +1189,7 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(
             [
                 'rally --skip-update --configuration-name="release" --quiet '
-                '--target-host="localhost:39200" --effective-start-date="2016-01-01 00:00:00" '
+                '--target-host="localhost:9200" --effective-start-date="2016-01-01 00:00:00" '
                 '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
                 '--car="defaults,basic-license" '
                 '--client-options="timeout:240" '
@@ -1241,7 +1241,7 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(
             [
                 'rally --skip-update --configuration-name="release" --quiet '
-                '--target-host="localhost:39200" --effective-start-date="2016-01-01 00:00:00" '
+                '--target-host="localhost:9200" --effective-start-date="2016-01-01 00:00:00" '
                 '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
                 '--car="defaults,unpooled" '
                 '--client-options="timeout:240" '
@@ -1410,7 +1410,7 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
-                'rally --skip-update --configuration-name="release" --quiet --target-host="localhost:39200" '
+                'rally --skip-update --configuration-name="release" --quiet --target-host="localhost:9200" '
                 '--effective-start-date="2016-01-01 00:00:00" --track-repository=\"default\" --track="geonames" '
                 '--challenge="append-no-conflicts" --car="defaults" --client-options="timeout:240" '
                 "--user-tag=\"name:geonames-defaults,setup:docker-oss,race-configs-id:{},license:oss\" "
@@ -1419,7 +1419,7 @@ class NightRallyTests(unittest.TestCase):
                 '{{\\"xpack.security.enabled\\": \\"false\\", \\"xpack.ml.enabled\\": \\"false\\", '
                 '\\"xpack.monitoring.enabled\\": \\"false\\", \\"xpack.watcher.enabled\\": \\"false\\"}}}}"'.format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:docker-oss,race-configs-id:{},license:oss\" "
@@ -1474,14 +1474,14 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:docker-oss,race-configs-id:{},license:oss\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"6.3.0\" "
                 "--pipeline=\"docker\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:docker-oss,race-configs-id:{},license:oss\" "
@@ -1590,13 +1590,13 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"",
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:percolator-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
@@ -1646,7 +1646,7 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(
             [
                 "rally --skip-update --telemetry=\"jfr,gc,jit\" --telemetry-params=\"recording-template:profile\" "
-                "--configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "--configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
@@ -1706,20 +1706,20 @@ class NightRallyTests(unittest.TestCase):
         self.assertEqual(3, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
                 "--telemetry=\"jfr,gc,jit\" --telemetry-params=\"{\\\"recording-template\\\": \\\"profile\\\"}\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"",
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
                 "--telemetry=\"gc\" --pipeline=\"from-sources-complete\" --revision=\"@2016-01-01T00:00:00Z\"",
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:39200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"8gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-8g,setup:bare,license:oss\" --runtime-jdk=\"8\" --on-error=\"abort\" "
