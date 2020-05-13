@@ -493,7 +493,10 @@
                 "car": "4gheap",
                 "x-pack": [
                   "ml"
-                ]
+                ],
+                "track-params": {
+                   "ingest_percentage": 30
+                }
               }
             ]
           }
