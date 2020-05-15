@@ -12,8 +12,6 @@ import inspect
 import json
 import jsonschema
 
-from collections import OrderedDict
-
 ROOT = os.path.dirname(os.path.realpath(__file__))
 RALLY_BINARY = "rally --skip-update"
 VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$")
@@ -470,9 +468,10 @@ class LicenseParams:
 
 
 class RaceConfig:
-    def __init__(self, track_name, track_repository, configuration, available_hosts):
+    def __init__(self, track_name, track_repository, placement, configuration, available_hosts):
         self.track = track_name
         self.track_repository = track_repository
+        self.placement = placement
         self.configuration = configuration
         self.available_hosts = available_hosts
 
@@ -543,8 +542,12 @@ class RaceConfig:
     def target_hosts(self):
         if self.node_count > len(self.available_hosts):
             return None
+        elif self.node_count == len(self.available_hosts):
+            return self.available_hosts
         else:
-            return self.available_hosts[:self.node_count]
+            d = collections.deque(self.available_hosts)
+            d.rotate(-self.placement)
+            return list(d)[:self.node_count]
 
     def _as_array(self, v):
         if isinstance(v, str):
@@ -563,7 +566,7 @@ def validate_race_configs(race_configs):
     jsonschema.validate(race_configs, race_configs_schema)
 
 
-def run_rally(tracks, release_params, available_hosts, command, dry_run=False, skip_ansible=False, system=os.system):
+def run_rally(race_configs, release_params, available_hosts, command, dry_run=False, skip_ansible=False, system=os.system):
     # Build list of host:port pairs for target hosts
     available_hosts_with_http_ports = list(map(lambda h: f"{h}:{TARGET_HTTP_PORT}", available_hosts))
     available_hosts_with_transport_ports = list(map(lambda h: f"{h}:{TARGET_TRANSPORT_PORT}", available_hosts))
@@ -573,11 +576,12 @@ def run_rally(tracks, release_params, available_hosts, command, dry_run=False, s
     else:
         runner = system
 
-    for track in tracks:
-        track_name = track["track"]
-        track_repository = track.get("track-repository", "default")
+    for r in race_configs:
+        track_name = r["track"]
+        placement = r.get("placement", 0)
+        track_repository = r.get("track-repository", "default")
 
-        for flavor_config in track["flavors"]:
+        for flavor_config in r["flavors"]:
             for license_config in flavor_config["licenses"]:
                 # TODO refactor encapsulation in Release/Docker Command
                 # release benchmarks override license, only go through oss
@@ -591,7 +595,7 @@ def run_rally(tracks, release_params, available_hosts, command, dry_run=False, s
                     # TODO refactor encapsulation in Release/Docker Command
                     configuration["license"] = release_params["license"] if release_params else license_config["name"]
 
-                    race_cfg = RaceConfig(track_name, track_repository, configuration, available_hosts_with_http_ports)
+                    race_cfg = RaceConfig(track_name, track_repository, placement, configuration, available_hosts_with_http_ports)
 
                     if race_cfg.target_hosts:
                         if command.runnable(race_cfg):
@@ -959,7 +963,7 @@ class CommonCliParams:
         self.version = version
         self._mode = mode
         self.configuration_name = configuration_name
-        self.release_params = OrderedDict()
+        self.release_params = collections.OrderedDict()
         self._release_x_pack_components = release_x_pack_components
         self._release_license = release_license
         # For now only used for release benchmarks
@@ -1031,7 +1035,7 @@ def main():
     )
 
     target_hosts = args.target_host.split(",")
-    tracks = load_race_configs(args.race_configs)
+    race_configs = load_race_configs(args.race_configs)
     params = []
 
     if args.telemetry:
@@ -1058,7 +1062,7 @@ def main():
                                      common_cli_params.setup, common_cli_params.race_configs_id, args.test_mode))
         command = NightlyCommand(params, start_date)
 
-    rally_failure = run_rally(tracks, common_cli_params.release_params, target_hosts, command, args.dry_run, args.skip_ansible)
+    rally_failure = run_rally(race_configs, common_cli_params.release_params, target_hosts, command, args.dry_run, args.skip_ansible)
 
     if common_cli_params.is_nightly:
         copy_results_for_release_comparison(

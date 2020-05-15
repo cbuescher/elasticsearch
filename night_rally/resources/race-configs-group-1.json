@@ -1,6 +1,7 @@
 [
   {
     "track": "geonames",
+    "placement": 1,
     "flavors": [
       {
         "name": "oss",
@@ -159,6 +160,7 @@
   },
   {
     "track": "geopoint",
+    "placement": 0,
     "flavors": [
       {
         "name": "oss",
@@ -296,6 +298,7 @@
   },
   {
     "track": "percolator",
+    "placement": 0,
     "flavors": [
       {
         "name": "oss",
@@ -345,6 +348,7 @@
   },
   {
     "track": "nyc_taxis",
+    "placement": 2,
     "flavors": [
       {
         "name": "oss",

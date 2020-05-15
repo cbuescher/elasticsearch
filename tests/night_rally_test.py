@@ -563,6 +563,7 @@ class NightRallyTests(unittest.TestCase):
         tracks = [
             {
                 "track": "geonames",
+                "placement": 0,
                 "flavors": [
                     {
                         "name": "oss",
@@ -583,6 +584,7 @@ class NightRallyTests(unittest.TestCase):
             },
             {
                 "track": "percolator",
+                "placement": 1,
                 "flavors": [
                     {
                         "name": "oss",
@@ -607,17 +609,17 @@ class NightRallyTests(unittest.TestCase):
         race_configs_id = os.path.basename(get_random_race_configs_id())
         params = [night_rally.StandardParams("nightly", start_date, 8, "bare", race_configs_id=race_configs_id)]
         cmd = night_rally.NightlyCommand(params, start_date)
-        night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        night_rally.run_rally(tracks, None, ["127.0.0.1", "127.0.0.2", "127.0.0.3"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
         self.assertEqual(
             [
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"127.0.0.1:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:geonames-defaults,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources-complete\" --revision=\"@2016-10-01T00:00:00Z\"".format(race_configs_id),
 
-                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
+                "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"127.0.0.2:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"percolator\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
                 "--user-tag=\"name:percolator-4g,setup:bare,race-configs-id:{},license:oss\" "

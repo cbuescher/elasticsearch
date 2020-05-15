@@ -1,6 +1,7 @@
 [
   {
     "track": "nested",
+    "placement": 0,
     "flavors": [
       {
         "name": "oss",
@@ -52,6 +53,7 @@
   },
   {
     "track": "noaa",
+    "placement": 0,
     "flavors": [
       {
         "name": "oss",
@@ -103,6 +105,7 @@
   },
   {
     "track": "pmc",
+    "placement": 1,
     "flavors": [
       {
         "name": "oss",
@@ -352,6 +355,7 @@
   },
   {
     "track": "http_logs",
+    "placement": 2,
     "flavors": [
       {
         "name": "oss",
