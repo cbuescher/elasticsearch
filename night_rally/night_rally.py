@@ -184,7 +184,7 @@ class SourceBasedCommand(BaseCommand):
     def __init__(self, params, revision):
         self.params = ParamsFormatter(params=params + [
             LicenseParams(distribution_version="master"),
-            ConstantParam("pipeline", "from-sources-complete"),
+            ConstantParam("pipeline", "from-sources"),
             ConstantParam("revision", revision)
         ])
 
