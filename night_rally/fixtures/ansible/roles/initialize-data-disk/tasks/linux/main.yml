@@ -39,7 +39,7 @@
   register: remove_mount_result
   retries: 5
   delay: 10
-  until: remove_mount_result | success
+  until: remove_mount_result is successful
 
 - name: delete cryptsetup passphrase file if present
   file:
