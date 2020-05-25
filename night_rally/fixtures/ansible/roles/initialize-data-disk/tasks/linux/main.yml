@@ -55,7 +55,7 @@
   register: mkfs_data_disk_success
 
 - fail: msg="Unable to format {{ data_device }} with mkfs.{{ default_linux_os_filesystem }}"
-  when: mkfs_data_disk_success | failed
+  when: mkfs_data_disk_success is failed
 
 - name: ensure presence of mount dir for data volume
   file:

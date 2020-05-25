@@ -39,7 +39,7 @@
   register: remove_mount_result
   retries: 5
   delay: 10
-  until: remove_mount_result | success
+  until: remove_mount_result is successful
 
 - name: populate passphrase file for encrypted device
   copy:
@@ -55,7 +55,7 @@
   register: luks_format_success
 
 - fail: msg="Unable to format {{ encrypted_device }} with LUKS"
-  when: luks_format_success | failed
+  when: luks_format_success is failed
 
 - name: setup LUKS slot key from file for the encrypted volume
   shell: >
@@ -67,7 +67,7 @@
   register: luks_open_success
 
 - fail: msg="Unable to open {{ encrypted_device }} with LUKS"
-  when: luks_open_success | failed
+  when: luks_open_success is failed
 
 - name: format encrypted block device
   command: mkfs.'{{ default_linux_os_filesystem }}' /dev/mapper/'{{ encrypted_volume_name }}'
