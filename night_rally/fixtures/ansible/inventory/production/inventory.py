@@ -1,19 +1,15 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-'''
+"""
 Extremely simple dynamic inventory script for Ansible.
 
 Expects TARGET_HOSTS env var to create the target_hosts group
 and COORDINATING_NODES env var to create the coordinating_nodes group.
-'''
+"""
 
 import argparse
+import json
 import os
-
-try:
-    import json
-except ImportError:
-    import simplejson as json
 
 ANSIBLE_SSH_PRIVATE_KEY_FILE = "/var/lib/jenkins/.ssh/rally"
 ANSIBLE_USER = "rally"
@@ -45,15 +41,15 @@ class Inventory(object):
         inventory.update(self.dynamic_groups(group_name="coordinating_nodes", env_var="COORDINATING_NODES"))
         inventory.update(
             {
-                '_meta': {
-                    'hostvars': {}
+                "_meta": {
+                    "hostvars": {}
                 }
             }
         )
-
         return inventory
 
-    def dynamic_groups(self, group_name=None, env_var=None):
+    @staticmethod
+    def dynamic_groups(group_name=None, env_var=None):
         if group_name is None or env_var is None or env_var not in os.environ:
             return {}
         else:
@@ -61,22 +57,23 @@ class Inventory(object):
 
         return {
             group_name: {
-                'hosts': group_hosts.split(","),
-                'vars': {
-                    'ansible_ssh_user': ANSIBLE_USER,
-                    'ansible_ssh_private_key_file': ANSIBLE_SSH_PRIVATE_KEY_FILE
+                "hosts": group_hosts.split(","),
+                "vars": {
+                    "ansible_ssh_user": ANSIBLE_USER,
+                    "ansible_ssh_private_key_file": ANSIBLE_SSH_PRIVATE_KEY_FILE
                 }
             }
         }
 
-    def empty_inventory(self):
-        return {'_meta': {'hostvars': {}}}
+    @staticmethod
+    def empty_inventory():
+        return {"_meta": {"hostvars": {}}}
 
     def read_cli_args(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument('--list', action = 'store_true')
-        parser.add_argument('--host', action = 'store')
-        parser.add_argument('--refresh', action = 'store_true')
+        parser.add_argument("--list", action="store_true")
+        parser.add_argument("--host", action="store")
+        parser.add_argument("--refresh", action="store_true")
         self.args = parser.parse_args()
 
 

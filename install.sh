@@ -6,7 +6,7 @@
 if python3 -c 'import os, sys; sys.exit(0) if "VIRTUAL_ENV" in os.environ else sys.exit(1)' >/dev/null 2>&1
 then
     # inside virtual env
-    python3 setup.py -q develop --upgrade
+    python3 -mpip install --upgrade -e .
 else
-    python3 setup.py -q develop --user --upgrade
+    python3 -mpip install --user --upgrade -e .
 fi

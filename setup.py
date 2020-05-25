@@ -18,9 +18,12 @@ __versionstr__ = VERSION
 
 long_description = str_from_file("README.md")
 
+# tuples of (major, minor) of supported Python versions ordered from lowest to highest
+supported_python_versions = [(3, 8)]
+
 install_requires = [
     # required for night-rally fixtures and deploying ini files
-    "ansible==2.8.8",
+    "ansible==2.9.6",
     # License: Apache 2.0
     # transitive dependency urllib3: MIT
     "elasticsearch==7.6.0",
@@ -40,6 +43,13 @@ tests_require = [
     "pytest-cov"
 ]
 
+python_version_classifiers = ["Programming Language :: Python :: {}.{}".format(major, minor)
+                              for major, minor in supported_python_versions]
+
+first_supported_version = "{}.{}".format(supported_python_versions[0][0], supported_python_versions[0][1])
+# next minor after the latest supported version
+first_unsupported_version = "{}.{}".format(supported_python_versions[-1][0], supported_python_versions[-1][1] + 1)
+
 setup(name="night_rally",
       version=__versionstr__,
       description="Nightly Benchmark Scripts for Elasticsearch Benchmarks based on Rally",
@@ -50,6 +60,9 @@ setup(name="night_rally",
           exclude=("tests*", "external*")
       ),
       include_package_data=True,
+      # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
+      python_requires=">={},<{}".format(first_supported_version, first_unsupported_version),
+
       package_data={"": ["*.json", "*.yml", "*.cfg", "*.j2"]},
       install_requires=install_requires,
       test_suite="tests",
@@ -72,8 +85,5 @@ setup(name="night_rally",
           "Operating System :: POSIX",
           "Programming Language :: Python",
           "Programming Language :: Python :: 3",
-          "Programming Language :: Python :: 3.4",
-          "Programming Language :: Python :: 3.5",
-          "Programming Language :: Python :: 3.6"
-      ],
+      ] + python_version_classifiers,
       zip_safe=False)
