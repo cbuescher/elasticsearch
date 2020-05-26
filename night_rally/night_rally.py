@@ -919,6 +919,8 @@ def parse_args():
     parser.add_argument(
         "--runtime-jdk",
         help="The major version of the runtime JDK to use.",
+        required=True,
+        type=non_empty_string,
         default=None)
     parser.add_argument(
         "--race-configs",
