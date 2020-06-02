@@ -31,6 +31,7 @@ import org.elasticsearch.common.time.DateFormatter;
 import org.elasticsearch.common.time.DateMathParser;
 import org.elasticsearch.geometry.utils.Geohash;
 import org.elasticsearch.index.mapper.DateFieldMapper;
+import org.elasticsearch.index.mapper.SemverFieldMapper;
 import org.elasticsearch.search.aggregations.bucket.geogrid.GeoTileUtils;
 
 import java.io.IOException;
@@ -363,6 +364,33 @@ public interface DocValueFormat extends NamedWriteable {
         @Override
         public String toString() {
             return "ip";
+        }
+    };
+
+    DocValueFormat VERSION = new DocValueFormat() {
+
+        @Override
+        public String getWriteableName() {
+            return "version";
+        }
+
+        @Override
+        public void writeTo(StreamOutput out) {
+        }
+
+        @Override
+        public String format(BytesRef value) {
+            return SemverFieldMapper.decodeVersion(value);
+        }
+
+        @Override
+        public BytesRef parseBytesRef(String value) {
+            return SemverFieldMapper.encodeVersion(value);
+        }
+
+        @Override
+        public String toString() {
+            return "version";
         }
     };
 
