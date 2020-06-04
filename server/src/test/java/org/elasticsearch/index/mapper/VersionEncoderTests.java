@@ -19,37 +19,71 @@
 
 package org.elasticsearch.index.mapper;
 
+import org.apache.lucene.util.BytesRef;
+import org.elasticsearch.index.mapper.VersionEncoder.AlphanumSortMode;
 import org.elasticsearch.test.ESTestCase;
 
 import java.util.List;
 
 import static org.elasticsearch.index.mapper.VersionEncoder.decodeVersion;
-import static org.elasticsearch.index.mapper.VersionEncoder.encodeVersion;
 
 public class VersionEncoderTests extends ESTestCase {
 
-    public void testEncodingOrdering() {
-        assertTrue(encodeVersion("1.0.0").compareTo(encodeVersion("2.0.0")) < 0);
-        assertTrue(encodeVersion("2.0.0").compareTo(encodeVersion("11.0.0")) < 0);
-        assertTrue(encodeVersion("2.0.0").compareTo(encodeVersion("2.1.0")) < 0);
-        assertTrue(encodeVersion("2.1.0").compareTo(encodeVersion("2.1.1")) < 0);
-        assertTrue(encodeVersion("2.1.1").compareTo(encodeVersion("2.1.1.0")) < 0);
-        assertTrue(encodeVersion("1.0.0").compareTo(encodeVersion("2.0")) < 0);
-        assertTrue(encodeVersion("1.0.0-a").compareTo(encodeVersion("1.0.0-b")) < 0);
-        assertTrue(encodeVersion("1.0.0-1.0.0").compareTo(encodeVersion("1.0.0-2.0")) < 0);
-        assertTrue(encodeVersion("1.0.0-alpha").compareTo(encodeVersion("1.0.0-alpha.1")) < 0);
-        assertTrue(encodeVersion("1.0.0-alpha.1").compareTo(encodeVersion("1.0.0-alpha.beta")) < 0);
-        assertTrue(encodeVersion("1.0.0-alpha.beta").compareTo(encodeVersion("1.0.0-beta")) < 0);
-        assertTrue(encodeVersion("1.0.0-beta").compareTo(encodeVersion("1.0.0-beta.2")) < 0);
-        assertTrue(encodeVersion("1.0.0-beta.2").compareTo(encodeVersion("1.0.0-beta.11")) < 0);
-        assertTrue(encodeVersion("1.0.0-beta11").compareTo(encodeVersion("1.0.0-beta2")) < 0); // correct according to Semver specs
-        assertTrue(encodeVersion("1.0.0-beta.11").compareTo(encodeVersion("1.0.0-rc.1")) < 0);
-        assertTrue(encodeVersion("1.0.0-rc.1").compareTo(encodeVersion("1.0.0")) < 0);
+    public void testEncodingOrderingSemver() {
+        assertTrue(encSemver("1.0.0").compareTo(encSemver("2.0.0")) < 0);
+        assertTrue(encSemver("2.0.0").compareTo(encSemver("11.0.0")) < 0);
+        assertTrue(encSemver("2.0.0").compareTo(encSemver("2.1.0")) < 0);
+        assertTrue(encSemver("2.1.0").compareTo(encSemver("2.1.1")) < 0);
+        assertTrue(encSemver("2.1.1").compareTo(encSemver("2.1.1.0")) < 0);
+        assertTrue(encSemver("1.0.0").compareTo(encSemver("2.0")) < 0);
+        assertTrue(encSemver("1.0.0-a").compareTo(encSemver("1.0.0-b")) < 0);
+        assertTrue(encSemver("1.0.0-1.0.0").compareTo(encSemver("1.0.0-2.0")) < 0);
+        assertTrue(encSemver("1.0.0-alpha").compareTo(encSemver("1.0.0-alpha.1")) < 0);
+        assertTrue(encSemver("1.0.0-alpha.1").compareTo(encSemver("1.0.0-alpha.beta")) < 0);
+        assertTrue(encSemver("1.0.0-alpha.beta").compareTo(encSemver("1.0.0-beta")) < 0);
+        assertTrue(encSemver("1.0.0-beta").compareTo(encSemver("1.0.0-beta.2")) < 0);
+        assertTrue(encSemver("1.0.0-beta.2").compareTo(encSemver("1.0.0-beta.11")) < 0);
+        assertTrue(encSemver("1.0.0-beta11").compareTo(encSemver("1.0.0-beta2")) < 0); // correct according to Semver specs
+        assertTrue(encSemver("1.0.0-beta.11").compareTo(encSemver("1.0.0-rc.1")) < 0);
+        assertTrue(encSemver("1.0.0-rc.1").compareTo(encSemver("1.0.0")) < 0);
+        assertTrue(encSemver("1.0.0").compareTo(encSemver("2.0.0-pre127")) < 0);
+        assertTrue(encSemver("2.0.0-pre127").compareTo(encSemver("2.0.0-pre128")) < 0);
+        assertTrue(encSemver("2.0.0-pre20201231z110026").compareTo(encSemver("2.0.0-pre227")) < 0);
     }
 
-    public void testDecoding() {
+    public void testDecodingSemver() {
         for (String version : List.of("1","1.1","1.0.0", "1.2.3.4", "1.0.0-alpha", "1-alpha.11", "1-a1234.12.13278.beta")) {
-            assertEquals(version, decodeVersion(encodeVersion(version)));
+            assertEquals(version, decodeVersion(encSemver(version), AlphanumSortMode.SEMVER));
         }
     }
+
+    private BytesRef encSemver(String s) {
+        return VersionEncoder.encodeVersion(s, AlphanumSortMode.SEMVER);
+    };
+
+    public void testEncodingOrderingNumerical() {
+        assertTrue(encNumeric("1.0.0").compareTo(encNumeric("2.0.0")) < 0);
+        assertTrue(encNumeric("2.0.0").compareTo(encNumeric("11.0.0")) < 0);
+        assertTrue(encNumeric("2.0.0").compareTo(encNumeric("2.1.0")) < 0);
+        assertTrue(encNumeric("2.1.0").compareTo(encNumeric("2.1.1")) < 0);
+        assertTrue(encNumeric("2.1.1").compareTo(encNumeric("2.1.1.0")) < 0);
+        assertTrue(encNumeric("1.0.0").compareTo(encNumeric("2.0")) < 0);
+        assertTrue(encNumeric("1.0.0-a").compareTo(encNumeric("1.0.0-b")) < 0);
+        assertTrue(encNumeric("1.0.0-1.0.0").compareTo(encNumeric("1.0.0-2.0")) < 0);
+        assertTrue(encNumeric("1.0.0-alpha").compareTo(encNumeric("1.0.0-alpha.1")) < 0);
+        assertTrue(encNumeric("1.0.0-alpha.1").compareTo(encNumeric("1.0.0-alpha.beta")) < 0);
+        assertTrue(encNumeric("1.0.0-alpha.beta").compareTo(encNumeric("1.0.0-beta")) < 0);
+        assertTrue(encNumeric("1.0.0-beta").compareTo(encNumeric("1.0.0-beta.2")) < 0);
+        assertTrue(encNumeric("1.0.0-beta.2").compareTo(encNumeric("1.0.0-beta.11")) < 0);
+        assertTrue(encNumeric("1.0.0-beta2").compareTo(encNumeric("1.0.0-beta11")) < 0);
+        assertTrue(encNumeric("1.0.0-beta.11").compareTo(encNumeric("1.0.0-rc.1")) < 0);
+        assertTrue(encNumeric("1.0.0-rc.1").compareTo(encNumeric("1.0.0")) < 0);
+        assertTrue(encNumeric("1.0.0").compareTo(encNumeric("2.0.0-pre127")) < 0);
+        assertTrue(encNumeric("2.0.0-pre127").compareTo(encNumeric("2.0.0-pre128")) < 0);
+        assertTrue(encNumeric("2.0.0-pre227").compareTo(encNumeric("2.0.0-pre20201231z110026")) < 0);
+    }
+
+    private BytesRef encNumeric(String s) {
+        return VersionEncoder.encodeVersion(s, AlphanumSortMode.HONOUR_NUMERALS);
+    };
 }

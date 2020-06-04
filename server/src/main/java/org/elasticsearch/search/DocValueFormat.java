@@ -31,7 +31,7 @@ import org.elasticsearch.common.time.DateFormatter;
 import org.elasticsearch.common.time.DateMathParser;
 import org.elasticsearch.geometry.utils.Geohash;
 import org.elasticsearch.index.mapper.DateFieldMapper;
-import org.elasticsearch.index.mapper.SemverFieldMapper;
+import org.elasticsearch.index.mapper.VersionEncoder;
 import org.elasticsearch.search.aggregations.bucket.geogrid.GeoTileUtils;
 
 import java.io.IOException;
@@ -380,12 +380,12 @@ public interface DocValueFormat extends NamedWriteable {
 
         @Override
         public String format(BytesRef value) {
-            return SemverFieldMapper.decodeVersion(value);
+            return VersionEncoder.decodeVersion(value);
         }
 
         @Override
         public BytesRef parseBytesRef(String value) {
-            return SemverFieldMapper.encodeVersion(value);
+            return VersionEncoder.encodeVersion(value);
         }
 
         @Override
