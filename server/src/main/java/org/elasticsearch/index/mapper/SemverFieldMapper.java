@@ -40,6 +40,7 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.support.XContentMapValues;
 import org.elasticsearch.index.fielddata.IndexFieldData;
 import org.elasticsearch.index.fielddata.plain.SortedSetOrdinalsIndexFieldData;
+import org.elasticsearch.index.mapper.VersionEncoder.AlphanumSortMode;
 import org.elasticsearch.index.query.QueryShardContext;
 import org.elasticsearch.search.DocValueFormat;
 import org.elasticsearch.search.aggregations.support.CoreValuesSourceType;
@@ -162,10 +163,10 @@ public class SemverFieldMapper extends FieldMapper {
         @Override
         protected BytesRef indexedValueForSearch(Object value) {
             if (value instanceof String) {
-                return encodeVersion((String) value);
+                return encodeVersion((String) value, AlphanumSortMode.SEMVER);
             } else if (value instanceof BytesRef) {
                 // encoded string, need to re-encode
-                return encodeVersion(((BytesRef) value).utf8ToString());
+                return encodeVersion(((BytesRef) value).utf8ToString(), AlphanumSortMode.SEMVER);
             } else {
                 throw new IllegalArgumentException("Illegal value type: " + value.getClass());
             }
@@ -261,7 +262,7 @@ public class SemverFieldMapper extends FieldMapper {
         }
 
         // convert to utf8 only once before feeding postings/dv/stored fields
-        final BytesRef encodedVersion = encodeVersion(versionString);
+        final BytesRef encodedVersion = encodeVersion(versionString, AlphanumSortMode.SEMVER);
         if (fieldType().indexOptions() != IndexOptions.NONE || fieldType().stored())  {
             Field field = new Field(fieldType().name(), encodedVersion, fieldType());
             context.doc().add(field);
