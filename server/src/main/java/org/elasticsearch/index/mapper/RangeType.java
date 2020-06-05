@@ -38,6 +38,7 @@ import org.elasticsearch.common.geo.ShapeRelation;
 import org.elasticsearch.common.network.InetAddresses;
 import org.elasticsearch.common.time.DateMathParser;
 import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.index.mapper.VersionEncoder.AlphanumSortMode;
 import org.elasticsearch.index.query.QueryShardContext;
 
 import java.io.IOException;
@@ -52,6 +53,118 @@ import java.util.function.BiFunction;
 
 /** Enum defining the type of range */
 public enum RangeType {
+    VERSION("version_range", LengthType.VARIABLE) {
+        @Override
+        public Field getRangeField(String name, RangeFieldMapper.Range r) {
+            return new VersionRangeField(name, (BytesRef)r.from, (BytesRef)r.to);
+        }
+        @Override
+        public BytesRef parseFrom(RangeFieldMapper.RangeFieldType fieldType, XContentParser parser, boolean coerce, boolean included)
+                throws IOException {
+            BytesRef version = VersionEncoder.encodeVersion(parser.text(), AlphanumSortMode.SEMVER);
+            return version;
+        }
+        @Override
+        public BytesRef parseTo(RangeFieldMapper.RangeFieldType fieldType, XContentParser parser, boolean coerce, boolean included)
+                throws IOException {
+            return parseFrom(fieldType, parser, coerce, included);
+        }
+        @Override
+        public InetAddress parse(Object value, boolean coerce) {
+            if (value instanceof InetAddress) {
+                return (InetAddress) value;
+            } else {
+                if (value instanceof BytesRef) {
+                    value = ((BytesRef) value).utf8ToString();
+                }
+                return InetAddresses.forString(value.toString());
+            }
+        }
+        @Override
+        public BytesRef minValue() {
+            // TODO think about true max/min values
+            return new BytesRef(Byte.MIN_VALUE);
+        }
+        @Override
+        public BytesRef maxValue() {
+            // TODO think about true max/min values
+            return new BytesRef(Byte.MAX_VALUE);
+        }
+        @Override
+        public BytesRef nextUp(Object value) {
+            // TODO currently no up/down
+            return (BytesRef) value;
+        }
+        @Override
+        public BytesRef nextDown(Object value) {
+            // TODO currently no up/down
+            return (BytesRef) value;
+        }
+
+        @Override
+        public BytesRef encodeRanges(Set<RangeFieldMapper.Range> ranges) throws IOException {
+            return BinaryRangeUtil.encodeIPRanges(ranges);
+        }
+
+        @Override
+        public List<RangeFieldMapper.Range> decodeRanges(BytesRef bytes) {
+            // TODO: Implement this.
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Double doubleValue (Object endpointValue) {
+            throw new UnsupportedOperationException("Version ranges cannot be safely converted to doubles");
+        }
+
+        @Override
+        public Query dvRangeQuery(String field, BinaryDocValuesRangeQuery.QueryType queryType, Object from, Object to, boolean includeFrom,
+                                  boolean includeTo) {
+            if (includeFrom == false) {
+                from = nextUp(from);
+            }
+
+            if (includeTo == false) {
+                to = nextDown(to);
+            }
+
+            byte[] encodedFrom = VersionEncoder.encodeVersion((String) from, AlphanumSortMode.SEMVER).bytes;
+            byte[] encodedTo = VersionEncoder.encodeVersion((String) to, AlphanumSortMode.SEMVER).bytes;
+            return new BinaryDocValuesRangeQuery(field, queryType, LengthType.VARIABLE,
+                    new BytesRef(encodedFrom), new BytesRef(encodedTo), from, to);
+        }
+
+        @Override
+        public Query withinQuery(String field, Object from, Object to, boolean includeFrom, boolean includeTo) {
+            return dvRangeQuery(field, BinaryDocValuesRangeQuery.QueryType.WITHIN, from, to, includeFrom, includeTo);
+        }
+        @Override
+        public Query containsQuery(String field, Object from, Object to, boolean includeFrom, boolean includeTo) {
+            return dvRangeQuery(field, BinaryDocValuesRangeQuery.QueryType.CONTAINS, from, to, includeFrom, includeTo);
+        }
+        @Override
+        public Query intersectsQuery(String field, Object from, Object to, boolean includeFrom, boolean includeTo) {
+            return dvRangeQuery(field, BinaryDocValuesRangeQuery.QueryType.INTERSECTS, from, to, includeFrom, includeTo);
+        }
+
+        private Query createQuery(String field, BytesRef lower, BytesRef upper, BiFunction<BytesRef, BytesRef, Query> querySupplier) {
+            byte[] lowerBytes = lower.bytes;
+            byte[] upperBytes = upper.bytes;
+//            if (Arrays.compareUnsigned(lowerBytes, 0, lowerBytes.length, upperBytes, 0, upperBytes.length) > 0) {
+//                throw new IllegalArgumentException(
+//                        "Range query `from` value (" + lower + ") is greater than `to` value (" + upper + ")");
+//            }
+//            BytesRef correctedFrom = includeLower ? (InetAddress) lower : nextUp(lower);
+//            BytesRef correctedTo = includeUpper ? (InetAddress) upper : nextDown(upper);;
+//            lowerBytes = InetAddressPoint.encode(correctedFrom);
+//            upperBytes = InetAddressPoint.encode(correctedTo);
+            if (Arrays.compareUnsigned(lowerBytes, 0, lowerBytes.length, upperBytes, 0, upperBytes.length) > 0) {
+                return new MatchNoDocsQuery("float range didn't intersect anything");
+            } else {
+                return querySupplier.apply(lower, upper);
+            }
+        }
+    },
     IP("ip_range", LengthType.FIXED_16) {
         @Override
         public Field getRangeField(String name, RangeFieldMapper.Range r) {
