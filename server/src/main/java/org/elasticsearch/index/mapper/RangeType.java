@@ -32,12 +32,14 @@ import org.apache.lucene.queries.BinaryDocValuesRangeQuery;
 import org.apache.lucene.search.IndexOrDocValuesQuery;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.store.ByteArrayDataOutput;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.geo.ShapeRelation;
 import org.elasticsearch.common.network.InetAddresses;
 import org.elasticsearch.common.time.DateMathParser;
 import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.index.mapper.RangeFieldMapper.Range;
 import org.elasticsearch.index.mapper.VersionEncoder.AlphanumSortMode;
 import org.elasticsearch.index.query.QueryShardContext;
 
@@ -70,25 +72,21 @@ public enum RangeType {
             return parseFrom(fieldType, parser, coerce, included);
         }
         @Override
-        public InetAddress parse(Object value, boolean coerce) {
-            if (value instanceof InetAddress) {
-                return (InetAddress) value;
-            } else {
-                if (value instanceof BytesRef) {
-                    value = ((BytesRef) value).utf8ToString();
-                }
-                return InetAddresses.forString(value.toString());
+        public BytesRef parse(Object value, boolean coerce) {
+            if (value instanceof BytesRef) {
+                value = ((BytesRef) value).utf8ToString();
             }
+            return VersionEncoder.encodeVersion(value.toString(), AlphanumSortMode.SEMVER);
         }
         @Override
         public BytesRef minValue() {
             // TODO think about true max/min values
-            return new BytesRef(Byte.MIN_VALUE);
+            return new BytesRef(new byte[] {-128});
         }
         @Override
         public BytesRef maxValue() {
             // TODO think about true max/min values
-            return new BytesRef(Byte.MAX_VALUE);
+            return new BytesRef(new byte[] {127});
         }
         @Override
         public BytesRef nextUp(Object value) {
@@ -102,8 +100,29 @@ public enum RangeType {
         }
 
         @Override
-        public BytesRef encodeRanges(Set<RangeFieldMapper.Range> ranges) throws IOException {
-            return BinaryRangeUtil.encodeIPRanges(ranges);
+        public BytesRef encodeRanges(Set<Range> ranges) throws IOException {
+            int length = 0;
+            for (RangeFieldMapper.Range range : ranges) {
+                length += ((BytesRef) range.from).length;
+                length += ((BytesRef) range.to).length;
+            }
+            final byte[] encoded = new byte[15 + length];
+            ByteArrayDataOutput out = new ByteArrayDataOutput(encoded);
+            out.writeVInt(ranges.size());
+            for (RangeFieldMapper.Range range : ranges) {
+                BytesRef fromValue = (BytesRef) range.from;
+                byte[] encodedFromValue = fromValue.bytes;
+                int fromLength = ((BytesRef) range.from).length;
+                out.writeByte((byte) fromLength);
+                out.writeBytes(encodedFromValue, 0, fromLength);
+
+                BytesRef toValue = (BytesRef) range.to;
+                byte[] encodedToValue = toValue.bytes;
+                int toLength = ((BytesRef) range.to).length;
+                out.writeByte((byte) toLength);
+                out.writeBytes(encodedToValue, 0, toLength);
+            }
+            return new BytesRef(encoded, 0, out.getPosition());
         }
 
         @Override
@@ -128,9 +147,9 @@ public enum RangeType {
                 to = nextDown(to);
             }
 
-            byte[] encodedFrom = VersionEncoder.encodeVersion((String) from, AlphanumSortMode.SEMVER).bytes;
-            byte[] encodedTo = VersionEncoder.encodeVersion((String) to, AlphanumSortMode.SEMVER).bytes;
-            return new BinaryDocValuesRangeQuery(field, queryType, LengthType.VARIABLE,
+            byte[] encodedFrom = ((BytesRef) from).bytes;
+            byte[] encodedTo = ((BytesRef) to).bytes;
+            return new BinaryDocValuesRangeQuery(field, queryType, LengthType.FULL_BYTE,
                     new BytesRef(encodedFrom), new BytesRef(encodedTo), from, to);
         }
 
@@ -164,6 +183,7 @@ public enum RangeType {
                 return querySupplier.apply(lower, upper);
             }
         }
+
     },
     IP("ip_range", LengthType.FIXED_16) {
         @Override
@@ -825,7 +845,15 @@ public enum RangeType {
                 }
                 return 1 + length;
             }
-        };
+        },
+        FULL_BYTE {
+            @Override
+            public int readLength(byte[] bytes, int offset) {
+                // the first bit encodes the sign and the next 4 bits encode the number
+                // of additional bytes
+                return bytes[offset];
+            }
+        };;
 
         /**
          * Return the length of the value that starts at {@code offset} in {@code bytes}.

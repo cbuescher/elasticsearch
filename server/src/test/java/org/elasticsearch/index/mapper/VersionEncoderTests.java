@@ -52,7 +52,16 @@ public class VersionEncoderTests extends ESTestCase {
     }
 
     public void testDecodingSemver() {
-        for (String version : List.of("1","1.1","1.0.0", "1.2.3.4", "1.0.0-alpha", "1-alpha.11", "1-a1234.12.13278.beta")) {
+        for (String version : List.of(
+            "1",
+            "1.1",
+            "1.0.0",
+            "1.2.3.4",
+            "1.0.0-alpha",
+            "1-alpha.11",
+            "1-a1234.12.13278.beta",
+            "1.0.0-beta+someBuildNumber-123456-open"
+        )) {
             assertEquals(version, decodeVersion(encSemver(version), AlphanumSortMode.SEMVER));
         }
     }

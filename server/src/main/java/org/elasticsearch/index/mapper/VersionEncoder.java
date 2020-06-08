@@ -32,6 +32,8 @@ public class VersionEncoder {
     private static final byte DOT_SEPARATOR_BYTE = (byte) DOT_SEPARATOR;
     private static final char PRERELESE_SEPARATOR = '-';
     private static final byte PRERELESE_SEPARATOR_BYTE = (byte) PRERELESE_SEPARATOR;
+    private static final char BUILD_SEPARATOR = '+';
+    private static final byte BUILD_SEPARATOR_BYTE = (byte) BUILD_SEPARATOR;
     private static final char NO_PRERELESE_SEPARATOR = '@';
     private static final byte NO_PRERELESE_SEPARATOR_BYTE = (byte) NO_PRERELESE_SEPARATOR;
 
@@ -44,7 +46,7 @@ public class VersionEncoder {
      */
     public enum AlphanumSortMode {
         /**
-         * strict semver precedence treats everything alphabetically, e.g. "rc11" < "rc2"
+         * strict semver precedence treats everything alphabetically, e.g. "rc11" &lt; "rc2"
          */
         SEMVER
         {
@@ -68,7 +70,7 @@ public class VersionEncoder {
         },
         /**
          * This mode will order mixed strings so that the numeric parts are treated with numeric ordering,
-         * e.g. "rc2" < "rc11", "alpha523" < "alpha1234"
+         * e.g. "rc2" &lt; "rc11", "alpha523" &lt; "alpha1234"
          */
         HONOUR_NUMERALS
         {
@@ -124,9 +126,17 @@ public class VersionEncoder {
      */
     public static BytesRef encodeVersion(String versionString, AlphanumSortMode mode) {
         System.out.println("encoding: " + versionString);
-        if (LEGAL_VERSION_PATTERN.matcher(versionString).matches() == false) {
-            throw new IllegalArgumentException("Illegal version string: " + versionString);
+//        if (legalVersionString(versionString) == false) {
+//            throw new IllegalArgumentException("Illegal version string: " + versionString);
+//        }
+        // strip "build" suffix
+        int buildSuffixStart = versionString.indexOf(BUILD_SEPARATOR);
+        String buildSuffixPart = null;
+        if (buildSuffixStart > 0) {
+           buildSuffixPart = versionString.substring(buildSuffixStart);
+           versionString = versionString.substring(0, buildSuffixStart);
         }
+
         // split LHS (dot separated versions) and pre-release part
         String[] mainParts = versionString.split("-");
         String[] lhsVersions = mainParts[0].split("\\.");
@@ -150,13 +160,21 @@ public class VersionEncoder {
         } else {
             brb.append(NO_PRERELESE_SEPARATOR_BYTE);
         }
+        // append build part at the end
+        if (buildSuffixPart != null) {
+            brb.append(new BytesRef(buildSuffixPart));
+        }
         System.out.println("encoding: " + brb.get());
         return brb.get();
     }
 
+    static boolean legalVersionString(String versionString) {
+        return LEGAL_VERSION_PATTERN.matcher(versionString).matches();
+    }
+
     /**
-     * @param part
-     * @param result
+     * @param part the version string to encode
+     * @param result the builder for the result
      * @param addMarker needed on rhs where ids can be numeric or alphanumeric
      */
     private static void encodeVersionPartNumeric(String part, BytesRefBuilder result, boolean addMarker) {
@@ -168,69 +186,12 @@ public class VersionEncoder {
         result.append(DOT_SEPARATOR_BYTE);
     }
 
-//    private static void encodeVersionPartAlphanumeric(String part, BytesRefBuilder result) {
-//        result.append((byte) 2); // mark as alphanumeric
-//        result.append(new BytesRef(part));
-//        result.append(DOT_SEPARATOR_BYTE);
-//    }
-//
-//    /**
-//     * treat numerals with numeric sort
-//     */
-//    private static void encodeVersionPartAlphanumeric2(String part, BytesRefBuilder result) {
-//        result.append((byte) 2); // mark as alphanumeric
-//        int pos = 0;
-//        while (pos < part.length()) {
-//            if (Character.isDigit(part.charAt(pos))) {
-//                // found beginning of number block, so get its length
-//                int start = pos;
-//                BytesRefBuilder number = new BytesRefBuilder();
-//                while (pos < part.length() && Character.isDigit(part.charAt(pos))) {
-//                    number.append((byte) part.charAt(pos));
-//                    pos++;
-//                }
-//                int length = pos - start;
-//                result.append((byte) 3); // mark that the following is a length byte for later decoding
-//                result.append((byte) length);
-//                result.append(number);
-//            } else {
-//                result.append((byte) part.charAt(pos));
-//                pos++;
-//            }
-//        }
-//        result.append(DOT_SEPARATOR_BYTE);
-//    }
-
     private static int decodeVersionPartNumeric(byte[] input, StringBuilder result, int pos) {
         int partLength = input[pos++];
         result.append(new BytesRef(Arrays.copyOfRange(input, pos, pos + partLength)).utf8ToString());
         result.append(DOT_SEPARATOR);
         return pos + partLength + 1;
     }
-
-//    private static int decodeVersionPartAlphanumeric(byte[] input, StringBuilder result, int pos) {
-//        int last = pos;
-//        while (input[last] != DOT_SEPARATOR_BYTE) {
-//            last++;
-//        }
-//        result.append(new BytesRef(Arrays.copyOfRange(input, pos, last)).utf8ToString());
-//        result.append(DOT_SEPARATOR);
-//        return last + 1;
-//    }
-//
-//    private static int decodeVersionPartAlphanumeric2(byte[] input, StringBuilder result, int pos) {
-//        while (input[pos] != DOT_SEPARATOR_BYTE) {
-//            if (input[pos] != 3) {
-//                result.append((char) input[pos++]);
-//            } else {
-//                // skip also length byte
-//                pos +=2;
-//            }
-//        }
-//        result.append(DOT_SEPARATOR);
-//        pos++;
-//        return pos;
-//    }
 
     public static String decodeVersion(BytesRef version, AlphanumSortMode mode) {
         System.out.println("decoding: " + version);
@@ -246,15 +207,18 @@ public class VersionEncoder {
         byte preReleaseFlag = bytes[pos++];
         if (preReleaseFlag == PRERELESE_SEPARATOR_BYTE) {
             sb.append(PRERELESE_SEPARATOR);
-            while (pos < version.length) {
+            while (pos < version.length && bytes[pos] != BUILD_SEPARATOR_BYTE) {
                   byte isNumeric = bytes[pos++];
                   if (isNumeric == 1) {
                       pos = decodeVersionPartNumeric(bytes, sb, pos);
                   } else {
                       pos = mode.decode(bytes, sb, pos);
                   }
-             }
+            }
             sb.deleteCharAt(sb.length() - 1);
+        }
+        if (pos < version.length && bytes[pos] == BUILD_SEPARATOR_BYTE) {
+            sb.append(new BytesRef(Arrays.copyOfRange(version.bytes, pos, version.length)).utf8ToString());
         }
         System.out.println(sb.toString());
         return sb.toString();

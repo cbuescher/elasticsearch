@@ -33,6 +33,7 @@ import org.apache.lucene.search.Weight;
 import org.apache.lucene.store.ByteArrayDataInput;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.index.mapper.RangeType;
+import org.elasticsearch.index.mapper.RangeType.LengthType;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -79,6 +80,7 @@ public final class BinaryDocValuesRangeQuery extends Query {
                     @Override
                     public boolean matches() throws IOException {
                         BytesRef encodedRanges = values.binaryValue();
+                        System.out.println("encodedRanges: " + encodedRanges);
                         in.reset(encodedRanges.bytes, encodedRanges.offset, encodedRanges.length);
                         int numRanges = in.readVInt();
                         final byte[] bytes = encodedRanges.bytes;
@@ -87,14 +89,25 @@ public final class BinaryDocValuesRangeQuery extends Query {
                         int offset = in.getPosition();
                         for (int i = 0; i < numRanges; i++) {
                             int length = lengthType.readLength(bytes, offset);
+                            if (lengthType == LengthType.FULL_BYTE) {
+                                offset++;
+                            }
                             otherFrom.offset = offset;
                             otherFrom.length = length;
                             offset += length;
 
                             length = lengthType.readLength(bytes, offset);
+                            if (lengthType == LengthType.FULL_BYTE) {
+                                offset++;
+                            }
                             otherTo.offset = offset;
                             otherTo.length = length;
                             offset += length;
+//                            System.out.println("match: ");
+//                            System.out.println(from + " " + from.utf8ToString());
+//                            System.out.println(otherFrom + " " + otherFrom.utf8ToString());
+//                            System.out.println(to + " " + to.utf8ToString());
+//                            System.out.println(otherTo + " " + otherTo.utf8ToString());
 
                             if (queryType.matches(from, to, otherFrom, otherTo)) {
                                 return true;
