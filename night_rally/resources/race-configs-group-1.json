@@ -147,7 +147,6 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults",
-                "telemetry": "gc",
                 "x-pack": [
                   "security"
                 ]

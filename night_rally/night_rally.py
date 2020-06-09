@@ -138,6 +138,18 @@ def sanitize(text):
     return text.lower().replace(" ", "-").replace(".", "_")
 
 
+def csv_to_list(csv):
+    """
+    Converts a comma-separated string into a list.
+    """
+    if csv is None:
+        return None
+    elif len(csv.strip()) == 0:
+        return []
+    else:
+        return [e.strip() for e in csv.split(",")]
+
+
 def join_nullables(*args, join_with=","):
     """
 
@@ -1042,7 +1054,7 @@ def main():
 
     if args.telemetry:
         logger.info("Activating Rally telemetry %s." % args.telemetry)
-        params.append(TelemetryParams(args.telemetry, args.telemetry_params))
+        params.append(TelemetryParams(csv_to_list(args.telemetry), csv_to_list(args.telemetry_params)))
 
     if common_cli_params.is_release:
         params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk,
