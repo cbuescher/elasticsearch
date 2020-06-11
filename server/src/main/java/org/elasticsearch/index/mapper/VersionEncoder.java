@@ -25,6 +25,32 @@ import org.apache.lucene.util.BytesRefBuilder;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
+/**
+ * Encodes a version string to a {@link BytesRef} while ensuring an ordering that makes sense for
+ * software versions.
+ *
+ * Version strings are considered to consist of three parts in this order:
+ * <ul>
+ *  <li> a numeric major.minor.patch part starting the version string (e.g. 1.2.3)
+ *  <li> an optional "pre-release" part that starts with a `-` character and can consist of several alpha-numerical sections
+ *  separated by dots (e.g. "-alpha.2.3")
+ *  <li> an optional "build" part that starts with a `+` character. This will simply be treated as a prefix with no guaranteed ordering,
+ *  (although the ordering should be alphabetical in most cases).
+ * </ul>
+ *
+ * In the default mode (@link {@link AlphanumSortMode#SEMVER}, the version string is encoded such that the ordering works like the following:
+ * <ul>
+ *  <li> Major, minor, and patch versions are always compared numerically
+ *  <li> pre-release version have lower precedence than a normal version. (e.g 1.0.0-alpha < 1.0.0)
+ *  <li> the precedence for pre-release versions with same main version is calculated comparing each dot separated identifier from
+ *  left to right. Identifiers consisting of only digits are compared numerically and identifiers with letters or hyphens are compared
+ *  lexically in ASCII sort order. Numeric identifiers always have lower precedence than non-numeric identifiers.
+ * </ul>
+ *
+ * The sorting for the main version part in {@link AlphanumSortMode#HONOUR_NUMERALS} is the same except that in the pre-release part,
+ * mixed alpha-numerical identifiers are compared grouping all consecutive digits and treating them as a number with numerical ordering.
+ * For example, "alpha2" would sort _before" "alpha11" in this mode.
+ */
 public class VersionEncoder {
 
     private static final byte LHS_FINISHED_BYTE = (byte) 0;
@@ -38,8 +64,10 @@ public class VersionEncoder {
     private static final byte NO_PRERELESE_SEPARATOR_BYTE = (byte) NO_PRERELESE_SEPARATOR;
 
 
-    // Regex to test version validity: \d+(\.\d+)*(-[\-\dA-Za-z]+){0,1}(\.[-\dA-Za-z]+)*
-    private static Pattern LEGAL_VERSION_PATTERN = Pattern.compile("\\d+(\\.\\d+)*(-[\\-\\dA-Za-z]+){0,1}(\\.[\\-\\dA-Za-z]+)*");
+    // Regex to test version validity: \d+(\.\d+)*(-[\-\dA-Za-z]+){0,1}(\.[-\dA-Za-z]+)*(\+[\.\-\dA-Za-z]+)?
+    private static Pattern LEGAL_VERSION_PATTERN = Pattern.compile(
+        "\\d+(\\.\\d+)*(-[\\-\\dA-Za-z]+){0,1}(\\.[\\-\\dA-Za-z]+)*(\\+[\\.\\-\\dA-Za-z]+)?"
+    );
 
     /**
      * Defines how version parts consisting of both alphabetical and numerical characters are ordered
@@ -126,9 +154,9 @@ public class VersionEncoder {
      */
     public static BytesRef encodeVersion(String versionString, AlphanumSortMode mode) {
         System.out.println("encoding: " + versionString);
-//        if (legalVersionString(versionString) == false) {
-//            throw new IllegalArgumentException("Illegal version string: " + versionString);
-//        }
+        if (legalVersionString(versionString) == false) {
+            throw new IllegalArgumentException("Illegal version string: " + versionString);
+        }
         // strip "build" suffix
         int buildSuffixStart = versionString.indexOf(BUILD_SEPARATOR);
         String buildSuffixPart = null;

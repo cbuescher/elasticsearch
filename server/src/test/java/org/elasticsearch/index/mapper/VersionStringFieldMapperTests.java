@@ -29,7 +29,7 @@ import org.elasticsearch.test.ESSingleNodeTestCase;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
-public class SemverFieldMapperTests extends ESSingleNodeTestCase {
+public class VersionStringFieldMapperTests extends ESSingleNodeTestCase {
 
     public void testQueries() throws Exception {
         String indexName = "test";
@@ -41,7 +41,7 @@ public class SemverFieldMapperTests extends ESSingleNodeTestCase {
             .setSource(jsonBuilder().startObject().field("version", "1.0.0").endObject())
             .get();
         client().prepareIndex(indexName).setId("2")
-            .setSource(jsonBuilder().startObject().field("version", "1.3.0").endObject())
+            .setSource(jsonBuilder().startObject().field("version", "1.3.0+build1234567").endObject())
         .get();
         client().prepareIndex(indexName).setId("3")
         .setSource(jsonBuilder().startObject().field("version", "2.1.0-alpha").endObject())
@@ -57,6 +57,12 @@ public class SemverFieldMapperTests extends ESSingleNodeTestCase {
         response = client().prepareSearch(indexName)
             .setQuery(QueryBuilders.matchQuery("version", ("1.4.0"))).get();
         assertEquals(0, response.getHits().getTotalHits().value);
+        response = client().prepareSearch(indexName)
+            .setQuery(QueryBuilders.matchQuery("version", ("1.3.0"))).get();
+        assertEquals(0, response.getHits().getTotalHits().value);
+        response = client().prepareSearch(indexName)
+            .setQuery(QueryBuilders.matchQuery("version", ("1.3.0+build1234567"))).get();
+        assertEquals(1, response.getHits().getTotalHits().value);
 
         // ranges
         response = client().prepareSearch(indexName)
@@ -120,8 +126,20 @@ public class SemverFieldMapperTests extends ESSingleNodeTestCase {
         SearchHit[] hits = response.getHits().getHits();
         assertEquals("2.1.0", hits[0].getSortValues()[0]);
         assertEquals("2.1.0-alpha", hits[1].getSortValues()[0]);
-        assertEquals("1.3.0", hits[2].getSortValues()[0]);
+        assertEquals("1.3.0+build1234567", hits[2].getSortValues()[0]);
         assertEquals("1.0.0", hits[3].getSortValues()[0]);
+    }
+
+    public void testIgnoreMalformed() throws Exception {
+        String indexName = "test";
+        createIndex(indexName, Settings.builder().put("index.number_of_shards", 1).build(), "_doc",
+            "version", "type=version,ignore_malformed=true");
+        ensureGreen("test");
+
+        client().prepareIndex(indexName).setId("1")
+            .setSource(jsonBuilder().startObject().field("version", "1...0.0").endObject())
+            .get();
+
     }
 
     public void testAggs() throws Exception {

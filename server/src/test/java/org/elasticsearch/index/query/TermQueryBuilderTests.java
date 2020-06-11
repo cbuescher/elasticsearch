@@ -20,6 +20,7 @@
 package org.elasticsearch.index.query;
 
 import com.fasterxml.jackson.core.io.JsonStringEncoder;
+
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.PointRangeQuery;
@@ -132,6 +133,23 @@ public class TermQueryBuilderTests extends AbstractTermQueryTestCase<TermQueryBu
         TermQueryBuilder parsed = (TermQueryBuilder) parseQuery(json);
         checkGeneratedJson(json, parsed);
         assertEquals(json, "Quick Foxes!", parsed.value());
+    }
+
+    public void testFromJsonBigInt() throws IOException {
+        String json =
+                "{\n" +
+                "  \"term\" : {\n" +
+                "    \"exact_value\" : {\n" +
+                "      \"value\" : 8031595332174,\n" +
+                "      \"boost\" : 1.0\n" +
+                "    }\n" +
+                "  }\n" +
+                "}";
+
+        TermQueryBuilder parsed = (TermQueryBuilder) parseQuery(json);
+        checkGeneratedJson(json, parsed);
+        Object value = parsed.value();
+        System.out.println(value.getClass());
     }
 
     public void testGeo() throws Exception {

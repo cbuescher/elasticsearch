@@ -88,7 +88,7 @@ import org.elasticsearch.index.mapper.ObjectMapper;
 import org.elasticsearch.index.mapper.ObjectMapper.Nested;
 import org.elasticsearch.index.mapper.RangeFieldMapper;
 import org.elasticsearch.index.mapper.RangeType;
-import org.elasticsearch.index.mapper.SemverFieldMapper;
+import org.elasticsearch.index.mapper.VersionStringFieldMapper;
 import org.elasticsearch.index.mapper.TextFieldMapper;
 import org.elasticsearch.index.mapper.VersionEncoder;
 import org.elasticsearch.index.mapper.VersionEncoder.AlphanumSortMode;
@@ -162,7 +162,7 @@ public abstract class AggregatorTestCase extends ESTestCase {
         ObjectMapper.NESTED_CONTENT_TYPE, // TODO support for nested
         CompletionFieldMapper.CONTENT_TYPE, // TODO support completion
         FieldAliasMapper.CONTENT_TYPE, // TODO support alias
-        SemverFieldMapper.CONTENT_TYPE // TODO support alias
+        VersionStringFieldMapper.CONTENT_TYPE // TODO support alias
     );
 
     /**

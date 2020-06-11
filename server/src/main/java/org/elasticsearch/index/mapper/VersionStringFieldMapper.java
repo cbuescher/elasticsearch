@@ -56,7 +56,7 @@ import static org.elasticsearch.index.mapper.VersionEncoder.encodeVersion;
 import static org.elasticsearch.search.SearchService.ALLOW_EXPENSIVE_QUERIES;
 
 /** A {@link FieldMapper} for software versions. */
-public class SemverFieldMapper extends FieldMapper {
+public class VersionStringFieldMapper extends FieldMapper {
 
     // TODO naming etc... wrt VersionFieldMapper
     public static final String CONTENT_TYPE = "version";
@@ -70,7 +70,7 @@ public class SemverFieldMapper extends FieldMapper {
         private Boolean ignoreMalformed;
 
         public Builder(String name) {
-            super(name, new SemverFieldType(), new SemverFieldType());
+            super(name, new VersionStringFieldType(), new VersionStringFieldType());
             builder = this;
         }
 
@@ -90,9 +90,9 @@ public class SemverFieldMapper extends FieldMapper {
         }
 
         @Override
-        public SemverFieldMapper build(BuilderContext context) {
+        public VersionStringFieldMapper build(BuilderContext context) {
             setupFieldType(context);
-            return new SemverFieldMapper(name, fieldType, defaultFieldType, ignoreMalformed(context),
+            return new VersionStringFieldMapper(name, fieldType, defaultFieldType, ignoreMalformed(context),
                     context.indexSettings(), multiFieldsBuilder.build(this, context), copyTo);
         }
     }
@@ -127,21 +127,21 @@ public class SemverFieldMapper extends FieldMapper {
         }
     }
 
-    public static final class SemverFieldType extends TermBasedFieldType {
+    public static final class VersionStringFieldType extends TermBasedFieldType {
 
-        public SemverFieldType() {
+        public VersionStringFieldType() {
             super();
             setTokenized(false);
             setHasDocValues(true);
         }
 
-        SemverFieldType(SemverFieldType other) {
+        VersionStringFieldType(VersionStringFieldType other) {
             super(other);
         }
 
         @Override
         public MappedFieldType clone() {
-            return new SemverFieldType(this);
+            return new VersionStringFieldType(this);
         }
 
         @Override
@@ -216,7 +216,7 @@ public class SemverFieldMapper extends FieldMapper {
 
     private Explicit<Boolean> ignoreMalformed;
 
-    private SemverFieldMapper(
+    private VersionStringFieldMapper(
             String simpleName,
             MappedFieldType fieldType,
             MappedFieldType defaultFieldType,
@@ -229,8 +229,8 @@ public class SemverFieldMapper extends FieldMapper {
     }
 
     @Override
-    public SemverFieldType fieldType() {
-        return (SemverFieldType) super.fieldType();
+    public VersionStringFieldType fieldType() {
+        return (VersionStringFieldType) super.fieldType();
     }
 
     @Override
@@ -239,8 +239,8 @@ public class SemverFieldMapper extends FieldMapper {
     }
 
     @Override
-    protected SemverFieldMapper clone() {
-        return (SemverFieldMapper) super.clone();
+    protected VersionStringFieldMapper clone() {
+        return (VersionStringFieldMapper) super.clone();
     }
 
     @Override
@@ -261,8 +261,17 @@ public class SemverFieldMapper extends FieldMapper {
             return;
         }
 
-        // convert to utf8 only once before feeding postings/dv/stored fields
-        final BytesRef encodedVersion = encodeVersion(versionString, AlphanumSortMode.SEMVER);
+        BytesRef encodedVersion = null;
+        try {
+            encodedVersion = encodeVersion(versionString, AlphanumSortMode.SEMVER);
+        } catch (IllegalArgumentException e) {
+            if (ignoreMalformed.value()) {
+                context.addIgnoredField(fieldType.name());
+                return;
+            } else {
+                throw e;
+            }
+        }
         if (fieldType().indexOptions() != IndexOptions.NONE || fieldType().stored())  {
             Field field = new Field(fieldType().name(), encodedVersion, fieldType());
             context.doc().add(field);
@@ -282,7 +291,7 @@ public class SemverFieldMapper extends FieldMapper {
 
     @Override
     protected void mergeOptions(FieldMapper other, List<String> conflicts) {
-        SemverFieldMapper mergeWith = (SemverFieldMapper) other;
+        VersionStringFieldMapper mergeWith = (VersionStringFieldMapper) other;
         if (mergeWith.ignoreMalformed.explicit()) {
             this.ignoreMalformed = mergeWith.ignoreMalformed;
         }
