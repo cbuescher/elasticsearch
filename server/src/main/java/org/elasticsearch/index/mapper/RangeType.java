@@ -27,6 +27,7 @@ import org.apache.lucene.document.InetAddressRange;
 import org.apache.lucene.document.IntRange;
 import org.apache.lucene.document.LongRange;
 import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.VersionRangeField;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.queries.BinaryDocValuesRangeQuery;
 import org.apache.lucene.search.IndexOrDocValuesQuery;
@@ -56,9 +57,14 @@ import java.util.function.BiFunction;
 /** Enum defining the type of range */
 public enum RangeType {
     VERSION("version_range", LengthType.VARIABLE) {
+
+        // TODO check if these are really safe min/max values
+        private BytesRef MIN_VALUE = new BytesRef(0);
+        private BytesRef MAX_VALUE = new BytesRef(new byte[] {-1});
+
         @Override
         public Field getRangeField(String name, RangeFieldMapper.Range r) {
-            return new VersionRangeField(name, (BytesRef)r.from, (BytesRef)r.to);
+            return new VersionRangeField(name, (BytesRef) r.from, (BytesRef) r.to);
         }
         @Override
         public BytesRef parseFrom(RangeFieldMapper.RangeFieldType fieldType, XContentParser parser, boolean coerce, boolean included)
@@ -80,13 +86,11 @@ public enum RangeType {
         }
         @Override
         public BytesRef minValue() {
-            // TODO think about true max/min values
-            return new BytesRef(new byte[] {-128});
+            return MIN_VALUE;
         }
         @Override
         public BytesRef maxValue() {
-            // TODO think about true max/min values
-            return new BytesRef(new byte[] {127});
+            return MAX_VALUE;
         }
         @Override
         public BytesRef nextUp(Object value) {
@@ -155,18 +159,28 @@ public enum RangeType {
 
         @Override
         public Query withinQuery(String field, Object from, Object to, boolean includeFrom, boolean includeTo) {
-            return dvRangeQuery(field, BinaryDocValuesRangeQuery.QueryType.WITHIN, from, to, includeFrom, includeTo);
+            return createQuery(field, (BytesRef) from, (BytesRef) to, includeFrom, includeTo,
+                    (f, t) -> VersionRangeField.newWithinQuery(field, f, t));
         }
         @Override
         public Query containsQuery(String field, Object from, Object to, boolean includeFrom, boolean includeTo) {
-            return dvRangeQuery(field, BinaryDocValuesRangeQuery.QueryType.CONTAINS, from, to, includeFrom, includeTo);
+            return createQuery(field, (BytesRef) from, (BytesRef) to, includeFrom, includeTo,
+                    (f, t) -> VersionRangeField.newContainsQuery(field, f, t ));
         }
         @Override
         public Query intersectsQuery(String field, Object from, Object to, boolean includeFrom, boolean includeTo) {
-            return dvRangeQuery(field, BinaryDocValuesRangeQuery.QueryType.INTERSECTS, from, to, includeFrom, includeTo);
+            return createQuery(field, (BytesRef) from, (BytesRef) to, includeFrom, includeTo,
+                    (f, t) -> VersionRangeField.newIntersectsQuery(field, f ,t ));
         }
 
-        private Query createQuery(String field, BytesRef lower, BytesRef upper, BiFunction<BytesRef, BytesRef, Query> querySupplier) {
+        private Query createQuery(
+            String field,
+            BytesRef lower,
+            BytesRef upper,
+            boolean includeFrom,
+            boolean includeTo,
+            BiFunction<BytesRef, BytesRef, Query> querySupplier
+        ) {
             byte[] lowerBytes = lower.bytes;
             byte[] upperBytes = upper.bytes;
 //            if (Arrays.compareUnsigned(lowerBytes, 0, lowerBytes.length, upperBytes, 0, upperBytes.length) > 0) {
@@ -849,15 +863,25 @@ public enum RangeType {
         FULL_BYTE {
             @Override
             public int readLength(byte[] bytes, int offset) {
-                // the first bit encodes the sign and the next 4 bits encode the number
-                // of additional bytes
                 return bytes[offset];
             }
+
+            @Override
+            public int advanceBy() {
+                return 1;
+            };
         };;
 
         /**
-         * Return the length of the value that starts at {@code offset} in {@code bytes}.
+         * Return the length of the value encoded at {@code offset} in {@code bytes}.
          */
         public abstract int readLength(byte[] bytes, int offset);
+
+        /**
+         * Return the number of positions the offset needs to be advances after reading the length
+         */
+        public int advanceBy() {
+            return 0;
+        };
     }
 }

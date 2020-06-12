@@ -33,7 +33,6 @@ import org.apache.lucene.search.Weight;
 import org.apache.lucene.store.ByteArrayDataInput;
 import org.apache.lucene.util.BytesRef;
 import org.elasticsearch.index.mapper.RangeType;
-import org.elasticsearch.index.mapper.RangeType.LengthType;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -89,17 +88,13 @@ public final class BinaryDocValuesRangeQuery extends Query {
                         int offset = in.getPosition();
                         for (int i = 0; i < numRanges; i++) {
                             int length = lengthType.readLength(bytes, offset);
-                            if (lengthType == LengthType.FULL_BYTE) {
-                                offset++;
-                            }
+                            offset += lengthType.advanceBy();
                             otherFrom.offset = offset;
                             otherFrom.length = length;
                             offset += length;
 
                             length = lengthType.readLength(bytes, offset);
-                            if (lengthType == LengthType.FULL_BYTE) {
-                                offset++;
-                            }
+                            offset += lengthType.advanceBy();
                             otherTo.offset = offset;
                             otherTo.length = length;
                             offset += length;

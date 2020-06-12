@@ -108,9 +108,11 @@ public class SimpleSearchIT extends ESIntegTestCase {
     }
 
     public void testSimpleVersionRange() throws Exception {
-        createIndex("test");
+        prepareCreate("test").setSettings(Settings.builder().put(SETTING_NUMBER_OF_SHARDS, 1).put(SETTING_NUMBER_OF_REPLICAS, 0)).get();
+        ensureGreen();
 
         client().admin().indices().preparePutMapping("test")
+
                 .setSource(XContentFactory.jsonBuilder().startObject().startObject("_doc").startObject("properties")
                         .startObject("versionrange").field("type", "version_range").endObject()
                         .endObject().endObject().endObject())
