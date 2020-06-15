@@ -201,26 +201,26 @@ class SourceBasedCommand(BaseCommand):
         ])
 
 
-class NightlyCommand(SourceBasedCommand):
-    def __init__(self, params, effective_start_date):
-        super().__init__(params, "@%s" % to_iso8601(effective_start_date))
-
-
-class AdHocCommand(SourceBasedCommand):
-    def __init__(self, params, revision):
-        super().__init__(params, revision)
-
-
-class ReleaseCommand(BaseCommand):
-    def __init__(self, params, release_params, distribution_version):
-        self.distribution_version = distribution_version
-        self.release_params = release_params
+class DistributionBasedCommand(BaseCommand):
+    def __init__(self, params, distribution_version, release_params=None):
         self.params = ParamsFormatter(params=params + [
             LicenseParams(distribution_version, release_params),
             ConstantParam("distribution-version", distribution_version),
             ConstantParam("pipeline", "from-distribution")
         ])
 
+
+class NightlyCommand(SourceBasedCommand):
+    def __init__(self, params, effective_start_date):
+        super().__init__(params, "@%s" % to_iso8601(effective_start_date))
+
+
+class ReleaseCommand(DistributionBasedCommand):
+    def __init__(self, params, release_params, distribution_version):
+        self.distribution_version = distribution_version
+        self.release_params = release_params
+        super().__init__(params, self.distribution_version, self.release_params)
+        
     def runnable(self, race_config):
         major, minor, _, _ = components(self.distribution_version)
 
@@ -1067,9 +1067,13 @@ def main():
                         % (common_cli_params.version, target_hosts, common_cli_params.printable_release_params))
             command = ReleaseCommand(params, common_cli_params.release_params, common_cli_params.version)
     elif common_cli_params.is_adhoc:
-        logger.info("Running adhoc benchmarks for revision [%s] against %s." % (args.revision, target_hosts))
         params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk, common_cli_params.setup, args.test_mode))
-        command = AdHocCommand(params, args.revision)
+        if args.version is not None and args.version != "master":
+            logger.info("Running adhoc benchmarks for version [%s] against %s." % (args.version, target_hosts))
+            command = DistributionBasedCommand(params, args.version)
+        else:
+            logger.info("Running adhoc benchmarks for revision [%s] against %s." % (args.revision, target_hosts))
+            command = SourceBasedCommand(params, args.revision)
     else:
         logger.info("Running nightly benchmarks against %s." % target_hosts)
         params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk,
