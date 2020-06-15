@@ -53,15 +53,17 @@ import java.util.regex.Pattern;
  */
 public class VersionEncoder {
 
-    private static final byte LHS_FINISHED_BYTE = (byte) 0;
     private static final char DOT_SEPARATOR = '.';
     private static final byte DOT_SEPARATOR_BYTE = (byte) DOT_SEPARATOR;
     private static final char PRERELESE_SEPARATOR = '-';
     private static final byte PRERELESE_SEPARATOR_BYTE = (byte) PRERELESE_SEPARATOR;
     private static final char BUILD_SEPARATOR = '+';
     private static final byte BUILD_SEPARATOR_BYTE = (byte) BUILD_SEPARATOR;
-    private static final char NO_PRERELESE_SEPARATOR = '@';
+    private static final char NO_PRERELESE_SEPARATOR = '/';
     private static final byte NO_PRERELESE_SEPARATOR_BYTE = (byte) NO_PRERELESE_SEPARATOR;
+    private static final byte NUMERIC_MARKER_BYTE = (byte) 0x01;
+    private static final byte ALPHANUMERIC_MARKER_BYTE = (byte) 0x02;
+
 
 
     // Regex to test version validity: \d+(\.\d+)*(-[\-\dA-Za-z]+){0,1}(\.[-\dA-Za-z]+)*(\+[\.\-\dA-Za-z]+)?
@@ -80,7 +82,7 @@ public class VersionEncoder {
         {
             @Override
             public void encode(String part, BytesRefBuilder result) {
-                result.append((byte) 2); // mark as alphanumeric
+                result.append(ALPHANUMERIC_MARKER_BYTE); // mark as alphanumeric
                 result.append(new BytesRef(part));
                 result.append(DOT_SEPARATOR_BYTE);
             }
@@ -104,7 +106,7 @@ public class VersionEncoder {
         {
             @Override
             public void encode(String part, BytesRefBuilder result) {
-                result.append((byte) 2); // mark as alphanumeric
+                result.append(ALPHANUMERIC_MARKER_BYTE); // mark as alphanumeric
                 int pos = 0;
                 while (pos < part.length()) {
                     if (Character.isDigit(part.charAt(pos))) {
@@ -116,8 +118,8 @@ public class VersionEncoder {
                             pos++;
                         }
                         int length = pos - start;
-                        result.append((byte) 3); // mark that the following is a length byte for later decoding
-                        result.append((byte) length);
+                        result.append(NUMERIC_MARKER_BYTE); // ensure length byte does cause higher sort order comparing to other byte[]
+                        result.append((byte) (length | 0x80)); // add upper bit to mark as length
                         result.append(number);
                     } else {
                         result.append((byte) part.charAt(pos));
@@ -130,10 +132,10 @@ public class VersionEncoder {
             @Override
             public int decode(byte[] input, StringBuilder result, int pos) {
                 while (input[pos] != DOT_SEPARATOR_BYTE) {
-                    if (input[pos] != 3) {
+                    if (input[pos] != NUMERIC_MARKER_BYTE) {
                         result.append((char) input[pos++]);
                     } else {
-                        // skip also length byte
+                        // skip marker byte and length byte
                         pos +=2;
                     }
                 }
@@ -157,7 +159,7 @@ public class VersionEncoder {
         if (legalVersionString(versionString) == false) {
             throw new IllegalArgumentException("Illegal version string: " + versionString);
         }
-        // strip "build" suffix
+        // strip "build" suffix starting with "+"
         int buildSuffixStart = versionString.indexOf(BUILD_SEPARATOR);
         String buildSuffixPart = null;
         if (buildSuffixStart > 0) {
@@ -166,17 +168,20 @@ public class VersionEncoder {
         }
 
         // split LHS (dot separated versions) and pre-release part
-        String[] mainParts = versionString.split("-");
-        String[] lhsVersions = mainParts[0].split("\\.");
+        int preReleaseStart = versionString.indexOf("-");
+        String lhs = versionString;
+        if (preReleaseStart > 0) {
+            lhs = versionString.substring(0, preReleaseStart);
+        }
+        String[] lhsVersions = lhs.split("\\.");
         BytesRefBuilder brb = new BytesRefBuilder();
         for (String versionPart : lhsVersions) {
             encodeVersionPartNumeric(versionPart, brb, false);
         }
-        brb.append(LHS_FINISHED_BYTE);
         // encode whether version has pre-release parts
-        if (mainParts.length == 2) {
+        if (preReleaseStart > 0) {
             brb.append(PRERELESE_SEPARATOR_BYTE);  // versions with pre-release part sort before ones without
-            String[] preReleaseParts = mainParts[1].split("\\.");
+            String[] preReleaseParts = versionString.substring(preReleaseStart + 1).split("\\.");
             for (String preReleasePart : preReleaseParts) {
                 boolean isNumeric = preReleasePart.chars().allMatch(x -> Character.isDigit(x));
                 if (isNumeric) {
@@ -192,7 +197,7 @@ public class VersionEncoder {
         if (buildSuffixPart != null) {
             brb.append(new BytesRef(buildSuffixPart));
         }
-        System.out.println("encoding: " + brb.get());
+        System.out.println("encoded: " + brb.get());
         return brb.get();
     }
 
@@ -207,15 +212,15 @@ public class VersionEncoder {
      */
     private static void encodeVersionPartNumeric(String part, BytesRefBuilder result, boolean addMarker) {
         if (addMarker) {
-            result.append((byte) 1); // mark as numeric
+            result.append(NUMERIC_MARKER_BYTE); // mark as numeric
         }
-        result.append((byte) part.length());
+        result.append((byte) (0x80 | part.length())); // add upper bit to mark as length
         result.append(new BytesRef(part));
         result.append(DOT_SEPARATOR_BYTE);
     }
 
     private static int decodeVersionPartNumeric(byte[] input, StringBuilder result, int pos) {
-        int partLength = input[pos++];
+        int partLength = (input[pos++] & 0x7F); // remove upper bit
         result.append(new BytesRef(Arrays.copyOfRange(input, pos, pos + partLength)).utf8ToString());
         result.append(DOT_SEPARATOR);
         return pos + partLength + 1;
@@ -226,18 +231,18 @@ public class VersionEncoder {
         int pos = 0;
         byte[] bytes = version.bytes;
         StringBuilder sb = new StringBuilder();
-        while (bytes[pos] != LHS_FINISHED_BYTE) {
+        while (bytes[pos] != PRERELESE_SEPARATOR_BYTE && bytes[pos] != NO_PRERELESE_SEPARATOR_BYTE) {
             pos = decodeVersionPartNumeric(bytes, sb, pos);
         }
         sb.deleteCharAt(sb.length() - 1); // delete last dot
-        pos++;
+
         // decode whether version has pre-release part
         byte preReleaseFlag = bytes[pos++];
         if (preReleaseFlag == PRERELESE_SEPARATOR_BYTE) {
             sb.append(PRERELESE_SEPARATOR);
             while (pos < version.length && bytes[pos] != BUILD_SEPARATOR_BYTE) {
                   byte isNumeric = bytes[pos++];
-                  if (isNumeric == 1) {
+                  if (isNumeric == NUMERIC_MARKER_BYTE) {
                       pos = decodeVersionPartNumeric(bytes, sb, pos);
                   } else {
                       pos = mode.decode(bytes, sb, pos);
@@ -245,6 +250,8 @@ public class VersionEncoder {
             }
             sb.deleteCharAt(sb.length() - 1);
         }
+
+        // add build part if present
         if (pos < version.length && bytes[pos] == BUILD_SEPARATOR_BYTE) {
             sb.append(new BytesRef(Arrays.copyOfRange(version.bytes, pos, version.length)).utf8ToString());
         }

@@ -20,12 +20,13 @@
 package org.elasticsearch.index.mapper;
 
 import org.apache.lucene.util.BytesRef;
-import org.elasticsearch.index.mapper.VersionEncoder.AlphanumSortMode;
+import org.elasticsearch.index.mapper.VersionEncoder2.SortMode;
 import org.elasticsearch.test.ESTestCase;
 
+import java.util.Arrays;
 import java.util.List;
 
-import static org.elasticsearch.index.mapper.VersionEncoder.decodeVersion;
+import static org.elasticsearch.index.mapper.VersionEncoder2.decodeVersion;
 
 public class VersionEncoderTests extends ESTestCase {
 
@@ -51,6 +52,10 @@ public class VersionEncoderTests extends ESTestCase {
         assertTrue(encSemver("2.0.0-pre20201231z110026").compareTo(encSemver("2.0.0-pre227")) < 0);
     }
 
+    private BytesRef encSemver(String s) {
+        return VersionEncoder2.encodeVersion(s, SortMode.SEMVER);
+    };
+
     public void testDecodingSemver() {
         for (String version : List.of(
             "1",
@@ -62,13 +67,10 @@ public class VersionEncoderTests extends ESTestCase {
             "1-a1234.12.13278.beta",
             "1.0.0-beta+someBuildNumber-123456-open"
         )) {
-            assertEquals(version, decodeVersion(encSemver(version), AlphanumSortMode.SEMVER));
+            String decoded = decodeVersion(encSemver(version), SortMode.SEMVER);
+            assertEquals(version, decoded);
         }
     }
-
-    private BytesRef encSemver(String s) {
-        return VersionEncoder.encodeVersion(s, AlphanumSortMode.SEMVER);
-    };
 
     public void testEncodingOrderingNumerical() {
         assertTrue(encNumeric("1.0.0").compareTo(encNumeric("2.0.0")) < 0);
@@ -94,6 +96,69 @@ public class VersionEncoderTests extends ESTestCase {
     }
 
     private BytesRef encNumeric(String s) {
-        return VersionEncoder.encodeVersion(s, AlphanumSortMode.HONOUR_NUMERALS);
+        return VersionEncoder2.encodeVersion(s, SortMode.HONOUR_NUMERALS);
     };
+
+    public void testDecodingHonourNumeral() {
+        for (String version : List.of(
+            "1",
+            "1.1",
+            "1.0.0",
+            "1.2.3.4",
+            "1.0.0-alpha",
+            "1-alpha.11",
+            "1-a1234.12.13278.beta",
+            "1.0.0-beta+someBuildNumber-123456-open"
+        )) {
+            String decoded = decodeVersion(encSemver(version), SortMode.HONOUR_NUMERALS);
+            assertEquals(version, decoded);
+        }
+    }
+
+    /**
+     * test that encoding and decoding leads back to the same version string
+     */
+    public void testRandomRoundtrip() {
+        String versionString = randomVersionString();
+        assertEquals(versionString, decodeVersion(encSemver(versionString), SortMode.SEMVER));
+    }
+
+    private String randomVersionString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(randomIntBetween(0, 1000));
+        int releaseNumerals = randomIntBetween(0, 4);
+        for (int i = 0; i < releaseNumerals; i++) {
+            sb.append(".");
+            sb.append(randomIntBetween(0, 10000));
+        }
+        // optional pre-release part
+        if (randomBoolean()) {
+            sb.append("-");
+            int preReleaseParts = randomIntBetween(1, 5);
+            for (int i = 0; i < preReleaseParts; i++) {
+                if (randomBoolean()) {
+                    sb.append(randomIntBetween(0, 1000));
+                } else {
+                    int alphanumParts = 3;
+                    for (int j = 0; j < alphanumParts; j++) {
+                        if (randomBoolean()) {
+                            sb.append(randomAlphaOfLengthBetween(1, 2));
+                        } else {
+                            sb.append(randomIntBetween(1, 99));
+                        }
+                        if (rarely()) {
+                            sb.append(randomFrom(Arrays.asList("-")));
+                        }
+                    }
+                }
+                sb.append(".");
+            }
+            sb.deleteCharAt(sb.length() - 1);  // remove trailing dot
+        }
+        // optional build part
+        if (randomBoolean()) {
+            sb.append("+").append(randomAlphaOfLengthBetween(1,15));
+        }
+        return sb.toString();
+    }
 }
