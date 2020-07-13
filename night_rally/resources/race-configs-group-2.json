@@ -136,7 +136,12 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "defaults"
+                "car": "defaults",
+                "car-params": {
+                  "additional_cluster_settings": {
+                    "indexing_limits.memory.limit": "80%"
+                  }
+                }
               },
               {
                 "name": "pmc-append-4g-1node",
@@ -249,7 +254,12 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "defaults"
+                "car": "defaults",
+                "car-params": {
+                  "additional_cluster_settings": {
+                    "indexing_limits.memory.limit": "80%"
+                  }
+                }
               },
               {
                 "name": "pmc-append-4g-1node",
