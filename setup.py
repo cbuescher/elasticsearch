@@ -32,7 +32,7 @@ install_requires = [
     # License: MIT
     "jsonschema==3.1.1",
     # License: MIT
-    "tabulate==0.8.5",
+    "tabulate==0.8.7",
     # always use the latest version, these are certificate files...
     # License: MPL 2.0
     "certifi"
