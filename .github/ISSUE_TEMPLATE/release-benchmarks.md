@@ -24,20 +24,20 @@ The following parameter needs to be set for every build below:
 
 ### Builds
 
-The following URLs are provided with each release job. These builds will take you to a page in jenkins which contains a `proceed` button to confirm running the job. Please click the `proceed` button in order to actually run the job. 
+The following URLs are provided with each release job. These builds will take you to a page in jenkins which contains a `proceed` button to confirm running the job. Please click the `proceed` button in order to actually run the job. Once you click the proceed button, it will take you to a blank page. This is by design and if you visit the job page, you will see the job has been scheduled.
 
 - [ ] `MODE`: `release`, `RELEASE_LICENSE`: `oss` - triggered by `your user handle here`  as `link to all triggered builds here`
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
 - [ ] `MODE`: `release`, `RELEASE_LICENSE`: `basic` - triggered by `your user handle here`  as `link to all triggered builds here`
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release&RELEASE_LICENSE=basic&RUNTIME_JDK=bundled&VERSION=X.Y.Z
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release&RELEASE_LICENSE=basic&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release&RELEASE_LICENSE=basic&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release&RELEASE_LICENSE=basic&RUNTIME_JDK=bundled&VERSION=X.Y.Z
 - [ ] `MODE`: `release`, `RELEASE_LICENSE`: `trial`, `RELEASE_X_PACK_COMPONENTS`: `security` - triggered by `your user handle here`  as `link to all triggered builds here`
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release&RELEASE_LICENSE=trial&RELEASE_X_PACK_COMPONENTS=security&RUNTIME_JDK=bundled&VERSION=X.Y.Z
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release&RELEASE_LICENSE=trial&RELEASE_X_PACK_COMPONENTS=security&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release&RELEASE_LICENSE=trial&RELEASE_X_PACK_COMPONENTS=security&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release&RELEASE_LICENSE=trial&RELEASE_X_PACK_COMPONENTS=security&RUNTIME_JDK=bundled&VERSION=X.Y.Z
 - [ ] `MODE`: `release:docker` (everything else default i.e. `oss`) - triggered by `your user handle here`  as `link to all triggered builds here`
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release%3Adocker&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release%3Adocker&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release%3Adocker&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release%3Adocker&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
 - [ ] `MODE`: `release:encryption-at-rest`, runtime_jdk: `bundled` (everything else default i.e. `oss`) - triggered by `your user handle here`  as `link to all triggered builds here`
- - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release%3Aencryption-at-rest&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
-- https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release%3Aencryption-at-rest&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/buildWithParameters?MODE=release%3Aencryption-at-rest&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
+     - https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/buildWithParameters?MODE=release%3Aencryption-at-rest&RELEASE_LICENSE=oss&RUNTIME_JDK=bundled&VERSION=X.Y.Z
