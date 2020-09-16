@@ -26,7 +26,7 @@ install_requires = [
     "ansible==2.9.6",
     # License: Apache 2.0
     # transitive dependency urllib3: MIT
-    "elasticsearch==7.8.0",
+    "elasticsearch==7.9.1",
     # required by hashi_vault ansible plugin
     "hvac==0.9.1",
     # License: MIT
@@ -39,7 +39,8 @@ install_requires = [
 ]
 
 tests_require = [
-    "pytest==5.2.0",
+    "pytest==5.4.0",
+    "pytest-asyncio==0.14.0",
     "pytest-cov"
 ]
 
