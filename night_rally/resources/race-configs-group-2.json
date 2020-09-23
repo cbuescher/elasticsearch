@@ -136,9 +136,7 @@
                 },
                 "car": "defaults",
                 "car-params": {
-                  "additional_cluster_settings": {
-                    "indexing_pressure.memory.limit": "80%"
-                  }
+                  "indexing_pressure_memory_limit": "80%"
                 }
               },
               {
@@ -254,9 +252,7 @@
                 },
                 "car": "defaults",
                 "car-params": {
-                  "additional_cluster_settings": {
-                    "indexing_pressure.memory.limit": "80%"
-                  }
+                  "indexing_pressure_memory_limit": "80%"
                 }
               },
               {
