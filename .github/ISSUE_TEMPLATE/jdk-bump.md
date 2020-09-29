@@ -24,7 +24,6 @@ JDK $VERSION should be release on date ([source](https://openjdk.java.net/projec
 ### Microbenchmarks
 
 * [x] Create an infra PR to add the new JDK for the microbenchmark machine - e.g. https://github.com/elastic/infra/pull/19281 (ensure that infra executes the Ansible commands below against the machines so the JDK is present there). 
-* [x] Create an infra PR to bump the JDK in microbenchmark builds - e.g. https://github.com/elastic/infra/pull/19281
 
 ### Ansible
 
