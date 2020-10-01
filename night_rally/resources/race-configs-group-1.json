@@ -263,6 +263,27 @@
                 "car": "4gheap"
               },
               {
+                "name": "geopoint-append-4g-1node-with-jfr",
+                "label": "add-4g-jfr",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 0
+                },
+                "car": "4gheap",
+                "car-params": {
+                  "additional_java_settings": [
+                    "-XX:+UnlockDiagnosticVMOptions",
+                    "-XX:+DebugNonSafepoints",
+                    "-XX:FlightRecorderOptions=memorysize=256M",
+                    "-XX:StartFlightRecording=disk=true,name=elasticsearch-continuous,maxsize=256M",
+                    "-XX:+StartAttachListener"
+                  ]
+                }
+              },
+              {
                 "name": "geopoint-update-4g-1node",
                 "label": "update-4g",
                 "charts": [
