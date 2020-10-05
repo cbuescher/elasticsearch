@@ -172,8 +172,8 @@ def install_night_rally_test_script(base_ip, target_node_ip_addresses)
     #!/usr/bin/env bash
     set -eo pipefail
     source /var/lib/jenkins/env_test_script
-    night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-1.json" --effective-start-date="" --mode="release" --version="6.8.7" --release-license="oss" --release-x-pack-components="" --runtime-jdk="14"
-    night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-2.json" --effective-start-date="" --mode="release" --version="6.8.7" --release-license="oss" --release-x-pack-components="" --runtime-jdk="14"
+    night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-1.json" --effective-start-date="" --mode="release" --version="6.8.7" --release-license="oss" --release-x-pack-components="" --runtime-jdk="15"
+    night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-2.json" --effective-start-date="" --mode="release" --version="6.8.7" --release-license="oss" --release-x-pack-components="" --runtime-jdk="15"
     EOF2
 
     cat >/var/lib/jenkins/test_longrunning.sh <<"EOF2"
@@ -298,7 +298,7 @@ Vagrant.configure(2) do |config|
 
       # To allow building Elasticsearch (nightlies) install the minimum set of java versions required on target nodes
       if node != nodes.first && install_build_requirements
-        node_config.vm.provision "shell", inline: install_java(14)
+        node_config.vm.provision "shell", inline: install_java(15)
       end
 
       ip_address = ip_address.succ
