@@ -4,29 +4,6 @@
     "placement": 0,
     "flavors": [
       {
-        "name": "oss",
-        "licenses": [
-          {
-            "name": "oss",
-            "configurations": [
-              {
-                "name": "nested-append-4g-1node",
-                "label": "add-4g",
-                "charts": [
-                  "indexing",
-                  "query",
-                  "gc",
-                  "io",
-                  "segment_memory"
-                ],
-                "challenge": "nested-search-challenge",
-                "car": "4gheap"
-              }
-            ]
-          }
-        ]
-      },
-      {
         "name": "default",
         "licenses": [
           {
@@ -56,28 +33,6 @@
     "placement": 0,
     "flavors": [
       {
-        "name": "oss",
-        "licenses": [
-          {
-            "name": "oss",
-            "configurations": [
-              {
-                "name": "noaa-append-defaults-1node",
-                "label": "add-defaults",
-                "charts": [
-                  "query",
-                  "gc",
-                  "io",
-                  "segment_memory"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "defaults"
-              }
-            ]
-          }
-        ]
-      },
-      {
         "name": "default",
         "licenses": [
           {
@@ -105,122 +60,6 @@
     "track": "pmc",
     "placement": 1,
     "flavors": [
-      {
-        "name": "oss",
-        "licenses": [
-          {
-            "name": "oss",
-            "configurations": [
-              {
-                "name": "pmc-append-4g-3nodes",
-                "label": "add-4g-3nodes",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts",
-                "track-params": {
-                  "number_of_replicas": 1
-                },
-                "car": "4gheap",
-                "node-count": 3
-              },
-              {
-                "name": "pmc-append-defaults-1node",
-                "label": "add-defaults",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts-index-only",
-                "track-params": {
-                  "number_of_replicas": 0
-                },
-                "car": "defaults",
-                "car-params": {
-                  "indexing_pressure_memory_limit": "80%"
-                }
-              },
-              {
-                "name": "pmc-append-4g-1node",
-                "label": "add-4g",
-                "charts": [
-                  "indexing",
-                  "query",
-                  "gc",
-                  "io",
-                  "segment_memory"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "4gheap"
-              },
-              {
-                "name": "pmc-nio-4g-3nodes",
-                "label": "nio-4g-3nodes",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts-index-only",
-                "track-params": {
-                  "number_of_replicas": 1
-                },
-                "car": [
-                  "4gheap",
-                  "unpooled"
-                ],
-                "car-params": {
-                  "additional_cluster_settings": {
-                    "cache.recycler.page.limit.heap": "13.5%",
-                    "cache.recycler.page.weight.bytes": 2
-                  }
-                },
-                "plugins": "transport-nio:transport+http",
-                "node-count": 3
-              },
-              {
-                "name": "pmc-nio-4g-1node",
-                "label": "nio-4g-1node",
-                "charts": [
-                  "indexing",
-                  "query"
-                ],
-                "challenge": "append-no-conflicts",
-                "track-params": {
-                  "number_of_replicas": 0
-                },
-                "car": [
-                  "4gheap",
-                  "unpooled"
-                ],
-                "car-params": {
-                  "additional_cluster_settings": {
-                    "cache.recycler.page.limit.heap": "13.5%",
-                    "cache.recycler.page.weight.bytes": 2
-                  }
-                },
-                "plugins": "transport-nio:transport+http",
-                "node-count": 1
-              },
-              {
-                "name": "pmc-appendsorted-4g-1node",
-                "label": "add-sorted-4g",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-sorted-no-conflicts",
-                "car": "4gheap"
-              },
-              {
-                "name": "pmc-update-4g-1node",
-                "label": "update-4g",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-fast-with-conflicts",
-                "car": "4gheap"
-              }
-            ]
-          }
-        ]
-      },
       {
         "name": "default",
         "licenses": [
@@ -361,89 +200,6 @@
     "track": "http_logs",
     "placement": 2,
     "flavors": [
-      {
-        "name": "oss",
-        "licenses": [
-          {
-            "name": "oss",
-            "configurations": [
-              {
-                "name": "http_logs-append-4g-3nodes",
-                "label": "3nodes-4g",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts-index-only",
-                "track-params": {
-                  "number_of_replicas": 1
-                },
-                "car": "4gheap",
-                "node-count": 3
-              },
-              {
-                "name": "http_logs-append-defaults-1node",
-                "label": "defaults",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts-index-only",
-                "track-params": {
-                  "number_of_replicas": 0
-                },
-                "car": "defaults"
-              },
-              {
-                "name": "http_logs-append-4g-1node",
-                "label": "4g",
-                "charts": [
-                  "indexing",
-                  "query",
-                  "gc",
-                  "io",
-                  "segment_memory"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "4gheap",
-                "exclude-tasks": "force-merge-1-seg,refresh-after-force-merge-1-seg,desc-sort-timestamp-after-force-merge-1-seg,asc-sort-timestamp-after-force-merge-1-seg"
-              },
-              {
-                "name": "http_logs-no-src-1node",
-                "label": "no-src-4g",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts-index-only",
-                "track-params": {
-                  "source_enabled": false
-                },
-                "car": "4gheap"
-              },
-              {
-                "name": "http_logs-appendsorted-4g-1node",
-                "label": "sorted-4g",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-sorted-no-conflicts",
-                "car": "4gheap"
-              },
-              {
-                "name": "http_logs-grok-no-src-1node",
-                "label": "no-src-4g-grok",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-index-only-with-ingest-pipeline",
-                "track-params": {
-                  "source_enabled": false,
-                  "ingest_pipeline": "grok"
-                },
-                "car": "4gheap"
-              }
-            ]
-          }
-        ]
-      },
       {
         "name": "default",
         "licenses": [

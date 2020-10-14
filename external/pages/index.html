@@ -33,7 +33,7 @@ var charts = {
     this.currentSpec = this.findSelectedSpec(uiState);
     this.dateRange = this.findDateRange();
     this.currentChartType = this.chartType();
-    this.currentDistributionType = this.distributionType();
+    this.currentDistributionType = "default";
 
     this.buildMenu(this.currentSpec);
     this.buildOverview();
@@ -55,9 +55,8 @@ var charts = {
     if (uiState.length >= 2) {
         $("#checkToggleCompare").prop('checked', uiState[1] === "release");
     }
-    if (uiState.length >= 4) {
-        $("#dateRangeSelector").val(uiState[3]);
-        $("#checkSelectDistribution").val(uiState[2]);
+    if (uiState.length >= 3) {
+        $("#dateRangeSelector").val(uiState[2]);
     }
   },
 
@@ -100,9 +99,6 @@ var charts = {
     $("#checkToggleCompare").click(function() {
         charts.chartTypeChanged();
     });
-    $("#checkSelectDistribution").change(function() {
-        charts.distributionTypeChanged();
-    });
     $("#index-selector").click(function() {
         charts.selectMethodology();
     });
@@ -115,11 +111,6 @@ var charts = {
 
   chartTypeChanged: function() {
     charts.currentChartType = charts.chartType();
-    charts.render();
-  },
-
-  distributionTypeChanged: function() {
-    charts.currentDistributionType = charts.distributionType();
     charts.render();
   },
 
@@ -153,10 +144,6 @@ var charts = {
     }
   },
 
-  distributionType: function() {
-    return $("#checkSelectDistribution").children("option:selected").val().toLowerCase();
-  },
-
   activateSpec: function(spec) {
     this.currentSpec = spec;
     this.buildMenu(this.currentSpec);
@@ -174,7 +161,7 @@ var charts = {
   render: function() {
     $('.methodology').hide();
     $('.tracks').hide();
-    $("#nightlyOptionsGroup").hide();
+    $("#dateRangeGroup").hide();
     $("#releaseLegend").hide();
 
     if (charts.currentSpec != null) {
@@ -184,7 +171,7 @@ var charts = {
         if (charts.currentChartType === "nightly") {
           hash = hash + "/nightly/" + charts.currentDistributionType + "/" + charts.dateRange;
           var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards[charts.currentDistributionType]);
-          $("#nightlyOptionsGroup").show();
+          $("#dateRangeGroup").show();
           $("#dashboard-url").attr("href", nightlyUrl);
           charts.showChart(nightlyUrl, charts.dateRange);
         } else {
@@ -252,14 +239,7 @@ body,html,.main-display-area,.col-md-12 {
         <div class="checkbox">
           <label><input type="checkbox" id="checkToggleCompare"> Show release charts</label>
         </div>
-        <div class="form-group" id="nightlyOptionsGroup">
-          <div class="col-md-4">
-            <label for="sel1"> Distribution flavor for nightly</label>
-            <select class="form-control" id="checkSelectDistribution"</select>
-            <option value="default" selected>Default</option>
-            <option value="oss">OSS</option>
-            </select>
-          </div>
+        <div class="form-group" id="dateRangeGroup">
           <div class="col-md-4">
             <label for="dateRangeSelector" class="control-label"> Date range for nightly</label>
             <select class="form-control" id="dateRangeSelector">
@@ -430,7 +410,6 @@ body,html,.main-display-area,.col-md-12 {
             "track": "Geonames",
             "description": "for evaluating the performance of structured data",
             "nightly_dashboards": {
-                "oss": "2f0fc820-775f-4551-b2c1-fa245dd9291f",
                 "default": "2dfc906a-11da-493e-8001-baa3bae158a9",
             },
             "release_dashboard": "9a694d9e-3031-405a-8a9a-3d3269ec245e"
@@ -440,7 +419,6 @@ body,html,.main-display-area,.col-md-12 {
             "track": "Geopoint",
             "description": "for evaluating the performance of geo queries",
             "nightly_dashboards": {
-              "oss": "033487df-f6cc-45a9-8770-80a20a08ced3",
               "default": "88b4bb7f-4e2a-4607-8f55-0d3e920a92f0",
             },
             "release_dashboard": "de207531-3823-41ae-945d-21bafef2fa58"
@@ -450,7 +428,6 @@ body,html,.main-display-area,.col-md-12 {
             "track": "Percolator",
             "description": "for evaluating the performance of percolation queries",
             "nightly_dashboards": {
-                "oss": "069821c3-c3db-43bb-8eb6-fb9d3906e381",
                 "default": "7baeecea-229c-4284-a00e-00d85d234d28"
             },
             "release_dashboard": "fbc69688-9eb4-4ccc-99cc-aadef449329f"
@@ -460,7 +437,6 @@ body,html,.main-display-area,.col-md-12 {
             "track": "PMC",
             "description": "for evaluating the performance of full text search",
             "nightly_dashboards": {
-                "oss": "41d16894-0faa-4720-ba93-028bf68009c0",
                 "default": "01db78da-402d-4462-9f6d-d319ade6da67"
             },
             "release_dashboard": "e4428933-4b08-4dc3-a825-21ede989bc85"
@@ -470,7 +446,6 @@ body,html,.main-display-area,.col-md-12 {
             "track": "NYC taxis",
             "description": "for evaluating the performance for highly structured data",
             "nightly_dashboards": {
-                "oss": "6c524c79-88bc-4f7a-84f8-07058998b74c",
                 "default": "06c7cf83-c9f9-4466-8d9e-4b34b82841bb"
             },
             "release_dashboard": "3b1f0cc1-0e6e-443b-9dcd-abc58bfab0be"
@@ -480,7 +455,6 @@ body,html,.main-display-area,.col-md-12 {
             "track": "Nested",
             "description": "for evaluating the performance for nested documents",
             "nightly_dashboards": {
-              "oss": "823cf28d-4ebb-4d11-a3fc-02e0fd9e2fac",
               "default": "e76cda35-4e40-4bf1-97ca-c5b5c9c8384f"
             },
             "release_dashboard": "3601f1a0-c575-4795-a7a3-19ed5df71c10"
@@ -490,7 +464,6 @@ body,html,.main-display-area,.col-md-12 {
             "track": "HTTP Logs",
             "description": "for evaluating the performance of (Web) server logs",
             "nightly_dashboards": {
-                "oss": "a95329ca-8db2-4134-9893-9ad3c51f552a",
                 "default": "d02cc8e5-3f42-482a-a3d9-d09956db3040"
             },
             "release_dashboard": "41eb76c6-30a9-425a-8cf9-436dc3f1782c"
@@ -500,7 +473,6 @@ body,html,.main-display-area,.col-md-12 {
             "track": "noaa",
             "description": "for evaluating the performance of range fields",
             "nightly_dashboards": {
-                "oss": "25134ddc-24c1-40e7-aaee-8dceae813bd1",
                 "default": "3cd44b72-dd10-4e0b-ad76-e9a2b38cd144"
             },
             "release_dashboard": "83e5d5bb-40a0-4693-8431-a2739279add6"
