@@ -923,11 +923,11 @@ def parse_args():
     parser.add_argument(
         "--release-license",
         help="Specify license to use for release benchmarks.",
-        default="oss")
+        default="basic")
     parser.add_argument(
         "--release-x-pack-components",
         help="Comma separated list of x-pack components to use with release or adhoc benchmarks; example: security.",
-        default="oss")
+        default="basic")
     parser.add_argument(
         "--runtime-jdk",
         help="The major version of the runtime JDK to use.",
@@ -1098,7 +1098,6 @@ def main():
             common_cli_params.race_configs_id,
             args.dry_run,
             environment="release"
-
         )
 
         previous = race_meta_data("nightly",

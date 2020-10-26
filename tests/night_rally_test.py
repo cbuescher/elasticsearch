@@ -92,7 +92,7 @@ class WaitUntilPortFreeTests(unittest.TestCase):
 class CommonCliParamsTests(unittest.TestCase):
     default_mode = "nightly"
     default_version = "master"
-    default_release_license = "oss"
+    default_release_license = "basic"
     default_release_x_pack_components = ""
 
     def test_parses_defaults(self):
@@ -113,7 +113,7 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertFalse(common_cli_params.is_docker)
         self.assertFalse(common_cli_params.release_params)
 
-        self.assertEqual("bare-oss", common_cli_params.setup)
+        self.assertEqual("bare-basic", common_cli_params.setup)
         self.assertEqual("nightly", common_cli_params.configuration_name)
         self.assertEqual("master", common_cli_params.version)
         self.assertFalse(common_cli_params.release_params)
@@ -137,10 +137,10 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertFalse(common_cli_params.is_docker)
 
         self.assertTrue(common_cli_params.release_params)
-        self.assertEqual("bare-oss", common_cli_params.setup)
+        self.assertEqual("bare-basic", common_cli_params.setup)
         self.assertEqual("release", common_cli_params.configuration_name)
         self.assertEqual("6.6.0", common_cli_params.version)
-        self.assertEqual({"license": "oss"}, common_cli_params.release_params)
+        self.assertEqual({"license": "basic"}, common_cli_params.release_params)
         self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
 
     def test_parses_release_with_security_6_5_3(self):
@@ -203,7 +203,7 @@ class CommonCliParamsTests(unittest.TestCase):
             mode="release:encryption-at-rest",
             configuration_name="release",
             version="6.2.1",
-            release_license="oss",
+            release_license="basic",
             release_x_pack_components=CommonCliParamsTests.default_release_x_pack_components,
             race_configs_id=race_configs_id
         )
@@ -214,11 +214,11 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertFalse(common_cli_params.is_docker)
 
         self.assertTrue(common_cli_params.release_params)
-        self.assertEqual("ear-oss", common_cli_params.setup)
+        self.assertEqual("ear-basic", common_cli_params.setup)
         self.assertEqual("release", common_cli_params.configuration_name)
         self.assertEqual("6.2.1", common_cli_params.version)
         self.assertEqual({
-            "license": "oss"
+            "license": "basic"
             },
             common_cli_params.release_params
         )
@@ -231,7 +231,7 @@ class CommonCliParamsTests(unittest.TestCase):
             mode="release:docker",
             configuration_name="release",
             version="6.2.2",
-            release_license="oss",
+            release_license="basic",
             release_x_pack_components=CommonCliParamsTests.default_release_x_pack_components,
             race_configs_id=race_configs_id
         )
@@ -242,11 +242,11 @@ class CommonCliParamsTests(unittest.TestCase):
         self.assertTrue(common_cli_params.is_docker)
 
         self.assertTrue(common_cli_params.release_params)
-        self.assertEqual("docker-oss", common_cli_params.setup)
+        self.assertEqual("docker-basic", common_cli_params.setup)
         self.assertEqual("release", common_cli_params.configuration_name)
         self.assertEqual("6.2.2", common_cli_params.version)
         self.assertTrue({
-            "license": "oss"
+            "license": "basic"
             },
             common_cli_params.release_params
         )
@@ -258,7 +258,7 @@ class CommonCliParamsTests(unittest.TestCase):
                 mode="release:docker",
                 configuration_name="release",
                 version="6.2.2",
-                release_license="oss",
+                release_license="basic",
                 release_x_pack_components="security",
                 race_configs_id=os.path.basename(get_random_race_configs_id())
             )
@@ -384,10 +384,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-append-1node",
@@ -412,8 +412,8 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"8\" "
+                "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"8\" "
                 "--exclude-tasks=\"delete,type:search\" --pipeline=\"from-sources\" "
                 "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
             ]
@@ -430,10 +430,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-append-1node",
@@ -458,8 +458,8 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:oss\" --runtime-jdk=\"13\" "
+                "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:basic\" --runtime-jdk=\"13\" "
                 "--pipeline=\"from-sources\" "
                 "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
             ]
@@ -808,10 +808,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -832,9 +832,9 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 1, 1)
-        release_params= OrderedDict({"license": "oss"})
+        release_params = OrderedDict({"license": "basic"})
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss", race_configs_id=race_configs_id)]
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
         cmd = night_rally.ReleaseCommand(params, release_params, "5.3.0")
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         self.assertEqual(2, len(system_call.calls))
@@ -843,14 +843,14 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare-oss,race-configs-id:{},license:oss\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare-basic,race-configs-id:{},license:basic\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"5.3.0\" "
                 "--pipeline=\"from-distribution\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:bare-oss,race-configs-id:{},license:oss\" "
+                "--user-tag=\"name:geonames-4g,setup:bare-basic,race-configs-id:{},license:basic\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"5.3.0\" "
                 "--pipeline=\"from-distribution\"".format(race_configs_id)
             ]
@@ -1139,10 +1139,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -1159,9 +1159,9 @@ class NightRallyTests(unittest.TestCase):
         ]
 
         start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "oss"})
+        release_params = OrderedDict({"license": "basic"})
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss",race_configs_id=race_configs_id)]
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
         cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="7.0.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -1171,9 +1171,9 @@ class NightRallyTests(unittest.TestCase):
                 'rally --skip-update --configuration-name="release" --quiet '
                 '--target-host="localhost:9200" --effective-start-date="2016-01-01 00:00:00" '
                 '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
-                '--car="defaults,unpooled" '
+                '--car="defaults,unpooled,basic-license" '
                 '--client-options="timeout:240" '
-                '--user-tag="name:geonames-defaults,setup:bare-oss,race-configs-id:{},license:oss" '
+                '--user-tag="name:geonames-defaults,setup:bare-basic,race-configs-id:{},license:basic" '
                 '--runtime-jdk="8" --elasticsearch-plugins="transport-nio:transport+http" '
                 '--distribution-version="7.0.0" --pipeline="from-distribution"'.format(race_configs_id)
             ]
@@ -1269,10 +1269,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -1288,9 +1288,9 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        release_params = {"license": "oss"}
+        release_params = {"license": "basic"}
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-oss", race_configs_id=race_configs_id)]
+        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
         # 6.2.0 does not have transport-nio available
         cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="6.2.0")
 
@@ -1306,10 +1306,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -1329,9 +1329,9 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "oss"})
+        release_params = OrderedDict({"license": "basic"})
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "docker-oss", race_configs_id=race_configs_id)]
+        params = [night_rally.StandardParams("release", start_date, 8, "docker-basic", race_configs_id=race_configs_id)]
         cmd = night_rally.DockerCommand(params, release_params, "5.6.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -1341,7 +1341,7 @@ class NightRallyTests(unittest.TestCase):
                 'rally --skip-update --configuration-name="release" --quiet --target-host="localhost:9200" '
                 '--effective-start-date="2016-01-01 00:00:00" --track-repository=\"default\" --track="geonames" '
                 '--challenge="append-no-conflicts" --car="defaults" --client-options="timeout:240" '
-                "--user-tag=\"name:geonames-defaults,setup:docker-oss,race-configs-id:{},license:oss\" "
+                "--user-tag=\"name:geonames-defaults,setup:docker-basic,race-configs-id:{},license:basic\" "
                 '--runtime-jdk="8" --distribution-version="5.6.0" '
                 '--pipeline="docker" --car-params="{{\\"additional_cluster_settings\\": '
                 '{{\\"xpack.security.enabled\\": \\"false\\", \\"xpack.ml.enabled\\": \\"false\\", '
@@ -1350,7 +1350,7 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
                 "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:docker-oss,race-configs-id:{},license:oss\" "
+                "--user-tag=\"name:geonames-4g,setup:docker-basic,race-configs-id:{},license:basic\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"5.6.0\" "
                 "--pipeline=\"docker\" --car-params=\"{{\\\"additional_cluster_settings\\\": "
                 "{{\\\"xpack.security.enabled\\\": \\\"false\\\", \\\"xpack.ml.enabled\\\": \\\"false\\\", "
@@ -1370,10 +1370,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -1393,9 +1393,9 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "oss"})
+        release_params = OrderedDict({"license": "basic"})
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "docker-oss", race_configs_id=race_configs_id)]
+        params = [night_rally.StandardParams("release", start_date, 8, "docker-basic", race_configs_id=race_configs_id)]
         cmd = night_rally.DockerCommand(params, release_params, "6.3.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -1404,15 +1404,15 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:docker-oss,race-configs-id:{},license:oss\" "
+                "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-defaults,setup:docker-basic,race-configs-id:{},license:basic\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"6.3.0\" "
                 "--pipeline=\"docker\"".format(race_configs_id),
 
                 "rally --skip-update --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:docker-oss,race-configs-id:{},license:oss\" "
+                "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-4g,setup:docker-basic,race-configs-id:{},license:basic\" "
                 "--runtime-jdk=\"8\" --distribution-version=\"6.3.0\" "
                 "--pipeline=\"docker\"".format(race_configs_id)
             ]
@@ -1429,10 +1429,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -1454,9 +1454,9 @@ class NightRallyTests(unittest.TestCase):
             }
         ]
         start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "oss"})
+        release_params = OrderedDict({"license": "basic"})
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "docker-oss", race_configs_id=race_configs_id)]
+        params = [night_rally.StandardParams("release", start_date, 8, "docker-basic", race_configs_id=race_configs_id)]
         cmd = night_rally.DockerCommand(params, release_params, "7.3.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
@@ -1472,10 +1472,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -1492,10 +1492,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "percolator",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "percolator-4g",
@@ -1520,14 +1520,14 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare,license:basic\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources\" --revision=\"@2016-10-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-10-01 00:00:00\" --track-repository=\"default\" --track=\"percolator\" "
-                "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:percolator-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:percolator-4g,setup:bare,license:basic\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources\" --revision=\"@2016-10-01T00:00:00Z\""
             ]
             ,
@@ -1542,10 +1542,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -1576,8 +1576,8 @@ class NightRallyTests(unittest.TestCase):
                 "rally --skip-update --telemetry=\"jfr,gc,jit\" --telemetry-params=\"recording-template:profile\" "
                 "--configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare,license:basic\" --runtime-jdk=\"8\" "
                 "--pipeline=\"from-sources\" --revision=\"@2016-01-01T00:00:00Z\""
             ]
             ,
@@ -1592,10 +1592,10 @@ class NightRallyTests(unittest.TestCase):
                 "track": "geonames",
                 "flavors": [
                     {
-                        "name": "oss",
+                        "name": "default",
                         "licenses": [
                             {
-                                "name": "oss",
+                                "name": "basic",
                                 "configurations": [
                                     {
                                         "name": "geonames-defaults",
@@ -1636,21 +1636,21 @@ class NightRallyTests(unittest.TestCase):
             [
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"defaults\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-defaults,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-defaults,setup:bare,license:basic\" --runtime-jdk=\"8\" "
                 "--telemetry=\"jfr,gc,jit\" --telemetry-params=\"{\\\"recording-template\\\": \\\"profile\\\"}\" "
                 "--pipeline=\"from-sources\" --revision=\"@2016-01-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-4g,setup:bare,license:oss\" --runtime-jdk=\"8\" "
+                "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-4g,setup:bare,license:basic\" --runtime-jdk=\"8\" "
                 "--telemetry=\"gc\" --pipeline=\"from-sources\" --revision=\"@2016-01-01T00:00:00Z\"",
 
                 "rally --skip-update --configuration-name=\"nightly\" --quiet --target-host=\"localhost:9200\" "
                 "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-                "--challenge=\"append-no-conflicts\" --car=\"8gheap\" --client-options=\"timeout:240\" "
-                "--user-tag=\"name:geonames-8g,setup:bare,license:oss\" --runtime-jdk=\"8\" --on-error=\"abort\" "
+                "--challenge=\"append-no-conflicts\" --car=\"8gheap,basic-license\" --client-options=\"timeout:240\" "
+                "--user-tag=\"name:geonames-8g,setup:bare,license:basic\" --runtime-jdk=\"8\" --on-error=\"abort\" "
                 "--pipeline=\"from-sources\" --revision=\"@2016-01-01T00:00:00Z\"",
             ]
             ,

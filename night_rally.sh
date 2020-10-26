@@ -42,7 +42,7 @@ IN_VAGRANT=${IN_VAGRANT:NO}
 MODE="nightly"
 TEST_MODE=${TEST_MODE:NO}
 VERSION="master"
-RELEASE_LICENSE=${RELEASE_LICENSE:-oss}
+RELEASE_LICENSE=${RELEASE_LICENSE:-basic}
 # only needed for ad-hoc benchmarks
 REVISION="latest"
 RUNTIME_JDK=""
