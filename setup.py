@@ -40,8 +40,7 @@ install_requires = [
 
 tests_require = [
     "pytest==5.4.0",
-    "pytest-asyncio==0.14.0",
-    "pytest-cov"
+    "pytest-asyncio==0.14.0"
 ]
 
 python_version_classifiers = ["Programming Language :: Python :: {}.{}".format(major, minor)
