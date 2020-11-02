@@ -797,7 +797,7 @@ def deactivate_outdated_results(effective_start_date, configuration_name, releas
         from night_rally import client
         es = client.create_client(configuration_name)
         es.indices.refresh(index="rally-results-*")
-        res = es.update_by_query(index="rally-results-*", body=body, size=10000)
+        res = es.update_by_query(index="rally-results-*", body=body)
         logger.info("Result: %s" % res)
 
 
