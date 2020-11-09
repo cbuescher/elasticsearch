@@ -299,9 +299,17 @@ export FIXTURES=drop-caches,trim,initialize-data-disk,encryption-at-rest
 
 and running `./test_release.sh` will cause all these fixtures to be executed, simulating the expected behavior from the Jenkins job.
 
-## Common issues with the bare metal environments
+## Common issues with the bare metal environments (Hetzner)
 
 The current bare metal environments are documented in [42.md](42.md).
+
+### Accessing the admin UI of Hetzner
+
+We have access to the [admin UI](https://accounts.hetzner.com/login) of Hetzner. This is useful, for example, to open issues to replace faulty disks, order new hardware (after management approval) etc.
+
+username: `vault read -field=admin_email secret/infra/hetzner`
+password: `vault read -field=password secret/infra/hetzner`
+2FA code: `vault read -field=code totp/code/hetzner`
 
 ### Swapping network public/private NIC device names after re-bootstrapping the OS
 
