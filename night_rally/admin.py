@@ -35,7 +35,7 @@ def list_races(es, args):
                             "race-timestamp": {
                                 "gte": from_date,
                                 "lte": to_date,
-                                "format": "yyyyMMdd"
+                                "format": "basic_date"
                             }
                         }
                     }
