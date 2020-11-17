@@ -334,5 +334,30 @@
         ]
       }
     ]
+  },
+  {
+    "track": "eql",
+    "placement": 1,
+    "flavors": [
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "basic",
+            "configurations": [
+              {
+                "name": "eql-16g-1node",
+                "label": "add-16g",
+                "charts": [
+                  "query"
+                ],
+                "challenge": "default",
+                "car": "16gheap"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]

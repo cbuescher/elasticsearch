@@ -252,6 +252,9 @@ class ReleaseCommand(DistributionBasedCommand):
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if major < 6 and "sorted" in race_config.challenge:
             return False
+        # EQL is available from 7.10.0 onwards
+        if int(self.distribution_version[0]) < 7:
+            return race_config.track != "eql"
         return True
 
 
@@ -286,6 +289,9 @@ class DockerCommand(BaseCommand):
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if int(self.distribution_version[0]) < 6:
             return "sorted" not in race_config.challenge
+        # EQL is available from 7.10.0 onwards
+        if int(self.distribution_version[0]) < 7:
+            return race_config.track != "eql"
         return True
 
 
