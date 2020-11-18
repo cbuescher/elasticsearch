@@ -8,13 +8,13 @@
   <meta name="author" content="">
   <link rel="shortcut icon" href="assets/favicon.ico">
 
-  <title>Elasticsearch Benchmarks</title>
+  <title>Elasticsearch Benchmarks [Incubating]</title>
 
   <!-- Bootstrap core CSS -->
-  <link href="assets/css/Supernice.css" rel="stylesheet">
+  <link href="../assets/css/Supernice.css" rel="stylesheet">
 
   <!-- Custom styles for this template -->
-  <link href="assets/css/navbar-fixed-top.css" rel="stylesheet">
+  <link href="../assets/css/navbar-fixed-top.css" rel="stylesheet">
 
   <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!--[if lt IE 9]>
@@ -216,7 +216,7 @@ body,html,.main-display-area,.col-md-12 {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a id="index-selector" class="navbar-brand" href="#">Elasticsearch Benchmarks</a>
+      <a id="index-selector" class="navbar-brand" href="#">Elasticsearch Benchmarks (Incubating)</a>
     </div>
     <div class="navbar-collapse collapse">
       <ul id="navigation-container" class="nav navbar-nav">
@@ -401,81 +401,18 @@ body,html,.main-display-area,.col-md-12 {
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-<script src="assets/js/bootstrap.min.js"></script>
+<script src="../assets/js/bootstrap.min.js"></script>
 <script>
   $(document).ready(function() {
     charts.init([
         {
-            "id": "geonames",
-            "track": "Geonames",
-            "description": "for evaluating the performance of structured data",
+            "id": "eql",
+            "track": "EQL",
+            "description": "for evaluating the performance of EQL",
             "nightly_dashboards": {
-                "default": "72825286-179d-4ec2-9322-6bb1bc7639cb",
+                "default": "ee7bdacd-56d5-48ec-a765-f8b5183885b9"
             },
-            "release_dashboard": "9a694d9e-3031-405a-8a9a-3d3269ec245e"
-        },
-        {
-            "id": "geopoint",
-            "track": "Geopoint",
-            "description": "for evaluating the performance of geo queries",
-            "nightly_dashboards": {
-              "default": "88b4bb7f-4e2a-4607-8f55-0d3e920a92f0",
-            },
-            "release_dashboard": "de207531-3823-41ae-945d-21bafef2fa58"
-        },
-        {
-            "id": "percolator",
-            "track": "Percolator",
-            "description": "for evaluating the performance of percolation queries",
-            "nightly_dashboards": {
-                "default": "7baeecea-229c-4284-a00e-00d85d234d28"
-            },
-            "release_dashboard": "fbc69688-9eb4-4ccc-99cc-aadef449329f"
-        },
-        {
-            "id": "pmc",
-            "track": "PMC",
-            "description": "for evaluating the performance of full text search",
-            "nightly_dashboards": {
-                "default": "01db78da-402d-4462-9f6d-d319ade6da67"
-            },
-            "release_dashboard": "e4428933-4b08-4dc3-a825-21ede989bc85"
-        },
-        {
-            "id": "nyc-taxis",
-            "track": "NYC taxis",
-            "description": "for evaluating the performance for highly structured data",
-            "nightly_dashboards": {
-                "default": "06c7cf83-c9f9-4466-8d9e-4b34b82841bb"
-            },
-            "release_dashboard": "3b1f0cc1-0e6e-443b-9dcd-abc58bfab0be"
-        },
-        {
-            "id": "nested",
-            "track": "Nested",
-            "description": "for evaluating the performance for nested documents",
-            "nightly_dashboards": {
-              "default": "e76cda35-4e40-4bf1-97ca-c5b5c9c8384f"
-            },
-            "release_dashboard": "3601f1a0-c575-4795-a7a3-19ed5df71c10"
-        },
-        {
-            "id": "http-logs",
-            "track": "HTTP Logs",
-            "description": "for evaluating the performance of (Web) server logs",
-            "nightly_dashboards": {
-                "default": "60ea6244-e0ff-4ca5-b274-bf076e480561"
-            },
-            "release_dashboard": "41eb76c6-30a9-425a-8cf9-436dc3f1782c"
-        },
-        {
-            "id": "noaa",
-            "track": "noaa",
-            "description": "for evaluating the performance of range fields",
-            "nightly_dashboards": {
-                "default": "3cd44b72-dd10-4e0b-ad76-e9a2b38cd144"
-            },
-            "release_dashboard": "83e5d5bb-40a0-4693-8431-a2739279add6"
+            "release_dashboard": "77859dc3-81da-479a-8f32-40fc3f2edfe0"
         }
     ], window.location.hash);
   });
