@@ -352,7 +352,8 @@
                   "query"
                 ],
                 "challenge": "default",
-                "car": "16gheap"
+                "car": "16gheap",
+                "plugins": "mapper-size"
               }
             ]
           }
