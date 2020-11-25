@@ -245,6 +245,22 @@
                 "car": "4gheap"
               },
               {
+                "name": "http_logs-runtime-4g-1node",
+                "label": "runtime-4g",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-runtime-script-grok",
+                "car": "4gheap",
+                "track-params": {
+                  "runtime_script_grok": true
+                }
+              },
+              {
                 "name": "http_logs-no-src-1node",
                 "label": "no-src-4g",
                 "charts": [
