@@ -9,12 +9,12 @@ def successive_ips(base_ip, num_of_successive_ips)
   num_of_successive_ips.times.map { |n| ip = ip.succ; ip }
 end
 
-base_ip = '192.168.180.10'
-boxname = "elastic/ubuntu-16.04-x86_64"
-# Pin an older image to ensure Ansible <2.8
-box_version = "20190623.0.0"
+base_ip = "192.168.180.10"
+boxname = "ubuntu/bionic64"
+box_version = "20201123.0.0"
 
-default_cpus = 2
+default_loaddriver_cpus = 2
+default_target_cpus = ENV.fetch("VAGRANT_TARGET_CPUS", "2")
 default_target_node_count = 3
 target_node_ip_addresses = successive_ips(base_ip, default_target_node_count)
 # Memory settings in MB
@@ -24,16 +24,23 @@ default_target_memory = ENV.fetch("VAGRANT_TARGET_MEMORY", "5120")
 install_build_requirements = ENV["VAGRANT_ENABLE_BUILD"].to_s.downcase=="true"
 domain_name = "benchmarks.ci.vagrant"
 
-nodes = [{ hostname: "coordinator", domain: domain_name, autostart: true, box: boxname, box_version: box_version, memory: default_load_driver_memory }]
+nodes = [{ hostname: "coordinator", domain: domain_name, autostart: true, box: boxname, box_version: box_version, memory: default_load_driver_memory, cpus: default_loaddriver_cpus }]
 
 # target-nodes
 for i in 1..default_target_node_count
-  nodes += [{ hostname: "target%02d" % [i], domain: domain_name, autostart: true, box: boxname, box_version: box_version, memory: default_target_memory.to_i }]
+  nodes += [{ hostname: "target%02d" % [i], domain: domain_name, autostart: true, box: boxname, box_version: box_version, memory: default_target_memory.to_i, cpus: default_target_cpus }]
 end
 
 rally_repo = ENV.fetch("RALLY_REPO", "https://github.com/elastic/rally.git")
 rally_branch = ENV.fetch("RALLY_BRANCH", "master")
 rally_sha = ENV.fetch("RALLY_SHA", "")
+
+def disable_apt_frontend
+  <<~EOF
+    set -eo pipefail
+    sed -i 's/\(dpkg-preconfigure\) --apt/\1 --frontend=noninteractive --apt/' /etc/apt/apt.conf.d/70debconf
+  EOF
+end
 
 def curl_wrapper(max_time=10, retry_max_time=100, silent=true)
   # Return a curl command prefix that always retries on failure
@@ -102,7 +109,7 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     set -eo pipefail
     apt-get update
     apt-get purge -y python3\*-pip python3\*-setuptools
-    apt-get install -y build-essential curl libbz2-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev llvm wget xz-utils zlib1g-dev
+    apt-get install -y build-essential curl libbz2-dev libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev libssl-dev llvm wget xz-utils zlib1g-dev unzip jq
     cat >/rally-install.sh <<'EOF2'
     #!/usr/bin/env bash
 
@@ -117,15 +124,12 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     pyenv install 3.8.0
     pyenv local 3.8.0
     echo 'pyenv local 3.8.0' >> /var/lib/jenkins/.profile
-    #{curl_wrapper} https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-    python3 get-pip.py --user
-    rm ./get-pip.py
     mkdir src bin
     cd src
     git clone #{rally_repo} --branch #{rally_branch}
     cd rally
     if [[ ! -z \"#{rally_sha}\" ]]; then git checkout #{rally_sha}; fi
-    python3 -m pip install --upgrade pip setuptools
+    python3 -m pip install --upgrade pip setuptools wheel
     python3 -m pip install --quiet --user --upgrade --editable . --use-feature=2020-resolver
     cd /var/lib/jenkins
     ln -s $PWD/src/rally/rally $PWD/bin/rally
@@ -214,6 +218,41 @@ def pass_additional_jenkins_env_vars
   EOF
 end
 
+def install_docker
+  <<~EOF
+    set -eo pipefail
+    # Remove older Docker versions
+    apt-get remove -y \
+      docker \
+      docker-engine \
+      docker.io \
+      containerd \
+      runc
+    # Install and configure Docker
+    apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      gnupg-agent \
+      software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - && \
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
+    apt-get update && \
+    apt-get install -y docker-ce docker-ce-cli containerd.io && \
+    usermod -aG docker jenkins && \
+    systemctl enable docker && \
+    systemctl start docker
+    curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+  EOF
+end
+
+def install_ansible(ansible_version)
+  <<~EOF
+    sudo -iu jenkins bash -c "python3 -m pip install --user ansible==#{ansible_version}"
+  EOF
+end
+
 Vagrant.configure(2) do |config|
   use_cachier = false
   if Vagrant.has_plugin?('vagrant-cachier') and not ENV['VAGRANT_NO_CACHIER']
@@ -237,21 +276,12 @@ Vagrant.configure(2) do |config|
       node_config.vm.provider :virtualbox do |vbox, override_config|
         vbox.name = fqdn
         vbox.memory = node[:memory] || default_memory
-        vbox.cpus = node[:cpus] || default_cpus
+        vbox.cpus = node[:cpus]
         override_config.vm.synced_folder '../../..', '/night_rally'
 
-        # Workaround for https://github.com/fgrehm/vagrant-cachier/issues/175#issuecomment-233507989
-        if use_cachier and ['ubuntu-16.04'].any? { |os_substring| node[:box].include?(os_substring) }
-          override_config.cache.synced_folder_opts = {
-            owner: "_apt",
-            group: "_apt",
-            mount_options: ["dmode=777", "fmode=666"],
-          }
-        end
-
         file_to_disk = File.realpath("vagrantdisk").to_s + "/#{node[:hostname]}_disk.vdi"
-        vbox.customize ['createhd', '--filename', file_to_disk, '--size', 4*1024, '--format', 'VDI'] # Size is in MiB
-        vbox.customize ['storageattach', :id, '--storagectl', 'IDE Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+        vbox.customize ['createmedium', "disk", '--filename', file_to_disk, '--size', 20480, '--format', 'VDI'] # Size is in MiB
+        vbox.customize ['storageattach', :id, '--storagectl', 'SCSI', '--port', 2, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
 
         if node[:hostname] == "coordinator"
           override_config.vm.synced_folder "#{Dir.home}/", "/home/vagrant/", type: "rsync", rsync__args: ["-r", "--include=.vault-token", "--exclude=*"]
@@ -259,6 +289,7 @@ Vagrant.configure(2) do |config|
       end
 
       node_config.ssh.forward_agent = true
+      node_config.vm.provision "shell", inline: disable_apt_frontend
       node_config.vm.provision "shell", inline: tweak_es_sysctl
       node_config.vm.provision "shell", inline: install_jenkins_user
       node_config.vm.provision "shell", inline: pass_additional_jenkins_env_vars, env: {"RALLY_METRICS_STORE_CREDENTIAL_PATH" => ENV["VAULT_NIGHT_RALLY_METRICS_STORE_CREDENTIAL_PATH"]}
@@ -267,10 +298,10 @@ Vagrant.configure(2) do |config|
       node_config.vm.provision "shell", inline: install_rally_source(rally_repo, rally_branch, rally_sha)
 
       node_config.vm.provision "shell", inline: <<-EOF
-        mkfs.ext4 /dev/sdb
+        mkfs.ext4 /dev/sdc
         mkdir -p /var/lib/jenkins/.rally/benchmarks/races
-        echo "/dev/sdb /var/lib/jenkins/.rally/benchmarks/races ext4 defaults 0 2" >>/etc/fstab
-        mount -a
+        echo "/dev/sdc /var/lib/jenkins/.rally/benchmarks/races ext4 defaults 0 2" >>/etc/fstab
+        mount /var/lib/jenkins/.rally/benchmarks/races
         chown -R jenkins:jenkins /var/lib/jenkins/.rally
       EOF
 
@@ -286,9 +317,16 @@ Vagrant.configure(2) do |config|
 
           sudo -iu jenkins bash -c 'cd night_rally; make install'
         EOF
+
+        node_config.vm.provision "shell", inline: install_ansible("2.9.6")
       end
 
       node_config.vm.provision "shell", inline: install_night_rally_test_script(base_ip, target_node_ip_addresses)
+
+      # Install docker on target nodes
+      if node != nodes.first
+        node_config.vm.provision "shell", inline: install_docker
+      end
 
       # Java 11 is used by default for release benchmarks, so should be installed always
       # https://github.com/elastic/night-rally/issues/114#issuecomment-534100792
@@ -296,7 +334,6 @@ Vagrant.configure(2) do |config|
         node_config.vm.provision "shell", inline: install_java(11)
       end
 
-      # To allow building Elasticsearch (nightlies) install the minimum set of java versions required on target nodes
       if node != nodes.first && install_build_requirements
         node_config.vm.provision "shell", inline: install_java(15)
       end

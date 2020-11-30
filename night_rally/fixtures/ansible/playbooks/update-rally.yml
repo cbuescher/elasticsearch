@@ -12,7 +12,7 @@
 
     - name: ensure no java process is running except for the jenkins swarm client
       shell: >
-        ps -ef | grep -i java | grep -viE "swarm-client|grep" | awk '{print $2}' | xargs kill -9
+        ps -ef | grep -i java | grep -viE "swarm-client|grep" | awk '{print $2}' | xargs -r kill -9
       become: true
 
 - name: update Rally on all affected machines before the benchmark
