@@ -11,6 +11,7 @@
   args:
     chdir: /var/lib/jenkins
   environment:
+    GOOGLE_APPLICATION_CREDENTIALS: /var/lib/jenkins/.gcs-service-account.json
     JAVA7_HOME: /var/lib/jenkins/.java/java7
     JAVA8_HOME: /var/lib/jenkins/.java/java8
     JAVA9_HOME: /var/lib/jenkins/.java/java9
@@ -31,6 +32,7 @@
   args:
     chdir: /var/lib/jenkins
   environment:
+    GOOGLE_APPLICATION_CREDENTIALS: /var/lib/jenkins/.gcs-service-account.json
     JAVA8_HOME: /usr/lib/jvm/java-8-openjdk-amd64
     JAVA11_HOME: /var/lib/jenkins/.java/openjdk11
     JAVA12_HOME: /var/lib/jenkins/.java/openjdk12

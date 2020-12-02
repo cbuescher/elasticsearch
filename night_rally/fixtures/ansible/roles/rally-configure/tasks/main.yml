@@ -6,3 +6,16 @@
   template:
     src: rally.ini.j2
     dest: "{{ rally_homedir }}/.rally/rally-{{ rally_environment }}.ini"
+
+- block:
+    - set_fact:
+        gcs_service_account_contents: "{{ lookup('hashi_vault', 'secret=/secret/rally/cloud/gcs-internal-rally-service-account:contents') }}"
+
+    - name: write gcs service account file
+      become: true
+      become_user: "jenkins"
+      copy:
+        content: "{{ gcs_service_account_contents }}"
+        dest: ~/.gcs-service-account.json
+  when: not local_setup | default("false") | bool
+
