@@ -26,18 +26,16 @@ Now you can invoke Night Rally regularly with the startup script `night_rally.sh
 
 #### Compare what has changed in Elasticsearch between two benchmarks
 
-Find the relevant revision One possibility is to run e.g. `night-rally-admin list races --environment=nightly --track=geonames --challenge=append-no-conflicts` which provides the following list:
+Find the relevant revision One possibility is to run e.g. `night-rally-admin list races --environment=nightly --track=geonames --license=trial --from-date=20201207` which provides the following list:
 
 ```
-Race Timestamp    Track     Challenge            Car           Version       Revision    User Tags
-----------------  --------  -------------------  ------------  ------------  ----------  -------------------------------------------------------------
-20180219T183731Z  geonames  append-no-conflicts  ['defaults']  7.0.0-alpha1  ff2164c     env=bare, name=geonames-append-defaults-1node
-20180219T183731Z  geonames  append-no-conflicts  ['defaults']  7.0.0-alpha1  ff2164c     env=bare, name=geonames-append-defaults-x-pack-security-1node
-20180218T182130Z  geonames  append-no-conflicts  ['defaults']  7.0.0-alpha1  df07943     env=bare, name=geonames-append-defaults-1node
-...
+Race Timestamp    Race Id                               Track     Challenge            Car                                               ES Version      Revision                                  Rally Version                       Track Revision    Team Revision    User Tags
+----------------  ------------------------------------  --------  -------------------  ------------------------------------------------  --------------  ----------------------------------------  ----------------------------------  ----------------  ---------------  ----------------------------------------------------------------------------------------------------------------------------
+20201208T200053Z  e83e9161-ed9c-44ee-8f29-17260e820bf3  geonames  append-no-conflicts  ['defaults', 'trial-license', 'x-pack-security']  8.0.0-SNAPSHOT  c76058d0b3ca1e14ce4126ff6eb2a68b741b90f0  2.0.3.dev0 (git revision: b143899)  47b7054           3d59034          license=trial, name=geonames-append-defaults-1node, race-configs-id=race-configs-group-1.json, setup=bare-basic, x-pack=true
+20201207T200113Z  f133d0f0-7d24-49d3-ab08-35209d6c2c5e  geonames  append-no-conflicts  ['defaults', 'trial-license', 'x-pack-security']  8.0.0-SNAPSHOT  5859c4d6e62606428c2e49a181c7f845cadabecb  2.0.3.dev0 (git revision: b143899)  47b7054           3d59034          license=trial, name=geonames-append-defaults-1node, race-configs-id=race-configs-group-1.json, setup=bare-basic, x-pack=true
 ```
 
-You can see the revisions `df07943` and `ff2164c`. If you want to see which commits are included in between, open the Github compare view with https://github.com/elastic/elasticsearch/compare/df07943...ff2164c.
+You can see the revisions `5859c4d6e62606428c2e49a181c7f845cadabecb` and `c76058d0b3ca1e14ce4126ff6eb2a68b741b90f0`. If you want to see which commits are included in between, open the Github compare view with https://github.com/elastic/elasticsearch/compare/5859c4d6e62606428c2e49a181c7f845cadabecb...c76058d0b3ca1e14ce4126ff6eb2a68b741b90f0.
 
 
 #### Add an annotation

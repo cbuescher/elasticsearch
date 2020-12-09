@@ -16,8 +16,8 @@ def list_races(es, args):
     limit = args.limit
     environment = args.environment
     track = args.track
-    car = args.car
-    challenge = args.challenge
+    name = args.name
+    license = args.license
     from_date = args.from_date
     to_date = args.to_date
 
@@ -49,17 +49,17 @@ def list_races(es, args):
                 "track": track
             }
         })
-    if challenge:
+    if name:
         query["query"]["bool"]["filter"].append({
             "term": {
-                "challenge": challenge
+                "user-tags.name": name
             }
         })
 
-    if car:
+    if license:
         query["query"]["bool"]["filter"].append({
             "term": {
-                "car": car
+                "user-tags.license": license
             }
         })
 
@@ -300,13 +300,13 @@ def arg_parser():
         default=None
     )
     list_parser.add_argument(
-        "--car",
-        help="Show only records for this car",
+        "--license",
+        help="Show only records from with corresponding 'license' user tag",
         default=None
     )
     list_parser.add_argument(
-        "--challenge",
-        help="Show only records for this challenge",
+        "--name",
+        help="Show only records from with corresponding 'name' user tag",
         default=None
     )
     list_parser.add_argument(
