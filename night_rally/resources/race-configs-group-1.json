@@ -360,5 +360,37 @@
         ]
       }
     ]
+  },
+  {
+    "track": "observability/observe",
+    "track-repository": "internal",
+    "flavors": [
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "basic",
+            "configurations": [
+              {
+                "name": "observability-8g-1node",
+                "label": "add-8g",
+                "challenge": "index-logs-daily-volume",
+                "car": "8gheap",
+                "track-params": {
+                  "corpora_uri_base":"gs://rally-internal-tracks",
+                  "wait_for_status": "yellow"
+                },
+                "charts": [
+                  "indexing",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]
