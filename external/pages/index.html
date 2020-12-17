@@ -163,11 +163,17 @@ var charts = {
     $('.tracks').hide();
     $("#dateRangeGroup").hide();
     $("#releaseLegend").hide();
+    $("#warningLegend").hide();
 
     if (charts.currentSpec != null) {
         var hash = "#tracks/" + charts.currentSpec.id;
 
         $('.tracks').show();
+
+        if ("warning" in charts.currentSpec) {
+          $("#warningLegend").html(charts.currentSpec.warning).show();
+        }
+
         if (charts.currentChartType === "nightly") {
           hash = hash + "/nightly/" + charts.currentDistributionType + "/" + charts.dateRange;
           var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards[charts.currentDistributionType]);
@@ -265,6 +271,7 @@ body,html,.main-display-area,.col-md-12 {
           </ul>
           <p>Starting with Elasticsearch 7.7.0, benchmarks are run with the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup.html#jvm-version">JDK that is bundled with Elasticsearch</a>.</p>
       </div>
+      <div id="warningLegend" class="alert alert-warning" role="alert"></div>
     </div>
   </div>
 
@@ -485,6 +492,16 @@ body,html,.main-display-area,.col-md-12 {
                 "default": "ee7bdacd-56d5-48ec-a765-f8b5183885b9"
             },
             "release_dashboard": "77859dc3-81da-479a-8f32-40fc3f2edfe0"
+        },
+        {
+            "id": "logging",
+            "track": "Logging",
+            "warning": "Observability benchmarks are under active development and shouldn't be consulted for any calculations at this point",
+            "description": "for evaluating the performance of observability logging",
+            "nightly_dashboards": {
+                "default": "fd480790-f523-45ea-83ae-afce34fbf7f9"
+            },
+            "release_dashboard": "560d5e44-1120-41ef-a432-18c7844d834b"
         }
     ], window.location.hash);
   });
