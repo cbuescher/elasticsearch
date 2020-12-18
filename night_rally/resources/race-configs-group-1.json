@@ -382,7 +382,7 @@
                   "enriched_data_volume_per_day": "30GB",
                   "max_generated_corpus_size": "30GB",
                   "force_data_generation": true,
-                  "max_total_download_gb": "40",
+                  "max_total_download_gb": 40,
                   "corpora_uri_base":"gs://rally-internal-tracks",
                   "number_of_replicas": 0,
                   "wait_for_status": "green"
