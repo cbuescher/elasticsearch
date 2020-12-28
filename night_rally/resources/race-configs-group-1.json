@@ -375,7 +375,7 @@
               {
                 "name": "observability-8g-1node",
                 "label": "add-8g",
-                "challenge": "index-logs-daily-volume",
+                "challenge": "logging-indexing",
                 "car": "8gheap",
                 "track-params": {
                   "track_id": "seed_id",
