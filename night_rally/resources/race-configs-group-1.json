@@ -379,7 +379,7 @@
                 "car": "8gheap",
                 "track-params": {
                   "track_id": "seed_id",
-                  "enriched_data_volume_per_day": "30GB",
+                  "raw_data_volume_per_day": "3.5GB",
                   "max_generated_corpus_size": "30GB",
                   "force_data_generation": true,
                   "max_total_download_gb": 40,
