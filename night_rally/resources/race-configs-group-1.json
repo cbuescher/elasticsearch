@@ -378,7 +378,6 @@
                 "challenge": "logging-indexing",
                 "car": "8gheap",
                 "track-params": {
-                  "track_id": "seed_id",
                   "raw_data_volume_per_day": "3.5GB",
                   "max_generated_corpus_size": "30GB",
                   "force_data_generation": true,
