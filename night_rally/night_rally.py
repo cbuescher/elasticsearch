@@ -13,7 +13,7 @@ import json
 import jsonschema
 
 ROOT = os.path.dirname(os.path.realpath(__file__))
-RALLY_BINARY = "rally --skip-update"
+RALLY_BINARY = "rally --skip-update race"
 VERSION_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$")
 # The port that Elasticsearch is configured to use for rest requests.
 TARGET_HTTP_PORT = 9200
