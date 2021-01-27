@@ -8,6 +8,7 @@
     - util-linux
     - smartmontools
 
+# excluding loopback devices per https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/devices.txt#L191-L198
 - name: Retrieve list of locally attached physical disks
-  shell: lsblk --json --nodeps
+  shell: lsblk --json --nodeps --exclude 7
   register: phys_disks
