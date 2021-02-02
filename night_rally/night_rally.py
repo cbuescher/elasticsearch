@@ -866,8 +866,8 @@ def race_meta_data(environment, configuration_name, effective_start_date, race_c
         es.indices.refresh(index="rally-races-*")
         logger.debug("Executing query\n%s" % json.dumps(query, indent=2))
         result = es.search(index="rally-races-*", body=query)
-        logger.debug("Got %s results.", str(result["hits"]["total"]))
-        if result["hits"]["total"] > 0:
+        logger.debug("Got %s results.", str(result["hits"]["total"]["value"]))
+        if result["hits"]["total"]["value"] > 0:
             return result["hits"]["hits"][0]["_source"]
         else:
             return None
