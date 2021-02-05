@@ -103,6 +103,15 @@ def install_vault
   EOF
 end
 
+def install_rally_ssh_key
+  # Deploy a key that allows us to read from private GH track repos like elastic/rally-internal-tracks
+  <<~EOF
+  set -eo pipefail
+  cd /var/lib/jenkins
+  sudo -iu jenkins bash -c "vault read -field=private-key /secret/rally/ssh-keypairs/rally >~/.ssh/id_rsa && chmod 0600 ~/.ssh/id_rsa && ssh-keyscan github.com >> ~/.ssh/known_hosts"
+  EOF
+end
+
 def install_rally_source(rally_repo, rally_branch, rally_sha)
   # Remove OS packages for python3-pip and python3-setuptools; we prefer per account installation of pip3
   <<~EOF
@@ -117,7 +126,7 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     #{curl_wrapper} https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer -o pyenv-installer
     bash ./pyenv-installer
     rm pyenv-installer
-    echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> /var/lib/jenkins/.profile
+    echo 'export PATH="$HOME/.pyenv/bin:$HOME/.local/bin:$PATH"' >> /var/lib/jenkins/.profile
     echo 'eval "\$(pyenv init -)"' >> /var/lib/jenkins/.profile
     echo 'eval "\$(pyenv virtualenv-init -)"' >> /var/lib/jenkins/.profile
     source /var/lib/jenkins/.profile
@@ -130,7 +139,7 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     cd rally
     if [[ ! -z \"#{rally_sha}\" ]]; then git checkout #{rally_sha}; fi
     python3 -m pip install --upgrade pip setuptools wheel
-    python3 -m pip install --quiet --user --upgrade --editable . --use-feature=2020-resolver
+    python3 -m pip install --quiet --user --upgrade --editable .
     cd /var/lib/jenkins
     ln -s $PWD/src/rally/rally $PWD/bin/rally
     ln -s $PWD/src/rally/rallyd $PWD/bin/rallyd
@@ -319,6 +328,7 @@ Vagrant.configure(2) do |config|
         EOF
 
         node_config.vm.provision "shell", inline: install_ansible("2.9.6")
+        node_config.vm.provision "shell", inline: install_rally_ssh_key
       end
 
       node_config.vm.provision "shell", inline: install_night_rally_test_script(base_ip, target_node_ip_addresses)
