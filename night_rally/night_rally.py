@@ -252,6 +252,9 @@ class ReleaseCommand(DistributionBasedCommand):
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if major < 6 and "sorted" in race_config.challenge:
             return False
+        # cannot run "runtime fields" challenges - it's a 7.x feature
+        if major < 7 and "runtime" in race_config.challenge:
+            return False
         # EQL and the observability track are not available prior to 7.x
         if int(self.distribution_version[0]) < 7:
             return race_config.track not in ["eql", "observability/logs"]
