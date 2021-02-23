@@ -254,11 +254,12 @@
                   "io",
                   "segment_memory"
                 ],
-                "challenge": "append-runtime-script-grok",
+                "challenge": "runtime-fields",
                 "car": "4gheap",
                 "track-params": {
-                  "runtime_script_grok": true
-                }
+                  "runtime_fields": true
+                },
+                "exclude-tasks": "tag:term,tag:200s-in-range,400s-in-range-from-keyword-using-grok,400s-in-range-from-keyword-using-dissect,400s-in-range-from-keyword-using-index-of"
               },
               {
                 "name": "http_logs-no-src-1node",
