@@ -291,8 +291,11 @@ class DockerCommand(BaseCommand):
         if race_config.x_pack or race_config.plugins:
             return False
         # cannot run "sorted" challenges - it's a 6.0+ feature
-        if int(self.distribution_version[0]) < 6:
-            return "sorted" not in race_config.challenge
+        if int(self.distribution_version[0]) < 6 and "sorted" in race_config.challenge:
+            return False
+        # cannot run "runtime fields" challenges - it's a 7.x feature
+        if int(self.distribution_version[0]) < 7 and "runtime" in race_config.challenge:
+            return False
         # EQL is available from 7.10.0 onwards
         if int(self.distribution_version[0]) < 7:
             return race_config.track != "eql"
