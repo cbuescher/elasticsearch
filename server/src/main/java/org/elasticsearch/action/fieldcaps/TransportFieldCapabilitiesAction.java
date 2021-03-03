@@ -117,6 +117,7 @@ public class TransportFieldCapabilitiesAction extends HandledTransportAction<Fie
                 remoteRequest.fields(request.fields());
                 remoteRequest.indexFilter(request.indexFilter());
                 remoteRequest.nowInMillis(nowInMillis);
+                // remoteRequest.runtimeFields(request.runtimeFields());
                 remoteClusterClient.fieldCaps(remoteRequest,  ActionListener.wrap(response -> {
                     for (FieldCapabilitiesIndexResponse res : response.getIndexResponses()) {
                         indexResponses.add(new FieldCapabilitiesIndexResponse(RemoteClusterAware.
