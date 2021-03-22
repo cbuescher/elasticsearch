@@ -102,7 +102,9 @@
                   "query",
                   "gc",
                   "io",
-                  "segment_memory"
+                  "segment_memory",
+                  "merge_count",
+                  "merge_times"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap"

@@ -355,8 +355,8 @@ def arg_parser():
     add_parser.add_argument(
         "--chart",
         help="Chart to target. If none given, applies to all charts.",
-        choices=['query', 'script', 'stats', 'indexing', 'gc', 'index_times', 'merge_times', 'segment_count', 'segment_memory', 'io',
-                 'ml_bucket_time'],
+        choices=["query", "script", "stats", "indexing", "gc", "index_times", "merge_times", "merge_count", "segment_count",
+                 "segment_memory", "io", "ml_bucket_time"],
         default=None
     )
     add_parser.add_argument(
