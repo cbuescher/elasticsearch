@@ -349,7 +349,8 @@
                 "name": "eql-16g-1node",
                 "label": "add-16g",
                 "charts": [
-                  "query"
+                  "query",
+                  "gc"
                 ],
                 "challenge": "default",
                 "car": "16gheap",
