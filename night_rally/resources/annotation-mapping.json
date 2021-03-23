@@ -37,6 +37,9 @@
         "chart": {
           "type": "keyword"
         },
+        "chart-name": {
+          "type": "keyword"
+        },
         "message": {
           "type": "keyword"
         }

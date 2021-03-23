@@ -148,9 +148,9 @@ def list_annotations(es, args):
     annotations = []
     for hit in result["hits"]["hits"]:
         src = hit["_source"]
-        annotations.append([hit["_id"], src["race-timestamp"], src.get("track", ""), src.get("chart", ""), src["message"]])
+        annotations.append([hit["_id"], src["race-timestamp"], src.get("track", ""), src.get("chart", ""), src.get("chart-name", ""), src["message"]])
     if annotations:
-        print(tabulate.tabulate(annotations, headers=["Annotation Id", "Timestamp", "Track", "Chart", "Message"]))
+        print(tabulate.tabulate(annotations, headers=["Annotation Id", "Timestamp", "Track", "Chart Type", "Chart Name", "Message"]))
     else:
         print("No results")
 
@@ -159,13 +159,14 @@ def add_annotation(es, args):
     environment = args.environment
     race_timestamp = args.race_timestamp
     track = args.track
-    chart = args.chart
+    chart_type = args.chart_type
+    chart_name = args.chart_name
     message = args.message
     dry_run = args.dry_run
 
     if dry_run:
-        print("Would add annotation with message [%s] for environment=[%s], race timestamp=[%s], track=[%s], chart=[%s]" %
-              (message, environment, race_timestamp, track, chart))
+        print(f"Would add annotation with message [{message}] for environment=[{environment}], race timestamp=[{race_timestamp}], "
+              f"track=[{track}], chart type=[{chart_type}], chart name=[{chart_name}]")
     else:
         if not es.indices.exists(index="rally-annotations"):
             cwd = os.path.dirname(os.path.realpath(__file__))
@@ -175,7 +176,8 @@ def add_annotation(es, args):
             "environment": environment,
             "race-timestamp": race_timestamp,
             "track": track,
-            "chart": chart,
+            "chart": chart_type,
+            "chart-name": chart_name,
             "message": message
         })
 
@@ -323,9 +325,9 @@ def arg_parser():
     )
 
     # if no "track" is given -> annotate all tracks
-    # "chart" indicates the graph. If no chart, is given, it is empty -> we need to write the queries to that we update all chart
+    # "chart-type" indicates the graph. If no chart-type, is given, it is empty -> we need to write the queries to that we update all chart
     #
-    # add [annotation] --environment=nightly --race-timestamp --track --chart --text
+    # add [annotation] --environment=nightly --race-timestamp --track --chart-type --chart-name --text
     add_parser = subparsers.add_parser("add", help="Add records")
     add_parser.add_argument(
         "configuration",
@@ -353,10 +355,15 @@ def arg_parser():
         default=None
     )
     add_parser.add_argument(
-        "--chart",
-        help="Chart to target. If none given, applies to all charts.",
+        "--chart-type",
+        help="Chart type to target. If none given, applies to all charts.",
         choices=["query", "script", "stats", "indexing", "gc", "index_times", "merge_times", "merge_count", "segment_count",
                  "segment_memory", "io", "ml_bucket_time"],
+        default=None
+    )
+    add_parser.add_argument(
+        "--chart-name",
+        help="A chart name to target. If none given, applies to all charts.",
         default=None
     )
     add_parser.add_argument(
