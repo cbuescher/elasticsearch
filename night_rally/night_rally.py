@@ -231,6 +231,9 @@ class ReleaseCommand(DistributionBasedCommand):
         # Don't run any combination specifying (any) x-pack components when release license is oss
         if self.release_params["license"] == "oss" and race_config.x_pack:
             return False
+        # Don't run jfr challenges for release
+        if "jfr" in race_config.challenge:
+            return False
         # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
         if race_config.car == "1gheap":
             return False
