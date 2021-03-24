@@ -1700,7 +1700,9 @@ class NightRallyTests(unittest.TestCase):
                 "failed": 0
             },
             "hits": {
-                "total": 352,
+                "total": {
+                    "value": 352
+                },
                 "hits": [
                     {
                         "_index": "rally-races-2020-03",
