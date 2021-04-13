@@ -35,23 +35,26 @@ ssh night-rally-1
     cp -r config.d/. ~/.ssh/config.d
     ```
 
-3. Edit `~/.ssh/config.d/common` and change `<yourlocalsshuser>` in line 5 with the unix account you used in the [infra repo](https://github.com/elastic/infra/blob/master/docs/accessing-instances.md#ssh-access) when you submitted your public key.
+3. Copy the latest version of the file [.known_hosts](https://github.com/elastic/infra/blob/master/ansible/.known_hosts) from the [infra repo](github.com/elastic/infra) under `~/.ssh/config.d`.
+   
+4. Edit `~/.ssh/config.d/common` and change `<yourlocalsshuser>` in line 5 with the unix account you used in the [infra repo](https://github.com/elastic/infra/blob/master/docs/accessing-instances.md#ssh-access) when you submitted your public key.
 
-4. Add the following include **at the top** of your `~/.ssh/config` (if you don't have a config file, create a new one):
+5. Add the following include **at the top** of your `~/.ssh/config` (if you don't have a config file, create a new one):
 
     ```
     Include ~/.ssh/config.d/*
     ```
 
-5. Test your setup:
+6. Test your setup:
 
     ```
     ssh night-rally-1
 
+    ssh night-rally-14
     ssh lowmem-rally-1
     ```
 
 ## Troubleshooting
 
 Most of the issues are either due to a non-working Vault configuration or due to a missing `.known_hosts` file.
-For the latter, ensure that `.known_hosts` got copied correctly in step 2 and is present under `~/.ssh/config.d`.
+For the latter, ensure that `.known_hosts` got copied correctly in step 3 and is present under `~/.ssh/config.d`.

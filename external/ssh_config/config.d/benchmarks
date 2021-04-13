@@ -36,6 +36,19 @@ Host night-rally-11
 
 Host night-rally-12
   Hostname target-953736.benchmark.fsn1-dc14.hetzner.elasticnet.co
+
+# Night Rally Group 3
+Host night-rally-13
+  Hostname worker-669376.build.fsn1-dc4.hetzner.elasticnet.co
+
+Host night-rally-14
+  Hostname target-669377.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+Host night-rally-15
+  Hostname target-669378.benchmark.fsn1-dc4.hetzner.elasticnet.co
+
+Host night-rally-16
+  Hostname target-669380.benchmark.fsn1-dc4.hetzner.elasticnet.co
 # End Night Rally load driver and target machines section
 
 # Memory benchmark machines
@@ -45,21 +58,6 @@ Host lowmem-rally-1
 Host lowmem-rally-2
   Hostname memory-869743.benchmark.fsn1-dc4.hetzner.elasticnet.co
 # End Memory benchmark machines
-
-# Longrun benchmarks section
-Host long-run-rally-1
-  Hostname longrun-669376.benchmark.fsn1-dc4.hetzner.elasticnet.co
-
-Host long-run-rally-2
-  Hostname longrun-669377.benchmark.fsn1-dc4.hetzner.elasticnet.co
-
-Host long-run-rally-3
-  Hostname longrun-669378.benchmark.fsn1-dc4.hetzner.elasticnet.co
-
-Host long-run-rally-4
-  Hostname longrun-669380.benchmark.fsn1-dc4.hetzner.elasticnet.co
-
-# End Longrun benchmarks section
 
 Host microbenchmark
   Hostname 148.251.138.133

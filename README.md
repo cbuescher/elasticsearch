@@ -207,23 +207,6 @@ To iterate on changes, always remember to re-run `./update_jenkins_night_rally.s
 
 To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
 
-##### Iterating on long-running benchmarks while testing changes to night-rally
-
-1. `cd night_rally/fixtures/ansible`
-2. Specify the following environment variables:
-    ```
-    # long-running benchmarks run with 8GB of heap
-    export VAGRANT_TARGET_MEMORY=10240
-    export VAGRANT_ENABLE_BUILD=true
-    ```
-3. `vagrant up`
-4. `vagrant ssh /coord/` # ssh'es to the coordinating node
-5. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
-6. `sudo -iu jenkins`
-7. Run `./test_longrunning.sh`
-
-To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
-
 ##### Iterating on release or nightly benchmarks while testing changes on Rally
 
 If you want to verify your on-going Rally work or a Rally PR against a full nightly or release run, use the following steps:
@@ -311,7 +294,7 @@ See the runbook [how to have a faulty disk replaced](https://github.com/elastic/
 Occasionally there is a need to ask Infra to reinstall the operating system (e.g. due to failed disks).
 Due to random conditions in Hetzner's OS installation scripts this may result in `eth0` / `eth1` NIC device names to get
 swapped. Normally `eth0` is the public IP address, which has strict firewall rules, whereas `eth1` points to the 10Gbps
-internal interconnect NIC which is whitelisted in firewall rules (example rules in the [infra repo](https://github.com/elastic/infra/blob/master/ansible/playbooks/group_vars/longrunbenchmarks/firewall.yml)).
+internal interconnect NIC which is whitelisted in firewall rules (example rules in the [infra repo](https://github.com/elastic/infra/blob/master/ansible/playbooks/group_vars/elasticsearch-ci-workers-macrobenchmarks-group-1/firewall.yml#L8)).
 
 This situation is resolvable following the steps shown below; the example assumes that currently `eth1` is the NIC using
 the public IP and `eth0` the internal interconnect NIC and we want to swap them:
@@ -319,13 +302,13 @@ the public IP and `eth0` the internal interconnect NIC and we want to swap them:
 _Step 1: Become root on the server_
 
 ``` shell
-dliappis@longrun-669380:~$ sudo su -
+dliappis@target-669380:~$ sudo su -
 ```
 
 _Step 2: Assign the right IP to the right NIC_
 ```shell
 # Show IP definitions per interface
-root@longrun-669380 ~ # cat /etc/network/interfaces
+root@target-669380 ~ # cat /etc/network/interfaces
 ### Hetzner Online GmbH installimage
 
 source /etc/network/interfaces.d/*
@@ -343,10 +326,10 @@ iface eth1 inet static
   up route add -net 94.130.140.192 netmask 255.255.255.192 gw 94.130.140.193 dev eth1
 
 # Switch to use `eth0` for public IP
-root@longrun-669380 ~ # sed -i 's/eth1/eth0/g' /etc/network/interfaces
+root@target-669380 ~ # sed -i 's/eth1/eth0/g' /etc/network/interfaces
 
 # Verify changes
-root@longrun-669380 ~ # cat /etc/network/interfaces
+root@target-669380 ~ # cat /etc/network/interfaces
 ### Hetzner Online GmbH installimage
 
 source /etc/network/interfaces.d/*
@@ -364,20 +347,20 @@ iface eth0 inet static
   up route add -net 94.130.140.192 netmask 255.255.255.192 gw 94.130.140.193 dev eth0
 
 # Check the internal NIC:
-root@longrun-669380 ~ # cat /etc/network/interfaces.d/eth1
+root@target-669380 ~ # cat /etc/network/interfaces.d/eth1
 auto eth0
 iface eth0 inet static
 address 192.168.14.80
 netmask 255.255.255.0
 
 # Use the right name for the internal NIC
-root@longrun-669380 ~ # mv /etc/network/interfaces.d/eth0 /etc/network/interfaces.d/eth1
+root@target-669380 ~ # mv /etc/network/interfaces.d/eth0 /etc/network/interfaces.d/eth1
 
 # Ensure eth1 gets the private IP address
-root@longrun-669380 ~ # sed -i 's/eth0/eth1/g' /etc/network/interfaces.d/eth1
+root@target-669380 ~ # sed -i 's/eth0/eth1/g' /etc/network/interfaces.d/eth1
 
 # Verify that the internal NIC is eth1 and has the correct private IP
-root@longrun-669380 ~ # cat /etc/network/interfaces.d/eth1
+root@target-669380 ~ # cat /etc/network/interfaces.d/eth1
 auto eth1
 iface eth1 inet static
 address 192.168.14.80
@@ -387,17 +370,17 @@ netmask 255.255.255.0
 _Step 3: Fix the NIC persistent mappings_
 ``` shell
 # Check current NIC mapping
-root@longrun-669380 ~ # cat /etc/udev/rules.d/70-persistent-net.rules
+root@target-669380 ~ # cat /etc/udev/rules.d/70-persistent-net.rules
 ### Hetzner Online GmbH installimage
 
 SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:1b:21:db:91:ea", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
 SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="90:1b:0e:de:dd:a6", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth1"
 
 # Edit the file and swap `eth0` <--> `eth1`
-root@longrun-669380 ~ # vi /etc/udev/rules.d/70-persistent-net.rules
+root@target-669380 ~ # vi /etc/udev/rules.d/70-persistent-net.rules
 
 # Should now look like (note the difference with the MAC address from the previous cat command):
-root@longrun-669380 ~ # cat /etc/udev/rules.d/70-persistent-net.rules
+root@target-669380 ~ # cat /etc/udev/rules.d/70-persistent-net.rules
 ### Hetzner Online GmbH installimage
 
 SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="90:1b:0e:de:dd:a6", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
@@ -407,11 +390,11 @@ SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:1b:21:db:91:e
 _Step 4: Fix the firewall rules_
 ```
 # Check whether current firewall rules assume that eth0 is the private NIC
-root@longrun-669380 ~ # grep eth0 /etc/firewall.bash
+root@target-669380 ~ # grep eth0 /etc/firewall.bash
 iptables -A INPUT -p all -i eth0 -j ACCEPT
 
 # Swap eth0 to eth1 in firewall rules
-root@longrun-669380 ~ # sed -i 's/eth0/eth1/g' /etc/firewall.bash
+root@target-669380 ~ # sed -i 's/eth0/eth1/g' /etc/firewall.bash
 ```
 
 _Step 5: Reboot_
