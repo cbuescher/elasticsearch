@@ -223,7 +223,6 @@ class ReleaseCommand(DistributionBasedCommand):
         
     def runnable(self, race_config):
         major, minor, _, _ = components(self.distribution_version)
-
         # Do not run challenges with special x-pack security configs.
         # If release license is trial every other challenge will be executed using the specified release x-pack plugins.
         if self.release_params["license"] == "trial" and "security" in race_config.x_pack:
@@ -231,8 +230,9 @@ class ReleaseCommand(DistributionBasedCommand):
         # Don't run any combination specifying (any) x-pack components when release license is oss
         if self.release_params["license"] == "oss" and race_config.x_pack:
             return False
-        # Don't run jfr challenges for release
-        if "jfr" in race_config.challenge:
+        # Java flight recorder related benchmarks are only to measure the overhead compared to a configuration
+        # without Java flight recorder and it is sufficient to enable them in nightlies.
+        if "jfr" in race_config.name:
             return False
         # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
         if race_config.car == "1gheap":
@@ -293,15 +293,19 @@ class DockerCommand(BaseCommand):
         # no plugin installs on Docker
         if race_config.x_pack or race_config.plugins:
             return False
+        # Java flight recorder related benchmarks are only to measure the overhead compared to a configuration
+        # without Java flight recorder and it is sufficient to enable them in nightlies.
+        if "jfr" in race_config.name:
+            return False
         # cannot run "sorted" challenges - it's a 6.0+ feature
         if int(self.distribution_version[0]) < 6 and "sorted" in race_config.challenge:
             return False
         # cannot run "runtime fields" challenges - it's a 7.x feature
         if int(self.distribution_version[0]) < 7 and "runtime" in race_config.challenge:
             return False
-        # EQL is available from 7.10.0 onwards
+        # EQL and the observability track are not available prior to 7.x
         if int(self.distribution_version[0]) < 7:
-            return race_config.track != "eql"
+            return race_config.track not in ["eql", "observability/logs"]
         return True
 
 
