@@ -20,6 +20,12 @@ TARGET_HTTP_PORT = 9200
 TARGET_TRANSPORT_PORT = 9300
 RACE_CONFIGS_SCHEMA_FILE = "{}/resources/race-configs-schema.json".format(ROOT)
 
+MIN_ES_VERSION_PER_TRACK = {
+    "eql": 7,
+    "observability/logging": 7,
+    "geopointshape": 7
+}
+
 # console logging
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s][%(levelname)s] %(message)s")
 # Remove all handlers associated with the root logger object so we can start over with an entirely fresh log configuration
@@ -61,6 +67,14 @@ class RemotePortNotDefined(NightRallyError):
     """
     Thrown whenever there was no port specified in --target-host
     """
+
+
+def run_track(track, es_major_ver):
+    """
+    Determines whether to run or skip track depending on the major version of Elasticsearch
+    """
+
+    return int(es_major_ver) >= MIN_ES_VERSION_PER_TRACK.get(track, -1)
 
 
 def wait_until_port_is_free(target_hosts, connector=socket, wait_time=5):
@@ -258,11 +272,8 @@ class ReleaseCommand(DistributionBasedCommand):
         # cannot run "runtime fields" challenges - it's a 7.x feature
         if major < 7 and "runtime" in race_config.challenge:
             return False
-        # EQL and the observability track are not available prior to 7.x
-        if int(self.distribution_version[0]) < 7:
-            return race_config.track not in ["eql", "observability/logs"]
-
-        return True
+        # tracks that shouldn't be run depending on the Elasticsearch major version
+        return run_track(race_config.track, self.distribution_version[0])
 
 
 class DockerCommand(BaseCommand):
@@ -303,10 +314,8 @@ class DockerCommand(BaseCommand):
         # cannot run "runtime fields" challenges - it's a 7.x feature
         if int(self.distribution_version[0]) < 7 and "runtime" in race_config.challenge:
             return False
-        # EQL and the observability track are not available prior to 7.x
-        if int(self.distribution_version[0]) < 7:
-            return race_config.track not in ["eql", "observability/logs"]
-        return True
+        # tracks that shouldn't be run depending on the Elasticsearch major version
+        return run_track(race_config.track, self.distribution_version[0])
 
 
 class ParamsFormatter:

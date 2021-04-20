@@ -52,6 +52,26 @@ class VersionsTests(unittest.TestCase):
         self.assertEqual("version string '5.0.0a' does not conform to pattern "+r"'^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$'", ctx.exception.args[0])
 
 
+class SkipTrackTests(unittest.TestCase):
+    def test_allows_geopointshape_with_es_7(self):
+        self.assertTrue(
+            night_rally.run_track("geopointshape", 7),
+            "geopointshape shouldn't run if ES is <7"
+        )
+
+    def test_fails_eql_with_es_6(self):
+        self.assertFalse(
+            night_rally.run_track("eql", 6),
+            "eql shouldn't run if ES is <7"
+        )
+
+    def test_always_run_tracks_not_in_blacklist(self):
+        self.assertTrue(
+            night_rally.run_track("somenewtrack", 5),
+            "allow non blacklisted track to run with any ES version"
+        )
+
+
 class WaitUntilPortFreeTests(unittest.TestCase):
     multi_host_string = "192.168.14.3:9200,192.168.14.4:9200,192.168.14.5:9200".split(",")
     single_host_string = "192.168.2.3:9200".split(",")

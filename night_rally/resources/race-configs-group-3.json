@@ -1,0 +1,80 @@
+[
+  {
+    "track": "geopointshape",
+    "placement": 1,
+    "flavors": [
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "basic",
+            "configurations": [
+              {
+                "name": "geopointshape-append-4g-3nodes",
+                "label": "add-4g-3nodes",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "track-params": {
+                  "number_of_replicas": 1
+                },
+                "car": "4gheap",
+                "node-count": 3
+              },
+              {
+                "name": "geopointshape-append-defaults-1node",
+                "label": "add-defaults",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io",
+                  "segment_memory"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "defaults"
+              },
+              {
+                "name": "geopointshape-append-4g-1node",
+                "label": "add-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-no-conflicts-index-only",
+                "car": "4gheap"
+              },
+              {
+                "name": "geopointshape-update-4g-1node",
+                "label": "update-4g",
+                "charts": [
+                  "indexing"
+                ],
+                "challenge": "append-fast-with-conflicts",
+                "car": "4gheap"
+              }
+            ]
+          },
+          {
+            "name": "trial",
+            "configurations": [
+              {
+                "name": "geopointshape-append-defaults-1node",
+                "label": "add-defaults-security",
+                "charts": [
+                  "indexing",
+                  "query"
+                ],
+                "challenge": "append-no-conflicts",
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
