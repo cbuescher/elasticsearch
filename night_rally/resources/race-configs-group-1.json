@@ -117,7 +117,8 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
-                "node-count": 3
+                "node-count": 3,
+                "on-error": "abort"
               },
               {
                 "name": "geopoint-append-defaults-1node",
@@ -130,7 +131,8 @@
                   "segment_memory"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "defaults"
+                "car": "defaults",
+                "on-error": "abort"
               },
               {
                 "name": "geopoint-append-4g-1node",
@@ -142,7 +144,8 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               },
               {
                 "name": "geopoint-append-4g-1node-with-jfr",
@@ -155,6 +158,7 @@
                   "number_of_replicas": 0
                 },
                 "car": "4gheap",
+                "on-error": "abort",
                 "car-params": {
                   "additional_java_settings": [
                     "-XX:+UnlockDiagnosticVMOptions",
@@ -172,7 +176,8 @@
                   "indexing"
                 ],
                 "challenge": "append-fast-with-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               }
             ]
           },
@@ -188,6 +193,7 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults",
+                "on-error": "abort",
                 "x-pack": [
                   "security"
                 ]
