@@ -11,7 +11,6 @@ JDK $VERSION should be release on date ([source](https://openjdk.java.net/projec
 
 ### Rally
 
-* [ ] Create an infra PR to add the new `JAVA$VERSION_HOME` in the rally builds (this is needed because Rally builds Elasticsearch from sources) - e.g. https://github.com/elastic/infra/pull/19281
 * [ ] Add the build and runtime JDK in rally-teams - e.g. https://github.com/elastic/rally-teams/pull/48
 * [ ] Expose the new environment variable in Rally in `tox.ini` - e.g. https://github.com/elastic/rally/pull/953
 
@@ -20,10 +19,6 @@ JDK $VERSION should be release on date ([source](https://openjdk.java.net/projec
 * [ ] Create an infra PR to add the new JDK for the macrobenchmark machines (nightly, low-mem) - e.g. https://github.com/elastic/infra/pull/19281 (ensure that infra executes the Ansible commands below against the machines so the JDK is present there). 
 * [ ] Expose `JAVA$VERSION_HOME` when starting the Rally daemon via night-rally - e.g. https://github.com/elastic/night-rally/pull/235
 * [ ] Ensure that our Vagrant workflow still works - e.g. https://github.com/elastic/night-rally/pull/234
-
-### Microbenchmarks
-
-* [x] Create an infra PR to add the new JDK for the microbenchmark machine - e.g. https://github.com/elastic/infra/pull/19281 (ensure that infra executes the Ansible commands below against the machines so the JDK is present there). 
 
 ### Ansible
 
@@ -39,8 +34,6 @@ ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_
 ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets-group-2 --tags java
 
 ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets-group-3 --tags java
-
-ansible-playbook -u $SSH_USER -i inventory/production playbooks/jenkins_workers.yml --limit elasticsearch-ci-workers-microbenchmarks --tags java
 ```
 
 `$SSH_USER` is your remote user name on the bare metal machines.

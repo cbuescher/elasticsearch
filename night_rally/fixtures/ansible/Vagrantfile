@@ -340,7 +340,7 @@ Vagrant.configure(2) do |config|
       end
 
       if node != nodes.first && install_build_requirements
-        node_config.vm.provision "shell", inline: install_java(15)
+        node_config.vm.provision "shell", inline: install_java(16)
       end
 
       ip_address = ip_address.succ
