@@ -20,7 +20,8 @@
                   "segment_memory"
                 ],
                 "challenge": "nested-search-challenge",
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               }
             ]
           }
@@ -48,7 +49,8 @@
                   "segment_memory"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "defaults"
+                "car": "defaults",
+                "on-error": "abort"
               }
             ]
           }
@@ -77,6 +79,7 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
+                "on-error": "abort",
                 "node-count": 3
               },
               {
@@ -90,6 +93,7 @@
                   "number_of_replicas": 0
                 },
                 "car": "defaults",
+                "on-error": "abort",
                 "car-params": {
                   "indexing_pressure_memory_limit": "80%"
                 }
@@ -107,7 +111,8 @@
                   "merge_times"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               },
               {
                 "name": "pmc-nio-4g-3nodes",
@@ -123,6 +128,7 @@
                   "4gheap",
                   "unpooled"
                 ],
+                "on-error": "abort",
                 "car-params": {
                   "additional_cluster_settings": {
                     "cache.recycler.page.limit.heap": "13.5%",
@@ -147,6 +153,7 @@
                   "4gheap",
                   "unpooled"
                 ],
+                "on-error": "abort",
                 "car-params": {
                   "additional_cluster_settings": {
                     "cache.recycler.page.limit.heap": "13.5%",
@@ -163,7 +170,8 @@
                   "indexing"
                 ],
                 "challenge": "append-sorted-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               },
               {
                 "name": "pmc-update-4g-1node",
@@ -172,7 +180,8 @@
                   "indexing"
                 ],
                 "challenge": "append-fast-with-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               }
             ]
           },
@@ -188,6 +197,7 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap",
+                "on-error": "abort",
                 "x-pack": [
                   "security"
                 ]
