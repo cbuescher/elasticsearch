@@ -11,29 +11,19 @@ JDK $VERSION should be release on date ([source](https://openjdk.java.net/projec
 
 ### Rally
 
+* [ ] Check if new definitions are needed for `java_custom_versions:` in [defaults.yml](https://github.com/elastic/infra/blob/16dabef9ff2f628b6c77329414952cf015a5d614/ansible/roles/java/defaults/main.yml#L7-L65) of infra's `java` role; if they are missing, add them with a PR like [infra#29041](https://github.com/elastic/infra/pull/29041)
+* [ ] Execute yourself, or ensure that infra executes the following Ansible command:
+
+    ```
+    ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets-all --tags java
+    ```
+   `$SSH_USER` is your remote user name on the bare metal machines.`
+
 * [ ] Add the build and runtime JDK in rally-teams - e.g. https://github.com/elastic/rally-teams/pull/48
 * [ ] Expose the new environment variable in Rally in `tox.ini` - e.g. https://github.com/elastic/rally/pull/953
 
 ### Nightly Benchmarks
 
-* [ ] Create an infra PR to add the new JDK for the macrobenchmark machines (nightly, low-mem) - e.g. https://github.com/elastic/infra/pull/19281 (ensure that infra executes the Ansible commands below against the machines so the JDK is present there). 
+* [ ] Create an infra PR to add the new JDK for the linux java machines config - e.g. https://github.com/elastic/infra/pull/29041 (ensure that infra executes the Ansible commands below against the machines so the JDK is present there).
 * [ ] Expose `JAVA$VERSION_HOME` when starting the Rally daemon via night-rally - e.g. https://github.com/elastic/night-rally/pull/235
 * [ ] Ensure that our Vagrant workflow still works - e.g. https://github.com/elastic/night-rally/pull/234
-
-### Ansible
-
-To install the new Java version on all environments, run the following commands after the respective infra PR(s) has been merged from the `ansible` directory in the infra repository:
-
-```
-ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets --tags java
-
-ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit memorybenchmarks --tags java
-
-ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets-group-1 --tags java
-
-ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets-group-2 --tags java
-
-ansible-playbook -u $SSH_USER -i inventory/production playbooks/macrobenchmarks_targets.yml --limit macrobenchmarks-targets-group-3 --tags java
-```
-
-`$SSH_USER` is your remote user name on the bare metal machines.
