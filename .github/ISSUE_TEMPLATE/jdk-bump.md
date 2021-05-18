@@ -24,6 +24,5 @@ JDK $VERSION should be release on date ([source](https://openjdk.java.net/projec
 
 ### Nightly Benchmarks
 
-* [ ] Create an infra PR to add the new JDK for the linux java machines config - e.g. https://github.com/elastic/infra/pull/29041 (ensure that infra executes the Ansible commands below against the machines so the JDK is present there).
 * [ ] Expose `JAVA$VERSION_HOME` when starting the Rally daemon via night-rally - e.g. https://github.com/elastic/night-rally/pull/235
 * [ ] Ensure that our Vagrant workflow still works - e.g. https://github.com/elastic/night-rally/pull/234
