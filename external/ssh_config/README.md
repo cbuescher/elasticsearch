@@ -35,7 +35,7 @@ ssh night-rally-1
     cp -r config.d/. ~/.ssh/config.d
     ```
 
-3. Copy the latest version of the file [.known_hosts](https://github.com/elastic/infra/blob/master/ansible/.known_hosts) from the [infra repo](github.com/elastic/infra) under `~/.ssh/config.d`.
+3. Copy the latest version of the file [.known_hosts](https://github.com/elastic/infra/blob/master/ansible/.known_hosts) from the [infra repo](https://github.com/elastic/infra) under `~/.ssh/config.d`.
    
 4. Edit `~/.ssh/config.d/common` and change `<yourlocalsshuser>` in line 5 with the unix account you used in the [infra repo](https://github.com/elastic/infra/blob/master/docs/accessing-instances.md#ssh-access) when you submitted your public key.
 
