@@ -229,6 +229,7 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
+                "on-error": "abort",
                 "node-count": 3
               },
               {
@@ -241,7 +242,8 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "defaults"
+                "car": "defaults",
+                "on-error": "abort"
               },
               {
                 "name": "http_logs-append-4g-1node",
@@ -254,7 +256,8 @@
                   "segment_memory"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               },
               {
                 "name": "http_logs-runtime-4g-1node",
@@ -268,6 +271,7 @@
                 ],
                 "challenge": "runtime-fields",
                 "car": "4gheap",
+                "on-error": "abort",
                 "track-params": {
                   "runtime_fields": true
                 },
@@ -283,7 +287,8 @@
                 "track-params": {
                   "source_enabled": false
                 },
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               },
               {
                 "name": "http_logs-appendsorted-4g-1node",
@@ -292,7 +297,8 @@
                   "indexing"
                 ],
                 "challenge": "append-sorted-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               },
               {
                 "name": "http_logs-grok-no-src-1node",
@@ -305,7 +311,8 @@
                   "source_enabled": false,
                   "ingest_pipeline": "grok"
                 },
-                "car": "4gheap"
+                "car": "4gheap",
+                "on-error": "abort"
               }
             ]
           },
@@ -321,6 +328,7 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap",
+                "on-error": "abort",
                 "x-pack": [
                   "security"
                 ],
