@@ -21,8 +21,7 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
-                "node-count": 3,
-                "on-error": "abort"
+                "node-count": 3
               },
               {
                 "name": "geonames-append-defaults-1node",
@@ -35,8 +34,7 @@
                   "segment_memory"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "defaults",
-                "on-error": "abort"
+                "car": "defaults"
               },
               {
                 "name": "geonames-append-4g-1node",
@@ -48,8 +46,7 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "4gheap",
-                "on-error": "abort"
+                "car": "4gheap"
               },
               {
                 "name": "geonames-appendsorted-4g-1node",
@@ -58,8 +55,7 @@
                   "indexing"
                 ],
                 "challenge": "append-sorted-no-conflicts",
-                "car": "4gheap",
-                "on-error": "abort"
+                "car": "4gheap"
               },
               {
                 "name": "geonames-update-4g-1node",
@@ -68,8 +64,7 @@
                   "indexing"
                 ],
                 "challenge": "append-fast-with-conflicts",
-                "car": "4gheap",
-                "on-error": "abort"
+                "car": "4gheap"
               }
             ]
           },
@@ -85,7 +80,6 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults",
-                "on-error": "abort",
                 "x-pack": [
                   "security"
                 ]
@@ -117,8 +111,7 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
-                "node-count": 3,
-                "on-error": "abort"
+                "node-count": 3
               },
               {
                 "name": "geopoint-append-defaults-1node",
@@ -131,8 +124,7 @@
                   "segment_memory"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "defaults",
-                "on-error": "abort"
+                "car": "defaults"
               },
               {
                 "name": "geopoint-append-4g-1node",
@@ -144,8 +136,7 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "4gheap",
-                "on-error": "abort"
+                "car": "4gheap"
               },
               {
                 "name": "geopoint-append-4g-1node-with-jfr",
@@ -158,7 +149,6 @@
                   "number_of_replicas": 0
                 },
                 "car": "4gheap",
-                "on-error": "abort",
                 "car-params": {
                   "additional_java_settings": [
                     "-XX:+UnlockDiagnosticVMOptions",
@@ -176,8 +166,7 @@
                   "indexing"
                 ],
                 "challenge": "append-fast-with-conflicts",
-                "car": "4gheap",
-                "on-error": "abort"
+                "car": "4gheap"
               }
             ]
           },
@@ -193,7 +182,6 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults",
-                "on-error": "abort",
                 "x-pack": [
                   "security"
                 ]
@@ -224,8 +212,7 @@
                   "segment_memory"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "4gheap",
-                "on-error": "abort"
+                "car": "4gheap"
               }
             ]
           }
@@ -258,7 +245,6 @@
                   }
                 },
                 "car": "4gheap",
-                "on-error": "abort",
                 "node-count": 3,
                 "exclude-tasks": "force-merge,refresh-after-force-merge"
               },
@@ -274,7 +260,6 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap",
-                "on-error": "abort",
                 "exclude-tasks": "force-merge,refresh-after-force-merge"
               },
               {
@@ -288,7 +273,6 @@
                   "number_of_replicas": 0
                 },
                 "car": "4gheap",
-                "on-error": "abort",
                 "exclude-tasks": "force-merge,refresh-after-force-merge"
               }
             ]
@@ -311,7 +295,6 @@
                   }
                 },
                 "car": "4gheap",
-                "on-error": "abort",
                 "x-pack": [
                   "security"
                 ],
@@ -327,7 +310,6 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap",
-                "on-error": "abort",
                 "x-pack": [
                   "security"
                 ],
@@ -340,7 +322,6 @@
                 "charts": [],
                 "challenge": "append-ml",
                 "car": "4gheap",
-                "on-error": "abort",
                 "x-pack": [
                   "ml"
                 ],
@@ -373,7 +354,6 @@
                 ],
                 "challenge": "default",
                 "car": "16gheap",
-                "on-error": "abort",
                 "plugins": "mapper-size"
               }
             ]

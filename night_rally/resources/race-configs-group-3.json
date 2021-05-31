@@ -93,7 +93,6 @@
                 "label": "add-8g",
                 "challenge": "logging-indexing",
                 "car": "8gheap",
-                "on-error": "abort",
                 "track-params": {
                   "raw_data_volume_per_day": "3.5GB",
                   "max_generated_corpus_size": "30GB",
@@ -153,7 +152,6 @@
                 "label": "add-8g",
                 "challenge": "logging-querying",
                 "car": "8gheap",
-                "on-error": "abort",
                 "track-params": {
                   "bulk_start_date": "2020-01-01",
                   "bulk_end_date": "2020-01-02",
