@@ -2,7 +2,7 @@
 
 ## Night Rally
 
-Night Rally is a set of driver scripts for [running nightly macrobenchmarks for Elasticsearch](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic) and [publishing the results](https://elasticsearch-benchmarks.elastic.co/). The macrobenchmarks themselves are executed by [Rally](https://github.com/elastic/rally).
+Night Rally is a set of driver scripts for running nightly macrobenchmarks for Elasticsearch and [publishing the results](https://elasticsearch-benchmarks.elastic.co/). The macrobenchmarks themselves are executed by [Rally](https://github.com/elastic/rally).
 
 ### Prerequisites
 
@@ -81,11 +81,11 @@ This is done as the last step before the nightly run has finished.
 
 #### Add a new track
 
-Benchmarks get executed in two environments, group-1 / group-2 (see [infra repo](https://github.com/elastic/infra/blob/master/ansible/inventory/production/hetzner/benchmarks)).
+Benchmarks get executed in three environments, group-1 / group-2 / group-3 (see [infra repo](https://github.com/elastic/infra/blob/master/ansible/inventory/production/hetzner/benchmarks)).
 
 The following steps are necessary to add a new track:
 
-1. Add your track and the challenges to run in `resources/race-configs-group-1.json` or `resources/race-configs-group-2.json`.
+1. Add your track and the challenges to run in `resources/race-configs-group-?.json`.
 2. Generate nightly charts and the corresponding dashboards with Rally: `esrally generate charts --configuration-name=nightly --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-group-?.json --chart-type=time-series --output-path=nightly-charts.ndjson`
 3. Generate release charts and the corresponding dashboard with Rally: `esrally generate charts --configuration-name=release --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-group-?.json --chart-type=bar --output-path=release-charts.ndjson`
 4. Import the new charts to the corresponding dashboards on the [Kibana instance](https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io) (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
@@ -95,16 +95,7 @@ If you're finished, please submit a PR. After the PR is merged, we will deploy t
 
 #### Run a release benchmark
 
-Suppose we want to publish a new release benchmark of the Elasticsearch release `6.6.1` on our benchmark page. To do that, start two jobs:
-
-- [target group-1 macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/)
-- [target group-2 macrobenchmark build](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/)
-
-* `MODE`: `release`
-* `RELEASE_LICENSE`: `basic` (default)
-* `VERSION`: `6.6.1`
-
-The results will show up automatically as soon as the build is finished.
+Raise a [release benchmark issue](https://github.com/elastic/night-rally/issues/new?assignees=&labels=benchmark&template=release-benchmarks.md&title=Run+release+benchmarks+for+Elasticsearch+x.y.z) and follow the steps outlined in the template.
 
 #### Retrigger a failed nightly benchmark
 
@@ -115,7 +106,7 @@ Rally allows to benchmark arbitrary (recent) commits in Elasticsearch. Night-Ral
 
 Therefore, we need to ensure we set the corresponding build parameter `EFFECTIVE_START_DATE` in the nightly CI builds. Suppose a benchmark has failed that has originally been run with the effective start date "20200220T180634Z" (look for e.g. `18:13:14 [2020-02-20 18:13:14][INFO] Effective start date is [2020-02-20 18:06:34]` in the Jenkins console ouput).
 
-1. Ensure that [all machines in the affected benchmark environment](42.md#where-are-the-benchmark-machines) are in a clean state (no hanging processes etc.) by logging in to each machine as user `jenkins` (`sudo -iu jenkins`). Then check (and terminate if needed):
+1. Ensure that [all machines in the affected benchmark environment](https://wiki.elastic.co/pages/viewpage.action?pageId=135076508) are in a clean state (no hanging processes etc.) by logging in to each machine as user `jenkins` (`sudo -iu jenkins`). Then check (and terminate if needed):
     1. Any leftover Elasticsearch processes: `ps -ef | grep -i java | grep -v swarm-client`. Note that on the load driver machines one Java process, the Jenkins swarm client, is running (and should keep running) so please make sure you don't terminate it accidentally.
     2. Any leftover Rally processes: `ps -ef | grep -i rally`
 
@@ -283,11 +274,11 @@ and running `./test_release.sh` will cause all these fixtures to be executed, si
 
 ## Common issues with the bare metal environments (Hetzner)
 
-The current bare metal environments are documented in [42.md](42.md).
+See our list of the [current bare metal environments](https://wiki.elastic.co/pages/viewpage.action?pageId=135076508).
 
 ### Replacing a faulty disk
 
-See the runbook [how to have a faulty disk replaced](https://github.com/elastic/elasticsearch-benchmarks/wiki/Runbooks#drive-failure).
+See the runbook [how to have a faulty disk replaced](https://wiki.elastic.co/display/DEV/Drive+Failure).
 
 ### Swapping network public/private NIC device names after re-bootstrapping the OS
 
