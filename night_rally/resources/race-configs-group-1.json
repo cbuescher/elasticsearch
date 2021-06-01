@@ -30,8 +30,7 @@
                   "indexing",
                   "query",
                   "gc",
-                  "io",
-                  "segment_memory"
+                  "io"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults"
@@ -120,8 +119,7 @@
                   "indexing",
                   "query",
                   "gc",
-                  "io",
-                  "segment_memory"
+                  "io"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults"
@@ -208,8 +206,7 @@
                 "charts": [
                   "query",
                   "gc",
-                  "io",
-                  "segment_memory"
+                  "io"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap"
@@ -255,8 +252,7 @@
                   "indexing",
                   "query",
                   "gc",
-                  "io",
-                  "segment_memory"
+                  "io"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap",

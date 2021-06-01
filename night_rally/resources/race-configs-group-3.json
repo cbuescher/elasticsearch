@@ -29,8 +29,7 @@
                   "indexing",
                   "query",
                   "gc",
-                  "io",
-                  "segment_memory"
+                  "io"
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults"
@@ -142,7 +141,6 @@
                   "indexing",
                   "gc",
                   "io",
-                  "segment_memory",
                   "merge_count",
                   "merge_times"
                 ]
