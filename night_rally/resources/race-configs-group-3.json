@@ -235,7 +235,7 @@
                 "charts": [
                   "gc",
                   "io",
-                  "querying"
+                  "query"
                 ]
               }
             ]
