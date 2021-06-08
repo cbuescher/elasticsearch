@@ -314,8 +314,9 @@
               {
                 "name": "nyc_taxis-ml-4g-1node",
                 "label": "ml-4g",
-                "#COMMENT": "Don't generate any standard charts but we'll create ML-specific charts",
-                "charts": [],
+                "charts": [
+                  "ml_processing_time"
+                ],
                 "challenge": "append-ml",
                 "car": "4gheap",
                 "x-pack": [
