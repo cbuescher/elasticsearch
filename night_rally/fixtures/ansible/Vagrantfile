@@ -123,12 +123,12 @@ def install_rally_source(rally_repo, rally_branch, rally_sha)
     #!/usr/bin/env bash
 
     cd /var/lib/jenkins
-    #{curl_wrapper} https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer -o pyenv-installer
-    bash ./pyenv-installer
-    rm pyenv-installer
-    echo 'export PATH="$HOME/.pyenv/bin:$HOME/.local/bin:$PATH"' >> /var/lib/jenkins/.profile
-    echo 'eval "\$(pyenv init -)"' >> /var/lib/jenkins/.profile
-    echo 'eval "\$(pyenv virtualenv-init -)"' >> /var/lib/jenkins/.profile
+    git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+    # Per the installation guide, pyenv needs to be added to PATH before ~/.profile sources ~/.bashrc
+    # https://github.com/pyenv/pyenv/blob/master/README.md#basic-github-checkout
+    sed -i '/^\\s*\\. "\\$HOME\\/\\.bashrc"$/i \\\texport PATH="\\$HOME/.pyenv/bin:\\$HOME/.local/bin:\\$PATH"\\\n\\\teval "\\$(pyenv init --path)"\\\n\\\n' /var/lib/jenkins/.profile
+    echo 'eval "\$(pyenv init --path)"' >> /var/lib/jenkins/.profile
+    echo 'eval "\$(pyenv init -)"' >> /var/lib/jenkins/.bashrc
     source /var/lib/jenkins/.profile
     pyenv install 3.8.0
     pyenv local 3.8.0
