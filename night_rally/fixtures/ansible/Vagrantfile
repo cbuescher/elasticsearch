@@ -2,6 +2,7 @@
 # -*- ruby -*-
 
 require "ipaddr"
+require "net/http"
 
 
 def successive_ips(base_ip, num_of_successive_ips)
@@ -196,9 +197,29 @@ def install_night_rally_test_script(base_ip, target_node_ip_addresses)
   EOF
 end
 
+
+def get_java_version(requirement)
+  uri = URI('https://raw.githubusercontent.com/elastic/elasticsearch/master/.ci/java-versions.properties')
+  begin
+    res = Net::HTTP.get_response(uri)
+  rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
+    Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
+    puts "Failed to get required Java version: #{e}"
+    raise e
+  end
+
+  if requirement == "build"
+    res.body.match(/^ES_BUILD_JAVA=(\D+)(\d+)$/mi).captures.last
+  elsif requirement == "runtime"
+    res.body.match(/^ES_RUNTIME_JAVA=(\D+)(\d+)$/mi).captures.last
+  end
+end
+
+
 def install_java(major_ver)
   <<~EOF
     set -eo pipefail
+    echo "Installing Java version #{major_ver}"
     jdk_url=$(#{curl_wrapper} https://jvm-catalog.elastic.co/jdk/latest_openjdk_#{major_ver}_linux | jq -r .url)
     cd /var/lib/jenkins
     mkdir -p .java/openjdk#{major_ver}
@@ -336,11 +357,11 @@ Vagrant.configure(2) do |config|
       # Java 11 is used by default for release benchmarks, so should be installed always
       # https://github.com/elastic/night-rally/issues/114#issuecomment-534100792
       if node != nodes.first
-        node_config.vm.provision "shell", inline: install_java(11)
+        node_config.vm.provision "shell", inline: install_java(get_java_version("runtime"))
       end
 
       if node != nodes.first && install_build_requirements
-        node_config.vm.provision "shell", inline: install_java(16)
+        node_config.vm.provision "shell", inline: install_java(get_java_version("build"))
       end
 
       ip_address = ip_address.succ

@@ -25,4 +25,4 @@ JDK $VERSION should be release on date ([source](https://openjdk.java.net/projec
 ### Nightly Benchmarks
 
 * [ ] Expose `JAVA$VERSION_HOME` when starting the Rally daemon via night-rally - e.g. https://github.com/elastic/night-rally/pull/235
-* [ ] Ensure that our Vagrant workflow still works - e.g. https://github.com/elastic/night-rally/pull/234
+* [ ] Ensure that our Vagrant workflow still works [by running through both the release and nightly benchmark tests](https://github.com/elastic/night-rally#developing-night-rally--rally), i.e. `./test_release.sh` and `./test_nightly.sh`.
