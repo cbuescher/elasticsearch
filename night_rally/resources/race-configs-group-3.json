@@ -97,7 +97,6 @@
                   "max_generated_corpus_size": "30GB",
                   "force_data_generation": true,
                   "max_total_download_gb": 40,
-                  "corpora_uri_base":"gs://rally-internal-tracks",
                   "number_of_replicas": 0,
                   "wait_for_status": "green",
                   "corpus_ratios": {
@@ -157,7 +156,6 @@
                   "max_generated_corpus_size": "30GB",
                   "force_data_generation": true,
                   "max_total_download_gb": 40,
-                  "corpora_uri_base": "gs://rally-internal-tracks/data",
                   "number_of_replicas": 0,
                   "wait_for_status": "green",
                   "corpus_ratios": {
