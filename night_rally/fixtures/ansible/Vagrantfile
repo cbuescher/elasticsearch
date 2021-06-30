@@ -237,7 +237,7 @@ def pass_additional_jenkins_env_vars
     set +x -eo pipefail
     cat >>/var/lib/jenkins/.profile <<EOF2
     export VAULT_ADDR=https://secrets.elastic.co:8200
-    export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-/secret/rally/cloud/vagrant-test-rally-metrics}
+    export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-/secret/performance/es-perf/cloud/vagrant-test-rally-metrics}
     export IN_VAGRANT=YES
     EOF2
   EOF
