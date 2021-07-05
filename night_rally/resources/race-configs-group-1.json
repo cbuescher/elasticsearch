@@ -33,6 +33,9 @@
                   "io"
                 ],
                 "challenge": "append-no-conflicts",
+                "track-params": {
+                  "max_num_segments": 1
+                },
                 "car": "defaults"
               },
               {
@@ -79,6 +82,9 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "defaults",
+                "track-params": {
+                  "max_num_segments": 1
+                },
                 "x-pack": [
                   "security"
                 ]
