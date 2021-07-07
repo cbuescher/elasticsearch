@@ -9,7 +9,7 @@
 
 - block:
     - set_fact:
-        gcs_service_account_contents: "{{ lookup('hashi_vault', 'secret=/secret/performance/employees/cloud/buckets/gcs/performance-testing-artifacts') }}"
+        gcs_service_account_contents: "{{ lookup('hashi_vault', 'secret=/secret/performance/employees/cloud/buckets/gcs/performance-testing-artifacts:service_account') }}"
 
     - name: write gcs service account file
       become: true
