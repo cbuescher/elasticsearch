@@ -109,7 +109,7 @@ def install_rally_ssh_key
   <<~EOF
   set -eo pipefail
   cd /var/lib/jenkins
-  sudo -iu jenkins bash -c "vault read -field=private-key /secret/rally/ssh-keypairs/rally >~/.ssh/id_rsa && chmod 0600 ~/.ssh/id_rsa && ssh-keyscan github.com >> ~/.ssh/known_hosts"
+  sudo -iu jenkins bash -c "vault read -field=private-key /secret/performance/employees/ssh/rally >~/.ssh/id_rsa && chmod 0600 ~/.ssh/id_rsa && ssh-keyscan github.com >> ~/.ssh/known_hosts"
   EOF
 end
 

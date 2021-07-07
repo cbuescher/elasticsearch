@@ -24,7 +24,7 @@ while [[ -h $SOURCE ]]; do # resolve $SOURCE until the file is no longer a symli
 done
 NIGHT_RALLY_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-"/secret/rally/cloud/nightly-rally-metrics"}
+export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-"/secret/performance/employees/cloud/nightly-rally-metrics"}
 
 ANSIBLE_ALL_TAGS=(check-drive-health encryption-at-rest initialize-data-disk trim drop-caches)
 ANSIBLE_SKIP_TAGS=( )

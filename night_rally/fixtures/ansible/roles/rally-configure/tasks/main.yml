@@ -9,7 +9,7 @@
 
 - block:
     - set_fact:
-        gcs_service_account_contents: "{{ lookup('hashi_vault', 'secret=/secret/rally/cloud/gcs-internal-rally-service-account:contents') }}"
+        gcs_service_account_contents: "{{ lookup('hashi_vault', 'secret=/secret/performance/employees/cloud/buckets/gcs/performance-testing-artifacts') }}"
 
     - name: write gcs service account file
       become: true
@@ -18,4 +18,3 @@
         content: "{{ gcs_service_account_contents }}"
         dest: ~/.gcs-service-account.json
   when: not local_setup | default("false") | bool
-

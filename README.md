@@ -239,15 +239,15 @@ The Vagrant workflow retrieves credentials to the metrics store via Vault so ens
     "es_secure": "true"
     }
     ```
-    1.2 Add the key-value pairs to Vault. Please use `/secret/rally/cloud` as path prefix:
+    1.2 Add the key-value pairs to Vault. Please use `/secret/performance/es-perf/cloud` as the path prefix if you want this to be accessible by members of the es-pef team, or `/secret/performance/employees/cloud` if you want it to be readable by all employees:
 
     ```
-    vault write /secret/rally/cloud/your-metrics-cluster-name @cluster-creds.json
+    vault write /secret/performance/es-perf/cloud/your-metrics-cluster-name @cluster-creds.json
     ```
     1.3 Check that the data are present
 
     ```
-    vault read /secret/rally/cloud/your-metrics-cluster-name
+    vault read /secret/performance/es-perf/cloud/your-metrics-cluster-name
     ```
 
     1.4 Delete the cluster properties file
@@ -256,7 +256,7 @@ The Vagrant workflow retrieves credentials to the metrics store via Vault so ens
     rm ~/cluster-creds.json
     ```
 
-2. `export VAULT_NIGHT_RALLY_METRICS_STORE_CREDENTIAL_PATH=/secret/rally/cloud/your-metrics-cluster-name`
+2. `export VAULT_NIGHT_RALLY_METRICS_STORE_CREDENTIAL_PATH=/secret/performance/es-perf/cloud/your-metrics-cluster-name`
 
 Afterwards you can start the Vagrant boxes.
 

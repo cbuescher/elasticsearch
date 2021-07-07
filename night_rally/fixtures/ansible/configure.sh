@@ -12,7 +12,7 @@ SCRIPT_HOME="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 cd ${SCRIPT_HOME}
 
-export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-"/secret/rally/cloud/nightly-rally-metrics"}
+export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-"/secret/performance/employees/cloud/nightly-rally-metrics"}
 # attempt to read so we can determine early on whether the user is logged in
 set +e
 vault read ${RALLY_METRICS_STORE_CREDENTIAL_PATH} > /dev/null 2>&1
