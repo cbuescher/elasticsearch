@@ -99,21 +99,54 @@
                   "max_total_download_gb": 40,
                   "number_of_replicas": 0,
                   "wait_for_status": "green",
-                  "corpus_ratios": {
-                    "application-logs-1": 0.5,
-                    "application-logs-2": 0.25,
-                    "system-syslog-logs": 0.05,
-                    "system-auth-logs": 0.025,
-                    "nginx-access-logs": 0.025,
-                    "nginx-access-logs-2": 0.025,
-                    "nginx-error-logs": 0.01,
-                    "nginx-error-logs-2": 0.01,
-                    "apache-access-logs": 0.025,
-                    "apache-error-logs": 0.01,
-                    "mysql-slowlog-logs": 0.025,
-                    "mysql-error-logs": 0.01,
-                    "kafka-logs": 0.025,
-                    "redis-app-logs": 0.01
+                  "integration_ratios": {
+                    "kafka": {
+                      "corpora": {
+                        "kafka-logs": 0.025
+                      }
+                    },
+                    "nginx": {
+                      "corpora": {
+                        "nginx-access-logs": 0.025,
+                        "nginx-access-logs-2": 0.025,
+                        "nginx-error-logs": 0.01,
+                        "nginx-error-logs-2": 0.01
+                      }
+                    },
+                    "application-logs": {
+                      "corpora": {
+                        "application-logs-1": 0.5,
+                        "application-logs-2": 0.25
+                      }
+                    },
+                    "apache": {
+                      "corpora": {
+                        "apache-access-logs": 0.025,
+                        "apache-error-logs": 0.01
+                      }
+                    },
+                    "mysql": {
+                      "corpora": {
+                        "mysql-slowlog-logs": 0.025,
+                        "mysql-error-logs": 0.01
+                      }
+                    },
+                    "kafka": {
+                      "corpora": {
+                        "kafka-logs": 0.025
+                      }
+                    },
+                    "redis": {
+                      "corpora": {
+                        "redis-app-logs": 0.01
+                      }
+                    },
+                    "system": {
+                      "corpora": {
+                        "system-syslog-logs": 0.05,
+                        "system-auth-logs": 0.025
+                      }
+                    }
                   },
                   "exclude_properties": {
                     "kafka-logs": ["container"],
@@ -158,21 +191,54 @@
                   "max_total_download_gb": 40,
                   "number_of_replicas": 0,
                   "wait_for_status": "green",
-                  "corpus_ratios": {
-                    "application-logs-1": 0.5,
-                    "application-logs-2": 0.25,
-                    "system-syslog-logs": 0.05,
-                    "system-auth-logs": 0.025,
-                    "nginx-access-logs": 0.025,
-                    "nginx-access-logs-2": 0.025,
-                    "nginx-error-logs": 0.01,
-                    "nginx-error-logs-2": 0.01,
-                    "apache-access-logs": 0.025,
-                    "apache-error-logs": 0.01,
-                    "mysql-slowlog-logs": 0.025,
-                    "mysql-error-logs": 0.01,
-                    "kafka-logs": 0.025,
-                    "redis-app-logs": 0.01
+                  "integration_ratios": {
+                    "kafka": {
+                      "corpora": {
+                        "kafka-logs": 0.025
+                      }
+                    },
+                    "nginx": {
+                      "corpora": {
+                        "nginx-access-logs": 0.025,
+                        "nginx-access-logs-2": 0.025,
+                        "nginx-error-logs": 0.01,
+                        "nginx-error-logs-2": 0.01
+                      }
+                    },
+                    "application-logs": {
+                      "corpora": {
+                        "application-logs-1": 0.5,
+                        "application-logs-2": 0.25
+                      }
+                    },
+                    "apache": {
+                      "corpora": {
+                        "apache-access-logs": 0.025,
+                        "apache-error-logs": 0.01
+                      }
+                    },
+                    "mysql": {
+                      "corpora": {
+                        "mysql-slowlog-logs": 0.025,
+                        "mysql-error-logs": 0.01
+                      }
+                    },
+                    "kafka": {
+                      "corpora": {
+                        "kafka-logs": 0.025
+                      }
+                    },
+                    "redis": {
+                      "corpora": {
+                        "redis-app-logs": 0.01
+                      }
+                    },
+                    "system": {
+                      "corpora": {
+                        "system-syslog-logs": 0.05,
+                        "system-auth-logs": 0.025
+                      }
+                    }
                   },
                   "exclude_properties": {
                     "kafka-logs": [
