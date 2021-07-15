@@ -77,7 +77,7 @@
     ]
   },
   {
-    "track": "observability/logs",
+    "track": "solutions/logs",
     "placement": 0,
     "track-repository": "internal",
     "flavors": [
