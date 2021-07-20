@@ -262,7 +262,9 @@
                 ],
                 "challenge": "append-no-conflicts",
                 "car": "4gheap",
-                "exclude-tasks": "force-merge,refresh-after-force-merge"
+                "track-params": {
+                  "force_merge_max_num_segments": 1
+                }
               },
               {
                 "name": "nyc_taxis-appendsorted-4g-1node",
@@ -315,7 +317,9 @@
                 "x-pack": [
                   "security"
                 ],
-                "exclude-tasks": "force-merge,refresh-after-force-merge"
+                "track-params": {
+                  "force_merge_max_num_segments": 1
+                }
               },
               {
                 "name": "nyc_taxis-ml-4g-1node",
