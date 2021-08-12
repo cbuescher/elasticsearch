@@ -85,6 +85,14 @@
     group: jenkins
     mode: '0755'
 
+- name: ensure /etc/crypttab exists
+  file:
+    path: '/etc/crypttab'
+    state: present
+    owner: root
+    group: root
+    mode: '0644'
+
 - name: configure crypttab to auto open encrypted volume
   lineinfile:
     dest: /etc/crypttab
