@@ -88,7 +88,7 @@
 - name: ensure /etc/crypttab exists
   file:
     path: '/etc/crypttab'
-    state: present
+    state: file
     owner: root
     group: root
     mode: '0644'
