@@ -17,7 +17,6 @@ import org.elasticsearch.common.util.BigArrays;
 import org.elasticsearch.core.Nullable;
 import org.elasticsearch.index.fielddata.IndexFieldData.XFieldComparatorSource.Nested;
 import org.elasticsearch.index.fielddata.fieldcomparator.DoubleValuesComparatorSource;
-import org.elasticsearch.index.fielddata.fieldcomparator.FloatValuesComparatorSource;
 import org.elasticsearch.index.fielddata.fieldcomparator.LongValuesComparatorSource;
 import org.elasticsearch.search.DocValueFormat;
 import org.elasticsearch.search.MultiValueMode;
@@ -46,7 +45,7 @@ public abstract class IndexNumericFieldData implements IndexFieldData<LeafNumeri
         DATE(false, SortField.Type.LONG, CoreValuesSourceType.DATE),
         DATE_NANOSECONDS(false, SortField.Type.LONG, CoreValuesSourceType.DATE),
         HALF_FLOAT(true, SortField.Type.LONG, CoreValuesSourceType.NUMERIC),
-        FLOAT(true, SortField.Type.FLOAT, CoreValuesSourceType.NUMERIC),
+        FLOAT(true, SortField.Type.DOUBLE, CoreValuesSourceType.NUMERIC),
         DOUBLE(true, SortField.Type.DOUBLE, CoreValuesSourceType.NUMERIC);
 
         private final boolean floatingPoint;
@@ -170,7 +169,6 @@ public abstract class IndexNumericFieldData implements IndexFieldData<LeafNumeri
         switch (targetNumericType) {
         case HALF_FLOAT:
         case FLOAT:
-            return new FloatValuesComparatorSource(this, missingValue, sortMode, nested);
         case DOUBLE:
             return new DoubleValuesComparatorSource(this, missingValue, sortMode, nested);
         case DATE:

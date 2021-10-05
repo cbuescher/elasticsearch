@@ -2075,4 +2075,73 @@ public class FieldSortIT extends ESIntegTestCase {
         }
     }
 
+    public void testNumericTypeSortCompatibility() throws InterruptedException {
+        String[] integerTypes = new String[] { "long", "integer", "short", "byte" };
+        for (String type1 : integerTypes) {
+            for (String type2 : integerTypes) {
+                if (type1.compareTo(type2) <= 0) {
+                    continue;
+                }
+                String indexName1 = "test1_" + type1 + "_" + type2;
+                System.out.println(indexName1);
+                assertAcked(
+                    prepareCreate(indexName1).setSettings(Settings.builder().put(IndexMetadata.SETTING_NUMBER_OF_SHARDS, 2))
+                        .setMapping("field", "type=" + type1)
+                        .get()
+                );
+                String indexName2 = "test2_" + type1 + "_" + type2;
+                assertAcked(
+                    prepareCreate(indexName2).setSettings(Settings.builder().put(IndexMetadata.SETTING_NUMBER_OF_SHARDS, 2))
+                        .setMapping("field", "type=" + type2)
+                        .get()
+                );
+
+                List<IndexRequestBuilder> builders = new ArrayList<>();
+                builders.add(client().prepareIndex(indexName1).setId("1").setSource("field", 1.0));
+                builders.add(client().prepareIndex(indexName2).setId("2").setSource("field", 2.0));
+                indexRandom(true, true, builders);
+
+                SearchResponse searchResponse = client().prepareSearch(indexName1, indexName2)
+                    .addSort(new FieldSortBuilder("field").order(SortOrder.ASC))
+                    .get();
+                assertSearchResponse(searchResponse);
+                assertEquals("1", searchResponse.getHits().getHits()[0].getId());
+                assertEquals("2", searchResponse.getHits().getHits()[1].getId());
+            }
+        }
+
+        String[] floatTypes = new String[] { "double", "float" };
+        for (String type1 : floatTypes) {
+            for (String type2 : floatTypes) {
+                if (type1.compareTo(type2) <= 0) {
+                    continue;
+                }
+                String indexName1 = "test1_" + type1 + "_" + type2;
+                assertAcked(
+                    prepareCreate(indexName1).setSettings(Settings.builder().put(IndexMetadata.SETTING_NUMBER_OF_SHARDS, 2))
+                        .setMapping("field", "type=" + type1)
+                        .get()
+                );
+                String indexName2 = "test2_" + type1 + "_" + type2;
+                assertAcked(
+                    prepareCreate(indexName2).setSettings(Settings.builder().put(IndexMetadata.SETTING_NUMBER_OF_SHARDS, 2))
+                        .setMapping("field", "type=" + type2)
+                        .get()
+                );
+
+                List<IndexRequestBuilder> builders = new ArrayList<>();
+                builders.add(client().prepareIndex(indexName1).setId("1").setSource("field", 1.0));
+                builders.add(client().prepareIndex(indexName2).setId("2").setSource("field", 2.0));
+                indexRandom(true, true, builders);
+
+                SearchResponse searchResponse = client().prepareSearch(indexName1, indexName2)
+                    .addSort(new FieldSortBuilder("field").order(SortOrder.ASC))
+                    .get();
+                assertSearchResponse(searchResponse);
+                assertEquals("1", searchResponse.getHits().getHits()[0].getId());
+                assertEquals("2", searchResponse.getHits().getHits()[1].getId());
+            }
+        }
+    }
+
 }

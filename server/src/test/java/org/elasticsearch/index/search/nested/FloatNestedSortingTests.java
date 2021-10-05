@@ -56,7 +56,7 @@ public class FloatNestedSortingTests extends DoubleNestedSortingTests {
         MultiValueMode sortMode = MultiValueMode.AVG;
         Query childFilter = Queries.not(parentFilter);
         XFieldComparatorSource nestedComparatorSource =
-            createFieldComparator("field2", sortMode, -127, createNested(searcher, parentFilter, childFilter));
+            createFieldComparator("field2", sortMode, -127f, createNested(searcher, parentFilter, childFilter));
         Query query =
             new ToParentBlockJoinQuery(new ConstantScoreQuery(childFilter), new QueryBitSetProducer(parentFilter), ScoreMode.None);
         Sort sort = new Sort(new SortField("field2", nestedComparatorSource));

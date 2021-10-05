@@ -496,7 +496,7 @@ public class FieldSortBuilderTests extends AbstractSortTestCase<FieldSortBuilder
 
                             case FLOAT:
                                 float v4 = randomFloat();
-                                values[i] = v4;
+                                values[i] = (double) v4;
                                 doc.add(new FloatPoint(fieldName, v4));
                                 break;
 
