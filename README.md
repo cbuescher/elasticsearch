@@ -15,7 +15,7 @@ Night Rally is only tested on Mac OS X and Linux.
 
 1. Ensure that all prerequisites of [Rally](https://github.com/elastic/rally) are properly setup. Hint: It is *not* required to install Rally manually. Just ensure that its prerequisites are installed.
 2. Clone this repo: `git clone git@github.com:elastic/night-rally.git`
-3. [Setup Vault](https://github.com/elastic/infra/blob/master/docs/vault.md)
+3. [Setup Vault](https://github.com/elastic/infra/tree/master/docs/vault)
 4. Run `make setup`
 
 Now you can invoke Night Rally regularly with the startup script `night_rally.sh` e.g. via cron. The script can also self-update if invoked as `night_rally.sh --self-update`.
