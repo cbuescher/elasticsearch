@@ -51,15 +51,6 @@
                 "car": "4gheap"
               },
               {
-                "name": "geonames-appendsorted-4g-1node",
-                "label": "add-sorted-4g",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-sorted-no-conflicts",
-                "car": "4gheap"
-              },
-              {
                 "name": "geonames-update-4g-1node",
                 "label": "update-4g",
                 "charts": [
