@@ -40,7 +40,7 @@ You can see the revisions `5859c4d6e62606428c2e49a181c7f845cadabecb` and `c76058
 
 #### Add an annotation
 
-To add an annotation, use the admin tool. First find the correct race timestamp by issuing `night-rally-admin list races --environment=nightly`. You will need the race timestamp later. Below are examples for common cases:
+To add an annotation, use the admin tool. First find the correct race timestamp by issuing `night-rally-admin list races --environment=nightly`. You will need to specify it as `--race-timestamp`. Below are examples for common cases:
 
 * Add an annotation for all charts for a specific nightly benchmark race: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --message="Just a test annotation"`
 * Add an annotation for all charts of one track for a specific nightly benchmark race: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`

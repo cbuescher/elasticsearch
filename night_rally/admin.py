@@ -3,7 +3,7 @@ import sys
 import argparse
 from night_rally import client
 import tabulate
-from datetime import datetime
+import datetime
 
 
 def list_races(es, args):
@@ -155,9 +155,18 @@ def list_annotations(es, args):
         print("No results")
 
 
+def _at_midnight(race_timestamp):
+    TIMESTAMP_FMT = "%Y%m%dT%H%S%MZ"
+    date = datetime.datetime.strptime(race_timestamp, TIMESTAMP_FMT)
+    date = date.replace(hour=0, minute=0, second=0, tzinfo=datetime.timezone.utc)
+    return date.strftime(TIMESTAMP_FMT)
+
+
 def add_annotation(es, args):
     environment = args.environment
-    race_timestamp = args.race_timestamp
+    # To line up annotations with chart data points, use midnight of day N as this is
+    # what the chart use too.
+    race_timestamp = _at_midnight(args.race_timestamp)
     track = args.track
     chart_type = args.chart_type
     chart_name = args.chart_name
@@ -172,7 +181,7 @@ def add_annotation(es, args):
             cwd = os.path.dirname(os.path.realpath(__file__))
             body = open(os.path.join(cwd, "resources", "annotation-mapping.json"), "rt").read()
             es.indices.create(index="rally-annotations", body=body)
-        es.index(index="rally-annotations", doc_type="_doc", body={
+        resp = es.index(index="rally-annotations", doc_type="_doc", body={
             "environment": environment,
             "race-timestamp": race_timestamp,
             "track": track,
@@ -180,6 +189,7 @@ def add_annotation(es, args):
             "chart-name": chart_name,
             "message": message
         })
+        print(f"Successfully added annotation [{resp['_id']}].")
 
 
 def delete_annotation(es, args):
@@ -258,7 +268,7 @@ def arg_parser():
     def valid_date(v):
         pattern = "%Y%m%d"
         try:
-            datetime.strptime(v, pattern)
+            datetime.datetime.strptime(v, pattern)
             # don't convert, just check that the format is correct, we'll use the string value later on anyway
             return v
         except ValueError:
