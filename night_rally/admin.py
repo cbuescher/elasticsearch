@@ -1,9 +1,12 @@
+import argparse
+import datetime
 import os
 import sys
-import argparse
-from night_rally import client
+import uuid
+
 import tabulate
-import datetime
+
+from night_rally import client
 
 
 def list_races(es, args):
@@ -171,6 +174,7 @@ def add_annotation(es, args):
     chart_type = args.chart_type
     chart_name = args.chart_name
     message = args.message
+    annotation_id = str(uuid.uuid4())
     dry_run = args.dry_run
 
     if dry_run:
@@ -181,7 +185,7 @@ def add_annotation(es, args):
             cwd = os.path.dirname(os.path.realpath(__file__))
             body = open(os.path.join(cwd, "resources", "annotation-mapping.json"), "rt").read()
             es.indices.create(index="rally-annotations", body=body)
-        resp = es.index(index="rally-annotations", doc_type="_doc", body={
+        resp = es.index(index="rally-annotations", doc_type="_doc", id=annotation_id, body={
             "environment": environment,
             "race-timestamp": race_timestamp,
             "track": track,
