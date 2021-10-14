@@ -1,12 +1,17 @@
 import argparse
 import datetime
+import json
 import os
 import sys
 import uuid
+from collections import namedtuple
 
 import tabulate
 
 from night_rally import client
+
+def snake_case(s):
+    return "_".join(s.lower().split())
 
 
 def list_races(es, args):
@@ -23,6 +28,7 @@ def list_races(es, args):
     license = args.license
     from_date = args.from_date
     to_date = args.to_date
+    output_format = args.output_format
 
     query = {
         "query": {
@@ -82,7 +88,20 @@ def list_races(es, args):
     ]
 
     result = es.search(index="rally-races-*", body=query, size=limit)
+    headers = ["Race Timestamp",
+               "Race Id",
+               "Track",
+               "Challenge",
+               "Car",
+               "ES Version",
+               "Revision",
+               "Rally Version",
+               "Track Revision",
+               "Team Revision",
+               "User Tags"]
+    Race = namedtuple("Race", " ".join([snake_case(h) for h in headers]))
     races = []
+
     for hit in result["hits"]["hits"]:
         src = hit["_source"]
         if "user-tags" in src:
@@ -92,13 +111,25 @@ def list_races(es, args):
         else:
             user_tags = ""
 
-        races.append([src["race-timestamp"], src["race-id"], src["track"], src.get("challenge"), src["car"],
-                      src["cluster"]["distribution-version"], src["cluster"]["revision"], src["rally-version"],
-                      src["track-revision"], src["cluster"]["team-revision"], user_tags])
+        race_data = Race(src["race-timestamp"],
+                         src["race-id"],
+                         src["track"],
+                         src.get("challenge"),
+                         src["car"],
+                         src["cluster"]["distribution-version"],
+                         src["cluster"]["revision"],
+                         src["rally-version"],
+                         src["track-revision"],
+                         src["cluster"]["team-revision"],
+                         user_tags)
+
+        races.append(race_data)
+
     if races:
-        print(tabulate.tabulate(races, headers=[
-            "Race Timestamp", "Race Id", "Track", "Challenge", "Car", "ES Version",
-            "Revision", "Rally Version", "Track Revision", "Team Revision", "User Tags"]))
+        if output_format == "json":
+            print(json.dumps([race._asdict() for race in races], indent=2))
+        else:
+            print(tabulate.tabulate(races, headers=headers))
     else:
         print("No results")
 
@@ -107,6 +138,7 @@ def list_annotations(es, args):
     limit = args.limit
     environment = args.environment
     track = args.track
+    output_format = args.output_format
     if track:
         query = {
             "query": {
@@ -148,12 +180,30 @@ def list_annotations(es, args):
     ]
 
     result = es.search(index="rally-annotations", body=query, size=limit)
+    headers = ["Annotation Id",
+               "Timestamp",
+               "Track",
+               "Chart Type",
+               "Chart Name",
+               "Message"]
+    Annotation = namedtuple("Annotation", " ".join([snake_case(h) for h in headers]))
     annotations = []
+
     for hit in result["hits"]["hits"]:
         src = hit["_source"]
-        annotations.append([hit["_id"], src["race-timestamp"], src.get("track", ""), src.get("chart", ""), src.get("chart-name", ""), src["message"]])
+        annotation_data = Annotation(hit["_id"],
+                                     src["race-timestamp"],
+                                     src.get("track", ""),
+                                     src.get("chart", ""),
+                                     src.get("chart-name", ""),
+                                     src["message"])
+        annotations.append(annotation_data)
+
     if annotations:
-        print(tabulate.tabulate(annotations, headers=["Annotation Id", "Timestamp", "Track", "Chart Type", "Chart Name", "Message"]))
+        if output_format == "json":
+            print(json.dumps([a._asdict() for a in annotations], indent=2))
+        else:
+            print(tabulate.tabulate(annotations, headers=headers))
     else:
         print("No results")
 
@@ -336,6 +386,13 @@ def arg_parser():
         help="Show only records before or on this date (format: yyyyMMdd)",
         type=valid_date,
         default=None
+    )
+    list_parser.add_argument(
+        "--format",
+        help="Print results as text or json",
+        choices=["text", "json"],
+        default="text",
+        dest="output_format"
     )
 
     # if no "track" is given -> annotate all tracks
