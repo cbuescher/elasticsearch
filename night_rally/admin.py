@@ -138,35 +138,38 @@ def list_annotations(es, args):
     limit = args.limit
     environment = args.environment
     track = args.track
+    from_date = args.from_date
+    to_date = args.to_date
     output_format = args.output_format
-    if track:
-        query = {
-            "query": {
-                "bool": {
-                    "filter": [
-                        {
-                            "term": {
-                                "environment": environment
-                            }
-                        },
-                        {
-                            "term": {
-                                "track": track
+    query = {
+        "query": {
+            "bool": {
+                "filter": [
+                    {
+                        "term": {
+                            "environment": environment
+                        }
+                    },
+                    {
+                        "range": {
+                            "race-timestamp": {
+                                "gte": from_date,
+                                "lte": to_date,
+                                "format": "basic_date"
                             }
                         }
-                    ]
-                }
-
+                    }
+                ]
             }
         }
-    else:
-        query = {
-            "query": {
-                "term": {
-                    "environment": environment
-                }
-            },
-        }
+    }
+    if track:
+        query["query"]["bool"]["filter"].append({
+            "term": {
+                "track": track
+            }
+        })
+    
     query["sort"] = [
         {
             "race-timestamp": "desc"
