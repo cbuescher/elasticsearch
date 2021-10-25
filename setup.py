@@ -32,15 +32,15 @@ install_requires = [
     # License: MIT
     "jsonschema==3.1.1",
     # License: MIT
-    "tabulate==0.8.7",
+    "tabulate==0.8.9",
     # always use the latest version, these are certificate files...
     # License: MPL 2.0
     "certifi"
 ]
 
 tests_require = [
-    "pytest==5.4.0",
-    "pytest-asyncio==0.14.0"
+    "pytest==6.2.5",
+    "pytest-asyncio==0.16.0"
 ]
 
 python_version_classifiers = ["Programming Language :: Python :: {}.{}".format(major, minor)
