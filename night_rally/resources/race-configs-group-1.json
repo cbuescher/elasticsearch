@@ -7,7 +7,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "#COMMENT": "We need to start with a configuration where we build all candidates on all machines as we skip the build step afterwards",
@@ -21,7 +21,10 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
-                "node-count": 3
+                "node-count": 3,
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geonames-append-defaults-1node",
@@ -36,7 +39,10 @@
                 "track-params": {
                   "max_num_segments": 1
                 },
-                "car": "defaults"
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geonames-append-4g-1node",
@@ -48,7 +54,10 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geonames-update-4g-1node",
@@ -57,25 +66,7 @@
                   "indexing"
                 ],
                 "challenge": "append-fast-with-conflicts",
-                "car": "4gheap"
-              }
-            ]
-          },
-          {
-            "name": "trial",
-            "configurations": [
-              {
-                "name": "geonames-append-defaults-1node",
-                "label": "add-defaults-security",
-                "charts": [
-                  "indexing",
-                  "query"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "defaults",
-                "track-params": {
-                  "max_num_segments": 1
-                },
+                "car": "4gheap",
                 "x-pack": [
                   "security"
                 ]
