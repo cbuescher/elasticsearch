@@ -7,7 +7,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "nested-append-4g-1node",
@@ -19,7 +19,10 @@
                   "io"
                 ],
                 "challenge": "nested-search-challenge",
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               }
             ]
           }
@@ -35,7 +38,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "noaa-append-defaults-1node",
@@ -46,7 +49,10 @@
                   "io"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "defaults"
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
               }
             ]
           }
@@ -62,7 +68,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "pmc-append-4g-3nodes",
@@ -75,7 +81,10 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
-                "node-count": 3
+                "node-count": 3,
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "pmc-append-defaults-1node",
@@ -90,7 +99,10 @@
                 "car": "defaults",
                 "car-params": {
                   "indexing_pressure_memory_limit": "80%"
-                }
+                },
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "pmc-append-4g-1node",
@@ -104,7 +116,10 @@
                   "merge_times"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "pmc-appendsorted-4g-1node",
@@ -113,7 +128,10 @@
                   "indexing"
                 ],
                 "challenge": "append-sorted-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "pmc-update-4g-1node",
@@ -122,21 +140,6 @@
                   "indexing"
                 ],
                 "challenge": "append-fast-with-conflicts",
-                "car": "4gheap"
-              }
-            ]
-          },
-          {
-            "name": "trial",
-            "configurations": [
-              {
-                "name": "pmc-append-4g-1node",
-                "label": "add-4g-security",
-                "charts": [
-                  "indexing",
-                  "query"
-                ],
-                "challenge": "append-no-conflicts",
                 "car": "4gheap",
                 "x-pack": [
                   "security"
@@ -156,7 +159,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "http_logs-append-4g-3nodes",
@@ -169,7 +172,10 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
-                "node-count": 3
+                "node-count": 3,
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "http_logs-append-defaults-1node",
@@ -181,7 +187,10 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "defaults"
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "http_logs-append-4g-1node",
@@ -193,7 +202,10 @@
                   "io"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "http_logs-runtime-4g-1node",
@@ -206,6 +218,9 @@
                 ],
                 "challenge": "runtime-fields",
                 "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ],
                 "track-params": {
                   "runtime_fields": true
                 },
@@ -221,7 +236,10 @@
                 "track-params": {
                   "source_enabled": false
                 },
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "http_logs-appendsorted-4g-1node",
@@ -230,7 +248,10 @@
                   "indexing"
                 ],
                 "challenge": "append-sorted-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "http_logs-grok-no-src-1node",
@@ -243,26 +264,10 @@
                   "source_enabled": false,
                   "ingest_pipeline": "grok"
                 },
-                "car": "4gheap"
-              }
-            ]
-          },
-          {
-            "name": "trial",
-            "configurations": [
-              {
-                "name": "http_logs-append-4g-1node",
-                "label": "security-4g",
-                "charts": [
-                  "indexing",
-                  "query"
-                ],
-                "challenge": "append-no-conflicts",
                 "car": "4gheap",
                 "x-pack": [
                   "security"
-                ],
-                "exclude-tasks": "force-merge-1-seg,refresh-after-force-merge-1-seg,desc-sort-timestamp-after-force-merge-1-seg,asc-sort-timestamp-after-force-merge-1-seg"
+                ]
               }
             ]
           }

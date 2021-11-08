@@ -85,7 +85,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "geopoint-append-4g-3nodes",
@@ -98,7 +98,10 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
-                "node-count": 3
+                "node-count": 3,
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geopoint-append-defaults-1node",
@@ -110,7 +113,10 @@
                   "io"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "defaults"
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geopoint-append-4g-1node",
@@ -122,7 +128,10 @@
                 "track-params": {
                   "number_of_replicas": 0
                 },
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geopoint-append-4g-1node-with-jfr",
@@ -135,6 +144,9 @@
                   "number_of_replicas": 0
                 },
                 "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ],
                 "car-params": {
                   "additional_java_settings": [
                     "-XX:+UnlockDiagnosticVMOptions",
@@ -152,22 +164,7 @@
                   "indexing"
                 ],
                 "challenge": "append-fast-with-conflicts",
-                "car": "4gheap"
-              }
-            ]
-          },
-          {
-            "name": "trial",
-            "configurations": [
-              {
-                "name": "geopoint-append-defaults-1node",
-                "label": "add-defaults-security",
-                "charts": [
-                  "indexing",
-                  "query"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "defaults",
+                "car": "4gheap",
                 "x-pack": [
                   "security"
                 ]
@@ -186,7 +183,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "percolator-append-4g-1node",
@@ -197,7 +194,10 @@
                   "io"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               }
             ]
           }
@@ -213,7 +213,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "nyc_taxis-append-4g-3nodes",
@@ -230,6 +230,9 @@
                   }
                 },
                 "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ],
                 "node-count": 3,
                 "exclude-tasks": "force-merge,refresh-after-force-merge"
               },
@@ -246,7 +249,10 @@
                 "car": "4gheap",
                 "track-params": {
                   "force_merge_max_num_segments": 1
-                }
+                },
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "nyc_taxis-appendsorted-4g-1node",
@@ -259,51 +265,12 @@
                   "number_of_replicas": 0
                 },
                 "car": "4gheap",
-                "exclude-tasks": "force-merge,refresh-after-force-merge"
-              }
-            ]
-          },
-          {
-            "name": "trial",
-            "configurations": [
-              {
-                "name": "nyc_taxis-append-4g-3nodes",
-                "label": "add-4g-security-3nodes",
-                "charts": [
-                  "indexing"
-                ],
-                "challenge": "append-no-conflicts-index-only",
-                "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
-                "track-params": {
-                  "index_settings": {
-                    "index.number_of_replicas": 1,
-                    "index.number_of_shards": 5
-                  }
-                },
-                "car": "4gheap",
+                "exclude-tasks": "force-merge,refresh-after-force-merge",
                 "x-pack": [
                   "security"
-                ],
-                "node-count": 3,
-                "exclude-tasks": "force-merge,refresh-after-force-merge"
+                ]
               },
-              {
-                "name": "nyc_taxis-append-4g-1node",
-                "label": "add-4g-security",
-                "charts": [
-                  "indexing",
-                  "query"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "4gheap",
-                "x-pack": [
-                  "security"
-                ],
-                "track-params": {
-                  "force_merge_max_num_segments": 1
-                }
-              },
-              {
+                            {
                 "name": "nyc_taxis-ml-4g-1node",
                 "label": "ml-4g",
                 "charts": [
@@ -312,7 +279,8 @@
                 "challenge": "append-ml",
                 "car": "4gheap",
                 "x-pack": [
-                  "ml"
+                  "ml",
+                  "security"
                 ],
                 "track-params": {
                    "ingest_percentage": 30
@@ -332,7 +300,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "eql-16g-1node",
@@ -343,7 +311,10 @@
                 ],
                 "challenge": "default",
                 "car": "16gheap",
-                "plugins": "mapper-size"
+                "plugins": "mapper-size",
+                "x-pack": [
+                  "security"
+                ]
               }
             ]
           }

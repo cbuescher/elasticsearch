@@ -7,7 +7,7 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "geopointshape-append-4g-3nodes",
@@ -20,7 +20,10 @@
                   "number_of_replicas": 1
                 },
                 "car": "4gheap",
-                "node-count": 3
+                "node-count": 3,
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geopointshape-append-defaults-1node",
@@ -32,7 +35,10 @@
                   "io"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "defaults"
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geopointshape-append-4g-1node",
@@ -41,7 +47,10 @@
                   "indexing"
                 ],
                 "challenge": "append-no-conflicts-index-only",
-                "car": "4gheap"
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
               },
               {
                 "name": "geopointshape-update-4g-1node",
@@ -50,22 +59,7 @@
                   "indexing"
                 ],
                 "challenge": "append-fast-with-conflicts",
-                "car": "4gheap"
-              }
-            ]
-          },
-          {
-            "name": "trial",
-            "configurations": [
-              {
-                "name": "geopointshape-append-defaults-1node",
-                "label": "add-defaults-security",
-                "charts": [
-                  "indexing",
-                  "query"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "defaults",
+                "car": "4gheap",
                 "x-pack": [
                   "security"
                 ]
@@ -85,13 +79,16 @@
         "name": "default",
         "licenses": [
           {
-            "name": "basic",
+            "name": "trial",
             "configurations": [
               {
                 "name": "observability-8g-1node",
                 "label": "add-8g",
                 "challenge": "logging-indexing",
                 "car": "8gheap",
+                "x-pack": [
+                  "security"
+                ],
                 "track-params": {
                   "raw_data_volume_per_day": "3.5GB",
                   "max_generated_corpus_size": "30GB",
@@ -182,6 +179,9 @@
                 "label": "add-8g",
                 "challenge": "logging-querying",
                 "car": "8gheap",
+                "x-pack": [
+                  "security"
+                ],
                 "track-params": {
                   "bulk_start_date": "2020-01-01",
                   "bulk_end_date": "2020-01-02",
