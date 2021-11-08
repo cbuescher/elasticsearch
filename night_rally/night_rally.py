@@ -680,12 +680,10 @@ def copy_results_for_release_comparison(effective_start_date, configuration_name
     if not dry_run:
         import elasticsearch.helpers
         """
-        Copies all results in the metric store for the given trial timestamp so that they are also available as master release results.
+        Copies all results in the metric store for the given timestamp so that they are also available as master release results.
         """
         es.indices.refresh(index="rally-results-*")
         ts = to_iso8601_short(effective_start_date)
-        # find all of today's results but exclude "x-pack" ones because we will not have release charts for them (x-pack has
-        # their own dedicated trial runs on releases)
         query = {
             "query": {
                 "bool": {
@@ -708,19 +706,6 @@ def copy_results_for_release_comparison(effective_start_date, configuration_name
                               "term": {
                                   "user-tags.race-configs-id": race_configs_id
                               }
-                        },
-                        {
-                            "bool": {
-                                "must_not": [
-                                    {
-                                        "term": {
-                                            "user-tags.license": {
-                                                "value": "trial"
-                                            }
-                                        }
-                                    }
-                                ]
-                            }
                         }
                     ]
                 }
