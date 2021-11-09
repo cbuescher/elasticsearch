@@ -65,11 +65,9 @@ setup(name="night_rally",
 
       package_data={"": ["*.json", "*.yml", "*.cfg", "*.j2"]},
       install_requires=install_requires,
-      test_suite="tests",
-      tests_require=tests_require,
-      setup_requires=[
-          "pytest-runner==5.1",
-      ],
+      extras_require={
+          "develop": tests_require,
+      },
       entry_points={
           "console_scripts": [
               # This should not clash with the shell script (which is symlinked as "night_rally" in our CI environment)!

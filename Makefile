@@ -1,5 +1,5 @@
 test:
-	python3 setup.py test
+	pytest tests
 
 setup: install configure
 
