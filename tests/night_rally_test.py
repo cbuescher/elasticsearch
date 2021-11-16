@@ -669,20 +669,12 @@ class NightRallyTests(unittest.TestCase):
                             {
                                 "name": "trial",
                                 "configurations": [
-                                    # should not run this combination - because we filter x-pack configs
-                                    {
-                                        "name": "geonames-4g-with-x-pack",
-                                        "challenge": "append-no-conflicts",
-                                        "car": "4gheap",
-                                        "x-pack": ["security"],
-                                        "track-params": "bulk_size:1000"
-                                    },
                                     # should run an ML benchmark
                                     {
                                         "name": "geonames-4g-with-ml",
                                         "challenge": "append-ml",
                                         "car": "4gheap",
-                                        "x-pack": ["ml"]
+                                        "x-pack": ["ml", "security"]
                                     }
                                 ]
                             }
@@ -757,11 +749,6 @@ class NightRallyTests(unittest.TestCase):
                                         "name": "geonames-defaults",
                                         "challenge": "append-no-conflicts",
                                         "car": "defaults"
-                                    },
-                                    {
-                                        "name": "geonames-4g",
-                                        "challenge": "append-no-conflicts",
-                                        "car": "4gheap"
                                     }
                                 ]
                             },
@@ -773,7 +760,9 @@ class NightRallyTests(unittest.TestCase):
                                         "name": "geonames-4g-with-x-pack",
                                         "challenge": "append-no-conflicts",
                                         "car": "4gheap",
-                                        "x-pack": "security"
+                                        "x-pack": [
+                                            "security"
+                                        ]
                                     }
                                 ]
 
@@ -811,7 +800,7 @@ class NightRallyTests(unittest.TestCase):
              '--car="4gheap,trial-license,x-pack-security" --on-error="abort" '
              '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
              ',basic_auth_password:\'rally-password\'" '
-             "--user-tag=\"name:geonames-4g,setup:bare-trial-security,race-configs-id:{},license:trial,"
+             "--user-tag=\"name:geonames-4g-with-x-pack,setup:bare-trial-security,race-configs-id:{},license:trial,"
              "x-pack:true,x-pack-components:security\" "
              '--runtime-jdk="8" --distribution-version="6.3.0" '
              '--pipeline="from-distribution"'.format(race_configs_id)]

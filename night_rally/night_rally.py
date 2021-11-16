@@ -237,10 +237,6 @@ class ReleaseCommand(DistributionBasedCommand):
         
     def runnable(self, race_config):
         major, minor, _, _ = components(self.distribution_version)
-        # Do not run challenges with special x-pack security configs.
-        # If release license is trial every other challenge will be executed using the specified release x-pack plugins.
-        if self.release_params["license"] == "trial" and "security" in race_config.x_pack:
-            return False
         # Don't run any combination specifying (any) x-pack components when release license is oss
         if self.release_params["license"] == "oss" and race_config.x_pack:
             return False
@@ -302,7 +298,7 @@ class DockerCommand(BaseCommand):
         if len(race_config.target_hosts) > 1:
             return False
         # no plugin installs on Docker
-        if race_config.x_pack or race_config.plugins:
+        if race_config.plugins:
             return False
         # Java flight recorder related benchmarks are only to measure the overhead compared to a configuration
         # without Java flight recorder and it is sufficient to enable them in nightlies.
@@ -464,7 +460,9 @@ class LicenseParams:
         params = {}
         x_pack = race_config.x_pack
         if self.release_params:
-            x_pack += self.release_params.get("x-pack-components", [])
+            for component in self.release_params.get("x-pack-components", []):
+                if component not in x_pack:
+                    x_pack.append(component)
 
         add_if_present(params, "client-options", self.client_options(x_pack))
         add_if_present(params, "elasticsearch-plugins", self.elasticsearch_plugins(x_pack))
@@ -620,8 +618,6 @@ def run_rally(race_configs, release_params, available_hosts, command, dry_run=Fa
 
         for flavor_config in r["flavors"]:
             for license_config in flavor_config["licenses"]:
-                # TODO refactor encapsulation in Release/Docker Command
-                # release benchmarks override license, only go through oss
                 if release_params:
                     # RELEASE_LICENSE=oss|basic only run specific sections
                     if release_params["license"] != "trial" and license_config["name"] != release_params["license"]:
@@ -724,8 +720,8 @@ def copy_results_for_release_comparison(effective_start_date, configuration_name
             # pseudo version for stable comparisons
             src["distribution-version"] = "master"
             src["environment"] = "release"
-            # release benchmarks rely on `user-tags.setup` for bar charts and this depends on the license
-            src["user-tags"]["setup"] = "bare-{}".format(src["user-tags"]["license"])
+            # release benchmarks rely on `user-tags.setup` for bar charts
+            src["user-tags"]["setup"] = "bare"
             release_results.append(src)
         if release_results:
             logger.info("Copying %d result documents for [%s] to release environment." % (len(release_results), ts))
@@ -995,28 +991,19 @@ class CommonCliParams:
             if self._release_x_pack_components:
                 self.release_params["x-pack-components"] = self._release_x_pack_components.split(",")
             self.release_params["license"] = self._release_license
-        if self.is_docker:
-            if self._release_x_pack_components:
-                raise RuntimeError("User specified x-pack configuration [%s] but this is not supported for Docker benchmarks."
-                                   % self._release_x_pack_components)
 
         # Store the filename of race_configs (e.g. `race-configs-group-1.json`)
         # we need it in user tags to help deactivating old release results
         self.race_configs_id = os.path.basename(race_configs_id)
 
     def __build_setup_string(self):
-        # is in the form "<bare|ear|docker>-[<license>]-[<x-pack-components>]"
-        # examples: "bare-oss", "ear-oss", "bare-trial-security", "bare-basic"
+        # is in the form "<bare|ear|docker>"
+        # examples: "bare", "ear"
         setup = "bare"
         if "encryption-at-rest" in self._mode:
             setup = "ear"
         elif self.is_docker:
             setup = "docker"
-
-        setup += "-{}".format(self._release_license)
-
-        if "security" in self._release_x_pack_components:
-            setup += "-security"
 
         return setup
 
