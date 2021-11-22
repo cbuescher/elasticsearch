@@ -9,7 +9,7 @@ assignees: ''
 
 ### Notes
 
-For every task below, after scheduling the job, **set a reminder for yourself at 20:00 UTC** to check the auto-scheduled nightly jobs. If the released job seems to be still running, you should:
+For every task below, after scheduling the job, **set a reminder for yourself at 18:00 UTC** to check the auto-scheduled nightly jobs. If the released job seems to be still running, you should:
 
 1. Cancel the auto-scheduled nightly jobs: use the `x` button after logging in on Jenkins to cancel the pending nightly jobs ([group-1](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-1/), [group-2](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-2/), [group-3](https://elasticsearch-ci.elastic.co/view/All/job/elastic+elasticsearch+master+macrobenchmark-periodic-group-3/)).
 2. Re-schedule the nightly jobs using the correct effective start date.
