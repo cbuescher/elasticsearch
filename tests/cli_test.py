@@ -1,11 +1,10 @@
-import unittest
 import os.path
 
 from night_rally import night_rally
 from tests import get_random_race_configs_id
 
 
-class CommonCliParamsTests(unittest.TestCase):
+class TestCommonCliParams():
     default_mode = "nightly"
     default_version = "master"
     default_release_license = "trial"
@@ -15,25 +14,25 @@ class CommonCliParamsTests(unittest.TestCase):
         race_configs_id = get_random_race_configs_id()
 
         common_cli_params = night_rally.CommonCliParams(
-            mode=CommonCliParamsTests.default_mode,
+            mode=self.default_mode,
             configuration_name="nightly",
-            version=CommonCliParamsTests.default_version,
-            release_license=CommonCliParamsTests.default_release_license,
-            release_x_pack_components=CommonCliParamsTests.default_release_x_pack_components,
+            version=self.default_version,
+            release_license=self.default_release_license,
+            release_x_pack_components=self.default_release_x_pack_components,
             race_configs_id=race_configs_id
         )
 
-        self.assertTrue(common_cli_params.is_nightly)
-        self.assertFalse(common_cli_params.is_release)
-        self.assertFalse(common_cli_params.is_adhoc)
-        self.assertFalse(common_cli_params.is_docker)
-        self.assertFalse(common_cli_params.release_params)
+        assert common_cli_params.is_nightly
+        assert not common_cli_params.is_release
+        assert not common_cli_params.is_adhoc
+        assert not common_cli_params.is_docker
+        assert not common_cli_params.release_params
 
-        self.assertEqual("bare", common_cli_params.setup)
-        self.assertEqual("nightly", common_cli_params.configuration_name)
-        self.assertEqual("master", common_cli_params.version)
-        self.assertFalse(common_cli_params.release_params)
-        self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
+        assert common_cli_params.setup == "bare"
+        assert common_cli_params.configuration_name == "nightly"
+        assert common_cli_params.version == "master"
+        assert not common_cli_params.release_params
+        assert common_cli_params.race_configs_id == os.path.basename(race_configs_id)
 
     def test_parses_release_6_6_0(self):
         race_configs_id = get_random_race_configs_id()
@@ -42,22 +41,22 @@ class CommonCliParamsTests(unittest.TestCase):
             mode="release",
             configuration_name="release",
             version="6.6.0",
-            release_license=CommonCliParamsTests.default_release_license,
-            release_x_pack_components=CommonCliParamsTests.default_release_x_pack_components,
+            release_license=self.default_release_license,
+            release_x_pack_components=self.default_release_x_pack_components,
             race_configs_id=race_configs_id
         )
 
-        self.assertFalse(common_cli_params.is_nightly)
-        self.assertTrue(common_cli_params.is_release)
-        self.assertFalse(common_cli_params.is_adhoc)
-        self.assertFalse(common_cli_params.is_docker)
+        assert not common_cli_params.is_nightly
+        assert common_cli_params.is_release
+        assert not common_cli_params.is_adhoc
+        assert not common_cli_params.is_docker
 
-        self.assertTrue(common_cli_params.release_params)
-        self.assertEqual("bare", common_cli_params.setup)
-        self.assertEqual("release", common_cli_params.configuration_name)
-        self.assertEqual("6.6.0", common_cli_params.version)
-        self.assertEqual({"license": "trial", "x-pack-components": ["security"]}, common_cli_params.release_params)
-        self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
+        assert common_cli_params.release_params
+        assert common_cli_params.setup == "bare"
+        assert common_cli_params.configuration_name == "release"
+        assert common_cli_params.version == "6.6.0"
+        assert common_cli_params.release_params == {"license": "trial", "x-pack-components": ["security"]} 
+        assert common_cli_params.race_configs_id == os.path.basename(race_configs_id) 
 
     def test_parses_release_with_security_6_5_3(self):
         race_configs_id = get_random_race_configs_id()
@@ -71,17 +70,17 @@ class CommonCliParamsTests(unittest.TestCase):
             race_configs_id=race_configs_id
         )
 
-        self.assertFalse(common_cli_params.is_nightly)
-        self.assertTrue(common_cli_params.is_release)
-        self.assertFalse(common_cli_params.is_adhoc)
-        self.assertFalse(common_cli_params.is_docker)
+        assert not common_cli_params.is_nightly
+        assert common_cli_params.is_release
+        assert not common_cli_params.is_adhoc
+        assert not common_cli_params.is_docker
 
-        self.assertTrue(common_cli_params.release_params)
-        self.assertEqual("bare", common_cli_params.setup)
-        self.assertEqual("release", common_cli_params.configuration_name)
-        self.assertEqual("6.5.3", common_cli_params.version)
-        self.assertEqual({"license": "trial", "x-pack-components": ["security"]}, common_cli_params.release_params)
-        self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
+        assert common_cli_params.release_params
+        assert common_cli_params.setup == "bare"
+        assert common_cli_params.configuration_name == "release"
+        assert common_cli_params.version == "6.5.3"
+        assert common_cli_params.release_params == {"license": "trial", "x-pack-components": ["security"]} 
+        assert common_cli_params.race_configs_id == os.path.basename(race_configs_id) 
 
     def test_parses_release_with_security_and_monitoring_6_5_1(self):
         race_configs_id = get_random_race_configs_id()
@@ -95,22 +94,21 @@ class CommonCliParamsTests(unittest.TestCase):
             race_configs_id=race_configs_id
         )
 
-        self.assertFalse(common_cli_params.is_nightly)
-        self.assertTrue(common_cli_params.is_release)
-        self.assertFalse(common_cli_params.is_adhoc)
-        self.assertFalse(common_cli_params.is_docker)
+        assert not common_cli_params.is_nightly
+        assert common_cli_params.is_release
+        assert not common_cli_params.is_adhoc
+        assert not common_cli_params.is_docker
 
-        self.assertTrue(common_cli_params.release_params)
+        assert common_cli_params.release_params
         # TODO: be specific about additional plugins
-        self.assertEqual("bare", common_cli_params.setup)
-        self.assertEqual("release", common_cli_params.configuration_name)
-        self.assertEqual("6.5.1", common_cli_params.version)
-        self.assertEqual({
+        assert common_cli_params.setup == "bare"
+        assert common_cli_params.configuration_name == "release"
+        assert common_cli_params.version == "6.5.1"
+        assert common_cli_params.release_params == {
             "license": "trial",
-            "x-pack-components": ["security","monitoring"]},
-            common_cli_params.release_params
-        )
-        self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
+            "x-pack-components": ["security","monitoring"],
+        }
+        assert common_cli_params.race_configs_id == os.path.basename(race_configs_id) 
 
     def test_parses_release_ear_6_2_1(self):
         race_configs_id = get_random_race_configs_id()
@@ -120,21 +118,21 @@ class CommonCliParamsTests(unittest.TestCase):
             configuration_name="release",
             version="6.2.1",
             release_license="trial",
-            release_x_pack_components=CommonCliParamsTests.default_release_x_pack_components,
+            release_x_pack_components=self.default_release_x_pack_components,
             race_configs_id=race_configs_id
         )
 
-        self.assertFalse(common_cli_params.is_nightly)
-        self.assertTrue(common_cli_params.is_release)
-        self.assertFalse(common_cli_params.is_adhoc)
-        self.assertFalse(common_cli_params.is_docker)
+        assert not common_cli_params.is_nightly
+        assert common_cli_params.is_release
+        assert not common_cli_params.is_adhoc
+        assert not common_cli_params.is_docker
 
-        self.assertTrue(common_cli_params.release_params)
-        self.assertEqual("ear", common_cli_params.setup)
-        self.assertEqual("release", common_cli_params.configuration_name)
-        self.assertEqual("6.2.1", common_cli_params.version)
-        self.assertEqual({"license": "trial", "x-pack-components": ["security"]}, common_cli_params.release_params)
-        self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
+        assert common_cli_params.release_params
+        assert common_cli_params.setup == "ear"
+        assert common_cli_params.configuration_name == "release"
+        assert common_cli_params.version == "6.2.1"
+        assert common_cli_params.release_params == {"license": "trial", "x-pack-components": ["security"]} 
+        assert common_cli_params.race_configs_id == os.path.basename(race_configs_id) 
 
     def test_parses_docker_release_6_2_2(self):
         race_configs_id = get_random_race_configs_id()
@@ -144,25 +142,21 @@ class CommonCliParamsTests(unittest.TestCase):
             configuration_name="release",
             version="6.2.2",
             release_license="trial",
-            release_x_pack_components=CommonCliParamsTests.default_release_x_pack_components,
+            release_x_pack_components=self.default_release_x_pack_components,
             race_configs_id=race_configs_id
         )
 
-        self.assertFalse(common_cli_params.is_nightly)
-        self.assertTrue(common_cli_params.is_release)
-        self.assertFalse(common_cli_params.is_adhoc)
-        self.assertTrue(common_cli_params.is_docker)
+        assert not common_cli_params.is_nightly
+        assert common_cli_params.is_release
+        assert not common_cli_params.is_adhoc
+        assert common_cli_params.is_docker
 
-        self.assertTrue(common_cli_params.release_params)
-        self.assertEqual("docker", common_cli_params.setup)
-        self.assertEqual("release", common_cli_params.configuration_name)
-        self.assertEqual("6.2.2", common_cli_params.version)
-        self.assertTrue({
-            "license": "trial"
-            },
-            common_cli_params.release_params
-        )
-        self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
+        assert common_cli_params.release_params
+        assert common_cli_params.setup == "docker"
+        assert common_cli_params.configuration_name == "release"
+        assert common_cli_params.version == "6.2.2"
+        assert common_cli_params.release_params == {"license": "trial", "x-pack-components": ["security"]} 
+        assert common_cli_params.race_configs_id == os.path.basename(race_configs_id) 
 
     def test_parses_adhoc_benchmarks(self):
         race_configs_id = get_random_race_configs_id()
@@ -172,18 +166,18 @@ class CommonCliParamsTests(unittest.TestCase):
             configuration_name="adhoc",
             version="lucene-7",
             release_license="trial",
-            release_x_pack_components=CommonCliParamsTests.default_release_x_pack_components,
+            release_x_pack_components=self.default_release_x_pack_components,
             race_configs_id=race_configs_id
         )
 
-        self.assertFalse(common_cli_params.is_nightly)
-        self.assertFalse(common_cli_params.is_release)
-        self.assertTrue(common_cli_params.is_adhoc)
-        self.assertFalse(common_cli_params.is_docker)
+        assert not common_cli_params.is_nightly
+        assert not common_cli_params.is_release
+        assert common_cli_params.is_adhoc
+        assert not common_cli_params.is_docker
 
-        self.assertFalse(common_cli_params.release_params)
-        self.assertEqual("bare", common_cli_params.setup)
-        self.assertEqual("adhoc", common_cli_params.configuration_name)
-        self.assertEqual("lucene-7", common_cli_params.version)
-        self.assertFalse(common_cli_params.release_params)
-        self.assertEqual(os.path.basename(race_configs_id), common_cli_params.race_configs_id)
+        assert not common_cli_params.release_params
+        assert common_cli_params.setup == "bare"
+        assert common_cli_params.configuration_name == "adhoc"
+        assert common_cli_params.version == "lucene-7"
+        assert not common_cli_params.release_params
+        assert common_cli_params.race_configs_id == os.path.basename(race_configs_id) 
