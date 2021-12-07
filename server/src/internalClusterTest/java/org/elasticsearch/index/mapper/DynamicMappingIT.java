@@ -18,14 +18,11 @@ import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.cluster.ClusterState;
 import org.elasticsearch.cluster.ClusterStateUpdateTask;
 import org.elasticsearch.cluster.metadata.MappingMetadata;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.cluster.service.ClusterService;
 import org.elasticsearch.common.Randomness;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.geo.GeoPoint;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.xcontent.XContentBuilder;
-import org.elasticsearch.xcontent.XContentFactory;
-import org.elasticsearch.xcontent.XContentType;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -33,6 +30,9 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.test.ESIntegTestCase;
 import org.elasticsearch.test.InternalSettingsPlugin;
+import org.elasticsearch.xcontent.XContentBuilder;
+import org.elasticsearch.xcontent.XContentFactory;
+import org.elasticsearch.xcontent.XContentType;
 import org.hamcrest.Matchers;
 
 import java.io.IOException;
@@ -419,7 +419,9 @@ public class DynamicMappingIT extends ESIntegTestCase {
                 "{\"dynamic\":{\"type\":\"object\", \"dynamic\":true}}}}}}}}", XContentType.JSON));
 
         //the parent object has been mapped dynamic:true, hence the field gets indexed
-        assertEquals(RestStatus.CREATED, client().prepareIndex("test", "_doc").setSource("obj.runtime.dynamic.number", 1)
+        // we use a fixed doc id here to make sure this document and the one we sent later with a conflicting type
+        // target the same shard where we are sure the mapping update has been applied
+        assertEquals(RestStatus.CREATED, client().prepareIndex("test", "_doc").setSource("obj.runtime.dynamic.number", 1).setId("id")
             .setRefreshPolicy(WriteRequest.RefreshPolicy.IMMEDIATE).get().status());
 
         {
