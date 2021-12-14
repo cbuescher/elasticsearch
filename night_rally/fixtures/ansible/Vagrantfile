@@ -36,6 +36,88 @@ rally_repo = ENV.fetch("RALLY_REPO", "https://github.com/elastic/rally.git")
 rally_branch = ENV.fetch("RALLY_BRANCH", "master")
 rally_sha = ENV.fetch("RALLY_SHA", "")
 
+extra_disks = {
+  :coordinator => {
+    :rally_disk => {
+      :scsi_port => 2,
+      :scsi_device => 0,
+      :block_device => "/dev/sdc",
+      :mount_point => "/var/lib/jenkins/.rally",
+      :size_mib => 20480,
+      :fsck_order => 2,
+    }
+  },
+  :target => {
+    :rally_disk => {
+      # needed mostly for building ES from source
+      :scsi_port => 2,
+      :scsi_device => 0,
+      :block_device => "/dev/sdc",
+      :mount_point => "/var/lib/jenkins/.rally",
+      :size_mib => 10480,
+      :fsck_order => 2,
+    },
+    :races_disk => {
+      :scsi_port => 3,
+      :scsi_device => 0,
+      :block_device => "/dev/sdd",
+      :mount_point => "/var/lib/jenkins/.rally/benchmarks/races",
+      :size_mib => 20480,
+      :fsck_order => 3,
+    }
+  }
+}
+
+def create_addon_disks(is_coordinator, hostname, vbox, extra_disks)
+  node_role = is_coordinator ? :coordinator : :target
+  rally_disk_file = File.realpath("vagrantdisk").to_s + "/#{hostname}_rally_disk.vdi"
+  rally_disk_size_mib = extra_disks[node_role][:rally_disk][:size_mib]
+  rally_disk_scsi_port = extra_disks[node_role][:rally_disk][:scsi_port]
+  rally_disk_scsi_device = extra_disks[node_role][:rally_disk][:scsi_device]
+
+  vbox.customize ['createmedium', "disk", '--filename', rally_disk_file, '--size', rally_disk_size_mib, '--format', 'VDI']
+  vbox.customize ['storageattach', :id, '--storagectl', 'SCSI', '--port', rally_disk_scsi_port, '--device', rally_disk_scsi_device, '--type', 'hdd', '--medium', rally_disk_file]
+
+  if ! is_coordinator
+    races_disk_file = File.realpath("vagrantdisk").to_s + "/#{hostname}_races_disk.vdi"
+    races_disk_size_mib = extra_disks[node_role][:races_disk][:size_mib]
+    races_disk_scsi_port = extra_disks[node_role][:races_disk][:scsi_port]
+    races_disk_scsi_device = extra_disks[node_role][:races_disk][:scsi_device]
+
+    vbox.customize ['createmedium', "disk", '--filename', races_disk_file, '--size', races_disk_size_mib, '--format', 'VDI']
+    vbox.customize ['storageattach', :id, '--storagectl', 'SCSI', '--port', races_disk_scsi_port, '--device', races_disk_scsi_device, '--type', 'hdd', '--medium', races_disk_file]
+  end
+end
+
+def setup_extra_disks(is_coordinator, extra_disks)
+  script = "set -eo pipefail\n"
+
+  node_role = is_coordinator ? :coordinator : :target
+  script << disk_init_generator(extra_disks[node_role][:rally_disk])
+
+  if ! is_coordinator
+    script << " \n "
+    script << disk_init_generator(extra_disks[:target][:races_disk])
+  end
+  return script
+end
+
+def disk_init_generator(disk_conf)
+  <<~EOF
+    basedir="/var/lib/jenkins/.rally"
+    mountdir=#{disk_conf[:mount_point]}
+    mkdir -p $mountdir
+    # as $mountdir can be deep under $basedir (and we create parent missing directories with -p), we need to chown the $basedir
+    chown -R jenkins:jenkins $basedir
+    chmod -R 775 $basedir
+    mkfs.ext4 #{disk_conf[:block_device]}
+    echo \"#{disk_conf[:block_device]} $mountdir ext4 defaults 0 #{disk_conf[:fsck_order]}\" >>/etc/fstab
+    mount $mountdir
+    chown -R jenkins:jenkins $mountdir
+    chmod -R 775 $mountdir
+  EOF
+end
+
 def disable_apt_frontend
   <<~EOF
     set -eo pipefail
@@ -298,17 +380,17 @@ Vagrant.configure(2) do |config|
       node_config.vm.hostname = fqdn
       node_config.vm.network :private_network, ip: ip_address.to_s
 
+      is_coordinator = node[:hostname] == "coordinator"
+
       node_config.vm.provider :virtualbox do |vbox, override_config|
         vbox.name = fqdn
         vbox.memory = node[:memory] || default_memory
         vbox.cpus = node[:cpus]
         override_config.vm.synced_folder '../../..', '/night_rally'
 
-        file_to_disk = File.realpath("vagrantdisk").to_s + "/#{node[:hostname]}_disk.vdi"
-        vbox.customize ['createmedium', "disk", '--filename', file_to_disk, '--size', 20480, '--format', 'VDI'] # Size is in MiB
-        vbox.customize ['storageattach', :id, '--storagectl', 'SCSI', '--port', 2, '--device', 0, '--type', 'hdd', '--medium', file_to_disk]
+        create_addon_disks(is_coordinator, node[:hostname], vbox, extra_disks)
 
-        if node[:hostname] == "coordinator"
+        if is_coordinator
           override_config.vm.synced_folder "#{Dir.home}/", "/home/vagrant/", type: "rsync", rsync__args: ["-r", "--include=.vault-token", "--exclude=*"]
         end
       end
@@ -321,18 +403,11 @@ Vagrant.configure(2) do |config|
       node_config.vm.provision "shell", inline: install_rally_user
       node_config.vm.provision "shell", inline: rally_sudoers
       node_config.vm.provision "shell", inline: install_rally_source(rally_repo, rally_branch, rally_sha)
-
-      node_config.vm.provision "shell", inline: <<-EOF
-        mkfs.ext4 /dev/sdc
-        mkdir -p /var/lib/jenkins/.rally/benchmarks/races
-        echo "/dev/sdc /var/lib/jenkins/.rally/benchmarks/races ext4 defaults 0 2" >>/etc/fstab
-        mount /var/lib/jenkins/.rally/benchmarks/races
-        chown -R jenkins:jenkins /var/lib/jenkins/.rally
-      EOF
+      node_config.vm.provision "shell", inline: setup_extra_disks(is_coordinator, extra_disks)
 
       # Make a local copy of night_rally under the jenkins user home dir on the coordinator
       # required because installing night_rally needs write access to the `.egg` directory
-      if node == nodes.first
+      if is_coordinator
         node_config.vm.provision "shell", inline: install_vault
         node_config.vm.provision "shell", inline: <<-EOF
           echo 'sudo rsync -r -o -g --chown=jenkins:jenkins --exclude ".vagrant" --exclude ".venv" --exclude "vagrantdisk" /night_rally /home/vagrant/.vault-token /var/lib/jenkins/' \
@@ -350,18 +425,20 @@ Vagrant.configure(2) do |config|
       node_config.vm.provision "shell", inline: install_night_rally_test_script(base_ip, target_node_ip_addresses)
 
       # Install docker on target nodes
-      if node != nodes.first
+      if ! is_coordinator
         node_config.vm.provision "shell", inline: install_docker
       end
 
       # Java 11 is used by default for release benchmarks, so should be installed always
       # https://github.com/elastic/night-rally/issues/114#issuecomment-534100792
-      if node != nodes.first
-        node_config.vm.provision "shell", inline: install_java(get_java_version("runtime"))
+      runtime_java_version = get_java_version("runtime")
+      build_java_version = get_java_version("build")
+      if ! is_coordinator
+        node_config.vm.provision "shell", inline: install_java(runtime_java_version)
       end
 
-      if node != nodes.first && install_build_requirements
-        node_config.vm.provision "shell", inline: install_java(get_java_version("build"))
+      if ! is_coordinator && install_build_requirements && runtime_java_version != build_java_version
+        node_config.vm.provision "shell", inline: install_java(build_java_version)
       end
 
       ip_address = ip_address.succ
