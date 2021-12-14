@@ -66,7 +66,7 @@ var charts = {
 
   restoreUiState: function(uiState) {
     if (uiState.length >= 2) {
-        $("#checkToggleCompare").prop('checked', uiState[1] === "release");
+        $("#environmentSelector").val(uiState[1]);
     }
     if (uiState.length >= 4) {
         $("#dateRangeSelector").val(uiState[3]);
@@ -109,7 +109,7 @@ var charts = {
     $("#dateRangeSelector").on("change", function() {
         charts.dateRangeChanged();
     });
-    $("#checkToggleCompare").on("click", function() {
+    $("#environmentSelector").on("change", function() {
         charts.chartTypeChanged();
     });
     $("#index-selector").on("click", function() {
@@ -149,12 +149,7 @@ var charts = {
   },
 
   chartType: function() {
-    var e = $("#checkToggleCompare")[0];
-    if (e.checked) {
-        return "release";
-    } else {
-        return "nightly";
-    }
+    return $("#environmentSelector option:selected").val();
   },
 
   activateSpec: function(spec) {
@@ -248,12 +243,15 @@ body,html,.main-display-area,.col-md-12 {
         <a id="dashboard-url" href="#">Kibana dashboard</a> if you want to analyze the results in more detail.
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
-      <form class="form-horizontal">
-        <div class="checkbox">
-          <label><input type="checkbox" id="checkToggleCompare"> Show release charts</label>
+      <form class="row row-cols-lg-auto g-3 align-items-center mb-3">
+        <div class="col-12" id="environmentGroup">
+            <label for="environmentSelector" class="control-label">Benchmark type</label>
+            <select class="form-select" id="environmentSelector">
+                <option value="nightly" selected>Nightly benchmarks</option>
+                <option value="release">Release benchmarks</option>
+            </select>
         </div>
-        <div class="form-group" id="dateRangeGroup">
-          <div class="col-md-4">
+        <div class="col-12" id="dateRangeGroup">
             <label for="dateRangeSelector" class="control-label"> Date range for nightly</label>
             <select class="form-select" id="dateRangeSelector">
               <option value="30d" selected>Last 30 days</option>
@@ -261,7 +259,6 @@ body,html,.main-display-area,.col-md-12 {
               <option value="6M">Last 6 months</option>
               <option value="1y">Last year</option>
             </select>
-          </div>
         </div>
       </form>
       <div id="releaseLegend">
