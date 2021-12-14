@@ -107,30 +107,18 @@ var charts = {
 
   installEventHandlers: function() {
     $("#dateRangeSelector").on("change", function() {
-        charts.dateRangeChanged();
+        charts.dateRange = charts.findDateRange();
+        charts.render();
     });
     $("#environmentSelector").on("change", function() {
-        charts.chartTypeChanged();
+        charts.currentChartType = charts.chartType();
+        charts.render();
     });
     $("#index-selector").on("click", function() {
-        charts.selectMethodology();
+        charts.currentSpec = null;
+        charts.buildMenu(charts.currentSpec);
+        charts.render();
     });
-  },
-
-  dateRangeChanged: function() {
-    charts.dateRange = charts.findDateRange();
-    charts.render();
-  },
-
-  chartTypeChanged: function() {
-    charts.currentChartType = charts.chartType();
-    charts.render();
-  },
-
-  selectMethodology: function() {
-    charts.currentSpec = null;
-    charts.buildMenu(charts.currentSpec);
-    charts.render();
   },
 
   findSelectedSpec: function(uiState) {
