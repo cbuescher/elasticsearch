@@ -61,6 +61,36 @@
     ]
   },
   {
+    "track": "sql",
+    "placement": 1,
+    "flavors": [
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "trial",
+            "configurations": [
+              {
+                "name": "sql-1node",
+                "label": "sql",
+                "charts": [
+                  "query",
+                  "gc",
+                  "io"
+                ],
+                "challenge": "sql",
+                "car": "4gheap",
+                "x-pack": [
+                  "security"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "track": "pmc",
     "placement": 1,
     "flavors": [
