@@ -311,7 +311,19 @@
                 ],
                 "challenge": "default",
                 "car": "16gheap",
-                "plugins": "mapper-size",
+                "x-pack": [
+                  "security"
+                ]
+              },
+              {
+                "name": "eql-indexSorting-16g-1node",
+                "label": "indexSorting-16g",
+                "charts": [
+                  "query",
+                  "gc"
+                ],
+                "challenge": "index-sorting",
+                "car": "16gheap",
                 "x-pack": [
                   "security"
                 ]
