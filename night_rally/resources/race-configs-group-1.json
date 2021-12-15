@@ -311,29 +311,7 @@
                 ],
                 "challenge": "default",
                 "car": "16gheap",
-                "x-pack": [
-                  "security"
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "name": "index-sorting",
-        "licenses": [
-          {
-            "name": "trial",
-            "configurations": [
-              {
-                "name": "eql-16g-1node",
-                "label": "add-16g",
-                "charts": [
-                  "query",
-                  "gc"
-                ],
-                "challenge": "index-sorting",
-                "car": "16gheap",
+                "plugins": "mapper-size",
                 "x-pack": [
                   "security"
                 ]
