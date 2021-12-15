@@ -65,10 +65,18 @@ var charts = {
   },
 
   restoreUiState: function(uiState) {
+    /*  We have three kinds of URLs: nightly, ARM and release. They look like this:
+      * nyc-taxis/nightly/default/30d
+      * nyc-taxis/arm/30d
+      * nyc-taxis/release
+    */
     if (uiState.length >= 2) {
         $("#environmentSelector").val(uiState[1]);
     }
-    if (uiState.length >= 4) {
+
+    if (uiState[1] === "arm") {
+        $("#dateRangeSelector").val(uiState[2]);
+    } else if (uiState[1] === "nightly") {
         $("#dateRangeSelector").val(uiState[3]);
     }
   },
@@ -147,7 +155,11 @@ var charts = {
   },
 
   showChart: function(url, dateRange) {
-    $("#charts").html("<iframe id=\"charts\" src=\"" +url + "?embed=true&_g=(refreshInterval%3A(display%3AOff%2Cpause%3A!f%2Cvalue%3A0)%2Ctime%3A(from%3Anow-" + dateRange + "%2Cmode%3Aquick%2Cto%3Anow))\" height=\"100%\" width=\"100%\" frameBorder=\"0\"></iframe>");
+    $("#charts").html("<iframe id=\"charts\" src=\"" +url + "?embed=true&_g=(refreshInterval%3A(display%3AOff%2Cpause%3A!f%2Cvalue%3A0)%2Ctime%3A(from%3Anow-" + dateRange + "%2Cmode%3Aquick%2Cto%3Anow))\" height=\"100%\" width=\"100%\" frameBorder=\"0\"></iframe>").show();
+  },
+
+  hideChart: function() {
+    $("#charts").hide();
   },
 
   dashboardUrl: function(chartId) {
@@ -159,6 +171,7 @@ var charts = {
     $('.tracks').hide();
     $("#dateRangeGroup").hide();
     $("#releaseLegend").hide();
+    $("#armLegend").hide();
     $("#warningLegend").hide();
 
     if (charts.currentSpec != null) {
@@ -176,6 +189,18 @@ var charts = {
           $("#dateRangeGroup").show();
           $("#dashboard-url").attr("href", nightlyUrl);
           charts.showChart(nightlyUrl, charts.dateRange);
+        } else if (charts.currentChartType === "arm") {
+          hash = hash + "/arm/" + charts.dateRange;
+          var url = charts.dashboardUrl(charts.currentSpec.arm_dashboard);
+          $("#dateRangeGroup").show();
+          $("#dashboard-url").attr("href", url);
+          if (!("arm_dashboard" in charts.currentSpec)) {
+            $("#warningLegend").html("<p>No ARM benchmarks for " + charts.currentSpec.track + ". Try NYC Taxis.").show();
+            charts.hideChart();
+          } else {
+            $("#armLegend").show();
+            charts.showChart(url, charts.dateRange);
+          }
         } else {
           hash = hash + "/release";
           var releaseUrl = charts.dashboardUrl(charts.currentSpec.release_dashboard);
@@ -236,11 +261,12 @@ body,html,.main-display-area,.col-md-12 {
             <label for="environmentSelector" class="control-label">Benchmark type</label>
             <select class="form-select" id="environmentSelector">
                 <option value="nightly" selected>Nightly benchmarks</option>
+                <option value="arm">ARM benchmarks</option>
                 <option value="release">Release benchmarks</option>
             </select>
         </div>
         <div class="col-12" id="dateRangeGroup">
-            <label for="dateRangeSelector" class="control-label"> Date range for nightly</label>
+            <label for="dateRangeSelector" class="control-label">Date range</label>
             <select class="form-select" id="dateRangeSelector">
               <option value="30d" selected>Last 30 days</option>
               <option value="90d">Last 90 days</option>
@@ -249,6 +275,18 @@ body,html,.main-display-area,.col-md-12 {
             </select>
         </div>
       </form>
+
+      <div id="warningLegend" class="alert alert-warning" role="alert"></div>
+
+      <div id="armLegend">
+        <h4>Legend</h4>
+        <p>We run nightly Graviton2 benchmarks using the <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.metal</a> AWS instance type. <strong>Don't use those numbers to compare x86 vs. ARM performance!</strong> Indeed:</p>
+        <ul>
+            <li>Those benchmarks are meant to detect regressions in Elasticsearch: we make sure they're stable, not fast.</li>
+            <li>The ARM instance types that we use have vastly different performance characteristics than our dedicated servers.</li>
+        </ul>
+      </div>
+
       <div id="releaseLegend">
         <h4>Legend</h4>
         <!--Remove the following line when release benchmarks on new env have been run-->
@@ -260,7 +298,6 @@ body,html,.main-display-area,.col-md-12 {
           </ul>
           <p>Starting with Elasticsearch 7.7.0, benchmarks are run with the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup.html#jvm-version">JDK that is bundled with Elasticsearch</a>.</p>
       </div>
-      <div id="warningLegend" class="alert alert-warning" role="alert"></div>
     </div>
   </div>
 
@@ -481,7 +518,8 @@ body,html,.main-display-area,.col-md-12 {
             "nightly_dashboards": {
                 "default": "fdb582b5-c3cb-47d4-8b5b-c1abe82327df"
             },
-            "release_dashboard": "8ba85403-4d85-446c-8243-53fa68929841"
+            "release_dashboard": "8ba85403-4d85-446c-8243-53fa68929841",
+            "arm_dashboard": "6028ee96-e921-4fb9-b370-ea663e4e1c1b"
         },
         {
             "id": "nested",
