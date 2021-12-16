@@ -1,7 +1,6 @@
 [
   {
     "track": "nyc_taxis",
-    "placement": 2,
     "flavors": [
       {
         "name": "default",
