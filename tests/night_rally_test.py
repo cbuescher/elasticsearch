@@ -30,6 +30,9 @@ class TestVersions():
 
 
 class TestSkipTrack():
+    def test_allows_dense_vector_with_es_8(self):
+        assert night_rally.run_track("dense_vector", 8), "dense_vector shouldn't run if ES is <8"
+        
     def test_allows_geopointshape_with_es_7(self):
         assert night_rally.run_track("geopointshape", 7), "geopointshape shouldn't run if ES is <7"
 

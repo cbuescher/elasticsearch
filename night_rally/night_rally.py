@@ -23,7 +23,8 @@ RACE_CONFIGS_SCHEMA_FILE = "{}/resources/race-configs-schema.json".format(ROOT)
 MIN_ES_VERSION_PER_TRACK = {
     "eql": 7,
     "solutions/logs": 7,
-    "geopointshape": 7
+    "geopointshape": 7,
+    "dense_vector": 8
 }
 
 # console logging
