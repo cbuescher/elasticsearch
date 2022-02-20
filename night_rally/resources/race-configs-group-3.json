@@ -345,5 +345,45 @@
         ]
       }
     ]
+  },
+  {
+    "track": "solutions/security",
+    "placement": 0,
+    "track-repository": "internal",
+    "flavors": [
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "trial",
+            "configurations": [
+              {
+                "name": "security-8g-3nodes-indexing-querying",
+                "label": "add-8g-3nodes",
+                "challenge": "security-indexing-querying",
+                "car": "8gheap",
+                "on-error": "abort",
+                "node-count": 3,
+                "x-pack": [
+                  "security"
+                ],
+                "track-params": {
+                  "number_of_replicas": 1,
+                  "wait_for_status": "green"
+                },
+                "charts": [
+                  "indexing",
+                  "gc",
+                  "io",
+                  "merge_count",
+                  "merge_times",
+                  "query"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]
