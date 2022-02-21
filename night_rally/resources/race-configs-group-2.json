@@ -53,6 +53,34 @@
                 "x-pack": [
                   "security"
                 ]
+              },
+              {
+                "name": "noaa-aggs-defaults-1node",
+                "label": "aggs-defaults",
+                "charts": [
+                  "query",
+                  "gc",
+                  "io"
+                ],
+                "challenge": "aggs",
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
+              },
+              {
+                "name": "noaa-aggs-8g-1node",
+                "label": "aggs-8g",
+                "charts": [
+                  "query",
+                  "gc",
+                  "io"
+                ],
+                "challenge": "aggs",
+                "car": "8gheap",
+                "x-pack": [
+                  "security"
+                ]
               }
             ]
           }
