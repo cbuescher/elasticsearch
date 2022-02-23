@@ -24,6 +24,11 @@
       background-color: #006BB4;
     }
 
+    .nav-link {
+      display: table-cell;
+      text-align: center;
+    }
+
     a {
       color: #0077cc;
     }
@@ -569,7 +574,6 @@ body,html,.main-display-area,.col-md-12 {
         {
             "id": "logging",
             "track": "Logging",
-            "warning": "Observability benchmarks are under active development and shouldn't be consulted for any calculations at this point",
             "description": "for evaluating the performance of the logging solution",
             "nightly_dashboards": {
                 "default": "876fbb19-2cd5-43ea-b08d-61ea2f7394ba"
@@ -584,7 +588,17 @@ body,html,.main-display-area,.col-md-12 {
                 "default": "aee73ca0-807d-11ec-9e55-01022ad3d8b4"
             },
             "release_dashboard": ""
-        }
+        },
+        {
+          "id": "security",
+          "track": "Security",
+          "warning": "Security benchmarks are under active development and shouldn't be consulted for any calculations at this point",
+          "description": "for evaluating the performance of Elastic's Security solution",
+          "nightly_dashboards": {
+            "default": "d9a97191-c770-42c5-b171-14ac575871ae"
+          },
+          "release_dashboard": ""
+        },
     ], window.location.hash);
   });
 </script>
