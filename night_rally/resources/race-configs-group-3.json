@@ -206,6 +206,7 @@
                 },
                 "charts": [
                   "indexing",
+                  "ingest",
                   "gc",
                   "io",
                   "merge_count",
@@ -373,6 +374,7 @@
                 },
                 "charts": [
                   "indexing",
+                  "ingest",
                   "gc",
                   "io",
                   "merge_count",

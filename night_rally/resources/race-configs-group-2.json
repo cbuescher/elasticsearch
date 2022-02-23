@@ -270,6 +270,7 @@
                 "label": "runtime-4g",
                 "charts": [
                   "indexing",
+                  "ingest",
                   "query",
                   "gc",
                   "io"
@@ -315,7 +316,8 @@
                 "name": "http_logs-grok-no-src-1node",
                 "label": "no-src-4g-grok",
                 "charts": [
-                  "indexing"
+                  "indexing",
+                  "ingest"
                 ],
                 "challenge": "append-index-only-with-ingest-pipeline",
                 "track-params": {
