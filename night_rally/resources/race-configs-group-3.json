@@ -369,6 +369,8 @@
                   "security"
                 ],
                 "track-params": {
+                  "query_max_date": "2020-01-01T01:00:00Z",
+                  "bulk_indexing_clients": 100,
                   "number_of_replicas": 1,
                   "wait_for_status": "green"
                 },
