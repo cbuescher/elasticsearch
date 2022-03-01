@@ -350,8 +350,10 @@ body,html,.main-display-area,.col-md-12 {
   <div class="row">
     <div class="col-md-12">
       <h3>Benchmarking Environment</h3>
-      <h4>Current environment</h4>
-      <p>All benchmarks are run on bare-metal machines with the following specifications:</p>
+      <h4>ARM environment</h4>
+      <p>ARM benchmarks are run on an AWS <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.metal</a> Graviton2 instance.</p>
+      <h4>Dedicated servers</h4>
+      <p>All other benchmarks are run on bare-metal machines with the following specifications:</p>
       <ul>
         <li>CPU: <a href="https://ark.intel.com/products/97128/intel-core-i7-7700-processor-8m-cache-up-to-4-20-ghz.html">Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz</a></li>
         <li>RAM: 32 GB</li>
@@ -574,7 +576,7 @@ body,html,.main-display-area,.col-md-12 {
         {
             "id": "logging",
             "track": "Logging",
-            "description": "for evaluating the performance of the logging solution",
+            "description": "for evaluating the performance of the Log Monitoring part of Elastic's Observability solution",
             "nightly_dashboards": {
                 "default": "2f9df915-096d-48de-a914-f13eddfdf014"
             },
