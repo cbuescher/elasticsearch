@@ -270,7 +270,7 @@
                   "security"
                 ]
               },
-                            {
+              {
                 "name": "nyc_taxis-ml-4g-1node",
                 "label": "ml-4g",
                 "charts": [
@@ -283,7 +283,7 @@
                   "security"
                 ],
                 "track-params": {
-                   "ingest_percentage": 30
+                  "ingest_percentage": 30
                 }
               }
             ]

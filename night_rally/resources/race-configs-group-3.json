@@ -166,11 +166,6 @@
                         "mysql-error-logs": 0.01
                       }
                     },
-                    "kafka": {
-                      "corpora": {
-                        "kafka-logs": 0.025
-                      }
-                    },
                     "redis": {
                       "corpora": {
                         "redis-app-logs": 0.01
@@ -260,11 +255,6 @@
                       "corpora": {
                         "mysql-slowlog-logs": 0.025,
                         "mysql-error-logs": 0.01
-                      }
-                    },
-                    "kafka": {
-                      "corpora": {
-                        "kafka-logs": 0.025
                       }
                     },
                     "redis": {
