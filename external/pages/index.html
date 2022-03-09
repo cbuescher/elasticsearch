@@ -17,20 +17,10 @@
   <style type="text/css">
     body {
       min-height: 2000px;
-      padding-top: 80px;
     }
 
     .navbar {
       background-color: #006BB4;
-    }
-
-    .nav-link {
-      display: table-cell;
-      text-align: center;
-    }
-
-    a {
-      color: #0077cc;
     }
   </style>
 
@@ -165,6 +155,7 @@ var charts = {
 
   hideChart: function() {
     $("#charts").hide();
+            console.log("hide charts");
   },
 
   dashboardUrl: function(chartId) {
@@ -224,94 +215,90 @@ var charts = {
 }
     </script>
 
-  <style>
-body,html,.main-display-area,.col-md-12 {
-   height:100%;
-}
-    </style>
 </head>
 
 <body>
 
-<!-- Fixed navbar -->
-<div class="navbar navbar-expand navbar-dark fixed-top" role="navigation">
-  <div class="container">
+<div class="navbar navbar-expand navbar-dark sticky-top">
+  <div class="container-fluid">
     <a id="index-selector" class="navbar-brand" href="#">Elasticsearch Benchmarks</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul id="navigation-container" class="navbar-nav">
-      </ul>
-    </div>
   </div>
 </div>
 
-<div class="container tracks">
+<div class="container-fluid">
   <div class="row">
-    <div class="col-md-8">
-      <h3>Results</h3>
-      <div class="alert alert-warning alert-dismissible" role="alert">
-        <strong>Hint</strong> These diagrams are just provided as an overview. Please go to the
-        <a id="dashboard-url" href="#">Kibana dashboard</a> if you want to analyze the results in more detail.
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-      <form class="row row-cols-lg-auto g-3 align-items-center mb-3">
-        <div class="col-12" id="environmentGroup">
-            <label for="environmentSelector" class="control-label">Benchmark type</label>
-            <select class="form-select" id="environmentSelector">
-                <option value="nightly" selected>Nightly benchmarks</option>
-                <option value="arm">ARM benchmarks</option>
-                <option value="release">Release benchmarks</option>
-            </select>
-        </div>
-        <div class="col-12" id="dateRangeGroup">
-            <label for="dateRangeSelector" class="control-label">Date range</label>
-            <select class="form-select" id="dateRangeSelector">
-              <option value="30d" selected>Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-              <option value="6M">Last 6 months</option>
-              <option value="1y">Last year</option>
-            </select>
-        </div>
-      </form>
-
-      <div id="warningLegend" class="alert alert-warning" role="alert"></div>
-
-      <div id="armLegend">
-        <h4>Legend</h4>
-        <p>We run nightly Graviton2 benchmarks using the <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.metal</a> AWS instance type. <strong>Don't use those numbers to compare x86 vs. ARM performance!</strong> Indeed:</p>
-        <ul>
-            <li>Those benchmarks are meant to detect regressions in Elasticsearch: we make sure they're stable, not fast.</li>
-            <li>The ARM instance types that we use have vastly different performance characteristics than our dedicated servers.</li>
-        </ul>
-
-        <div class="alert alert-warning alert-dismissible" role="alert">
-            <p><strong>Warning</strong> ARM benchmarks are still experimental!</p>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      </div>
-
-      <div id="releaseLegend">
-        <h4>Legend</h4>
-        <!--Remove the following line when release benchmarks on new env have been run-->
-        <p>We test the following configurations (all with <a href="https://www.elastic.co/what-is/elastic-stack-security">Security and TLS</a> enabled):</p>
-          <ul>
-              <li><code>bare</code>: Elasticsearch on an unencrypted drive</li>
-              <li><code>ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
-              <li><code>docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
-          </ul>
-          <p>Starting with Elasticsearch 7.7.0, benchmarks are run with the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup.html#jvm-version">JDK that is bundled with Elasticsearch</a>.</p>
-      </div>
+    <div class="border-end pt-3" style="width: 15em;" role="navigation">
+      <ul id="navigation-container" class="nav nav-pills flex-column">
+      </ul>
     </div>
-  </div>
 
-  <div class="row" style="height:270em">
-    <div class="col-md-12">
-      <div id="charts" style="width:100%; height:100%"></div>
-    </div>
-  </div>
-</div> <!-- /container -->
+    <div class="col pt-3">
+      <div class="container-fluid tracks">
+        <div class="row">
+          <div class="col-xxl-8">
+            <h3>Results</h3>
+            <div class="alert alert-warning alert-dismissible" role="alert">
+              <strong>Hint</strong> These diagrams are just provided as an overview. Please go to the
+              <a id="dashboard-url" href="#">Kibana dashboard</a> if you want to analyze the results in more detail.
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <form class="row row-cols-lg-auto g-3 align-items-center mb-3">
+              <div class="col-12" id="environmentGroup">
+                  <label for="environmentSelector" class="control-label">Benchmark type</label>
+                  <select class="form-select" id="environmentSelector">
+                      <option value="nightly" selected>Nightly benchmarks</option>
+                      <option value="arm">ARM benchmarks</option>
+                      <option value="release">Release benchmarks</option>
+                  </select>
+              </div>
+              <div class="col-12" id="dateRangeGroup">
+                  <label for="dateRangeSelector" class="control-label">Date range</label>
+                  <select class="form-select" id="dateRangeSelector">
+                    <option value="30d" selected>Last 30 days</option>
+                    <option value="90d">Last 90 days</option>
+                    <option value="6M">Last 6 months</option>
+                    <option value="1y">Last year</option>
+                  </select>
+              </div>
+            </form>
+
+            <div id="warningLegend" class="alert alert-warning" role="alert"></div>
+
+            <div id="armLegend">
+              <h4>Legend</h4>
+              <p>We run nightly Graviton2 benchmarks using the <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.metal</a> AWS instance type. <strong>Don't use those numbers to compare x86 vs. ARM performance!</strong> Indeed:</p>
+              <ul>
+                  <li>Those benchmarks are meant to detect regressions in Elasticsearch: we make sure they're stable, not fast.</li>
+                  <li>The ARM instance types that we use have vastly different performance characteristics than our dedicated servers.</li>
+              </ul>
+
+              <div class="alert alert-warning alert-dismissible" role="alert">
+                  <p><strong>Warning</strong> ARM benchmarks are still experimental!</p>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            </div>
+
+            <div id="releaseLegend">
+              <h4>Legend</h4>
+              <!--Remove the following line when release benchmarks on new env have been run-->
+              <p>We test the following configurations (all with <a href="https://www.elastic.co/what-is/elastic-stack-security">Security and TLS</a> enabled):</p>
+              <ul>
+                  <li><code>bare</code>: Elasticsearch on an unencrypted drive</li>
+                  <li><code>ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
+                  <li><code>docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
+              </ul>
+              <p>Starting with Elasticsearch 7.7.0, benchmarks are run with the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup.html#jvm-version">JDK that is bundled with Elasticsearch</a>.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <div id="charts" style="height:700em"></div>
+          </div>
+        </div>
+      </div>
+
 
 <!-- main content -->
 
@@ -464,6 +451,11 @@ body,html,.main-display-area,.col-md-12 {
     </div>
   </div>
 </div>
+
+    </div> <!-- /col -->
+  </div> <!-- /row-->
+</div> <!-- /container-fluid -->
+
 
 <!-- Bootstrap core JavaScript
 ================================================== -->
