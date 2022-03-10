@@ -4,6 +4,7 @@ import os
 from collections import OrderedDict
 from unittest import mock
 from night_rally import night_rally
+from night_rally.night_rally import TelemetryParams, csv_to_list
 from . import get_random_race_configs_id
 import pytest
 
@@ -53,6 +54,56 @@ class TestNightRally():
         assert night_rally.join_nullables("env:bare", None, "name:test") == "env:bare,name:test"
         assert night_rally.join_nullables(None, "name:test") == "name:test"
         assert night_rally.join_nullables(None) == ""
+
+    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
+    def test_mix_telemetry_from_command_line_and_race_config(self, mocked_wait_until_port_is_free):
+        system_call = RecordingSystemCall(return_value=False)
+
+        tracks = [
+            {
+                "track": "geonames",
+                "flavors": [
+                    {
+                        "name": "default",
+                        "licenses": [
+                            {
+                                "name": "trial",
+                                "configurations": [
+                                    {
+                                        "name": "geonames-append-1node",
+                                        "challenge": "append-no-conflicts",
+                                        "car": "defaults",
+                                        "telemetry": ["gc"]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+
+        start_date = datetime.datetime(2016, 1, 1)
+        race_configs_id = os.path.basename(get_random_race_configs_id())
+
+        # passing --telemetry as a cli arg in night rally
+        params = [TelemetryParams(csv_to_list("node-stats"), csv_to_list("node-stats-sample-interval:1")),
+                  night_rally.StandardParams("nightly", start_date, 8, "bare", race_configs_id=race_configs_id)]
+
+        cmd = night_rally.NightlyCommand(params, start_date)
+        night_rally.run_rally(tracks, None, ["localhost"], cmd, skip_ansible=True, system=system_call)
+        assert len(system_call.calls) == 1
+        assert system_call.calls == [
+            "rally --skip-update race --telemetry=\"node-stats,gc\" "
+            "--telemetry-params=\"node-stats-sample-interval:1\" "
+            "--configuration-name=\"nightly\" --quiet "
+            "--target-host=\"localhost:9200\" --effective-start-date=\"2016-01-01 00:00:00\" "
+            "--track-repository=\"default\" --track=\"geonames\" --challenge=\"append-no-conflicts\" "
+            "--car=\"defaults,trial-license\" --on-error=\"abort\" --client-options=\"timeout:240\" "
+            "--user-tag=\"name:geonames-append-1node,setup:bare,race-configs-id:{},license:trial\" --runtime-jdk=\"8\" "
+            "--pipeline=\"from-sources\" "
+            "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id),
+        ]
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_two_oss_challenges_successfully(self, mocked_wait_until_port_is_free):

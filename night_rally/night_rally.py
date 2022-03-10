@@ -948,11 +948,15 @@ def parse_args():
         default=None)
     parser.add_argument(
         "--telemetry",
-        help="Rally telemetry to activate",
+        help="Rally telemetry to activate. Applies to all race configs, any additional telemetry specified in a race "
+             "configuration will be appended. Mixing telemetry devices in cli and race configs will result "
+             "in duplicate definitions.",
         default=None)
     parser.add_argument(
         "--telemetry-params",
-        help="Parameters of Rally telemetry to set",
+        help="Parameters of Rally telemetry to set. Applies to all race configs, any additional params specified "
+             "in a race configuration will be appended. Mixing telemetry params in cli and race configs will result "
+             "in duplicate definitions.",
         default=None)
 
     return parser.parse_args()
