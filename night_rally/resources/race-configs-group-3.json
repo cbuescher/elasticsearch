@@ -327,7 +327,6 @@
                 },
                 "charts": [
                   "gc",
-                  "io",
                   "query"
                 ]
               }
