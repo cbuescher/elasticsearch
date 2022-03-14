@@ -24,7 +24,8 @@
                 "node-count": 3,
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "geonames-append-defaults-1node",
@@ -42,7 +43,8 @@
                 "car": "defaults",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "geonames-append-4g-1node",
@@ -57,7 +59,8 @@
                 "car": "4gheap",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "geonames-update-4g-1node",
@@ -69,7 +72,8 @@
                 "car": "4gheap",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               }
             ]
           }
@@ -101,7 +105,8 @@
                 "node-count": 3,
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "geopoint-append-defaults-1node",
@@ -116,7 +121,8 @@
                 "car": "defaults",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "geopoint-append-4g-1node",
@@ -131,7 +137,8 @@
                 "car": "4gheap",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "geopoint-append-4g-1node-with-jfr",
@@ -155,7 +162,8 @@
                     "-XX:StartFlightRecording=disk=true,name=elasticsearch-continuous,maxsize=256M",
                     "-XX:+StartAttachListener"
                   ]
-                }
+                },
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "geopoint-update-4g-1node",
@@ -167,7 +175,8 @@
                 "car": "4gheap",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               }
             ]
           }
@@ -197,7 +206,8 @@
                 "car": "4gheap",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               }
             ]
           }
@@ -234,7 +244,8 @@
                   "security"
                 ],
                 "node-count": 3,
-                "exclude-tasks": "force-merge,refresh-after-force-merge"
+                "exclude-tasks": "force-merge,refresh-after-force-merge",
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "nyc_taxis-append-4g-1node",
@@ -252,7 +263,8 @@
                 },
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "nyc_taxis-appendsorted-4g-1node",
@@ -268,7 +280,8 @@
                 "exclude-tasks": "force-merge,refresh-after-force-merge",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "nyc_taxis-ml-4g-1node",
@@ -284,7 +297,8 @@
                 ],
                 "track-params": {
                   "ingest_percentage": 30
-                }
+                },
+                "telemetry": ["disk-usage-stats"]
               }
             ]
           }
@@ -313,7 +327,8 @@
                 "car": "16gheap",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               },
               {
                 "name": "eql-indexSorting-16g-1node",
@@ -326,7 +341,8 @@
                 "car": "16gheap",
                 "x-pack": [
                   "security"
-                ]
+                ],
+                "telemetry": ["disk-usage-stats"]
               }
             ]
           }
