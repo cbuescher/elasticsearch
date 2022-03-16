@@ -348,8 +348,8 @@
             "name": "trial",
             "configurations": [
               {
-                "name": "security-8g-3nodes-indexing-querying",
-                "label": "add-8g-3nodes",
+                "name": "security-beats-8g-3nodes-indexing-querying",
+                "label": "beats-8g-3nodes",
                 "challenge": "security-indexing-querying",
                 "car": "8gheap",
                 "on-error": "abort",
@@ -358,6 +358,13 @@
                   "security"
                 ],
                 "track-params": {
+                  "integrations": [
+                    "auditbeat",
+                    "filebeat",
+                    "metricbeat",
+                    "packetbeat",
+                    "winlogbeat"
+                  ],
                   "query_max_date": "2020-01-01T01:00:00Z",
                   "bulk_indexing_clients": 100,
                   "number_of_replicas": 1,
@@ -371,6 +378,29 @@
                   "merge_count",
                   "merge_times",
                   "query"
+                ]
+              },
+              {
+                "name": "security-endpoint-8g-3nodes-indexing",
+                "label": "endpoint-8g-3nodes",
+                "challenge": "security-indexing",
+                "car": "8gheap",
+                "on-error": "abort",
+                "node-count": 3,
+                "x-pack": [
+                  "security"
+                ],
+                "track-params": {
+                  "integrations": [
+                    "logs-endpoint"
+                  ],
+                  "bulk_indexing_clients": 100,
+                  "number_of_replicas": 1,
+                  "wait_for_status": "green"
+                },
+                "charts": [
+                  "indexing",
+                  "ingest"
                 ]
               }
             ]
