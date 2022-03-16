@@ -164,7 +164,14 @@ night-rally-admin delete race --environment=nightly --id="0afb2330-ba14-43f0-87d
 #### Developing Night Rally / Rally
 
 To verify changes in the Night Rally repo (e.g. in race-configs) or changes in Rally itself that could potentially affect scheduled benchmarks, you are encouraged to use the Vagrant workflow.
-It will spin up 4 vm and requires at minimum 21GB of RAM (each target node uses 5GB ram, load driver 1GB). This configuration supports only release benchmarks, as nightlies require java11 and more RAM; read below on how to iterate on nightlies.
+It will spin up 4 VMs and requires by default 50GiB of available RAM (each target node uses 16GiB ram, load driver 2GiB). To adjust required resources at provisioning time, you can set the following Environment Variables:
+```
+VAGRANT_TARGET_CPUS # number of VCPUs assigned for each of the three target VMs (default 2)
+VAGRANT_TARGET_MEMORY # RAM in MiB for each of the three target VMs (default 16*1024)
+VAGRANT_LOAD_DRIVER_MEMORY # RAM in MiB for the load driver VM (default 2*1024)
+VAGRANT_RALLY_DISK_MIB # disk size for benchmark data in the load driver VM (default 80*1024)
+```
+
 Rally will run in [test mode](https://esrally.readthedocs.io/en/stable/command_line_reference.html?highlight=test-mode#test-mode) so the whole run will take just a few minutes.
 
 ##### Iterating on release benchmarks while testing changes to night-rally
@@ -183,18 +190,11 @@ To iterate on changes, always remember to re-run `./update_jenkins_night_rally.s
 ##### Iterating on nightly benchmarks while testing changes to night-rally
 
 1. `cd night_rally/fixtures/ansible`
-2. Specify the following environment variables:
-    ```
-    export VAGRANT_TARGET_MEMORY=7168
-    export VAGRANT_ENABLE_BUILD=true
-    ```
-
-    The reason for increasing memory for the target-nodes is that the additional build step, enabled with `VAGRANT_ENABLE_BUILD`, requires additional memory.)
-3. `vagrant up`
-4. `vagrant ssh /coord/` # ssh'es to the coordinating node
-5. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
-6. `sudo -iu jenkins`
-7. Run `./test_nightly.sh`
+2. `vagrant up`
+3. `vagrant ssh /coord/` # ssh'es to the coordinating node
+4. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
+5. `sudo -iu jenkins`
+6. Run `./test_nightly.sh`
 
 To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
 

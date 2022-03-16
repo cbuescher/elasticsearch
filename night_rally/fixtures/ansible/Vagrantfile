@@ -18,11 +18,10 @@ default_loaddriver_cpus = 2
 default_target_cpus = ENV.fetch("VAGRANT_TARGET_CPUS", "2")
 default_target_node_count = 3
 target_node_ip_addresses = successive_ips(base_ip, default_target_node_count)
-# Memory settings in MB
+# Memory settings in MiB
 default_load_driver_memory = ENV.fetch("VAGRANT_LOAD_DRIVER_MEMORY", "2048")
-default_target_memory = ENV.fetch("VAGRANT_TARGET_MEMORY", "5120")
+default_target_memory = ENV.fetch("VAGRANT_TARGET_MEMORY", "16384")
 
-install_build_requirements = ENV["VAGRANT_ENABLE_BUILD"].to_s.downcase=="true"
 domain_name = "benchmarks.ci.vagrant"
 
 nodes = [{ hostname: "coordinator", domain: domain_name, autostart: true, box: boxname, box_version: box_version, memory: default_load_driver_memory, cpus: default_loaddriver_cpus }]
@@ -39,11 +38,12 @@ rally_sha = ENV.fetch("RALLY_SHA", "")
 extra_disks = {
   :coordinator => {
     :rally_disk => {
+      # needed for benchmark data mostly
       :scsi_port => 2,
       :scsi_device => 0,
       :block_device => "/dev/sdc",
       :mount_point => "/var/lib/jenkins/.rally",
-      :size_mib => 20480,
+      :size_mib => ENV.fetch("VAGRANT_RALLY_DISK_MIB", 80*1024),
       :fsck_order => 2,
     }
   },
@@ -437,7 +437,7 @@ Vagrant.configure(2) do |config|
         node_config.vm.provision "shell", inline: install_java(runtime_java_version)
       end
 
-      if ! is_coordinator && install_build_requirements && runtime_java_version != build_java_version
+      if ! is_coordinator && runtime_java_version != build_java_version
         node_config.vm.provision "shell", inline: install_java(build_java_version)
       end
 
