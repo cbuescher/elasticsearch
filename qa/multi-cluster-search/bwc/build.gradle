@@ -12,7 +12,7 @@ import org.elasticsearch.gradle.internal.test.RestIntegTestTask
 apply plugin: 'elasticsearch.internal-java-rest-test'
 apply plugin: 'elasticsearch.internal-yaml-rest-test'
 apply plugin: 'elasticsearch.yaml-rest-compat-test'
-apply plugin: 'elasticsearch.standalone-rest-test'
+//apply plugin: 'elasticsearch.standalone-rest-test'
 
 dependencies {
   yamlRestTestImplementation project(path: ':qa:multi-cluster-search')
@@ -59,7 +59,3 @@ tasks.register("integTest") {
 }
 
 tasks.named("check").configure { dependsOn("integTest") }
-
-tasks.register("test") {
-  println ("Hello this is a test")
-}
