@@ -42,7 +42,7 @@
               }
             }
           }
-  - match: { _id: "usage_stats_watch" }
+  - match: { _id: "usage_stats_watchxx" }
 
   - do: {xpack.usage: {}}
   - gt: { "watcher.count.active": $watch_count_active }
