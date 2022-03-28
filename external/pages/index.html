@@ -41,7 +41,6 @@ var charts = {
     this.currentSpec = this.findSelectedSpec(uiState);
     this.dateRange = this.findDateRange();
     this.currentChartType = this.chartType();
-    this.currentDistributionType = "default";
 
     this.buildMenu(this.currentSpec);
     this.buildOverview();
@@ -180,8 +179,8 @@ var charts = {
         }
 
         if (charts.currentChartType === "nightly") {
-          hash = hash + "/nightly/" + charts.currentDistributionType + "/" + charts.dateRange;
-          var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards[charts.currentDistributionType]);
+          hash = hash + "/nightly/default/" + charts.dateRange;
+          var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards);
           $("#dateRangeGroup").show();
           $("#dashboard-url").attr("href", nightlyUrl);
           charts.showChart(nightlyUrl, charts.dateRange);
@@ -469,54 +468,42 @@ var charts = {
             "id": "geonames",
             "track": "Geonames",
             "description": "for evaluating the performance of structured data",
-            "nightly_dashboards": {
-                "default": "07b76f67-4817-4376-bd5a-c52ee886420a",
-            },
+            "nightly_dashboards": "07b76f67-4817-4376-bd5a-c52ee886420a",
             "release_dashboard": "0cf5dda1-d066-4d6f-9de3-a0f53152a09e"
         },
         {
             "id": "geopoint",
             "track": "Geopoint",
             "description": "for evaluating the performance of geopoint queries",
-            "nightly_dashboards": {
-              "default": "669c0832-6901-4ef3-a659-973de712107a",
-            },
+            "nightly_dashboards": "669c0832-6901-4ef3-a659-973de712107a",
             "release_dashboard": "07c70970-8c12-4bce-b8b9-ae7410985e59"
         },
         {
             "id": "geopointshape",
             "track": "Geopointshape",
             "description": "for evaluating the performance of geopointshape queries",
-            "nightly_dashboards": {
-              "default": "018562f4-3f6d-4fb4-8544-1489860e46a7",
-            },
+            "nightly_dashboards": "018562f4-3f6d-4fb4-8544-1489860e46a7",
             "release_dashboard": "ca20516c-5e31-423a-9ce6-f829e9d6b878"
         },
         {
             "id": "percolator",
             "track": "Percolator",
             "description": "for evaluating the performance of percolation queries",
-            "nightly_dashboards": {
-                "default": "71b66d5a-3b5e-4a9a-a853-85fe7996cd88"
-            },
+            "nightly_dashboards": "71b66d5a-3b5e-4a9a-a853-85fe7996cd88",
             "release_dashboard": "bab65c91-035c-4a77-ba9d-010963a33cf0"
         },
         {
             "id": "pmc",
             "track": "PMC",
             "description": "for evaluating the performance of full text search",
-            "nightly_dashboards": {
-                "default": "59564559-da26-4f07-ae3f-672f935ac826"
-            },
+            "nightly_dashboards": "59564559-da26-4f07-ae3f-672f935ac826",
             "release_dashboard": "02f48cc3-4d9f-4f15-9022-01ce7376b3c5"
         },
         {
             "id": "nyc-taxis",
             "track": "NYC taxis",
             "description": "for evaluating the performance for highly structured data",
-            "nightly_dashboards": {
-                "default": "c39e30e0-2a72-4cfd-94f9-85886d9acf4d"
-            },
+            "nightly_dashboards": "c39e30e0-2a72-4cfd-94f9-85886d9acf4d",
             "release_dashboard": "19485422-3669-4e40-9495-c7ec2eb447f6",
             "arm_dashboard": "518fba72-b3f8-44ce-a0a9-7f38fef1c7a7"
         },
@@ -524,63 +511,49 @@ var charts = {
             "id": "nested",
             "track": "Nested",
             "description": "for evaluating the performance for nested documents",
-            "nightly_dashboards": {
-              "default": "93ee1794-5b5c-4eed-bec1-ab4d25bd4d41"
-            },
+            "nightly_dashboards": "93ee1794-5b5c-4eed-bec1-ab4d25bd4d41",
             "release_dashboard": "79321412-b764-4414-9899-87256e19dd22"
         },
         {
             "id": "http-logs",
             "track": "HTTP Logs",
             "description": "for evaluating the performance of (Web) server logs",
-            "nightly_dashboards": {
-                "default": "cf84e463-9198-4847-8f02-43491d120734"
-            },
+            "nightly_dashboards": "cf84e463-9198-4847-8f02-43491d120734",
             "release_dashboard": "6413abb7-d123-4c15-b8cf-177a0bb73622"
         },
         {
             "id": "noaa",
             "track": "noaa",
             "description": "for evaluating the performance of range fields",
-            "nightly_dashboards": {
-                "default": "dc8eeefd-fa62-4528-8e79-4c193f7f810a"
-            },
+            "nightly_dashboards": "dc8eeefd-fa62-4528-8e79-4c193f7f810a",
             "release_dashboard": "d5560739-023c-4f2d-92d9-61b3a6da4480"
         },
         {
             "id": "eql",
             "track": "EQL",
             "description": "for evaluating the performance of EQL",
-            "nightly_dashboards": {
-                "default": "46e0e33d-e9df-43e3-84e9-5b3067392591"
-            },
+            "nightly_dashboards": "46e0e33d-e9df-43e3-84e9-5b3067392591",
             "release_dashboard": "1455cf9d-3df1-4e11-93e6-229ef491fb7d"
         },
         {
             "id": "sql",
             "track": "SQL",
             "description": "for evaluating the performance of SQL",
-            "nightly_dashboards": {
-                "default": "06033dd9-250e-4846-8179-12ed919967b8"
-            },
+            "nightly_dashboards": "06033dd9-250e-4846-8179-12ed919967b8",
             "release_dashboard": "942896bd-7042-40ca-b0ff-801b9533f0d2"
         },
         {
             "id": "logging",
             "track": "Logging",
             "description": "for evaluating the performance of the Log Monitoring part of Elastic's Observability solution",
-            "nightly_dashboards": {
-                "default": "2f9df915-096d-48de-a914-f13eddfdf014"
-            },
+            "nightly_dashboards": "2f9df915-096d-48de-a914-f13eddfdf014",
             "release_dashboard": "1409585c-c2d0-48d0-8108-666dec792378"
         },
         {
             "id": "dense_vector",
             "track": "Dense Vector",
             "description": "for evaluating the performance of vectors search",
-            "nightly_dashboards": {
-                "default": "aee73ca0-807d-11ec-9e55-01022ad3d8b4"
-            },
+            "nightly_dashboards": "aee73ca0-807d-11ec-9e55-01022ad3d8b4",
             "release_dashboard": ""
         },
         {
@@ -588,9 +561,7 @@ var charts = {
           "track": "Security",
           "warning": "Security benchmarks are under active development and shouldn't be consulted for any calculations at this point",
           "description": "for evaluating the performance of Elastic's Security solution",
-          "nightly_dashboards": {
-            "default": "d9a97191-c770-42c5-b171-14ac575871ae"
-          },
+          "nightly_dashboards": "d9a97191-c770-42c5-b171-14ac575871ae",
           "release_dashboard": ""
         },
     ], window.location.hash);
