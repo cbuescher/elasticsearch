@@ -18,7 +18,7 @@
                   "io"
                 ],
                 "challenge": "append-no-conflicts",
-                "car": "4gheap",
+                "car": "external",
                 "track-params": {
                   "force_merge_max_num_segments": 1
                 },
