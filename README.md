@@ -87,9 +87,10 @@ The following steps are necessary to add a new track:
 
 1. Add your track and the challenges to run in `resources/race-configs-group-?.json`.
 2. Generate nightly charts and the corresponding dashboards with Rally: `esrally generate charts --configuration-name=nightly --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-group-?.json --chart-type=time-series --output-path=nightly-charts.ndjson`
-3. Generate release charts and the corresponding dashboard with Rally: `esrally generate charts --configuration-name=release --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-group-?.json --chart-type=bar --output-path=release-charts.ndjson`
-4. Import the new charts to the corresponding dashboards on the [Kibana instance](https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io) (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
-5. Add the name of your track and the UUIDs of the dashboards that you've created in step two and three to the array at the bottom of `external/pages/index.html`.
+3. Generate ARM charts and the corresponding dashboards with Rally: `esrally generate charts --configuration-name=arm --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-arm.json --chart-type=time-series --output-path=arm-charts.ndjson`
+4. Generate release charts and the corresponding dashboard with Rally: `esrally generate charts --configuration-name=release --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-group-?.json --chart-type=bar --output-path=release-charts.ndjson`
+5. Import the new charts to the corresponding dashboards on the [Kibana instance](https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io) (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
+6. Add the name of your track and the UUIDs of the dashboards that you've created in step two and three to the array at the bottom of `external/pages/index.html`.
 
 If you're finished, please submit a PR. After the PR is merged, we will deploy the new page using the script in `external/pages/deploy.sh` and the dashboards for the new track will show up immediately.
 
