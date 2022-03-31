@@ -54,18 +54,15 @@ var charts = {
   },
 
   restoreUiState: function(uiState) {
-    /*  We have three kinds of URLs: nightly, ARM and release. They look like this:
+    /*  We have two kinds of URLs: nightly and release. They look like this:
       * nyc-taxis/nightly/default/30d
-      * nyc-taxis/arm/30d
       * nyc-taxis/release
     */
     if (uiState.length >= 2) {
         $("#environmentSelector").val(uiState[1]);
     }
 
-    if (uiState[1] === "arm") {
-        $("#dateRangeSelector").val(uiState[2]);
-    } else if (uiState[1] === "nightly") {
+    if (uiState.length >= 4) {
         $("#dateRangeSelector").val(uiState[3]);
     }
   },
@@ -161,7 +158,6 @@ var charts = {
     $('.tracks').hide();
     $("#dateRangeGroup").hide();
     $("#releaseLegend").hide();
-    $("#armLegend").hide();
     $("#warningLegend").hide();
 
     if (charts.currentSpec != null) {
@@ -179,18 +175,6 @@ var charts = {
           $("#dateRangeGroup").show();
           $("#dashboard-url").attr("href", nightlyUrl);
           charts.showChart(nightlyUrl, charts.dateRange);
-        } else if (charts.currentChartType === "arm") {
-          hash = hash + "/arm/" + charts.dateRange;
-          var url = charts.dashboardUrl(charts.currentSpec.arm_dashboard);
-          $("#dateRangeGroup").show();
-          $("#dashboard-url").attr("href", url);
-          if (!("arm_dashboard" in charts.currentSpec)) {
-            $("#warningLegend").html("<p>No ARM benchmarks for " + charts.currentSpec.track + ". Try NYC Taxis.").show();
-            charts.hideChart();
-          } else {
-            $("#armLegend").show();
-            charts.showChart(url, charts.dateRange);
-          }
         } else {
           hash = hash + "/release";
           var releaseUrl = charts.dashboardUrl(charts.currentSpec.release_dashboard);
@@ -241,7 +225,6 @@ var charts = {
                   <label for="environmentSelector" class="control-label">Benchmark type</label>
                   <select class="form-select" id="environmentSelector">
                       <option value="nightly" selected>Nightly benchmarks</option>
-                      <option value="arm">ARM benchmarks</option>
                       <option value="release">Release benchmarks</option>
                   </select>
               </div>
@@ -257,20 +240,6 @@ var charts = {
             </form>
 
             <div id="warningLegend" class="alert alert-warning" role="alert"></div>
-
-            <div id="armLegend">
-              <h4>Legend</h4>
-              <p>We run nightly Graviton2 benchmarks using the <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.metal</a> AWS instance type. <strong>Don't use those numbers to compare x86 vs. ARM performance!</strong> Indeed:</p>
-              <ul>
-                  <li>Those benchmarks are meant to detect regressions in Elasticsearch: we make sure they're stable, not fast.</li>
-                  <li>The ARM instance types that we use have vastly different performance characteristics than our dedicated servers.</li>
-              </ul>
-
-              <div class="alert alert-warning alert-dismissible" role="alert">
-                  <p><strong>Warning</strong> ARM benchmarks are still experimental!</p>
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            </div>
 
             <div id="releaseLegend">
               <h4>Legend</h4>
@@ -332,7 +301,11 @@ var charts = {
     <div class="col-md-12">
       <h3>Benchmarking Environment</h3>
       <h4>ARM environment</h4>
-      <p>ARM benchmarks are run on an AWS <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.metal</a> Graviton2 instance.</p>
+      <p>We run nightly Graviton2 benchmarks using the <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.metal</a> AWS instance type. <strong>Don't use those numbers to compare x86 vs. ARM performance!</strong> Indeed:</p>
+      <ul>
+          <li>Those benchmarks are meant to detect regressions in Elasticsearch: we make sure they're stable, not fast.</li>
+          <li>The ARM instance types that we use have vastly different performance characteristics than our dedicated servers.</li>
+      </ul>
       <h4>Dedicated servers</h4>
       <p>All other benchmarks are run on bare-metal machines with the following specifications:</p>
       <ul>
@@ -499,8 +472,15 @@ var charts = {
             "track": "NYC taxis",
             "description": "for evaluating the performance for highly structured data",
             "nightly_dashboards": "c39e30e0-2a72-4cfd-94f9-85886d9acf4d",
-            "release_dashboard": "19485422-3669-4e40-9495-c7ec2eb447f6",
-            "arm_dashboard": "518fba72-b3f8-44ce-a0a9-7f38fef1c7a7"
+            "release_dashboard": "19485422-3669-4e40-9495-c7ec2eb447f6"
+        },
+        {
+            "id": "arm-nyc-taxis",
+            "track": "NYC taxis (ARM)",
+            "warning": "ARM benchmarks run on different hardware. Don't use those numbers to compare x86 vs. ARM performance!",
+            "description": "for evaluating the performance for highly structured data and detect ARM-specific regressions",
+            "nightly_dashboards": "518fba72-b3f8-44ce-a0a9-7f38fef1c7a7",
+            "release_dashboard": ""
         },
         {
             "id": "nested",
