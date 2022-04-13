@@ -172,12 +172,14 @@ var charts = {
         if (charts.currentChartType === "nightly") {
           hash = hash + "/nightly/default/" + charts.dateRange;
           var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards);
+          $("#environmentGroup").hide();
           $("#dateRangeGroup").show();
           $("#dashboard-url").attr("href", nightlyUrl);
           charts.showChart(nightlyUrl, charts.dateRange);
         } else {
           hash = hash + "/release";
           var releaseUrl = charts.dashboardUrl(charts.currentSpec.release_dashboard);
+          $("#environmentGroup").show();
           $("#dashboard-url").attr("href", releaseUrl);
           $("#releaseLegend").show();
           //These charts should be time-independent. Don't use the date range here.
