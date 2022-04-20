@@ -300,6 +300,12 @@ var charts = {
   <div class="row">
     <div class="col-md-12">
       <h3>Benchmarking Environment</h3>
+      <h4>High shard count environment</h4>
+      <p>Benchmarks run on ephemeral AWS environments using 3x <a href="https://aws.amazon.com/ec2/instance-types/c6g/">c6gd.8xlarge</a> instances as dedicated master nodes and 6x <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.4xlarge</a> instances for the hot tier. <strong>Don't use those numbers to compare with other benchmarks!</strong> Indeed:</p>
+      <ul>
+          <li>Those benchmarks are meant to detect regressions in Elasticsearch: we make sure performance with high shard counts stays the same (or gets better) over time.</li>
+          <li>The AWS instance types used have vastly different performance characteristics than our dedicated servers.</li>
+      </ul>
       <h4>ARM environment</h4>
       <p>We run nightly Graviton2 benchmarks using the <a href="https://aws.amazon.com/ec2/instance-types/m6g/">m6gd.metal</a> AWS instance type. <strong>Don't use those numbers to compare x86 vs. ARM performance!</strong> Indeed:</p>
       <ul>
@@ -523,6 +529,14 @@ var charts = {
             "description": "for evaluating the performance of the Log Monitoring part of Elastic's Observability solution",
             "nightly_dashboards": "2f9df915-096d-48de-a914-f13eddfdf014",
             "release_dashboard": "1409585c-c2d0-48d0-8108-666dec792378"
+        },
+        {
+            "id": "many-shards-quantitative",
+            "track": "Logging (Many Shards)",
+            "warning": "These benchmarks run on different hardware compared to Logging. Don't use the numbers here to compare performance with other benchmarks!",
+            "description": "for evaluating the performance of the Log Monitoring part of Elastic's Observability solution with a large amount of shards",
+            "nightly_dashboards": "e906ee52-3cac-4fae-8add-1b1d41d9a460",
+            "release_dashboard": ""
         },
         {
             "id": "dense_vector",
