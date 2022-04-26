@@ -109,6 +109,39 @@
     ]
   },
   {
+    "track": "geoshape",
+    "placement": 2,
+    "flavors": [
+      {
+        "name": "default",
+        "licenses": [
+          {
+            "name": "trial",
+            "configurations": [
+              {
+                "name": "geoshape-append-defaults-1node",
+                "label": "add-defaults",
+                "charts": [
+                  "indexing",
+                  "query",
+                  "gc",
+                  "io"
+                ],
+                "challenge": "append-no-conflicts",
+                "node-count": 1,
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ],
+                "telemetry": ["disk-usage-stats"]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
     "track": "solutions/logs",
     "placement": 0,
     "track-repository": "internal",
