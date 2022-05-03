@@ -433,7 +433,9 @@
                 },
                 "charts": [
                   "indexing",
-                  "ingest"
+                  "ingest",
+                  "gc",
+                  "io"
                 ]
               }
             ]
