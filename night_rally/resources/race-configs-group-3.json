@@ -21,9 +21,6 @@
                   "merge_times"
                 ],
                 "challenge": "index-and-search",
-                "track-params": {
-                  "ingest_percentage": 20
-                },
                 "car": "4gheap",
                 "node-count": 1,
                 "x-pack": [
