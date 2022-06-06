@@ -388,13 +388,37 @@
                   "security"
                 ],
                 "track-params": {
-                  "integrations": [
-                    "auditbeat",
-                    "filebeat",
-                    "metricbeat",
-                    "packetbeat",
-                    "winlogbeat"
-                  ],
+                  "integration_ratios": {
+                    "auditbeat": {
+                      "corpora": {
+                        "auditbeat-security": 1.0
+                      }
+                    },
+                    "filebeat": {
+                      "corpora": {
+                        "filebeat-security": 1.0
+                      }
+                    },
+                    "metricbeat": {
+                      "corpora": {
+                        "metricbeat-security": 1.0
+                      }
+                    },
+                    "packetbeat": {
+                      "corpora": {
+                        "packetbeat-security": 1.0
+                      }
+                    },
+                    "winlogbeat": {
+                      "corpora": {
+                        "winlogbeat-security": 1.0
+                      }
+                    }
+                  },
+                  "raw_data_volume_per_day": "2400GB",
+                  "start_date": "2020-01-01T00:00:00Z",
+                  "end_date": "2020-01-01T01:00:00Z",
+                  "force_data_generation": true,
                   "query_max_date": "2020-01-01T01:00:00Z",
                   "bulk_indexing_clients": 100,
                   "number_of_replicas": 1,
@@ -421,9 +445,22 @@
                   "security"
                 ],
                 "track-params": {
-                  "integrations": [
-                    "logs-endpoint"
-                  ],
+                  "integration_ratios": {
+                    "logs-endpoint": {
+                      "corpora": {
+                        "endpoint-events-file": 0.2,
+                        "endpoint-events-library": 0.1,
+                        "endpoint-events-network": 0.2,
+                        "endpoint-events-process": 0.3,
+                        "endpoint-events-registry": 0.1,
+                        "endpoint-events-security": 0.1
+                      }
+                    }
+                  },
+                  "raw_data_volume_per_day": "1200GB",
+                  "start_date": "2020-01-01T00:00:00Z",
+                  "end_date": "2020-01-01T01:00:00Z",
+                  "force_data_generation": true,
                   "bulk_indexing_clients": 100,
                   "number_of_replicas": 1,
                   "wait_for_status": "green"
