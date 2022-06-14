@@ -201,12 +201,17 @@ var charts = {
     $('.tracks').hide();
     $("#dateRangeGroup").hide();
     $("#releaseLegend").hide();
+    $("#infoLegend").hide();
     $("#warningLegend").hide();
 
     if (charts.currentSpec != null) {
         var hash = "#tracks/" + charts.currentSpec.id;
 
         $('.tracks').show();
+
+        if ("info" in charts.currentSpec) {
+          $("#infoLegend").html(charts.currentSpec.info).show();
+        }
 
         if ("warning" in charts.currentSpec) {
           $("#warningLegend").html(charts.currentSpec.warning).show();
@@ -284,6 +289,7 @@ var charts = {
               </div>
             </form>
 
+            <div id="infoLegend" class="alert alert-info" role="alert"></div>
             <div id="warningLegend" class="alert alert-warning" role="alert"></div>
 
             <div id="releaseLegend">
@@ -640,6 +646,30 @@ var charts = {
             "id": "dense_vector",
             "track": "Dense Vector",
             "description": "for evaluating the performance of vectors search",
+                "info": `
+<h4>Index</h4>
+<p>This track indexes 2 million documents, each containing a <code>dense_vector</code> field with 96 dimensions. The vectors are based on the <a href="http://sites.skoltech.ru/compvision/noimi/">DEEP1B dataset</a> of image descriptors. The index has 2 shards and no replicas, and the vectors are indexed using HNSW parameters <code>maxConn=32</code>, <code>ef_construction=100</code>.</p>
+
+<h4>Operations</h4>
+<p>The track performs these steps:</p>
+<ul>
+    <li>Indexes the data and waits for merges to complete.</li>
+    <li>Performs ANN searches (using the <code>_knn_search</code> API), plus an exact kNN search (using a <code>script_score</code> query).</li>
+    <li>Force merges the index to a single segment.</li>
+    <li>Again performs ANN searches plus an exact kNN search.</li>
+</ul>
+
+<p>Descriptions of the main operations:</p>
+<ul>
+    <li>Indexing throughput: <code>nightly-dense_vector-indexing-throughput</code></li>
+    <li>Total time spent merging, including force merge: <code>nightly-dense_vector-add-4g-1node-merge-times</code>.</li>
+    <li>ANN search latency before force merge: <code>knn-search-10-50-before-force-merge-latency</code>, plus others. In this example <code>k=10</code> and <code>num_candidates=50</code>.</li>
+    <li>Exact kNN search latency before force merge: <code>script-score-query-before-force-merge-latency</code>.</li>
+    <li>ANN search latency with one segment: <code>knn-search-10-50-before-latency</code>, plus others.</li>
+    <li>Exact kNN search latency with one segment: <code>script-score-query-latency</code>.</li>
+</ul>
+
+<p>For the Elasticsearch config and requests that power the track, see the <a href="https://github.com/elastic/rally-tracks/tree/master/dense_vector">dense_vector Rally track</a></p>`,
             "nightly_dashboards": "b71147c4-0577-4b61-a6c0-551c7b515bea",
             "release_dashboard": ""
         },
