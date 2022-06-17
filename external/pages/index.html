@@ -653,20 +653,23 @@ var charts = {
 <h4>Operations</h4>
 <p>The track performs these steps:</p>
 <ul>
-    <li>Indexes the data and waits for merges to complete.</li>
-    <li>Performs ANN searches (using the <code>_knn_search</code> API), plus an exact kNN search (using a <code>script_score</code> query).</li>
+    <li>Indexes 2 million documents.</li>
+    <li>Reindexes 500K documents and in parallel performs ANN searches (using the <code>_knn_search</code> API).</li>
     <li>Force merges the index to a single segment.</li>
-    <li>Again performs ANN searches plus an exact kNN search.</li>
+    <li>Performs ANN searches, plus an exact kNN search (using a <code>script_score</code> query).</li>
 </ul>
 
 <p>Descriptions of the main operations:</p>
 <ul>
-    <li>Indexing throughput: <code>nightly-dense_vector-indexing-throughput</code></li>
-    <li>Total time spent merging, including force merge: <code>nightly-dense_vector-add-4g-1node-merge-times</code>.</li>
-    <li>ANN search latency before force merge: <code>knn-search-10-50-before-force-merge-latency</code>, plus others. In this example <code>k=10</code> and <code>num_candidates=50</code>.</li>
-    <li>Exact kNN search latency before force merge: <code>script-score-query-before-force-merge-latency</code>.</li>
-    <li>ANN search latency with one segment: <code>knn-search-10-50-before-latency</code>, plus others.</li>
-    <li>Exact kNN search latency with one segment: <code>script-score-query-latency</code>.</li>
+    <li>Indexing throughput: <code>indexing-throughput</code></li>
+    <ul>
+      <li>Throughput of the initial indexing operation: <code>index-append<code>.</li>
+      <li>Throughput of the re-indexing operation run concurrently with searches: <code>index-update-concurrent-with-searches</code>.</li>
+    </ul>
+    <li>Total time spent merging, including force merge: <code>merge-times</code>.</li>
+    <li>ANN search latency for searches run concurrently with indexing: <code>knn-search-100-1000-concurrent-with-indexing-latency</code>. In this example <code>k=100</code> and <code>num_candidates=1000</code>.</li>
+    <li>ANN search latency for searches on index force merged to 1 segment: <code>knn-search-10-100-latency</code> and <code>knn-search-100-1000-latency</code>.</li>
+    <li>Exact kNN search latency for searches on index force merged to 1 segment: <code>script-score-query-latency</code>.</li>
 </ul>
 
 <p>For the Elasticsearch config and requests that power the track, see the <a href="https://github.com/elastic/rally-tracks/tree/master/dense_vector">dense_vector Rally track</a></p>`,
