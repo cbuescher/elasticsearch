@@ -8,7 +8,7 @@ ssh night-rally-1
 
 ## Prerequisites
 
-1. Vault configured according to [infra instructions](https://github.com/elastic/infra/tree/master/docs/vault#github-auth) and environment variable `VAULT_ADDR` set in your shell.
+1. All dependencies installed and configured according to [infra instructions](https://github.com/elastic/infra/blob/master/docs/accessing-instances.md#dependencies). Specifically make sure that the environment variable `VAULT_ADDR` is set in your shell.
 2. OpenSSH version >=7.3p1. Check this with `ssh -V`.
 3. \[Optional, macOS\] If you want auto-completion with bash:
     1. `brew install bash-completion2`
