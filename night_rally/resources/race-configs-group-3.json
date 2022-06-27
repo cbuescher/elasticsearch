@@ -119,7 +119,6 @@
                 "name": "geoshape-append-defaults-1node",
                 "label": "add-defaults",
                 "charts": [
-                  "indexing",
                   "query",
                   "gc",
                   "io"
