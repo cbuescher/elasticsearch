@@ -230,8 +230,6 @@ var charts = {
           $("#environmentGroup").show();
           $("#dashboard-url").attr("href", releaseUrl);
           $("#releaseLegend").show();
-          //These charts should be time-independent. Don't use the date range here.
-          charts.showChart(releaseUrl, "5y");
         }
         window.location.hash = hash;
     } else {
@@ -292,16 +290,8 @@ var charts = {
             <div id="infoLegend" class="alert alert-info" role="alert"></div>
             <div id="warningLegend" class="alert alert-warning" role="alert"></div>
 
-            <div id="releaseLegend">
-              <h4>Legend</h4>
-              <!--Remove the following line when release benchmarks on new env have been run-->
-              <p>We test the following configurations (all with <a href="https://www.elastic.co/what-is/elastic-stack-security">Security and TLS</a> enabled):</p>
-              <ul>
-                  <li><code>bare</code>: Elasticsearch on an unencrypted drive</li>
-                  <li><code>ear</code>: Elasticsearch on a drive that is encrypted with <a href="https://gitlab.com/cryptsetup/cryptsetup/wikis/DMCrypt">dm-crypt</a> to benchmark the performance impact of encryption-at-rest.</li>
-                  <li><code>docker</code>: <a href="https://github.com/elastic/elasticsearch-docker">Official Elasticsearch Docker image</a></li>
-              </ul>
-              <p>Starting with Elasticsearch 7.7.0, benchmarks are run with the <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/setup.html#jvm-version">JDK that is bundled with Elasticsearch</a>.</p>
+            <div id="releaseLegend" class="alert alert-warning">
+              <p>Release benchmarks are no longer available. Please contact us if you relied on them.</p>
             </div>
           </div>
         </div>
