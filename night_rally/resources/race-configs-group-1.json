@@ -301,6 +301,20 @@
                 "telemetry": ["disk-usage-stats"]
               },
               {
+                "name": "nyc_taxis-aggs-defaults-1node",
+                "label": "aggs-defaults",
+                "charts": [
+                  "query",
+                  "gc",
+                  "io"
+                ],
+                "challenge": "aggs",
+                "car": "defaults",
+                "x-pack": [
+                  "security"
+                ]
+              },
+              {
                 "name": "nyc_taxis-aggs-8g-1node",
                 "label": "aggs-8g",
                 "charts": [
