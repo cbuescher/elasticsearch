@@ -500,6 +500,7 @@ var charts = {
             "pmc",
             "logging",
             "many-shards-quantitative",
+            "many-shards-snapshots",
             "security",
           ]
         },
@@ -634,6 +635,40 @@ var charts = {
             "warning": "These benchmarks run on different hardware compared to Logging. Don't use the numbers here to compare performance with other benchmarks!",
             "description": "for evaluating the performance of the Log Monitoring part of Elastic's Observability solution with a large amount of shards",
             "nightly_dashboards": "e906ee52-3cac-4fae-8add-1b1d41d9a460",
+            "release_dashboard": ""
+        },
+        {
+            "id": "many-shards-snapshots",
+            "track": "Logging (Snapshots)",
+            "description": "for evaluating snapshot performance when taking snapshot with a large of amount of shards",
+            "info": `
+<h5>Description:</h5>
+<p>This benchmark aims to evaluate Elasticsearch's performance when taking many snapshots using a high amount of indices.</p>
+
+<p>Elasticsearch runs on GCP using:</p>
+<ul>
+  <li>3 <code>master</code> nodes on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 8GB RAM and 1x375GiB local nvme scratch disk.</li>
+  <li>6 <code>hot</code> nodes running on <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 64GB RAM and 1x375GiB local nvme scratch disk.</li>
+  <li>All nodes have minimum cpu platform pinned to <code>Ice Lake</code>.</li>
+</ul>
+
+<p>The track performs these steps:</p>
+<ol>
+    <li>Creates <code>25000</code> indices (with settings: <code>1 primary 0 replicas</code>) each containing <code>100</code> auditbeat style documents.</li>
+    <li>Registers a snapshot repository on a GCS bucket.</li>
+    <li>Issues 100 <i>sequential</i> <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/create-snapshot-api.html">create snapshot requests</a> with <code>wait_for_completion=false</code>.</li>
+    <li>Waits until all snapshots are successful.</li>
+</ol>
+
+<p>Descriptions of the visualizations:</p>
+<ul>
+    <li><code>many-shards-snapshots-create-average</code>: the average <code>service time</code> of the operations issued in step 3.</li>
+    <li><code>nightly-elastic-logs/many-shards-snapshots-wait-duration</code>: the <code>service time</code> (i.e. duration) of the task in step 4.</li>
+</ul>
+
+<p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/elastic/logs/challenges/many-shards-snapshots.json">many-shards-snapshots challenge in the elastic/logs Rally track</a>.</p>`,
+
+            "nightly_dashboards": "5013b280-22d5-11ed-920a-3b1141502d24",
             "release_dashboard": ""
         },
         {
