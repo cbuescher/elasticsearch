@@ -32,11 +32,10 @@ var charts = {
     this.chartGroups = chartGroups;
     this.chartSpecs = chartSpecs;
     uiState = this.readUiStateFromUrl(url);
-    this.restoreUiState(uiState);
+    this.restoreDateRange(uiState);
 
     this.currentSpec = this.findSelectedSpec(uiState);
     this.dateRange = this.findDateRange();
-    this.currentChartType = this.chartType();
 
     this.buildMenu(this.currentSpec);
     this.buildOverview();
@@ -54,15 +53,8 @@ var charts = {
     }
   },
 
-  restoreUiState: function(uiState) {
-    /*  We have two kinds of URLs: nightly and release. They look like this:
-      * nyc-taxis/nightly/default/30d
-      * nyc-taxis/release
-    */
-    if (uiState.length >= 2) {
-        $("#environmentSelector").val(uiState[1]);
-    }
-
+  restoreDateRange: function(uiState) {
+    // For historical reasons, URLs look like `nyc-taxis/nightly/default/30d`
     if (uiState.length >= 4) {
         $("#dateRangeSelector").val(uiState[3]);
     }
@@ -147,10 +139,6 @@ var charts = {
         charts.dateRange = charts.findDateRange();
         charts.render();
     });
-    $("#environmentSelector").on("change", function() {
-        charts.currentChartType = charts.chartType();
-        charts.render();
-    });
     $("#index-selector").on("click", function() {
         charts.currentSpec = null;
         charts.buildMenu(charts.currentSpec);
@@ -173,10 +161,6 @@ var charts = {
     return $("#dateRangeSelector option:selected").val();
   },
 
-  chartType: function() {
-    return $("#environmentSelector option:selected").val();
-  },
-
   activateSpec: function(spec) {
     this.currentSpec = spec;
     this.buildMenu(this.currentSpec);
@@ -189,7 +173,6 @@ var charts = {
 
   hideChart: function() {
     $("#charts").hide();
-            console.log("hide charts");
   },
 
   dashboardUrl: function(chartId) {
@@ -200,7 +183,6 @@ var charts = {
     $('.methodology').hide();
     $('.tracks').hide();
     $("#dateRangeGroup").hide();
-    $("#releaseLegend").hide();
     $("#infoLegend").hide();
     $("#warningLegend").hide();
 
@@ -217,20 +199,11 @@ var charts = {
           $("#warningLegend").html(charts.currentSpec.warning).show();
         }
 
-        if (charts.currentChartType === "nightly") {
-          hash = hash + "/nightly/default/" + charts.dateRange;
-          var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards);
-          $("#environmentGroup").hide();
-          $("#dateRangeGroup").show();
-          $("#dashboard-url").attr("href", nightlyUrl);
-          charts.showChart(nightlyUrl, charts.dateRange);
-        } else {
-          hash = hash + "/release";
-          var releaseUrl = charts.dashboardUrl(charts.currentSpec.release_dashboard);
-          $("#environmentGroup").show();
-          $("#dashboard-url").attr("href", releaseUrl);
-          $("#releaseLegend").show();
-        }
+        hash = hash + "/nightly/default/" + charts.dateRange;
+        var nightlyUrl = charts.dashboardUrl(charts.currentSpec.nightly_dashboards);
+        $("#dateRangeGroup").show();
+        $("#dashboard-url").attr("href", nightlyUrl);
+        charts.showChart(nightlyUrl, charts.dateRange);
         window.location.hash = hash;
     } else {
         $('.methodology').show();
@@ -269,13 +242,6 @@ var charts = {
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             <form class="row row-cols-lg-auto g-3 align-items-center mb-3">
-              <div class="col-12" id="environmentGroup">
-                  <label for="environmentSelector" class="control-label">Benchmark type</label>
-                  <select class="form-select" id="environmentSelector">
-                      <option value="nightly" selected>Nightly benchmarks</option>
-                      <option value="release">Release benchmarks</option>
-                  </select>
-              </div>
               <div class="col-12" id="dateRangeGroup">
                   <label for="dateRangeSelector" class="control-label">Date range</label>
                   <select class="form-select" id="dateRangeSelector">
@@ -289,10 +255,6 @@ var charts = {
 
             <div id="infoLegend" class="alert alert-info" role="alert"></div>
             <div id="warningLegend" class="alert alert-warning" role="alert"></div>
-
-            <div id="releaseLegend" class="alert alert-warning">
-              <p>Release benchmarks are no longer available. Please contact us if you relied on them.</p>
-            </div>
           </div>
         </div>
 
@@ -541,49 +503,42 @@ var charts = {
             "track": "Geonames",
             "description": "for evaluating the performance of structured data",
             "nightly_dashboards": "07b76f67-4817-4376-bd5a-c52ee886420a",
-            "release_dashboard": "0cf5dda1-d066-4d6f-9de3-a0f53152a09e"
         },
         {
             "id": "geopoint",
             "track": "Geopoint",
             "description": "for evaluating the performance of geopoint queries",
             "nightly_dashboards": "669c0832-6901-4ef3-a659-973de712107a",
-            "release_dashboard": "07c70970-8c12-4bce-b8b9-ae7410985e59"
         },
         {
             "id": "geopointshape",
             "track": "Geopointshape",
             "description": "for evaluating the performance of geopointshape queries",
             "nightly_dashboards": "018562f4-3f6d-4fb4-8544-1489860e46a7",
-            "release_dashboard": "ca20516c-5e31-423a-9ce6-f829e9d6b878"
         },
         {
             "id": "geoshape",
             "track": "Geoshape",
             "description": "for evaluating the performance of geoshape data",
             "nightly_dashboards": "844d3875-2045-4663-a7a7-f9c6c9c3cec0",
-            "release_dashboard": ""
         },
         {
             "id": "percolator",
             "track": "Percolator",
             "description": "for evaluating the performance of percolation queries",
             "nightly_dashboards": "71b66d5a-3b5e-4a9a-a853-85fe7996cd88",
-            "release_dashboard": "bab65c91-035c-4a77-ba9d-010963a33cf0"
         },
         {
             "id": "pmc",
             "track": "PMC",
             "description": "for evaluating the performance of full text search",
             "nightly_dashboards": "59564559-da26-4f07-ae3f-672f935ac826",
-            "release_dashboard": "02f48cc3-4d9f-4f15-9022-01ce7376b3c5"
         },
         {
             "id": "nyc-taxis",
             "track": "NYC taxis",
             "description": "for evaluating the performance for highly structured data",
             "nightly_dashboards": "2a7bb269-508c-41d9-bd22-bca5245154ab",
-            "release_dashboard": "19485422-3669-4e40-9495-c7ec2eb447f6"
         },
         {
             "id": "arm-nyc-taxis",
@@ -591,49 +546,42 @@ var charts = {
             "warning": "ARM benchmarks run on different hardware. Don't use those numbers to compare x86 vs. ARM performance!",
             "description": "for evaluating the performance for highly structured data and detect ARM-specific regressions",
             "nightly_dashboards": "bf696390-142a-4a4d-8beb-04b0b93cbb52",
-            "release_dashboard": ""
         },
         {
             "id": "nested",
             "track": "Nested",
             "description": "for evaluating the performance for nested documents",
             "nightly_dashboards": "93ee1794-5b5c-4eed-bec1-ab4d25bd4d41",
-            "release_dashboard": "79321412-b764-4414-9899-87256e19dd22"
         },
         {
             "id": "http-logs",
             "track": "HTTP Logs",
             "description": "for evaluating the performance of (Web) server logs",
             "nightly_dashboards": "cf84e463-9198-4847-8f02-43491d120734",
-            "release_dashboard": "6413abb7-d123-4c15-b8cf-177a0bb73622"
         },
         {
             "id": "noaa",
             "track": "NOAA",
             "description": "for evaluating the performance of range fields",
             "nightly_dashboards": "dc8eeefd-fa62-4528-8e79-4c193f7f810a",
-            "release_dashboard": "d5560739-023c-4f2d-92d9-61b3a6da4480"
         },
         {
             "id": "eql",
             "track": "EQL",
             "description": "for evaluating the performance of EQL",
             "nightly_dashboards": "46e0e33d-e9df-43e3-84e9-5b3067392591",
-            "release_dashboard": "1455cf9d-3df1-4e11-93e6-229ef491fb7d"
         },
         {
             "id": "sql",
             "track": "SQL",
             "description": "for evaluating the performance of SQL",
             "nightly_dashboards": "06033dd9-250e-4846-8179-12ed919967b8",
-            "release_dashboard": "942896bd-7042-40ca-b0ff-801b9533f0d2"
         },
         {
             "id": "logging",
             "track": "Logging",
             "description": "for evaluating the performance of the Log Monitoring part of Elastic's Observability solution",
             "nightly_dashboards": "2f9df915-096d-48de-a914-f13eddfdf014",
-            "release_dashboard": "1409585c-c2d0-48d0-8108-666dec792378"
         },
         {
             "id": "many-shards-quantitative",
@@ -641,7 +589,6 @@ var charts = {
             "warning": "These benchmarks run on different hardware compared to Logging. Don't use the numbers here to compare performance with other benchmarks!",
             "description": "for evaluating the performance of the Log Monitoring part of Elastic's Observability solution with a large amount of shards",
             "nightly_dashboards": "e906ee52-3cac-4fae-8add-1b1d41d9a460",
-            "release_dashboard": ""
         },
         {
             "id": "many-shards-snapshots",
@@ -675,7 +622,6 @@ var charts = {
 <p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/elastic/logs/challenges/many-shards-snapshots.json">many-shards-snapshots challenge in the elastic/logs Rally track</a>.</p>`,
 
             "nightly_dashboards": "5013b280-22d5-11ed-920a-3b1141502d24",
-            "release_dashboard": ""
         },
         {
             "id": "dense_vector",
@@ -709,7 +655,6 @@ var charts = {
 
 <p>For the Elasticsearch config and requests that power the track, see the <a href="https://github.com/elastic/rally-tracks/tree/master/dense_vector">dense_vector Rally track</a></p>`,
             "nightly_dashboards": "407ca9cd-0f5e-4c3b-8d0d-6ba39b27d90e",
-            "release_dashboard": ""
         },
         {
           "id": "security",
@@ -717,14 +662,12 @@ var charts = {
           "warning": "Security benchmarks are under active development and shouldn't be consulted for any calculations at this point",
           "description": "for evaluating the performance of Elastic's Security solution",
           "nightly_dashboards": "fe1a9c3d-5106-48b2-baef-2ae36b760703",
-          "release_dashboard": ""
         },
         {
             "id": "tsdb",
             "track": "TSDB",
             "description": "for evaluating the performance of TSDB (time series database)",
             "nightly_dashboards": "f7e091a0-1db1-11ed-920a-3b1141502d24",
-            "release_dashboard": ""
         },
       ],
       window.location.hash
