@@ -18,9 +18,6 @@ __versionstr__ = VERSION
 
 long_description = str_from_file("README.md")
 
-# tuples of (major, minor) of supported Python versions ordered from lowest to highest
-supported_python_versions = [(3, 8), (3, 9)]
-
 install_requires = [
     # required for night-rally fixtures and deploying ini files
     "ansible==2.9.6",
@@ -43,13 +40,6 @@ tests_require = [
     "pytest-asyncio==0.16.0"
 ]
 
-python_version_classifiers = ["Programming Language :: Python :: {}.{}".format(major, minor)
-                              for major, minor in supported_python_versions]
-
-first_supported_version = "{}.{}".format(supported_python_versions[0][0], supported_python_versions[0][1])
-# next minor after the latest supported version
-first_unsupported_version = "{}.{}".format(supported_python_versions[-1][0], supported_python_versions[-1][1] + 1)
-
 setup(name="night_rally",
       version=__versionstr__,
       description="Nightly Benchmark Scripts for Elasticsearch Benchmarks based on Rally",
@@ -60,9 +50,7 @@ setup(name="night_rally",
           exclude=("tests*", "external*")
       ),
       include_package_data=True,
-      # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-      python_requires=">={},<{}".format(first_supported_version, first_unsupported_version),
-
+      python_requires=">=3.8",
       package_data={"": ["*.json", "*.yml", "*.cfg", "*.j2"]},
       install_requires=install_requires,
       extras_require={
@@ -83,5 +71,8 @@ setup(name="night_rally",
           "Operating System :: POSIX",
           "Programming Language :: Python",
           "Programming Language :: Python :: 3",
-      ] + python_version_classifiers,
+          "Programming Language :: Python :: 3.8",
+          "Programming Language :: Python :: 3.9",
+          "Programming Language :: Python :: 3.10",
+      ],
       zip_safe=False)
