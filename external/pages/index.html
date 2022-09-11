@@ -687,8 +687,8 @@ var charts = {
 
 <p>The track performs these steps:</p>
 <ol>
-    <li>Indexes ~30GB worth of logging data to the local cluster.</li>
-    <li>Replicate the logging data via CCR to the remote cluster</li>
+    <li>Indexes ~120GB worth of logging data to the local cluster</li>
+    <li>Replicates the logging data via CCR to the remote cluster</li>
     <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: true</code></li>
     <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: false</code></li>
 </ol>
