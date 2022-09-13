@@ -432,7 +432,7 @@ def arg_parser():
         "--chart-type",
         help="Chart type to target. If none given, applies to all charts.",
         choices=["query", "script", "stats", "indexing", "gc", "index_times", "merge_times", "merge_count",
-                 "segment_count", "io", "ml_processing_time"],
+                 "refresh_times", "segment_count", "io", "ml_processing_time"],
         default=None
     )
     add_parser.add_argument(
