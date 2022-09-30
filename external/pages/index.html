@@ -681,14 +681,15 @@ var charts = {
 
 <p>Elasticsearch runs on GCP using:</p>
 <ul>
-  <li>1 single-node 'local' cluster located in <code>europe-west2</code>, St. Ghislain, Belgium. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 32GB RAM and 2x375GiB local nvme scratch disks.</li>
-  <li>1 single-node 'remote' cluster located in <code>us-east4</code>, North Virginia, USA. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 32GB RAM and 2x375GiB local nvme scratch disks.</li>  
+  <li>1 single-node 'local' cluster located in <code>europe-west2</code>, St. Ghislain, Belgium. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 32 vCPUs, 32GB RAM and 4x375GiB local nvme scratch disks.</li>
+  <li>1 single-node 'remote' cluster located in <code>us-east4</code>, North Virginia, USA. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 32 vCPUs, 32GB RAM and 4x375GiB local nvme scratch disks.</li>  
 </ul>
 
 <p>The track performs these steps:</p>
 <ol>
-    <li>Indexes ~120GB worth of logging data to the local cluster</li>
-    <li>Replicates the logging data via CCR to the remote cluster</li>
+    <li>Creates 14 datastreams with 30 primary shards & 0 replicas, totaling 420 shards</li>
+    <li>Indexes ~200GB worth of logging data spanning ~7 days to the 'local' cluster</li>
+    <li>Replicates the datastreams via CCR to the 'remote' cluster. Meaning 420 shards per single node cluster, 840 shards in total.</li>
     <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: true</code></li>
     <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: false</code></li>
 </ol>
