@@ -1,33 +1,23 @@
 [
   {
     "track": "nyc_taxis",
-    "flavors": [
+    "configurations": [
       {
-        "name": "default",
-        "licenses": [
-          {
-            "name": "trial",
-            "configurations": [
-              {
-                "name": "nyc_taxis-append-4g-1node",
-                "label": "add-4g",
-                "charts": [
-                  "indexing",
-                  "query",
-                  "gc",
-                  "io"
-                ],
-                "challenge": "append-no-conflicts",
-                "car": "external",
-                "track-params": {
-                  "force_merge_max_num_segments": 1
-                },
-                "x-pack": [
-                  "security"
-                ]
-              }
-            ]
-          }
+        "name": "nyc_taxis-append-4g-1node",
+        "label": "add-4g",
+        "charts": [
+          "indexing",
+          "query",
+          "gc",
+          "io"
+        ],
+        "challenge": "append-no-conflicts",
+        "car": "external",
+        "track-params": {
+          "force_merge_max_num_segments": 1
+        },
+        "x-pack": [
+          "security"
         ]
       }
     ]

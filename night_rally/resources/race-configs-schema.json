@@ -19,7 +19,7 @@
         "type": "integer",
         "description": "Indicates on which target machine(s) to place a benchmark. Should be in the range [0, number_of_target_machines - 1]. 0 means that target hosts are assigned starting from the first target host, 1, starting from the second target host and so on."
       },
-      "flavors": {
+      "configurations": {
         "type": "array",
         "minItems": 1,
         "items": {
@@ -27,79 +27,52 @@
           "properties": {
             "name": {
               "type": "string",
-              "description": "The name of the Elasticsearch distribution aka flavor to build; only allowable values, oss/default"
+              "description": "Unique name of the specific benchmark, also used as the name on the chart"
             },
-            "licenses": {
+            "label": {
+              "type": "string",
+              "description": "Label to use when displaying charts"
+            },
+            "charts": {
               "type": "array",
-              "minItems": 1,
+              "minItems": 0,
               "items": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The license type configured for Elasticsearch; allowable values oss/basic/trial"
-                  },
-                  "configurations": {
-                    "type": "array",
-                    "minItems": 1,
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "name": {
-                          "type": "string",
-                          "description": "Unique name of the specific benchmark, also used as the name on the chart"
-                        },
-                        "label": {
-                          "type": "string",
-                          "description": "Label to use when displaying charts"
-                        },
-                        "charts": {
-                          "type": "array",
-                          "minItems": 0,
-                          "items": {
-                            "type": "string",
-                            "description": "Chart names to plot results on"
-                          }
-                        },
-                        "challenge": {
-                          "type": "string",
-                          "description": "Name of track's challenge to execute"
-                        },
-                        "track-params": {
-                          "type": "object"
-                        },
-                        "car": {
-                          "type": ["array", "string"],
-                          "description": "Car to use from rally-teams repo"
-                        },
-                        "runtime-jdk": {
-                          "type": "string",
-                          "description": "Runtime jdk to use, overwrites the default"
-                        },
-                        "telemetry": {
-                          "type": ["array", "string"],
-                          "description": "The telemetry devices to activate for a race"
-                        },
-                        "on-error": {
-                          "type": "string",
-                          "enum": ["abort", "continue"],
-                          "description": "How Rally should behave on request errors"
-                        },
-                        "node-count": {
-                          "type": "integer",
-                          "minimum": 1
-                        }
-                      },
-                      "required": ["name", "charts", "challenge"]
-                    }
-                  }
-                }
+                "type": "string",
+                "description": "Chart names to plot results on"
               }
+            },
+            "challenge": {
+              "type": "string",
+              "description": "Name of track's challenge to execute"
+            },
+            "track-params": {
+              "type": "object"
+            },
+            "car": {
+              "type": ["array", "string"],
+              "description": "Car to use from rally-teams repo"
+            },
+            "runtime-jdk": {
+              "type": "string",
+              "description": "Runtime jdk to use, overwrites the default"
+            },
+            "telemetry": {
+              "type": ["array", "string"],
+              "description": "The telemetry devices to activate for a race"
+            },
+            "on-error": {
+              "type": "string",
+              "enum": ["abort", "continue"],
+              "description": "How Rally should behave on request errors"
+            },
+            "node-count": {
+              "type": "integer",
+              "minimum": 1
             }
-          }
+          },
+          "required": ["name", "charts", "challenge"]
         }
       }
-    },
-    "required": ["track", "flavors"]
+    }
   }
 }

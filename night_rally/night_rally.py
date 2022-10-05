@@ -238,9 +238,6 @@ class ReleaseCommand(DistributionBasedCommand):
         
     def runnable(self, race_config):
         major, minor, _, _ = components(self.distribution_version)
-        # Don't run any combination specifying (any) x-pack components when release license is oss
-        if self.release_params["license"] == "oss" and race_config.x_pack:
-            return False
         # Java flight recorder related benchmarks are only to measure the overhead compared to a configuration
         # without Java flight recorder and it is sufficient to enable them in nightlies.
         if "jfr" in race_config.name:
@@ -522,7 +519,7 @@ class RaceConfig:
 
     @property
     def license(self):
-        return self.configuration["license"]
+        return "trial"
 
     @property
     def node_count(self):
@@ -617,52 +614,44 @@ def run_rally(race_configs, release_params, available_hosts, command, dry_run=Fa
         placement = r.get("placement", 0)
         track_repository = r.get("track-repository", "default")
 
-        for flavor_config in r["flavors"]:
-            for license_config in flavor_config["licenses"]:
-                if release_params:
-                    # RELEASE_LICENSE=oss|basic only run specific sections
-                    if release_params["license"] != "trial" and license_config["name"] != release_params["license"]:
-                        continue
-                    if release_params["license"] == "trial" and license_config["name"] == "oss":
-                        continue
-                for configuration in license_config["configurations"]:
-                    # TODO refactor encapsulation in Release/Docker Command
-                    configuration["license"] = release_params["license"] if release_params else license_config["name"]
-
-                    race_cfg = RaceConfig(track_name, track_repository, placement, configuration, available_hosts_with_http_ports)
-
-                    if race_cfg.target_hosts:
-                        if command.runnable(race_cfg):
-                            if not skip_ansible:
-                                logger.info("Resetting benchmark environment...")
-                                fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures", "ansible")
-                                shell_command = "cd {} && " \
-                                                "ansible-playbook -i inventory/production -u rally playbooks/setup.yml " \
-                                                "--tags={} && cd - >/dev/null".format(fixtures_dir,
-                                                                                      shlex.quote("drop-caches,trim"))
-                                runner(shell_command)
-                            logger.info("Running Rally on [%s]", race_cfg)
-                            start = time.perf_counter()
-                            try:
-                                if not dry_run:
-                                    wait_until_port_is_free(available_hosts_with_http_ports)
-                                    wait_until_port_is_free(available_hosts_with_transport_ports)
-                                cmd = command.command_line(race_cfg)
-                                logger.info("Executing [%s]", cmd)
-                                if runner(cmd):
-                                    rally_failure = True
-                                    logger.error("Failed to run [%s]. Please check the logs.", race_cfg)
-                                stop = time.perf_counter()
-                                logger.info("Finished running on [%s] in [%f] seconds.", race_cfg, (stop - start))
-                            except (RemotePortNotFree, RemotePortNotDefined) as remote_port_exception:
-                                logger.error("Skipped running [%s].", race_cfg)
-                                logger.error(remote_port_exception.message)
-                                logger.error(remote_port_exception.cause)
-                                break
-                        else:
-                            logger.info("Skipping [%s] (not supported by command).", race_cfg)
-                    else:
-                        logger.info("Skipping [%s] (not enough target machines available).", race_cfg)
+        for configuration in r["configurations"]:
+    
+            # security by default, unless adhoc options are set
+            configuration["license"] = release_params["license"] if release_params else "trial"
+            race_cfg = RaceConfig(track_name, track_repository, placement, configuration, available_hosts_with_http_ports)
+    
+            if race_cfg.target_hosts:
+                if command.runnable(race_cfg):
+                    if not skip_ansible:
+                        logger.info("Resetting benchmark environment...")
+                        fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures", "ansible")
+                        shell_command = "cd {} && " \
+                                        "ansible-playbook -i inventory/production -u rally playbooks/setup.yml " \
+                                        "--tags={} && cd - >/dev/null".format(fixtures_dir,
+                                                                              shlex.quote("drop-caches,trim"))
+                        runner(shell_command)
+                    logger.info("Running Rally on [%s]", race_cfg)
+                    start = time.perf_counter()
+                    try:
+                        if not dry_run:
+                            wait_until_port_is_free(available_hosts_with_http_ports)
+                            wait_until_port_is_free(available_hosts_with_transport_ports)
+                        cmd = command.command_line(race_cfg)
+                        logger.info("Executing [%s]", cmd)
+                        if runner(cmd):
+                            rally_failure = True
+                            logger.error("Failed to run [%s]. Please check the logs.", race_cfg)
+                        stop = time.perf_counter()
+                        logger.info("Finished running on [%s] in [%f] seconds.", race_cfg, (stop - start))
+                    except (RemotePortNotFree, RemotePortNotDefined) as remote_port_exception:
+                        logger.error("Skipped running [%s].", race_cfg)
+                        logger.error(remote_port_exception.message)
+                        logger.error(remote_port_exception.cause)
+                        break
+                else:
+                    logger.info("Skipping [%s] (not supported by command).", race_cfg)
+            else:
+                logger.info("Skipping [%s] (not enough target machines available).", race_cfg)
     return rally_failure
 
 
@@ -925,10 +914,6 @@ def parse_args():
         "--version",
         help="Specify release string to use for comparison reports.",
         default="master")
-    parser.add_argument(
-        "--release-license",
-        help="Specify license to use for release benchmarks.",
-        default="basic")
     parser.add_argument(
         "--release-x-pack-components",
         help="Comma separated list of x-pack components to use with release or adhoc benchmarks; example: security.",
