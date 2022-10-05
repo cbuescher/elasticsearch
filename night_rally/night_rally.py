@@ -915,6 +915,10 @@ def parse_args():
         help="Specify release string to use for comparison reports.",
         default="master")
     parser.add_argument(
+        "--release-license",
+        help="Specify license to use for release benchmarks.",
+        default="basic")
+    parser.add_argument(
         "--release-x-pack-components",
         help="Comma separated list of x-pack components to use with release or adhoc benchmarks; example: security.",
         default="basic")
