@@ -88,15 +88,10 @@ The following steps are necessary to add a new track:
 1. Add your track and the challenges to run in `resources/race-configs-group-?.json`.
 2. Generate nightly charts and the corresponding dashboards with Rally: `esrally generate charts --configuration-name=nightly --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-group-?.json --chart-type=time-series --output-path=nightly-charts.ndjson`
 3. Generate ARM charts and the corresponding dashboards with Rally: `esrally generate charts --configuration-name=arm --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-arm.json --chart-type=time-series --output-path=arm-charts.ndjson`
-4. Generate release charts and the corresponding dashboard with Rally: `esrally generate charts --configuration-name=release --chart-spec-path=$NIGHT_RALLY_HOME/night_rally/resources/race-configs-group-?.json --chart-type=bar --output-path=release-charts.ndjson`
-5. Import the new charts to the corresponding dashboards on the [Kibana instance](https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io) (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
-6. Add the name of your track and the UUIDs of the dashboards that you've created in step two and three to the array at the bottom of `external/pages/index.html`.
+4. Import the new charts to the corresponding dashboards on the [Kibana instance](https://ae582947d1ed4df0adc39c2d047e051a.eu-central-1.aws.cloud.es.io) (it's mapped to be publicly reachable). Please import only the charts for the new track and skip any existing ones.
+5. Add the name of your track and the UUIDs of the dashboards that you've created in step two and three to the array at the bottom of `external/pages/index.html`.
 
 If you're finished, please submit a PR. After the PR is merged, we will deploy the new page using the script in `external/pages/deploy.sh` and the dashboards for the new track will show up immediately.
-
-#### Run a release benchmark
-
-Raise a [release benchmark issue](https://github.com/elastic/night-rally/issues/new?assignees=&labels=benchmark&template=release-benchmarks.md&title=Run+release+benchmarks+for+Elasticsearch+x.y.z) and follow the steps outlined in the template.
 
 #### Retrigger a failed nightly benchmark
 
@@ -175,19 +170,6 @@ VAGRANT_RALLY_DISK_MIB # disk size for benchmark data in the load driver VM (def
 
 Rally will run in [test mode](https://esrally.readthedocs.io/en/stable/command_line_reference.html?highlight=test-mode#test-mode) so the whole run will take just a few minutes.
 
-##### Iterating on release benchmarks while testing changes to night-rally
-
-1. `cd night_rally/fixtures/ansible`
-2. `vagrant up`
-3. `vagrant ssh /coord/` # ssh'es to the coordinating node
-4. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
-5. `sudo -iu jenkins`
-6. Take a look at `./test_release.sh` before running it; you can specify the corresponding options that would be defined by JJB e.g. mode="release:x-pack"
-
-Results will be sent to the Elastic Cloud cluster `night-rally-tests` (details in LastPass).
-
-To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
-
 ##### Iterating on nightly benchmarks while testing changes to night-rally
 
 1. `cd night_rally/fixtures/ansible`
@@ -199,9 +181,9 @@ To iterate on changes, always remember to re-run `./update_jenkins_night_rally.s
 
 To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
 
-##### Iterating on release or nightly benchmarks while testing changes on Rally
+##### Iterating on nightly benchmarks while testing changes on Rally
 
-If you want to verify your on-going Rally work or a Rally PR against a full nightly or release run, use the following steps:
+If you want to verify your on-going Rally work or a Rally PR against a full nightly run, use the following steps:
 
 1. Specify the Rally repo and branch using the following environment variables:
     ```
@@ -213,7 +195,7 @@ If you want to verify your on-going Rally work or a Rally PR against a full nigh
     - `RALLY_BRANCH` optionally, the branch name. Defaults to `master` if unset.
     - `RALLY_SHA`: optionally, checkout a specific commit from the specified branch. If unset, the latest commit of `RALLY_BRANCH` will be used.
 
-2. Choose any of the previous workflows (Iterating on release/nightly benchmarks) and continue with the steps there.
+2. Repeat the steps from the previous section [Iterating on nightly benchmarks](#iterating-on-nightly-benchmarks-while-testing-changes-to-night-rally).
 
 3. If you are working with the `master` branch and don't want Rally to auto-update specify:
     ```
@@ -271,7 +253,7 @@ For example setting:
 export FIXTURES=drop-caches,trim,initialize-data-disk,encryption-at-rest
 ```
 
-and running `./test_release.sh` will cause all these fixtures to be executed, simulating the expected behavior from the Jenkins job.
+and running `./test_nightly.sh` will cause all these fixtures to be executed, simulating the expected behavior from the Jenkins job.
 
 ## Common issues with the bare metal environments (Hetzner)
 

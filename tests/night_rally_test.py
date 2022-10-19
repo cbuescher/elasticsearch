@@ -268,7 +268,7 @@ class TestNightRally():
         ]
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_release_benchmark_without_plugins(self, mocked_wait_until_port_is_free):
+    def test_run_adhoc_benchmark_without_plugins(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
 
         tracks = [
@@ -292,19 +292,19 @@ class TestNightRally():
         start_date = datetime.datetime(2016, 1, 1)
         release_params = OrderedDict({"license": "basic"})
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
-        cmd = night_rally.ReleaseCommand(params, release_params, "5.3.0")
+        params = [night_rally.StandardParams("adhoc", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
+        cmd = night_rally.DistributionBasedCommand(params, "5.3.0")
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         assert len(system_call.calls) == 2
         assert system_call.calls == [
-            "rally --skip-update race --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
+            "rally --skip-update race --configuration-name=\"adhoc\" --quiet --target-host=\"localhost:9200\" "
             "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
             "--challenge=\"append-no-conflicts\" --car=\"defaults\" --on-error=\"abort\" --client-options=\"timeout:240\" "
             "--user-tag=\"name:geonames-defaults,setup:bare-basic,race-configs-id:{},license:basic\" "
             "--runtime-jdk=\"8\" --distribution-version=\"5.3.0\" "
             "--pipeline=\"from-distribution\"".format(race_configs_id),
 
-            "rally --skip-update race --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
+            "rally --skip-update race --configuration-name=\"adhoc\" --quiet --target-host=\"localhost:9200\" "
             "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
             "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --on-error=\"abort\" --client-options=\"timeout:240\" "
             "--user-tag=\"name:geonames-4g,setup:bare-basic,race-configs-id:{},license:basic\" "
@@ -313,91 +313,7 @@ class TestNightRally():
         ]
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_release_benchmark_with_plugins(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-
-        tracks = [
-            {
-                "track": "geonames",
-                "configurations": [
-                    # should run an ML benchmark
-                    {
-                        "name": "geonames-4g-with-ml",
-                        "challenge": "append-ml",
-                        "car": "4gheap",
-                        "x-pack": ["ml", "security"]
-                    }
-                ]
-            }
-        ]
-
-        start_date = datetime.datetime(2016, 1, 1)
-        race_configs_id = os.path.basename(get_random_race_configs_id())
-        release_params = OrderedDict({"license": "trial", "x-pack-components": ["security", "monitoring"]})
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security", race_configs_id=race_configs_id)]
-        cmd = night_rally.ReleaseCommand(params, release_params, "5.4.0")
-
-        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        assert len(system_call.calls) == 1
-        assert system_call.calls == [
-            "rally --skip-update race --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
-            "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-            "--challenge=\"append-ml\" --car=\"4gheap\" --on-error=\"abort\" "
-            "--client-options=\"timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:'rally',"
-            "basic_auth_password:'rally-password'\" "
-            "--user-tag=\"name:geonames-4g-with-ml,setup:bare-trial-security,race-configs-id:{},license:trial,x-pack:true"
-            ",x-pack-components:security,monitoring\" "
-            "--runtime-jdk=\"8\""
-            " --elasticsearch-plugins=\"x-pack:ml+security+monitoring\" "
-            "--distribution-version=\"5.4.0\" --pipeline=\"from-distribution\"".format(race_configs_id),
-        ]
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_trial_release_benchmarks_with_x_pack_module(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-
-        tracks = [
-            {
-                "track": "geonames",
-                "configurations": [
-                    # should not run this combination - because we filter x-pack configs
-                    {
-                        "name": "geonames-4g-with-x-pack",
-                        "challenge": "append-no-conflicts",
-                        "car": "4gheap",
-                        "x-pack": [
-                            "security"
-                        ]
-                    }
-                ]
-            }
-        ]
-
-        start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "trial", "x-pack-components": ["security"]})
-        race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security", race_configs_id=race_configs_id)]
-        # 6.3.0 is the first version to include x-pack as a module
-        cmd = night_rally.ReleaseCommand(params, release_params, "6.3.0")
-
-        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        assert len(system_call.calls) == 1
-        assert system_call.calls == [
-
-            'rally --skip-update race --configuration-name="release" --quiet '
-            '--target-host="localhost:9200" --effective-start-date="2016-01-01 00:00:00" '
-            '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
-            '--car="4gheap,trial-license,x-pack-security" --on-error="abort" '
-            '--client-options="timeout:240,use_ssl:true,verify_certs:false,basic_auth_user:\'rally\''
-            ',basic_auth_password:\'rally-password\'" '
-            "--user-tag=\"name:geonames-4g-with-x-pack,setup:bare-trial-security,race-configs-id:{},license:trial,"
-            "x-pack:true,x-pack-components:security\" "
-            '--runtime-jdk="8" --distribution-version="6.3.0" '
-            '--pipeline="from-distribution"'.format(race_configs_id)
-        ]
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_release_benchmark_with_basic_license(self, mocked_wait_until_port_is_free):
+    def test_run_adhoc_benchmark_with_basic_license(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
         self.maxDiff = None
 
@@ -417,13 +333,13 @@ class TestNightRally():
         start_date = datetime.datetime(2016, 1, 1)
         release_params = OrderedDict({"license": "basic"})
         race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
-        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="7.0.0")
+        params = [night_rally.StandardParams("adhoc", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
+        cmd = night_rally.DistributionBasedCommand(params, distribution_version="7.0.0")
 
         night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
         assert len(system_call.calls) == 1
         assert system_call.calls == [
-            'rally --skip-update race --configuration-name="release" --quiet '
+            'rally --skip-update race --configuration-name="adhoc" --quiet '
             '--target-host="localhost:9200" --effective-start-date="2016-01-01 00:00:00" '
             '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
             '--car="defaults,basic-license" --on-error="abort" '
@@ -431,228 +347,7 @@ class TestNightRally():
             '--user-tag="name:geonames-defaults,setup:bare-basic,race-configs-id:{},license:basic" '
             '--runtime-jdk="8" '
             '--distribution-version="7.0.0" --pipeline="from-distribution"'.format(race_configs_id)
-        ] 
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_release_benchmark_with_transport_nio(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-        self.maxDiff = None
-
-        tracks = [
-            {
-                "track": "geonames",
-                "configurations": [
-                    {
-                        "name": "geonames-defaults",
-                        "challenge": "append-no-conflicts",
-                        "car": ["defaults", "unpooled"],
-                        "plugins": "transport-nio:transport+http"
-                    }
-                ]
-            }
         ]
-
-        start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "basic"})
-        race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
-        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="7.0.0")
-
-        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        assert len(system_call.calls) == 1
-        assert system_call.calls == [
-            'rally --skip-update race --configuration-name="release" --quiet '
-            '--target-host="localhost:9200" --effective-start-date="2016-01-01 00:00:00" '
-            '--track-repository="default" --track="geonames" --challenge="append-no-conflicts" '
-            '--car="defaults,unpooled,basic-license" --on-error="abort" '
-            '--client-options="timeout:240" '
-            '--user-tag="name:geonames-defaults,setup:bare-basic,race-configs-id:{},license:basic" '
-            '--runtime-jdk="8" --elasticsearch-plugins="transport-nio:transport+http" '
-            '--distribution-version="7.0.0" --pipeline="from-distribution"'.format(race_configs_id)
-        ] 
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_do_not_run_release_benchmark_with_transport_nio_and_x_pack(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-
-        tracks = [
-            {
-                "track": "geonames",
-                "configurations": [
-                    {
-                        "name": "geonames-defaults",
-                        "challenge": "append-no-conflicts",
-                        "car": "defaults",
-                        "plugins": "transport-nio:transport+http"
-                    }
-                ]
-            }
-        ]
-
-        start_date = datetime.datetime(2016, 1, 1)
-        race_configs_id = os.path.basename(get_random_race_configs_id())
-        release_params = {"license": "trial", "x-pack-components": ["security"]}
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-trial-security", race_configs_id=race_configs_id)]
-        cmd = night_rally.ReleaseCommand(params, release_params, "7.0.0")
-
-        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        assert len(system_call.calls) == 0
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_do_not_run_release_benchmark_with_transport_nio_on_old_version(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-
-        tracks = [
-            {
-                "track": "geonames",
-                "configurations": [
-                    {
-                        "name": "geonames-defaults",
-                        "challenge": "append-no-conflicts",
-                        "car": "defaults",
-                        "plugins": "transport-nio:transport+http"
-                    }
-                ]
-            }
-        ]
-        start_date = datetime.datetime(2016, 1, 1)
-        release_params = {"license": "basic"}
-        race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "bare-basic", race_configs_id=race_configs_id)]
-        # 6.2.0 does not have transport-nio available
-        cmd = night_rally.ReleaseCommand(params, release_params, distribution_version="6.2.0")
-
-        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        assert len(system_call.calls) == 0
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_docker_5x_benchmark(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-        self.maxDiff = None
-        tracks = [
-            {
-                "track": "geonames",
-                "configurations": [
-                    {
-                        "name": "geonames-defaults",
-                        "challenge": "append-no-conflicts",
-                        "car": "defaults"
-                    },
-                    {
-                        "name": "geonames-4g",
-                        "challenge": "append-no-conflicts",
-                        "car": "4gheap"
-                    }
-                ]
-            }
-        ]
-        start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "basic"})
-        race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "docker-basic", race_configs_id=race_configs_id)]
-        cmd = night_rally.DockerCommand(params, release_params, "5.6.0")
-
-        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        assert len(system_call.calls) == 2
-        assert system_call.calls == [
-            'rally --skip-update race --configuration-name="release" --quiet --target-host="localhost:9200" '
-            '--effective-start-date="2016-01-01 00:00:00" --track-repository=\"default\" --track="geonames" '
-            '--challenge="append-no-conflicts" --car="defaults" --on-error="abort" --client-options="timeout:240" '
-            "--user-tag=\"name:geonames-defaults,setup:docker-basic,race-configs-id:{},license:basic\" "
-            '--runtime-jdk="8" --distribution-version="5.6.0" '
-            '--pipeline="docker" --car-params="{{\\"additional_cluster_settings\\": '
-            '{{\\"xpack.security.enabled\\": \\"false\\", \\"xpack.ml.enabled\\": \\"false\\", '
-            '\\"xpack.monitoring.enabled\\": \\"false\\", \\"xpack.watcher.enabled\\": \\"false\\"}}}}"'.format(race_configs_id),
-
-            "rally --skip-update race --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
-            "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-            "--challenge=\"append-no-conflicts\" --car=\"4gheap\" --on-error=\"abort\" --client-options=\"timeout:240\" "
-            "--user-tag=\"name:geonames-4g,setup:docker-basic,race-configs-id:{},license:basic\" "
-            "--runtime-jdk=\"8\" --distribution-version=\"5.6.0\" "
-            "--pipeline=\"docker\" --car-params=\"{{\\\"additional_cluster_settings\\\": "
-            "{{\\\"xpack.security.enabled\\\": \\\"false\\\", \\\"xpack.ml.enabled\\\": \\\"false\\\", "
-            "\\\"xpack.monitoring.enabled\\\": \\\"false\\\", "
-            "\\\"xpack.watcher.enabled\\\": \\\"false\\\"}}}}\"".format(race_configs_id),
-        ]
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_run_docker_6x_benchmark(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-
-        tracks = [
-            {
-                "track": "geonames",
-                "configurations": [
-                    {
-                        "name": "geonames-defaults",
-                        "challenge": "append-no-conflicts",
-                        "car": "defaults"
-                    },
-                    {
-                        "name": "geonames-4g",
-                        "challenge": "append-no-conflicts",
-                        "car": "4gheap"
-                    }
-                ]
-            }
-        ]
-        start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "basic"})
-        race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "docker-basic", race_configs_id=race_configs_id)]
-        cmd = night_rally.DockerCommand(params, release_params, "6.3.0")
-
-        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        assert len(system_call.calls) == 2
-        assert system_call.calls == [
-            "rally --skip-update race --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
-            "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-            "--challenge=\"append-no-conflicts\" --car=\"defaults,basic-license\" --on-error=\"abort\" "
-            "--client-options=\"timeout:240\" "
-            "--user-tag=\"name:geonames-defaults,setup:docker-basic,race-configs-id:{},license:basic\" "
-            "--runtime-jdk=\"8\" --distribution-version=\"6.3.0\" "
-            "--pipeline=\"docker\"".format(race_configs_id),
-
-            "rally --skip-update race --configuration-name=\"release\" --quiet --target-host=\"localhost:9200\" "
-            "--effective-start-date=\"2016-01-01 00:00:00\" --track-repository=\"default\" --track=\"geonames\" "
-            "--challenge=\"append-no-conflicts\" --car=\"4gheap,basic-license\" --on-error=\"abort\" "
-            "--client-options=\"timeout:240\" "
-            "--user-tag=\"name:geonames-4g,setup:docker-basic,race-configs-id:{},license:basic\" "
-            "--runtime-jdk=\"8\" --distribution-version=\"6.3.0\" "
-            "--pipeline=\"docker\"".format(race_configs_id)
-        ]
-
-    @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
-    def test_skip_any_plugins_with_docker(self, mocked_wait_until_port_is_free):
-        system_call = RecordingSystemCall(return_value=False)
-
-        tracks = [
-            {
-                "track": "geonames",
-                "configurations": [
-                    {
-                        "name": "geonames-defaults",
-                        "challenge": "append-no-conflicts",
-                        "car": "defaults",
-                        "plugins": "transport-nio:transport+http",
-                    },
-                    {
-                        "name": "geonames-4g",
-                        "challenge": "append-no-conflicts",
-                        "car": "4gheap",
-                        "plugins": "transport-nio:transport+http",
-                    }
-                ]
-            }
-        ]
-        start_date = datetime.datetime(2016, 1, 1)
-        release_params = OrderedDict({"license": "basic"})
-        race_configs_id = os.path.basename(get_random_race_configs_id())
-        params = [night_rally.StandardParams("release", start_date, 8, "docker-basic", race_configs_id=race_configs_id)]
-        cmd = night_rally.DockerCommand(params, release_params, "7.3.0")
-
-        night_rally.run_rally(tracks, release_params, ["localhost"], cmd, skip_ansible=True, system=system_call)
-        assert len(system_call.calls) == 0
 
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_run_continues_on_error(self, mocked_wait_until_port_is_free):

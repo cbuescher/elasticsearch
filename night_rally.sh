@@ -139,7 +139,7 @@ done
 if [[ -z "$RALLY_ENVIRONMENT" ]]
 then
   # If not explicitly set, Rally environment is derived from the first token of
-  # $MODE, tokenized by ":" (e.g. for "release:docker" the environment is "release").
+  # $MODE, tokenized by ":" (e.g. for "adhoc:encryption-at-rests" the environment is "adhoc").
   RALLY_ENVIRONMENT=${MODE%:*}
 fi
 

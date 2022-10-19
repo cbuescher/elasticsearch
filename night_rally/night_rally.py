@@ -230,88 +230,6 @@ class NightlyCommand(SourceBasedCommand):
         super().__init__(params, "@%s" % to_iso8601(effective_start_date))
 
 
-class ReleaseCommand(DistributionBasedCommand):
-    def __init__(self, params, release_params, distribution_version):
-        self.distribution_version = distribution_version
-        self.release_params = release_params
-        super().__init__(params, self.distribution_version, self.release_params)
-        
-    def runnable(self, race_config):
-        major, minor, _, _ = components(self.distribution_version)
-        # Java flight recorder related benchmarks are only to measure the overhead compared to a configuration
-        # without Java flight recorder and it is sufficient to enable them in nightlies.
-        if "jfr" in race_config.name:
-            return False
-        # Do not run 1g benchmarks at all at the moment. Earlier versions of ES OOM.
-        if race_config.car == "1gheap":
-            return False
-        # transport-nio has been introduced in Elasticsearch 7.0.
-        if major < 7 and "transport-nio" in race_config.plugins:
-            return False
-        # Currently transport-nio does not support HTTPS
-        if self.release_params["license"] == "trial" and "security" in self.release_params.get("x-pack-components", []) and "transport-nio" in race_config.plugins:
-            return False
-        # ML has been introduced in 5.4.0
-        if race_config.x_pack and "ml" in race_config.x_pack and (major < 5 or (major == 5 and minor < 4)):
-            return False
-        # noaa does not work on older versions. This should actually be specified in track.json and not here...
-        if major < 5 and race_config.track == "noaa":
-            return False
-        # ingest pipelines were added in 5.0
-        if major < 5 and "ingest-pipeline" in race_config.challenge:
-            return False
-        # cannot run "sorted" challenges - it's a 6.0+ feature
-        if major < 6 and "sorted" in race_config.challenge:
-            return False
-        # cannot run "runtime fields" challenges - it's a 7.x feature
-        if major < 7 and "runtime" in race_config.challenge:
-            return False
-        # tracks that shouldn't be run depending on the Elasticsearch major version
-        return run_track(race_config.track, self.distribution_version[0])
-
-
-class DockerCommand(BaseCommand):
-    def __init__(self, params, release_params, distribution_version):
-        self.pipeline = "docker"
-        self.distribution_version = distribution_version
-
-        docker_params = [
-            LicenseParams(distribution_version, release_params),
-            ConstantParam("distribution-version", distribution_version),
-            ConstantParam("pipeline", "docker")
-        ]
-        if int(self.distribution_version[0]) < 6:
-            # 5.x needs additional settings as we removed this from Rally in c805ccda0ea05f15bdae22a1eac601bb33a66eae
-            docker_params.append(
-                ConstantParam("car-params", {"additional_cluster_settings": {"xpack.security.enabled": "false",
-                                                                             "xpack.ml.enabled": "false",
-                                                                             "xpack.monitoring.enabled": "false",
-                                                                             "xpack.watcher.enabled": "false"}})
-            )
-
-        self.params = ParamsFormatter(params=params + docker_params)
-
-    def runnable(self, race_config):
-        # we don't support (yet?) clusters with multiple Docker containers
-        if len(race_config.target_hosts) > 1:
-            return False
-        # no plugin installs on Docker
-        if race_config.plugins:
-            return False
-        # Java flight recorder related benchmarks are only to measure the overhead compared to a configuration
-        # without Java flight recorder and it is sufficient to enable them in nightlies.
-        if "jfr" in race_config.name:
-            return False
-        # cannot run "sorted" challenges - it's a 6.0+ feature
-        if int(self.distribution_version[0]) < 6 and "sorted" in race_config.challenge:
-            return False
-        # cannot run "runtime fields" challenges - it's a 7.x feature
-        if int(self.distribution_version[0]) < 7 and "runtime" in race_config.challenge:
-            return False
-        # tracks that shouldn't be run depending on the Elasticsearch major version
-        return run_track(race_config.track, self.distribution_version[0])
-
-
 class ParamsFormatter:
     """
     Renders the provided (structured) command line parameters as a Rally invocation.
@@ -519,7 +437,7 @@ class RaceConfig:
 
     @property
     def license(self):
-        return "trial"
+        return self.configuration["license"]
 
     @property
     def node_count(self):
@@ -615,7 +533,7 @@ def run_rally(race_configs, release_params, available_hosts, command, dry_run=Fa
         track_repository = r.get("track-repository", "default")
 
         for configuration in r["configurations"]:
-    
+
             # security by default, unless adhoc options are set
             configuration["license"] = release_params["license"] if release_params else "trial"
             race_cfg = RaceConfig(track_name, track_repository, placement, configuration, available_hosts_with_http_ports)
@@ -981,11 +899,6 @@ class CommonCliParams:
         # For now only used for release benchmarks
         self.setup = self.__build_setup_string()
 
-        if self.is_release:
-            if self._release_x_pack_components:
-                self.release_params["x-pack-components"] = self._release_x_pack_components.split(",")
-            self.release_params["license"] = self._release_license
-
         # Store the filename of race_configs (e.g. `race-configs-group-1.json`)
         # we need it in user tags to help deactivating old release results
         self.race_configs_id = os.path.basename(race_configs_id)
@@ -1045,18 +958,9 @@ def main():
         logger.info("Activating Rally telemetry %s." % args.telemetry)
         params.append(TelemetryParams(csv_to_list(args.telemetry), csv_to_list(args.telemetry_params)))
 
-    if common_cli_params.is_release:
+    if common_cli_params.is_adhoc:
         params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk,
-                                     common_cli_params.setup, common_cli_params.race_configs_id, args.test_mode))
-        if common_cli_params.is_docker:
-            logger.info("Running Docker release benchmarks for release [%s] against %s." % (common_cli_params.version, target_hosts))
-            command = DockerCommand(params, common_cli_params.release_params, common_cli_params.version)
-        else:
-            logger.info("Running release benchmarks for release [%s] against %s (release tag is [%s])."
-                        % (common_cli_params.version, target_hosts, common_cli_params.printable_release_params))
-            command = ReleaseCommand(params, common_cli_params.release_params, common_cli_params.version)
-    elif common_cli_params.is_adhoc:
-        params.append(StandardParams(common_cli_params.configuration_name, start_date, args.runtime_jdk, common_cli_params.setup, args.test_mode))
+                                     common_cli_params.setup, args.test_mode))
         if args.version is not None and args.version != "master":
             logger.info("Running adhoc benchmarks for version [%s] against %s." % (args.version, target_hosts))
             command = DistributionBasedCommand(params, args.version)
@@ -1077,16 +981,6 @@ def main():
             common_cli_params.configuration_name,
             common_cli_params.race_configs_id,
             args.dry_run
-        )
-        # we want to deactivate old release entries, not old nightly entries
-        deactivate_outdated_results(
-            start_date,
-            common_cli_params.configuration_name,
-            common_cli_params.version,
-            common_cli_params.setup,
-            common_cli_params.race_configs_id,
-            args.dry_run,
-            environment="release"
         )
 
         previous = race_meta_data("nightly",
@@ -1125,15 +1019,6 @@ def main():
         else:
             logger.info("Cannot determine race meta-data. Skipping summary.")
 
-    elif common_cli_params.is_release:
-        deactivate_outdated_results(
-            start_date,
-            common_cli_params.configuration_name,
-            common_cli_params.version,
-            common_cli_params.setup,
-            common_cli_params.race_configs_id,
-            args.dry_run
-        )
     if rally_failure:
         exit(1)
 
