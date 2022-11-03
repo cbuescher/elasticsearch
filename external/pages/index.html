@@ -344,6 +344,10 @@ var charts = {
       <p>All machines are connected via a dedicated 10 GBit switched network.</p>
       <h4>History of changes</h4>
       <ul>
+        <li>2022-11-01:</li>
+        <ul>
+          <li>Added two new dashboards for <code>so-transform</code> and <code>so-frequent-items</code> challenges under Machine Learning section.</li>
+        </ul>
         <li>2022-08-28:</li>
         <ul>
           <li>Updated both <code>arm64</code> and <code>x86_64</code> AWS AMIs for ubuntu-bionic-18.04-{arch}-server from <code>20201027</code> (arm64, Ubuntu <code>18.04.5</code>, kernel <code>5.4.0-1029-aws</code>) and <code>20200610</code> (x86_64, Ubuntu <code>18.04.4</code>, kernel <code>5.3.0-1023-aws</code>), respectively, to <code>20220810</code> (Ubuntu <code>18.04.6</code>, kernel <code>5.4.0-1083-aws</code>).</li>
@@ -507,6 +511,13 @@ var charts = {
             "many-shards-snapshots",
           ]
         },
+        "ml": {
+          "description": "Machine Learning",
+          "tracks": [
+            "so-frequent-items",
+            "so-transform",
+          ]
+        },
       },
       [
         {
@@ -587,6 +598,53 @@ var charts = {
             "track": "SQL",
             "description": "for evaluating the performance of SQL",
             "nightly_dashboards": "06033dd9-250e-4846-8179-12ed919967b8",
+        },
+        {
+            "id": "so-transform",
+            "track": "SO (Transform)",
+            "description": "for evaluating the performance of the transform feature",
+            "info": `
+                  <h5>Description:</h5>
+                  <p>This benchmark aims to evaluate Elasticsearch's performance of <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/transform-overview.html">transform feature</a>.</p>
+
+                  <p>Elasticsearch runs on GCP using:</p>
+                  <ul>
+                    <li>1 single-node cluster. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 16GB RAM and 1x300GiB SSD disk.</li>
+                    <li>The node has minimum cpu platform pinned to <code>Ice Lake</code>.</li>
+                  </ul>
+
+                  <p>The track performs these steps:</p>
+                  <ol>
+                      <li>Indexes data. The dataset is derived from a dump of <a href="https://ia800500.us.archive.org/22/items/stackexchange/stackoverflow.com-Posts.7z">StackOverflow posts</a>.</li>
+                      <li>Run transforms to pivot data by terms and date_histogram.</li>
+                  </ol>
+
+                  <p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/so/challenges/default.json">transform challenge in the StackOverflow Rally track</a>.</p>`,
+            "nightly_dashboards": "1859ab40-5932-11ed-920a-3b1141502d24",
+        },
+        {
+            "id": "so-frequent-items",
+            "track": "SO (Frequent Items)",
+            "description": "for evaluating the performance of the frequent items aggregation",
+            "info": `
+                  <h5>Description:</h5>
+                  <p>This benchmark aims to evaluate Elasticsearch's performance of <a href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-bucket-frequent-items-aggregation.html">frequent items aggregation</a>.</p>
+
+                  <p>Elasticsearch runs on GCP using:</p>
+                  <ul>
+                    <li>1 single-node cluster. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 4GB RAM and 1x300GiB SSD disk.</li>
+                    <li>The node has minimum cpu platform pinned to <code>Ice Lake</code>.</li>
+                  </ul>
+
+                  <p>The track performs these steps:</p>
+                  <ol>
+                      <li>Indexes data. The dataset is derived from a dump of <a href="https://ia800500.us.archive.org/22/items/stackexchange/stackoverflow.com-Posts.7z">StackOverflow posts</a>.</li>
+                      <li>Run frequent items aggregations.</li>
+                  </ol>
+
+                  <p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/so/challenges/default.json">frequent-items challenge in the StackOverflow Rally track</a>.</p>`,
+
+            "nightly_dashboards": "9d852950-5957-11ed-920a-3b1141502d24",
         },
         {
             "id": "logging",
