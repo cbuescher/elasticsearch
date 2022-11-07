@@ -344,6 +344,10 @@ var charts = {
       <p>All machines are connected via a dedicated 10 GBit switched network.</p>
       <h4>History of changes</h4>
       <ul>
+        <li>2022-11-07:</li>
+        <ul>
+          <li>Added a new dashboard for <code>so_vector</code> track under Search section.</li>
+        </ul>
         <li>2022-11-01:</li>
         <ul>
           <li>Added two new dashboards for <code>so-transform</code> and <code>so-frequent-items</code> challenges under Machine Learning section.</li>
@@ -501,6 +505,7 @@ var charts = {
           "description": "Search",
           "tracks": [
             "dense_vector",
+            "so_vector",
             "cross-clusters-search",
           ],
         },
@@ -724,6 +729,32 @@ var charts = {
 
 <p>For the Elasticsearch config and requests that power the track, see the <a href="https://github.com/elastic/rally-tracks/tree/master/dense_vector">dense_vector Rally track</a></p>`,
             "nightly_dashboards": "407ca9cd-0f5e-4c3b-8d0d-6ba39b27d90e",
+        },
+        {
+            "id": "so_vector",
+            "track": "SO Vector",
+            "description": "for evaluating the performance of filtered vector search",
+            "info": `
+                  <h5>Description:</h5>
+                  <p>This track tests vector search performance with <code>vectors</code> with 768 dimensions and kNN with filtering. The vectors are based on a dataset derived from a dump of <a href="https://ia800500.us.archive.org/22/items/stackexchange/stackoverflow.com-Posts.7z">StackOverflow posts</a>.</p>
+
+                  <p>Elasticsearch runs on GCP using:</p>
+                  <ul>
+                    <li>1 single-node cluster. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 16GB RAM and 1x300GiB SSD disk.</li>
+                    <li>The node has minimum cpu platform pinned to <code>Ice Lake</code>.</li>
+                  </ul>
+
+                  <p>The track performs these steps:</p>
+                  <ol>
+                      <li>Indexes data.</li>
+                      <li>Performs ANN searches (using the <code>_knn_search</code> API) with different filter selectivities.
+                      <li>Performance exact kNN searches (using a <code>script_score</code> query).</li>
+                      <li>Force merges the index to a single segment.</li>
+                      <li>Performs ANN searches again after the force merge.</li>
+                  </ol>
+
+                  <p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/so_vector/challenges/default.json">so_vector Rally track</a>.</p>`,
+            "nightly_dashboards": "43b63e80-5ba2-11ed-aede-a742809feed4",
         },
         {
           "id": "security",
