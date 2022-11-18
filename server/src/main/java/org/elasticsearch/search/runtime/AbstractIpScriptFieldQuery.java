@@ -24,7 +24,8 @@ import java.net.InetAddress;
 abstract class AbstractIpScriptFieldQuery extends AbstractScriptFieldQuery<IpFieldScript> {
 
     AbstractIpScriptFieldQuery(Script script, IpFieldScript.LeafFactory leafFactory, String fieldName) {
-        super(script, fieldName, leafFactory::newInstance);
+        // TODO fix this
+        super(script, fieldName, leafFactory::newInstance, false);
     }
 
     @Override

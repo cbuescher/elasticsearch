@@ -605,7 +605,7 @@ public class RangeAggregatorTests extends AggregatorTestCase {
                 emit("cat");
             }
         };
-        Query query = new StringScriptFieldTermQuery(new Script("dummy"), scriptFactory, "dummy", "cat", false);
+        Query query = new StringScriptFieldTermQuery(new Script("dummy"), scriptFactory, "dummy", "cat", false, false);
         debugTestCase(new RangeAggregationBuilder("r").field(NUMBER_FIELD_NAME).addRange(0, 1).addRange(1, 2).addRange(2, 3), query, iw -> {
             for (int d = 0; d < totalDocs; d++) {
                 iw.addDocument(List.of(new IntPoint(NUMBER_FIELD_NAME, 0), new SortedNumericDocValuesField(NUMBER_FIELD_NAME, 0)));
@@ -647,7 +647,7 @@ public class RangeAggregatorTests extends AggregatorTestCase {
                 emit((long) getDoc().get(NUMBER_FIELD_NAME).get(0));
             }
         };
-        MappedFieldType dummyFt = new LongScriptFieldType("dummy", scriptFactory, new Script("test"), Map.of());
+        MappedFieldType dummyFt = new LongScriptFieldType("dummy", scriptFactory, new Script("test"), Map.of(), false);
         MappedFieldType numberFt = new NumberFieldMapper.NumberFieldType(NUMBER_FIELD_NAME, NumberFieldMapper.NumberType.INTEGER);
         debugTestCase(
             new RangeAggregationBuilder("r").field("dummy").addRange(0, 1).addRange(1, 2).addRange(2, 3),

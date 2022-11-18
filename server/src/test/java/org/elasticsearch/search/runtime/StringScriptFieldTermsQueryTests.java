@@ -27,12 +27,12 @@ public class StringScriptFieldTermsQueryTests extends AbstractStringScriptFieldQ
     @Override
     protected StringScriptFieldTermsQuery createTestInstance() {
         Set<String> terms = new TreeSet<>(Arrays.asList(generateRandomStringArray(4, 6, false, false)));
-        return new StringScriptFieldTermsQuery(randomScript(), leafFactory, randomAlphaOfLength(5), terms);
+        return new StringScriptFieldTermsQuery(randomScript(), leafFactory, randomAlphaOfLength(5), terms, false);
     }
 
     @Override
     protected StringScriptFieldTermsQuery copy(StringScriptFieldTermsQuery orig) {
-        return new StringScriptFieldTermsQuery(orig.script(), leafFactory, orig.fieldName(), orig.terms());
+        return new StringScriptFieldTermsQuery(orig.script(), leafFactory, orig.fieldName(), orig.terms(), false);
     }
 
     @Override
@@ -49,12 +49,18 @@ public class StringScriptFieldTermsQueryTests extends AbstractStringScriptFieldQ
             }
             default -> fail();
         }
-        return new StringScriptFieldTermsQuery(script, leafFactory, fieldName, terms);
+        return new StringScriptFieldTermsQuery(script, leafFactory, fieldName, terms, false);
     }
 
     @Override
     public void testMatches() {
-        StringScriptFieldTermsQuery query = new StringScriptFieldTermsQuery(randomScript(), leafFactory, "test", Set.of("foo", "bar"));
+        StringScriptFieldTermsQuery query = new StringScriptFieldTermsQuery(
+            randomScript(),
+            leafFactory,
+            "test",
+            Set.of("foo", "bar"),
+            false
+        );
         assertTrue(query.matches(List.of("foo")));
         assertTrue(query.matches(List.of("bar")));
         assertFalse(query.matches(List.of("baz")));

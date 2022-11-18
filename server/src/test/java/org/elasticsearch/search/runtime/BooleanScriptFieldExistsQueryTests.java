@@ -13,20 +13,25 @@ import static org.hamcrest.Matchers.equalTo;
 public class BooleanScriptFieldExistsQueryTests extends AbstractBooleanScriptFieldQueryTestCase<BooleanScriptFieldExistsQuery> {
     @Override
     protected BooleanScriptFieldExistsQuery createTestInstance() {
-        return new BooleanScriptFieldExistsQuery(randomScript(), leafFactory, randomAlphaOfLength(5));
+        return new BooleanScriptFieldExistsQuery(randomScript(), leafFactory, randomAlphaOfLength(5), false);
     }
 
     @Override
     protected BooleanScriptFieldExistsQuery copy(BooleanScriptFieldExistsQuery orig) {
-        return new BooleanScriptFieldExistsQuery(orig.script(), leafFactory, orig.fieldName());
+        return new BooleanScriptFieldExistsQuery(orig.script(), leafFactory, orig.fieldName(), false);
     }
 
     @Override
     protected BooleanScriptFieldExistsQuery mutate(BooleanScriptFieldExistsQuery orig) {
         if (randomBoolean()) {
-            new BooleanScriptFieldExistsQuery(randomValueOtherThan(orig.script(), this::randomScript), leafFactory, orig.fieldName());
+            new BooleanScriptFieldExistsQuery(
+                randomValueOtherThan(orig.script(), this::randomScript),
+                leafFactory,
+                orig.fieldName(),
+                false
+            );
         }
-        return new BooleanScriptFieldExistsQuery(orig.script(), leafFactory, orig.fieldName() + "modified");
+        return new BooleanScriptFieldExistsQuery(orig.script(), leafFactory, orig.fieldName() + "modified", false);
     }
 
     @Override

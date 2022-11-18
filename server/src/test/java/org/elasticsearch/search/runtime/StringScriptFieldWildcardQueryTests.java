@@ -24,13 +24,21 @@ public class StringScriptFieldWildcardQueryTests extends AbstractStringScriptFie
             leafFactory,
             randomAlphaOfLength(5),
             randomAlphaOfLength(6),
-            randomBoolean()
+            randomBoolean(),
+            false
         );
     }
 
     @Override
     protected StringScriptFieldWildcardQuery copy(StringScriptFieldWildcardQuery orig) {
-        return new StringScriptFieldWildcardQuery(orig.script(), leafFactory, orig.fieldName(), orig.pattern(), orig.caseInsensitive());
+        return new StringScriptFieldWildcardQuery(
+            orig.script(),
+            leafFactory,
+            orig.fieldName(),
+            orig.pattern(),
+            orig.caseInsensitive(),
+            false
+        );
     }
 
     @Override
@@ -46,12 +54,12 @@ public class StringScriptFieldWildcardQueryTests extends AbstractStringScriptFie
             case 3 -> caseInsensitive = caseInsensitive == false;
             default -> fail();
         }
-        return new StringScriptFieldWildcardQuery(script, leafFactory, fieldName, pattern, caseInsensitive);
+        return new StringScriptFieldWildcardQuery(script, leafFactory, fieldName, pattern, caseInsensitive, false);
     }
 
     @Override
     public void testMatches() {
-        StringScriptFieldWildcardQuery query = new StringScriptFieldWildcardQuery(randomScript(), leafFactory, "test", "a*b", false);
+        StringScriptFieldWildcardQuery query = new StringScriptFieldWildcardQuery(randomScript(), leafFactory, "test", "a*b", false, false);
         assertTrue(query.matches(List.of("astuffb")));
         assertFalse(query.matches(List.of("Astuffb")));
         assertFalse(query.matches(List.of("fffff")));
@@ -61,7 +69,14 @@ public class StringScriptFieldWildcardQueryTests extends AbstractStringScriptFie
         assertFalse(query.matches(List.of("dsfb")));
         assertTrue(query.matches(List.of("astuffb", "fffff")));
 
-        StringScriptFieldWildcardQuery ciQuery = new StringScriptFieldWildcardQuery(randomScript(), leafFactory, "test", "a*b", true);
+        StringScriptFieldWildcardQuery ciQuery = new StringScriptFieldWildcardQuery(
+            randomScript(),
+            leafFactory,
+            "test",
+            "a*b",
+            true,
+            false
+        );
         assertTrue(ciQuery.matches(List.of("Astuffb")));
         assertTrue(ciQuery.matches(List.of("astuffB", "fffff")));
 
@@ -74,7 +89,7 @@ public class StringScriptFieldWildcardQueryTests extends AbstractStringScriptFie
 
     @Override
     public void testVisit() {
-        StringScriptFieldWildcardQuery query = new StringScriptFieldWildcardQuery(randomScript(), leafFactory, "test", "a*b", false);
+        StringScriptFieldWildcardQuery query = new StringScriptFieldWildcardQuery(randomScript(), leafFactory, "test", "a*b", false, false);
         ByteRunAutomaton automaton = visitForSingleAutomata(query);
         BytesRef term = new BytesRef("astuffb");
         assertTrue(automaton.run(term.bytes, term.offset, term.length));

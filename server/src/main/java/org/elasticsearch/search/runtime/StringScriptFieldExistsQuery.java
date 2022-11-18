@@ -14,8 +14,8 @@ import org.elasticsearch.script.StringFieldScript;
 import java.util.List;
 
 public class StringScriptFieldExistsQuery extends AbstractStringScriptFieldQuery {
-    public StringScriptFieldExistsQuery(Script script, StringFieldScript.LeafFactory leafFactory, String fieldName) {
-        super(script, leafFactory, fieldName);
+    public StringScriptFieldExistsQuery(Script script, StringFieldScript.LeafFactory leafFactory, String fieldName, Boolean onScriptError) {
+        super(script, leafFactory, fieldName, onScriptError);
     }
 
     @Override

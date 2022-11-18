@@ -48,7 +48,7 @@ public final class BooleanScriptFieldType extends AbstractScriptFieldType<Boolea
             Script script,
             Map<String, String> meta
         ) {
-            return new BooleanScriptFieldType(name, factory, script, meta);
+            return new BooleanScriptFieldType(name, factory, script, meta, onScriptError.get().equals("copntinue"));
         }
 
         @Override
@@ -67,13 +67,20 @@ public final class BooleanScriptFieldType extends AbstractScriptFieldType<Boolea
         return new Builder(name).createRuntimeField(BooleanFieldScript.PARSE_FROM_SOURCE);
     }
 
-    BooleanScriptFieldType(String name, BooleanFieldScript.Factory scriptFactory, Script script, Map<String, String> meta) {
+    BooleanScriptFieldType(
+        String name,
+        BooleanFieldScript.Factory scriptFactory,
+        Script script,
+        Map<String, String> meta,
+        Boolean onErrorContinue
+    ) {
         super(
             name,
             searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup),
             script,
             scriptFactory.isResultDeterministic(),
-            meta
+            meta,
+            onErrorContinue
         );
     }
 
@@ -109,7 +116,7 @@ public final class BooleanScriptFieldType extends AbstractScriptFieldType<Boolea
     @Override
     public Query existsQuery(SearchExecutionContext context) {
         applyScriptContext(context);
-        return new BooleanScriptFieldExistsQuery(script, leafFactory(context), name());
+        return new BooleanScriptFieldExistsQuery(script, leafFactory(context), name(), onErrorContinue);
     }
 
     @Override
@@ -180,13 +187,13 @@ public final class BooleanScriptFieldType extends AbstractScriptFieldType<Boolea
     @Override
     public Query termQueryCaseInsensitive(Object value, SearchExecutionContext context) {
         applyScriptContext(context);
-        return new BooleanScriptFieldTermQuery(script, leafFactory(context.lookup()), name(), toBoolean(value, true));
+        return new BooleanScriptFieldTermQuery(script, leafFactory(context.lookup()), name(), toBoolean(value, true), onErrorContinue);
     }
 
     @Override
     public Query termQuery(Object value, SearchExecutionContext context) {
         applyScriptContext(context);
-        return new BooleanScriptFieldTermQuery(script, leafFactory(context), name(), toBoolean(value, false));
+        return new BooleanScriptFieldTermQuery(script, leafFactory(context), name(), toBoolean(value, false), onErrorContinue);
     }
 
     @Override
@@ -213,11 +220,11 @@ public final class BooleanScriptFieldType extends AbstractScriptFieldType<Boolea
                 return existsQuery(context);
             }
             applyScriptContext(context);
-            return new BooleanScriptFieldTermQuery(script, leafFactory(context), name(), true);
+            return new BooleanScriptFieldTermQuery(script, leafFactory(context), name(), true, onErrorContinue);
         }
         if (falseAllowed) {
             applyScriptContext(context);
-            return new BooleanScriptFieldTermQuery(script, leafFactory(context), name(), false);
+            return new BooleanScriptFieldTermQuery(script, leafFactory(context), name(), false, onErrorContinue);
         }
         return new MatchNoDocsQuery("neither true nor false allowed");
     }

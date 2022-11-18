@@ -31,9 +31,10 @@ public class StringScriptFieldRangeQuery extends AbstractStringScriptFieldQuery 
         String lowerValue,
         String upperValue,
         boolean includeLower,
-        boolean includeUpper
+        boolean includeUpper,
+        Boolean onScriptError
     ) {
-        super(script, leafFactory, fieldName);
+        super(script, leafFactory, fieldName, onScriptError);
         if (lowerValue == null && includeLower == false) {
             throw new IllegalArgumentException("includeLower must be true when lowerValue is null (open ended)");
         }

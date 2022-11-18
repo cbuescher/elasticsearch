@@ -27,13 +27,15 @@ public class StringScriptFieldWildcardQuery extends AbstractStringScriptFieldAut
         StringFieldScript.LeafFactory leafFactory,
         String fieldName,
         String pattern,
-        boolean caseInsensitive
+        boolean caseInsensitive,
+        Boolean onScriptError
     ) {
         super(
             script,
             leafFactory,
             fieldName,
-            new ByteRunAutomaton(buildAutomaton(new Term(fieldName, Objects.requireNonNull(pattern)), caseInsensitive))
+            new ByteRunAutomaton(buildAutomaton(new Term(fieldName, Objects.requireNonNull(pattern)), caseInsensitive)),
+            onScriptError
         );
         this.pattern = pattern;
         this.caseInsensitive = caseInsensitive;

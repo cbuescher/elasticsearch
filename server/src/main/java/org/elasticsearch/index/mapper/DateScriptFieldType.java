@@ -98,7 +98,7 @@ public class DateScriptFieldType extends AbstractScriptFieldType<DateFieldScript
             String pattern = format.getValue() == null ? DateFieldMapper.DEFAULT_DATE_TIME_FORMATTER.pattern() : format.getValue();
             Locale locale = this.locale.getValue() == null ? Locale.ROOT : this.locale.getValue();
             DateFormatter dateTimeFormatter = DateFormatter.forPattern(pattern, supportedVersion).withLocale(locale);
-            return new DateScriptFieldType(name, factory, dateTimeFormatter, script, meta);
+            return new DateScriptFieldType(name, factory, dateTimeFormatter, script, meta, onScriptError.get().equals("continue"));
         }
 
         @Override
@@ -131,14 +131,16 @@ public class DateScriptFieldType extends AbstractScriptFieldType<DateFieldScript
         DateFieldScript.Factory scriptFactory,
         DateFormatter dateTimeFormatter,
         Script script,
-        Map<String, String> meta
+        Map<String, String> meta,
+        Boolean onErrorContinue
     ) {
         super(
             name,
             searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup, dateTimeFormatter),
             script,
             scriptFactory.isResultDeterministic(),
-            meta
+            meta,
+            onErrorContinue
         );
         this.dateTimeFormatter = dateTimeFormatter;
         this.dateMathParser = dateTimeFormatter.toDateMathParser();
@@ -197,7 +199,8 @@ public class DateScriptFieldType extends AbstractScriptFieldType<DateFieldScript
                 leafFactory(context)::newInstance,
                 name(),
                 originLong,
-                pivotTime.getMillis()
+                pivotTime.getMillis(),
+                onErrorContinue
             );
         });
     }

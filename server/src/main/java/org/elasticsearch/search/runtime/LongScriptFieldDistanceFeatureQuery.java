@@ -33,9 +33,10 @@ public final class LongScriptFieldDistanceFeatureQuery extends AbstractScriptFie
         Function<LeafReaderContext, AbstractLongFieldScript> leafFactory,
         String fieldName,
         long origin,
-        long pivot
+        long pivot,
+        Boolean onErrorContinue
     ) {
-        super(script, fieldName, leafFactory);
+        super(script, fieldName, leafFactory, onErrorContinue);
         this.origin = origin;
         this.pivot = pivot;
     }

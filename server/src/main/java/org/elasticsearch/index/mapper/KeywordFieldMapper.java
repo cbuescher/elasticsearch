@@ -483,7 +483,8 @@ public final class KeywordFieldMapper extends FieldMapper {
                     indexedValueForSearch(value).utf8ToString(),
                     fuzziness.asDistance(BytesRefs.toString(value)),
                     prefixLength,
-                    transpositions
+                    transpositions,
+                    false
                 );
             }
         }
@@ -504,7 +505,8 @@ public final class KeywordFieldMapper extends FieldMapper {
                     ctx -> new SortedSetDocValuesStringFieldScript(name(), context.lookup(), ctx),
                     name(),
                     indexedValueForSearch(value).utf8ToString(),
-                    caseInsensitive
+                    caseInsensitive,
+                    false
                 );
             }
         }
@@ -520,7 +522,8 @@ public final class KeywordFieldMapper extends FieldMapper {
                     ctx -> new SortedSetDocValuesStringFieldScript(name(), context.lookup(), ctx),
                     name(),
                     indexedValueForSearch(value).utf8ToString(),
-                    true
+                    true,
+                    false
                 );
             }
         }
@@ -827,7 +830,8 @@ public final class KeywordFieldMapper extends FieldMapper {
                     ctx -> new SortedSetDocValuesStringFieldScript(name(), context.lookup(), ctx),
                     name(),
                     value,
-                    caseInsensitive
+                    caseInsensitive,
+                    false
                 );
             }
         }
@@ -848,6 +852,7 @@ public final class KeywordFieldMapper extends FieldMapper {
                     ctx -> new SortedSetDocValuesStringFieldScript(name(), context.lookup(), ctx),
                     name(),
                     value,
+                    false,
                     false
                 );
             }
@@ -876,7 +881,8 @@ public final class KeywordFieldMapper extends FieldMapper {
                     indexedValueForSearch(value).utf8ToString(),
                     syntaxFlags,
                     matchFlags,
-                    maxDeterminizedStates
+                    maxDeterminizedStates,
+                    false
                 );
             }
         }

@@ -24,9 +24,11 @@ public abstract class AbstractStringScriptFieldAutomatonQuery extends AbstractSt
         Script script,
         StringFieldScript.LeafFactory leafFactory,
         String fieldName,
-        ByteRunAutomaton automaton
+        ByteRunAutomaton automaton,
+        Boolean onScriptError
     ) {
-        super(script, leafFactory, fieldName);
+
+        super(script, leafFactory, fieldName, onScriptError);
         this.automaton = automaton;
     }
 

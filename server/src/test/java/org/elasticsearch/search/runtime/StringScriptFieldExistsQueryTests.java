@@ -21,20 +21,20 @@ import static org.hamcrest.Matchers.equalTo;
 public class StringScriptFieldExistsQueryTests extends AbstractStringScriptFieldQueryTestCase<StringScriptFieldExistsQuery> {
     @Override
     protected StringScriptFieldExistsQuery createTestInstance() {
-        return new StringScriptFieldExistsQuery(randomScript(), leafFactory, randomAlphaOfLength(5));
+        return new StringScriptFieldExistsQuery(randomScript(), leafFactory, randomAlphaOfLength(5), false);
     }
 
     @Override
     protected StringScriptFieldExistsQuery copy(StringScriptFieldExistsQuery orig) {
-        return new StringScriptFieldExistsQuery(orig.script(), leafFactory, orig.fieldName());
+        return new StringScriptFieldExistsQuery(orig.script(), leafFactory, orig.fieldName(), false);
     }
 
     @Override
     protected StringScriptFieldExistsQuery mutate(StringScriptFieldExistsQuery orig) {
         if (randomBoolean()) {
-            new StringScriptFieldExistsQuery(randomValueOtherThan(orig.script(), this::randomScript), leafFactory, orig.fieldName());
+            new StringScriptFieldExistsQuery(randomValueOtherThan(orig.script(), this::randomScript), leafFactory, orig.fieldName(), false);
         }
-        return new StringScriptFieldExistsQuery(orig.script(), leafFactory, orig.fieldName() + "modified");
+        return new StringScriptFieldExistsQuery(orig.script(), leafFactory, orig.fieldName() + "modified", false);
     }
 
     @Override

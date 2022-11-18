@@ -25,9 +25,10 @@ public class StringScriptFieldTermQuery extends AbstractStringScriptFieldQuery {
         StringFieldScript.LeafFactory leafFactory,
         String fieldName,
         String term,
-        boolean caseInsensitive
+        boolean caseInsensitive,
+        Boolean onScriptError
     ) {
-        super(script, leafFactory, fieldName);
+        super(script, leafFactory, fieldName, onScriptError);
         this.term = Objects.requireNonNull(term);
         this.caseInsensitive = caseInsensitive;
     }

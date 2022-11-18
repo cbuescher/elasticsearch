@@ -25,13 +25,14 @@ public class StringScriptFieldPrefixQueryTests extends AbstractStringScriptField
             leafFactory,
             randomAlphaOfLength(5),
             randomAlphaOfLength(6),
-            randomBoolean()
+            randomBoolean(),
+            false
         );
     }
 
     @Override
     protected StringScriptFieldPrefixQuery copy(StringScriptFieldPrefixQuery orig) {
-        return new StringScriptFieldPrefixQuery(orig.script(), leafFactory, orig.fieldName(), orig.prefix(), orig.caseInsensitive());
+        return new StringScriptFieldPrefixQuery(orig.script(), leafFactory, orig.fieldName(), orig.prefix(), orig.caseInsensitive(), false);
     }
 
     @Override
@@ -47,12 +48,12 @@ public class StringScriptFieldPrefixQueryTests extends AbstractStringScriptField
             case 3 -> caseInsensitive = caseInsensitive == false;
             default -> fail();
         }
-        return new StringScriptFieldPrefixQuery(script, leafFactory, fieldName, prefix, caseInsensitive);
+        return new StringScriptFieldPrefixQuery(script, leafFactory, fieldName, prefix, caseInsensitive, false);
     }
 
     @Override
     public void testMatches() {
-        StringScriptFieldPrefixQuery query = new StringScriptFieldPrefixQuery(randomScript(), leafFactory, "test", "foo", false);
+        StringScriptFieldPrefixQuery query = new StringScriptFieldPrefixQuery(randomScript(), leafFactory, "test", "foo", false, false);
         assertTrue(query.matches(List.of("foo")));
         assertFalse(query.matches(List.of("Foo")));
         assertTrue(query.matches(List.of("foooo")));
@@ -61,7 +62,7 @@ public class StringScriptFieldPrefixQueryTests extends AbstractStringScriptField
         assertTrue(query.matches(List.of("fo", "foo")));
         assertFalse(query.matches(List.of("Fo", "fOo")));
 
-        StringScriptFieldPrefixQuery ciQuery = new StringScriptFieldPrefixQuery(randomScript(), leafFactory, "test", "foo", true);
+        StringScriptFieldPrefixQuery ciQuery = new StringScriptFieldPrefixQuery(randomScript(), leafFactory, "test", "foo", true, false);
         assertTrue(ciQuery.matches(List.of("fOo")));
         assertTrue(ciQuery.matches(List.of("Foooo")));
         assertTrue(ciQuery.matches(List.of("fo", "foO")));

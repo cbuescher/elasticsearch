@@ -18,8 +18,8 @@ import org.elasticsearch.script.Script;
  */
 abstract class AbstractBooleanScriptFieldQuery extends AbstractScriptFieldQuery<BooleanFieldScript> {
 
-    AbstractBooleanScriptFieldQuery(Script script, BooleanFieldScript.LeafFactory leafFactory, String fieldName) {
-        super(script, fieldName, leafFactory::newInstance);
+    AbstractBooleanScriptFieldQuery(Script script, BooleanFieldScript.LeafFactory leafFactory, String fieldName, Boolean onErrorContinue) {
+        super(script, fieldName, leafFactory::newInstance, onErrorContinue);
     }
 
     @Override

@@ -12,8 +12,13 @@ import org.elasticsearch.script.BooleanFieldScript;
 import org.elasticsearch.script.Script;
 
 public class BooleanScriptFieldExistsQuery extends AbstractBooleanScriptFieldQuery {
-    public BooleanScriptFieldExistsQuery(Script script, BooleanFieldScript.LeafFactory leafFactory, String fieldName) {
-        super(script, leafFactory, fieldName);
+    public BooleanScriptFieldExistsQuery(
+        Script script,
+        BooleanFieldScript.LeafFactory leafFactory,
+        String fieldName,
+        Boolean onErrorContinue
+    ) {
+        super(script, leafFactory, fieldName, onErrorContinue);
     }
 
     @Override

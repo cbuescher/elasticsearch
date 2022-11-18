@@ -24,12 +24,13 @@ public class StringScriptFieldFuzzyQuery extends AbstractStringScriptFieldAutoma
         String term,
         int maxEdits,
         int prefixLength,
-        boolean transpositions
+        boolean transpositions,
+        Boolean onScriptError
     ) {
         int maxExpansions = 1; // We don't actually expand anything so the value here doesn't matter
         FuzzyQuery delegate = new FuzzyQuery(new Term(fieldName, term), maxEdits, prefixLength, maxExpansions, transpositions);
         ByteRunAutomaton automaton = delegate.getAutomata().runAutomaton;
-        return new StringScriptFieldFuzzyQuery(script, leafFactory, fieldName, automaton, delegate);
+        return new StringScriptFieldFuzzyQuery(script, leafFactory, fieldName, automaton, delegate, onScriptError);
     }
 
     private final FuzzyQuery delegate;
@@ -39,9 +40,10 @@ public class StringScriptFieldFuzzyQuery extends AbstractStringScriptFieldAutoma
         StringFieldScript.LeafFactory leafFactory,
         String fieldName,
         ByteRunAutomaton automaton,
-        FuzzyQuery delegate
+        FuzzyQuery delegate,
+        Boolean onScriptError
     ) {
-        super(script, leafFactory, fieldName, automaton);
+        super(script, leafFactory, fieldName, automaton, onScriptError);
         this.delegate = delegate;
     }
 

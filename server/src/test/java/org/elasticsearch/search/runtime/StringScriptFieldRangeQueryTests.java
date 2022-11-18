@@ -29,7 +29,8 @@ public class StringScriptFieldRangeQueryTests extends AbstractStringScriptFieldQ
             lower,
             upper,
             lower == null || randomBoolean(),
-            upper == null || randomBoolean()
+            upper == null || randomBoolean(),
+            false
         );
     }
 
@@ -43,7 +44,8 @@ public class StringScriptFieldRangeQueryTests extends AbstractStringScriptFieldQ
                 null,
                 randomAlphaOfLength(3),
                 false,
-                randomBoolean()
+                randomBoolean(),
+                false
             )
         );
         expectThrows(
@@ -55,6 +57,7 @@ public class StringScriptFieldRangeQueryTests extends AbstractStringScriptFieldQ
                 randomAlphaOfLength(3),
                 null,
                 randomBoolean(),
+                false,
                 false
             )
         );
@@ -69,7 +72,8 @@ public class StringScriptFieldRangeQueryTests extends AbstractStringScriptFieldQ
             orig.lowerValue(),
             orig.upperValue(),
             orig.includeLower(),
-            orig.includeUpper()
+            orig.includeUpper(),
+            false
         );
     }
 
@@ -110,7 +114,7 @@ public class StringScriptFieldRangeQueryTests extends AbstractStringScriptFieldQ
             }
             default -> fail();
         }
-        return new StringScriptFieldRangeQuery(script, leafFactory, fieldName, lower, upper, includeLower, includeUpper);
+        return new StringScriptFieldRangeQuery(script, leafFactory, fieldName, lower, upper, includeLower, includeUpper, false);
     }
 
     private static String mutate(String term) {
@@ -125,34 +129,43 @@ public class StringScriptFieldRangeQueryTests extends AbstractStringScriptFieldQ
 
     @Override
     public void testMatches() {
-        StringScriptFieldRangeQuery query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", "a", "b", true, true);
+        StringScriptFieldRangeQuery query = new StringScriptFieldRangeQuery(
+            randomScript(),
+            leafFactory,
+            "test",
+            "a",
+            "b",
+            true,
+            true,
+            false
+        );
         assertTrue(query.matches(List.of("a")));
         assertTrue(query.matches(List.of("ab")));
         assertTrue(query.matches(List.of("b")));
         assertFalse(query.matches(List.of("ba")));
         assertTrue(query.matches(List.of("a", "c")));
-        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", "a", "b", false, false);
+        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", "a", "b", false, false, false);
         assertFalse(query.matches(List.of("a")));
         assertTrue(query.matches(List.of("ab")));
         assertFalse(query.matches(List.of("b")));
         assertFalse(query.matches(List.of("ba")));
-        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", "b", "a", randomBoolean(), randomBoolean());
+        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", "b", "a", randomBoolean(), randomBoolean(), false);
         assertFalse(query.matches(List.of("a")));
         assertFalse(query.matches(List.of("ab")));
         assertFalse(query.matches(List.of("b")));
         assertFalse(query.matches(List.of("ba")));
-        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", null, "b", true, false);
+        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", null, "b", true, false, false);
         assertTrue(query.matches(List.of("a")));
         assertTrue(query.matches(List.of("ab")));
         assertFalse(query.matches(List.of("b")));
         assertFalse(query.matches(List.of("ba")));
-        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", "a", null, false, true);
+        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", "a", null, false, true, false);
         assertFalse(query.matches(List.of("a")));
         assertTrue(query.matches(List.of("ab")));
         assertTrue(query.matches(List.of("b")));
         assertTrue(query.matches(List.of("ba")));
         assertTrue(query.matches(List.of("z")));
-        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", null, null, true, true);
+        query = new StringScriptFieldRangeQuery(randomScript(), leafFactory, "test", null, null, true, true, false);
         assertTrue(query.matches(List.of("a")));
         assertTrue(query.matches(List.of("ab")));
         assertTrue(query.matches(List.of("b")));

@@ -25,12 +25,19 @@ import static org.hamcrest.Matchers.equalTo;
 public class StringScriptFieldTermQueryTests extends AbstractStringScriptFieldQueryTestCase<StringScriptFieldTermQuery> {
     @Override
     protected StringScriptFieldTermQuery createTestInstance() {
-        return new StringScriptFieldTermQuery(randomScript(), leafFactory, randomAlphaOfLength(5), randomAlphaOfLength(6), randomBoolean());
+        return new StringScriptFieldTermQuery(
+            randomScript(),
+            leafFactory,
+            randomAlphaOfLength(5),
+            randomAlphaOfLength(6),
+            randomBoolean(),
+            false
+        );
     }
 
     @Override
     protected StringScriptFieldTermQuery copy(StringScriptFieldTermQuery orig) {
-        return new StringScriptFieldTermQuery(orig.script(), leafFactory, orig.fieldName(), orig.term(), orig.caseInsensitive());
+        return new StringScriptFieldTermQuery(orig.script(), leafFactory, orig.fieldName(), orig.term(), orig.caseInsensitive(), false);
     }
 
     @Override
@@ -46,18 +53,18 @@ public class StringScriptFieldTermQueryTests extends AbstractStringScriptFieldQu
             case 3 -> caseInsensitive = caseInsensitive == false;
             default -> fail();
         }
-        return new StringScriptFieldTermQuery(script, leafFactory, fieldName, term, caseInsensitive);
+        return new StringScriptFieldTermQuery(script, leafFactory, fieldName, term, caseInsensitive, false);
     }
 
     @Override
     public void testMatches() {
-        StringScriptFieldTermQuery query = new StringScriptFieldTermQuery(randomScript(), leafFactory, "test", "foo", false);
+        StringScriptFieldTermQuery query = new StringScriptFieldTermQuery(randomScript(), leafFactory, "test", "foo", false, false);
         assertTrue(query.matches(List.of("foo")));
         assertFalse(query.matches(List.of("foO")));
         assertFalse(query.matches(List.of("bar")));
         assertTrue(query.matches(List.of("foo", "bar")));
 
-        StringScriptFieldTermQuery ciQuery = new StringScriptFieldTermQuery(randomScript(), leafFactory, "test", "foo", true);
+        StringScriptFieldTermQuery ciQuery = new StringScriptFieldTermQuery(randomScript(), leafFactory, "test", "foo", true, false);
         assertTrue(ciQuery.matches(List.of("Foo")));
         assertTrue(ciQuery.matches(List.of("fOo", "bar")));
 

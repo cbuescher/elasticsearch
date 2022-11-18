@@ -19,12 +19,12 @@ public class BooleanScriptFieldTermQueryTests extends AbstractBooleanScriptField
     }
 
     private BooleanScriptFieldTermQuery createTestInstance(boolean term) {
-        return new BooleanScriptFieldTermQuery(randomScript(), leafFactory, randomAlphaOfLength(5), term);
+        return new BooleanScriptFieldTermQuery(randomScript(), leafFactory, randomAlphaOfLength(5), term, false);
     }
 
     @Override
     protected BooleanScriptFieldTermQuery copy(BooleanScriptFieldTermQuery orig) {
-        return new BooleanScriptFieldTermQuery(orig.script(), leafFactory, orig.fieldName(), orig.term());
+        return new BooleanScriptFieldTermQuery(orig.script(), leafFactory, orig.fieldName(), orig.term(), false);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class BooleanScriptFieldTermQueryTests extends AbstractBooleanScriptField
             case 2 -> term = term == false;
             default -> fail();
         }
-        return new BooleanScriptFieldTermQuery(script, leafFactory, fieldName, term);
+        return new BooleanScriptFieldTermQuery(script, leafFactory, fieldName, term, false);
     }
 
     @Override

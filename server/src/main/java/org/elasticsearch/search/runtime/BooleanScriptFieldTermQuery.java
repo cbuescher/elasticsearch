@@ -16,8 +16,14 @@ import java.util.Objects;
 public class BooleanScriptFieldTermQuery extends AbstractBooleanScriptFieldQuery {
     private final boolean term;
 
-    public BooleanScriptFieldTermQuery(Script script, BooleanFieldScript.LeafFactory leafFactory, String fieldName, boolean term) {
-        super(script, leafFactory, fieldName);
+    public BooleanScriptFieldTermQuery(
+        Script script,
+        BooleanFieldScript.LeafFactory leafFactory,
+        String fieldName,
+        boolean term,
+        boolean onErrorContinue
+    ) {
+        super(script, leafFactory, fieldName, onErrorContinue);
         this.term = term;
     }
 

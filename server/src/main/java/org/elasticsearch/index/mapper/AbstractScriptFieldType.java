@@ -44,18 +44,21 @@ abstract class AbstractScriptFieldType<LeafFactory> extends MappedFieldType {
     protected final Script script;
     private final Function<SearchLookup, LeafFactory> factory;
     private final boolean isResultDeterministic;
+    protected final Boolean onErrorContinue;
 
     AbstractScriptFieldType(
         String name,
         Function<SearchLookup, LeafFactory> factory,
         Script script,
         boolean isResultDeterministic,
-        Map<String, String> meta
+        Map<String, String> meta,
+        Boolean onErrorContinue
     ) {
         super(name, false, false, false, TextSearchInfo.SIMPLE_MATCH_WITHOUT_TERMS, meta);
         this.factory = factory;
         this.script = Objects.requireNonNull(script);
         this.isResultDeterministic = isResultDeterministic;
+        this.onErrorContinue = onErrorContinue;
     }
 
     @Override
@@ -225,6 +228,11 @@ abstract class AbstractScriptFieldType<LeafFactory> extends MappedFieldType {
             Objects::toString
         ).setSerializerCheck((id, ic, v) -> ic);
 
+        protected final FieldMapper.Parameter<String> onScriptError = FieldMapper.Parameter.onScriptErrorParam(
+            m -> m.onScriptError,
+            script
+        );
+
         Builder(String name, ScriptContext<Factory> scriptContext) {
             super(name);
             this.scriptContext = scriptContext;
@@ -287,6 +295,7 @@ abstract class AbstractScriptFieldType<LeafFactory> extends MappedFieldType {
         protected List<FieldMapper.Parameter<?>> getParameters() {
             List<FieldMapper.Parameter<?>> parameters = new ArrayList<>(super.getParameters());
             parameters.add(script);
+            parameters.add(onScriptError);
             return Collections.unmodifiableList(parameters);
         }
 

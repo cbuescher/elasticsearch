@@ -28,7 +28,8 @@ public class StringScriptFieldFuzzyQueryTests extends AbstractStringScriptFieldQ
             term,
             randomIntBetween(0, 2),
             randomIntBetween(0, term.length()),
-            randomBoolean()
+            randomBoolean(),
+            false
         );
     }
 
@@ -41,7 +42,8 @@ public class StringScriptFieldFuzzyQueryTests extends AbstractStringScriptFieldQ
             orig.delegate().getTerm().bytes().utf8ToString(),
             orig.delegate().getMaxEdits(),
             orig.delegate().getPrefixLength(),
-            orig.delegate().getTranspositions()
+            orig.delegate().getTranspositions(),
+            false
         );
     }
 
@@ -62,20 +64,29 @@ public class StringScriptFieldFuzzyQueryTests extends AbstractStringScriptFieldQ
             case 5 -> transpositions = transpositions == false;
             default -> fail();
         }
-        return StringScriptFieldFuzzyQuery.build(script, leafFactory, fieldName, term, maxEdits, prefixLength, transpositions);
+        return StringScriptFieldFuzzyQuery.build(script, leafFactory, fieldName, term, maxEdits, prefixLength, transpositions, false);
     }
 
     @Override
     public void testMatches() {
-        StringScriptFieldFuzzyQuery query = StringScriptFieldFuzzyQuery.build(randomScript(), leafFactory, "test", "foo", 1, 0, false);
+        StringScriptFieldFuzzyQuery query = StringScriptFieldFuzzyQuery.build(
+            randomScript(),
+            leafFactory,
+            "test",
+            "foo",
+            1,
+            0,
+            false,
+            false
+        );
         assertTrue(query.matches(List.of("foo")));
         assertTrue(query.matches(List.of("foa")));
         assertTrue(query.matches(List.of("foo", "bar")));
         assertFalse(query.matches(List.of("bar")));
-        query = StringScriptFieldFuzzyQuery.build(randomScript(), leafFactory, "test", "foo", 0, 0, false);
+        query = StringScriptFieldFuzzyQuery.build(randomScript(), leafFactory, "test", "foo", 0, 0, false, false);
         assertTrue(query.matches(List.of("foo")));
         assertFalse(query.matches(List.of("foa")));
-        query = StringScriptFieldFuzzyQuery.build(randomScript(), leafFactory, "test", "foo", 2, 0, false);
+        query = StringScriptFieldFuzzyQuery.build(randomScript(), leafFactory, "test", "foo", 2, 0, false, false);
         assertTrue(query.matches(List.of("foo")));
         assertTrue(query.matches(List.of("foa")));
         assertTrue(query.matches(List.of("faa")));

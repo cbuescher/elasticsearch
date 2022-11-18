@@ -27,13 +27,15 @@ public class StringScriptFieldRegexpQuery extends AbstractStringScriptFieldAutom
         String pattern,
         int syntaxFlags,
         int matchFlags,
-        int maxDeterminizedStates
+        int maxDeterminizedStates,
+        Boolean onScriptError
     ) {
         super(
             script,
             leafFactory,
             fieldName,
-            new ByteRunAutomaton(new RegExp(Objects.requireNonNull(pattern), syntaxFlags, matchFlags).toAutomaton(maxDeterminizedStates))
+            new ByteRunAutomaton(new RegExp(Objects.requireNonNull(pattern), syntaxFlags, matchFlags).toAutomaton(maxDeterminizedStates)),
+            onScriptError
         );
         this.pattern = pattern;
         this.syntaxFlags = syntaxFlags;

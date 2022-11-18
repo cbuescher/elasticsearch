@@ -20,6 +20,7 @@ import org.apache.lucene.search.ScoreMode;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.TwoPhaseIterator;
 import org.apache.lucene.search.Weight;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.script.AbstractFieldScript;
 import org.elasticsearch.script.Script;
 
@@ -41,10 +42,18 @@ public abstract class AbstractScriptFieldQuery<S extends AbstractFieldScript> ex
     private final String fieldName;
     private final Function<LeafReaderContext, S> scriptContextFunction;
 
-    AbstractScriptFieldQuery(Script script, String fieldName, Function<LeafReaderContext, S> scriptContextFunction) {
+    private final Boolean continueOnError;
+
+    AbstractScriptFieldQuery(
+        Script script,
+        String fieldName,
+        Function<LeafReaderContext, S> scriptContextFunction,
+        Boolean continueOnError
+    ) {
         this.script = Objects.requireNonNull(script);
         this.fieldName = Objects.requireNonNull(fieldName);
         this.scriptContextFunction = scriptContextFunction;
+        this.continueOnError = continueOnError;
     }
 
     final Function<LeafReaderContext, S> scriptContextFunction() {
@@ -70,11 +79,21 @@ public abstract class AbstractScriptFieldQuery<S extends AbstractFieldScript> ex
             @Override
             public Scorer scorer(LeafReaderContext ctx) {
                 S scriptContext = scriptContextFunction.apply(ctx);
+
                 DocIdSetIterator approximation = DocIdSetIterator.all(ctx.reader().maxDoc());
                 TwoPhaseIterator twoPhase = new TwoPhaseIterator(approximation) {
                     @Override
                     public boolean matches() {
-                        return AbstractScriptFieldQuery.this.matches(scriptContext, approximation.docID());
+                        try {
+                            return AbstractScriptFieldQuery.this.matches(scriptContext, approximation.docID());
+                        } catch (ElasticsearchException e) {
+                            if (continueOnError) {
+                                // TODO do count here
+                                return false;
+                            } else {
+                                throw e;
+                            }
+                        }
                     }
 
                     @Override

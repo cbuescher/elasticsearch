@@ -20,8 +20,14 @@ import java.util.Set;
 public class StringScriptFieldTermsQuery extends AbstractStringScriptFieldQuery {
     private final Set<String> terms;
 
-    public StringScriptFieldTermsQuery(Script script, StringFieldScript.LeafFactory leafFactory, String fieldName, Set<String> terms) {
-        super(script, leafFactory, fieldName);
+    public StringScriptFieldTermsQuery(
+        Script script,
+        StringFieldScript.LeafFactory leafFactory,
+        String fieldName,
+        Set<String> terms,
+        Boolean onScriptError
+    ) {
+        super(script, leafFactory, fieldName, onScriptError);
         this.terms = terms;
     }
 

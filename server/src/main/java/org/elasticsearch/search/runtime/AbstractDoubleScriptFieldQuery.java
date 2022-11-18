@@ -18,7 +18,8 @@ import org.elasticsearch.script.Script;
 abstract class AbstractDoubleScriptFieldQuery extends AbstractScriptFieldQuery<DoubleFieldScript> {
 
     AbstractDoubleScriptFieldQuery(Script script, DoubleFieldScript.LeafFactory leafFactory, String fieldName) {
-        super(script, fieldName, leafFactory::newInstance);
+        // TODO fix this
+        super(script, fieldName, leafFactory::newInstance, false);
     }
 
     @Override

@@ -40,7 +40,8 @@ public final class GeoPointScriptFieldDistanceFeatureQuery extends AbstractScrip
         double originLon,
         double pivotDistance
     ) {
-        super(script, fieldName, leafFactory);
+        // TODO fix this
+        super(script, fieldName, leafFactory, false);
         GeoUtils.checkLatitude(originLat);
         GeoUtils.checkLongitude(originLon);
         this.originLon = originLon;

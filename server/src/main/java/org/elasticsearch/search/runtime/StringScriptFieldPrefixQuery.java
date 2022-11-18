@@ -29,9 +29,10 @@ public class StringScriptFieldPrefixQuery extends AbstractStringScriptFieldQuery
         StringFieldScript.LeafFactory leafFactory,
         String fieldName,
         String prefix,
-        boolean caseInsensitive
+        boolean caseInsensitive,
+        Boolean onScriptError
     ) {
-        super(script, leafFactory, fieldName);
+        super(script, leafFactory, fieldName, onScriptError);
         this.prefix = Objects.requireNonNull(prefix);
         this.caseInsensitive = caseInsensitive;
     }

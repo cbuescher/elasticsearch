@@ -25,7 +25,8 @@ abstract class AbstractLongScriptFieldQuery extends AbstractScriptFieldQuery<Abs
         Function<LeafReaderContext, AbstractLongFieldScript> scriptContextFunction,
         String fieldName
     ) {
-        super(script, fieldName, scriptContextFunction);
+        // TODO fix this
+        super(script, fieldName, scriptContextFunction, false);
     }
 
     @Override

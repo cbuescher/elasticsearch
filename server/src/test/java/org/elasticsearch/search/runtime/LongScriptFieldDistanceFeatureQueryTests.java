@@ -38,12 +38,12 @@ public class LongScriptFieldDistanceFeatureQueryTests extends AbstractScriptFiel
     protected LongScriptFieldDistanceFeatureQuery createTestInstance() {
         long origin = randomLong();
         long pivot = randomValueOtherThan(origin, ESTestCase::randomLong);
-        return new LongScriptFieldDistanceFeatureQuery(randomScript(), leafFactory, randomAlphaOfLength(5), origin, pivot);
+        return new LongScriptFieldDistanceFeatureQuery(randomScript(), leafFactory, randomAlphaOfLength(5), origin, pivot, false);
     }
 
     @Override
     protected LongScriptFieldDistanceFeatureQuery copy(LongScriptFieldDistanceFeatureQuery orig) {
-        return new LongScriptFieldDistanceFeatureQuery(orig.script(), leafFactory, orig.fieldName(), orig.origin(), orig.pivot());
+        return new LongScriptFieldDistanceFeatureQuery(orig.script(), leafFactory, orig.fieldName(), orig.origin(), orig.pivot(), false);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class LongScriptFieldDistanceFeatureQueryTests extends AbstractScriptFiel
             case 3 -> pivot = randomValueOtherThan(origin, () -> randomValueOtherThan(orig.pivot(), ESTestCase::randomLong));
             default -> fail();
         }
-        return new LongScriptFieldDistanceFeatureQuery(script, leafFactory, fieldName, origin, pivot);
+        return new LongScriptFieldDistanceFeatureQuery(script, leafFactory, fieldName, origin, pivot, false);
     }
 
     @Override
@@ -89,7 +89,8 @@ public class LongScriptFieldDistanceFeatureQueryTests extends AbstractScriptFiel
                     leafFactory,
                     "test",
                     1595432181351L,
-                    3L
+                    3L,
+                    false
                 );
                 TopDocs td = searcher.search(query, 2);
                 assertThat(td.scoreDocs[0].score, equalTo(1.0f));

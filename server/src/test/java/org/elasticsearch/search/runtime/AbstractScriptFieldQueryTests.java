@@ -22,7 +22,8 @@ public class AbstractScriptFieldQueryTests extends ESTestCase {
         AbstractScriptFieldQuery<AbstractFieldScript> query = new AbstractScriptFieldQuery<AbstractFieldScript>(
             new Script("test"),
             "test",
-            null
+            null,
+            false
         ) {
             @Override
             protected boolean matches(AbstractFieldScript scriptContext, int docId) {

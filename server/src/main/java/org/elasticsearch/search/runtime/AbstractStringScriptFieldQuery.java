@@ -18,8 +18,8 @@ import java.util.List;
  */
 abstract class AbstractStringScriptFieldQuery extends AbstractScriptFieldQuery<StringFieldScript> {
 
-    AbstractStringScriptFieldQuery(Script script, StringFieldScript.LeafFactory leafFactory, String fieldName) {
-        super(script, fieldName, leafFactory::newInstance);
+    AbstractStringScriptFieldQuery(Script script, StringFieldScript.LeafFactory leafFactory, String fieldName, Boolean onScriptError) {
+        super(script, fieldName, leafFactory::newInstance, onScriptError);
     }
 
     @Override

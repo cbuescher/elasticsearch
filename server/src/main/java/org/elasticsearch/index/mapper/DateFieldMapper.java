@@ -671,7 +671,9 @@ public final class DateFieldMapper extends FieldMapper {
                     ctx -> new SortedNumericDocValuesLongFieldScript(name(), context.lookup(), ctx),
                     name(),
                     originLong,
-                    pivotLong
+                    pivotLong,
+                    // TODO how to access onErrorScript from FieldMapper?
+                    false
                 );
             }
         }
