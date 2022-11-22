@@ -169,7 +169,7 @@ def list_annotations(es, args):
                 "track": track
             }
         })
-    
+
     query["sort"] = [
         {
             "race-timestamp": "desc"
@@ -238,7 +238,7 @@ def add_annotation(es, args):
             cwd = os.path.dirname(os.path.realpath(__file__))
             body = open(os.path.join(cwd, "resources", "annotation-mapping.json"), "rt").read()
             es.indices.create(index="rally-annotations", body=body)
-        resp = es.index(index="rally-annotations", doc_type="_doc", id=annotation_id, body={
+        resp = es.index(index="rally-annotations", id=annotation_id, body={
             "environment": environment,
             "race-timestamp": race_timestamp,
             "track": track,
@@ -260,7 +260,7 @@ def delete_annotation(es, args):
     else:
         for annotation_id in annotations:
             try:
-                es.delete(index="rally-annotations", doc_type="_doc", id=annotation_id)
+                es.delete(index="rally-annotations", id=annotation_id)
                 print("Successfully deleted [%s]." % annotation_id)
             except elasticsearch.TransportError as e:
                 if e.status_code == 404:

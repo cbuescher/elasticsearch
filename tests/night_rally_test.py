@@ -21,19 +21,19 @@ class RecordingSystemCall:
 
 class TestVersions():
     def test_finds_components_for_valid_version(self):
-        assert night_rally.components("5.0.3") == (5, 0, 3, None) 
-        assert night_rally.components("5.0.3-SNAPSHOT") == (5, 0, 3, "SNAPSHOT") 
+        assert night_rally.components("5.0.3") == (5, 0, 3, None)
+        assert night_rally.components("5.0.3-SNAPSHOT") == (5, 0, 3, "SNAPSHOT")
 
     def test_components_ignores_invalid_versions(self):
         with pytest.raises(ValueError) as exc:
             night_rally.components("5.0.0a")
-        assert exc.value.args[0] == r"version string '5.0.0a' does not conform to pattern '^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$'" 
+        assert exc.value.args[0] == r"version string '5.0.0a' does not conform to pattern '^(\d+)\.(\d+)\.(\d+)(?:-(.+))?$'"
 
 
 class TestSkipTrack():
     def test_allows_dense_vector_with_es_8(self):
         assert night_rally.run_track("dense_vector", 8), "dense_vector shouldn't run if ES is <8"
-        
+
     def test_allows_geopointshape_with_es_7(self):
         assert night_rally.run_track("geopointshape", 7), "geopointshape shouldn't run if ES is <7"
 
@@ -152,7 +152,7 @@ class TestNightRally():
             "--runtime-jdk=\"8\" --track-params=\"{{\\\"number_of_replicas\\\": 0}}\" --pipeline=\"from-sources\" "
             "--revision=\"@2016-01-01T00:00:00Z\"".format(race_configs_id)
         ]
-        
+
     @mock.patch('night_rally.night_rally.wait_until_port_is_free', return_value=True)
     def test_exclude_tasks_option(self, mocked_wait_until_port_is_free):
         system_call = RecordingSystemCall(return_value=False)
@@ -541,7 +541,6 @@ class TestNightRally():
                 "hits": [
                     {
                         "_index": "rally-races-2020-03",
-                        "_type": "_doc",
                         "_id": "6a7527a5-79ba-4cbf-a41c-d09a4b254b2a",
                         "_source": race,
                         "sort": [

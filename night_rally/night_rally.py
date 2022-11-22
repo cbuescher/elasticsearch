@@ -455,7 +455,7 @@ class RaceConfig:
     @property
     def car_params(self):
         return self.configuration.get("car-params")
-    
+
     @property
     def exclude_tasks(self):
         return self.configuration.get("exclude-tasks")
@@ -463,12 +463,12 @@ class RaceConfig:
     @property
     def plugins(self):
         return self.configuration.get("plugins", "")
-    
+
     @property
     def telemetry(self):
         t = self.configuration.get("telemetry")
         return self._as_array(t)
-    
+
     @property
     def telemetry_params(self):
         return self.configuration.get("telemetry-params")
@@ -537,7 +537,7 @@ def run_rally(race_configs, release_params, available_hosts, command, dry_run=Fa
             # security by default, unless adhoc options are set
             configuration["license"] = release_params["license"] if release_params else "trial"
             race_cfg = RaceConfig(track_name, track_repository, placement, configuration, available_hosts_with_http_ports)
-    
+
             if race_cfg.target_hosts:
                 if command.runnable(race_cfg):
                     if not skip_ansible:
@@ -576,141 +576,6 @@ def run_rally(race_configs, release_params, available_hosts, command, dry_run=Fa
 #################################################
 # Reporting
 #################################################
-
-def copy_results_for_release_comparison(effective_start_date, configuration_name, race_configs_id, dry_run):
-    from night_rally import client
-    es = client.create_client(configuration_name)
-
-    if not dry_run:
-        import elasticsearch.helpers
-        """
-        Copies all results in the metric store for the given timestamp so that they are also available as master release results.
-        """
-        es.indices.refresh(index="rally-results-*")
-        ts = to_iso8601_short(effective_start_date)
-        query = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "term": {
-                                "race-timestamp": {
-                                    "value": ts
-                                }
-                            }
-                        },
-                        # also limit by environment in case of multiple night-rally jobs executed at the same time using different env
-                        {
-                            "term": {
-                                "environment": configuration_name
-                            }
-                        },
-                        # and avoid race conditions with >1 night-rally invocations on different hardware using same environment
-                        {
-                              "term": {
-                                  "user-tags.race-configs-id": race_configs_id
-                              }
-                        }
-                    ]
-                }
-            }
-        }
-        result = es.search(index="rally-results-*", body=query, size=10000)
-
-        release_results = []
-        index = None
-        doc_type = None
-        for hit in result["hits"]["hits"]:
-            # as we query for a specific race timestamp, all documents are in the same index
-            index = hit["_index"]
-            doc_type = hit["_type"]
-            src = hit["_source"]
-            # pseudo version for stable comparisons
-            src["distribution-version"] = "master"
-            src["environment"] = "release"
-            # release benchmarks rely on `user-tags.setup` for bar charts
-            src["user-tags"]["setup"] = "bare"
-            release_results.append(src)
-        if release_results:
-            logger.info("Copying %d result documents for [%s] to release environment." % (len(release_results), ts))
-            elasticsearch.helpers.bulk(es, release_results, index=index, doc_type=doc_type)
-
-
-def deactivate_outdated_results(effective_start_date, configuration_name, release, release_tag, race_configs_id, dry_run, environment=None):
-    """
-    Sets all results for the same major release version, environment, tag and race_configs_id to active=False except for the records
-    with the provided effective start date.
-    """
-    ts = to_iso8601_short(effective_start_date)
-    if not environment:
-        # for release benchmarks environment is explicitly set to release
-        environment = configuration_name
-    logger.info("Activating results only for [%s] on [%s] in environment [%s], tag [%s] and race-config-id [%s]." %
-                (release, ts, environment, release_tag, race_configs_id))
-    body = {
-        "script": {
-            "source": "ctx._source.active = false",
-            "lang": "painless"
-        },
-        "query": {
-            "bool": {
-                "filter": [
-                    {
-                        "term": {
-                            "active": True
-                        }
-                    },
-                    {
-                        "term": {
-                            "environment": environment
-                        }
-                    }
-                ],
-                "must_not": {
-                    "term": {
-                        "race-timestamp": ts
-                    }
-                }
-            }
-        }
-    }
-    if release == "master":
-        body["query"]["bool"]["filter"].append({
-            "term": {
-                "distribution-version": release
-            }
-        })
-    else:
-        body["query"]["bool"]["filter"].append({
-            "term": {
-                "distribution-major-version": int(release[:release.find(".")])
-            }
-        })
-
-    if release_tag:
-        body["query"]["bool"]["filter"].append({
-            "term": {
-                "user-tags.setup": release_tag
-            }
-        })
-
-    # TODO: refactor to be more generic in the future. For now, we don't deactivate results belonging to a different target-group
-    if race_configs_id:
-        body["query"]["bool"]["filter"].append({
-            "term": {
-                "user-tags.race-configs-id": race_configs_id
-            }
-        })
-
-    if dry_run:
-        import json
-        logger.info("Would execute update query script\n%s" % json.dumps(body, indent=2))
-    else:
-        from night_rally import client
-        es = client.create_client(configuration_name)
-        es.indices.refresh(index="rally-results-*")
-        res = es.update_by_query(index="rally-results-*", body=body)
-        logger.info("Result: %s" % res)
 
 
 def race_meta_data(environment, configuration_name, effective_start_date, race_configs_id, previous, dry_run):
@@ -976,13 +841,6 @@ def main():
     rally_failure = run_rally(race_configs, common_cli_params.release_params, target_hosts, command, args.dry_run, args.skip_ansible)
 
     if common_cli_params.is_nightly:
-        copy_results_for_release_comparison(
-            start_date,
-            common_cli_params.configuration_name,
-            common_cli_params.race_configs_id,
-            args.dry_run
-        )
-
         previous = race_meta_data("nightly",
                                   common_cli_params.configuration_name,
                                   start_date,
@@ -999,7 +857,7 @@ def main():
         if previous and current:
             # be lenient here and always assume that key are absent (may happen due to changes in the data model)
             msg = """Changes between [{previous_ts}] and [{current_ts}]:
-            
+
             * Elasticsearch: https://github.com/elastic/elasticsearch/compare/{previous_es}...{current_es}
             * Rally: https://github.com/elastic/rally/compare/{previous_rally}...{current_rally}
             * rally-tracks: https://github.com/elastic/rally-tracks/compare/{previous_tracks}...{current_tracks}
