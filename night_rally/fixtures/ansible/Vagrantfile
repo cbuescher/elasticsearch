@@ -259,6 +259,14 @@ def install_night_rally_test_script(base_ip, target_node_ip_addresses)
     #!/usr/bin/env bash
     set -eo pipefail
     source /var/lib/jenkins/env_test_script
+
+    function check_exit_code {
+      RED='\033[0;31m'
+      NO_COLOR='\033[0m'
+      printf "${RED}One of the scripts failed! Search for failures in the above output.${NO_COLOR}\n"
+    }
+    trap check_exit_code ERR
+
     # release-license is trial basic just because it's the default option in the JJB dropdown; ignored in nightly mode but used to copy the results as master in release charts
     night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-1.json" --effective-start-date="" --mode="nightly" --version="master" --release-license="trial" --runtime-jdk="bundled"
     night_rally --target-host="${TARGET_HOSTS}" --race-configs="resources/race-configs-group-2.json" --effective-start-date="" --mode="nightly" --version="master" --release-license="trial" --runtime-jdk="bundled"
