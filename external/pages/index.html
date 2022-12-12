@@ -780,17 +780,22 @@ var charts = {
 
 <p>Elasticsearch runs on GCP using:</p>
 <ul>
-  <li>1 single-node 'local' cluster located in <code>europe-west2</code>, St. Ghislain, Belgium. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 32 vCPUs, 32GB RAM and 4x375GiB local nvme scratch disks.</li>
-  <li>1 single-node 'remote' cluster located in <code>us-east4</code>, North Virginia, USA. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 32 vCPUs, 32GB RAM and 4x375GiB local nvme scratch disks.</li>  
+  <li>1 single-node 'local' cluster located in <code>europe-west1</code>, St. Ghislain, Belgium. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 32GB RAM and 1x375GiB local nvme scratch disk.</li>
+  <li>1 single-node 'remote' cluster located in <code>us-east4</code>, North Virginia, USA. Running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 8 vCPUs, 32GB RAM and 1x375GiB local nvme scratch disk.</li>  
 </ul>
 
 <p>The track performs these steps:</p>
 <ol>
-    <li>Creates 14 datastreams with 30 primary shards & 0 replicas, totaling 420 shards</li>
-    <li>Indexes ~200GB worth of logging data spanning ~7 days to the 'local' cluster</li>
-    <li>Replicates the datastreams via CCR to the 'remote' cluster. Meaning 420 shards per single node cluster, 840 shards in total.</li>
-    <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: true</code></li>
-    <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: false</code></li>
+    <li>Creates 14 datastreams with 250 primary shards & 0 replicas, totaling 3,500 shards</li>
+    <li>Indexes ~10GB worth of logging data spanning ~7 days to the 'local' cluster</li>
+    <li>In parallel:
+      <ul>
+        <li>Replicates the datastreams via CCR to the 'remote' cluster. Meaning 3,500 shards per single node cluster, 7000 shards in total.</li>
+        <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: true</code></li>
+        <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: false</code></li>
+        <li>Performs calls to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-field-caps.html#search-field-caps">the Field capabilities API</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>fields=*</code></li>
+      </ul>
+    </li>
 </ol>
 
 <p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/elastic/logs/challenges/cross-clusters-search.json">cross-clusters-search challenge in the elastic/logs Rally track</a>.</p>`,
