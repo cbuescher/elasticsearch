@@ -31,7 +31,7 @@ public class DateScriptMapperTests extends MapperScriptTestCase<DateFieldScript.
                 return new DateFieldScript.LeafFactory() {
                     @Override
                     public DateFieldScript newInstance(LeafReaderContext ctx) {
-                        return new DateFieldScript(fieldName, params, searchLookup, formatter, ctx) {
+                        return new DateFieldScript(fieldName, params, searchLookup, formatter, ctx, false) {
                             @Override
                             public void execute() {
                                 executor.accept(this);

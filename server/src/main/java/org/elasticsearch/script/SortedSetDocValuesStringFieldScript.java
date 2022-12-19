@@ -23,7 +23,7 @@ public class SortedSetDocValuesStringFieldScript extends StringFieldScript {
     boolean hasValue = false;
 
     public SortedSetDocValuesStringFieldScript(String fieldName, SearchLookup searchLookup, LeafReaderContext ctx) {
-        super(fieldName, Map.of(), searchLookup, ctx);
+        super(fieldName, Map.of(), searchLookup, ctx, false);
         try {
             sortedSetDocValues = DocValues.getSortedSet(ctx.reader(), fieldName);
         } catch (IOException e) {

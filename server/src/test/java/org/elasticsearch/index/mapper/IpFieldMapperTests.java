@@ -388,7 +388,7 @@ public class IpFieldMapperTests extends MapperTestCase {
         return new IngestScriptSupport() {
             @Override
             protected IpFieldScript.Factory emptyFieldScript() {
-                return (fieldName, params, searchLookup) -> ctx -> new IpFieldScript(fieldName, params, searchLookup, ctx) {
+                return (fieldName, params, searchLookup) -> ctx -> new IpFieldScript(fieldName, params, searchLookup, ctx, false) {
                     @Override
                     public void execute() {}
                 };
@@ -396,7 +396,7 @@ public class IpFieldMapperTests extends MapperTestCase {
 
             @Override
             protected IpFieldScript.Factory nonEmptyFieldScript() {
-                return (fieldName, params, searchLookup) -> ctx -> new IpFieldScript(fieldName, params, searchLookup, ctx) {
+                return (fieldName, params, searchLookup) -> ctx -> new IpFieldScript(fieldName, params, searchLookup, ctx, false) {
                     @Override
                     public void execute() {
                         emit("192.168.0.1");

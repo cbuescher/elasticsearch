@@ -94,7 +94,8 @@ public class GeoPointScriptFieldDistanceFeatureQueryTests extends AbstractScript
                     "test",
                     Map.of(),
                     searchLookup,
-                    ctx
+                    ctx,
+                    false
                 ) {
                     @Override
                     public void execute() {

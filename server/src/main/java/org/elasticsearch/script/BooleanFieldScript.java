@@ -22,8 +22,8 @@ public abstract class BooleanFieldScript extends AbstractFieldScript {
 
     public static final Factory PARSE_FROM_SOURCE = new Factory() {
         @Override
-        public LeafFactory newFactory(String field, Map<String, Object> params, SearchLookup lookup) {
-            return ctx -> new BooleanFieldScript(field, params, lookup, ctx) {
+        public LeafFactory newFactory(String field, Map<String, Object> params, SearchLookup lookup, boolean onErrorContinue) {
+            return ctx -> new BooleanFieldScript(field, params, lookup, ctx, false) {
                 @Override
                 public void execute() {
                     emitFromSource();
@@ -38,11 +38,11 @@ public abstract class BooleanFieldScript extends AbstractFieldScript {
     };
 
     public static Factory leafAdapter(Function<SearchLookup, CompositeFieldScript.LeafFactory> parentFactory) {
-        return (leafFieldName, params, searchLookup) -> {
+        return (leafFieldName, params, searchLookup, onErrroContinue) -> {
             CompositeFieldScript.LeafFactory parentLeafFactory = parentFactory.apply(searchLookup);
             return (LeafFactory) ctx -> {
                 CompositeFieldScript compositeFieldScript = parentLeafFactory.newInstance(ctx);
-                return new BooleanFieldScript(leafFieldName, params, searchLookup, ctx) {
+                return new BooleanFieldScript(leafFieldName, params, searchLookup, ctx, false) {
                     @Override
                     public void setDocument(int docId) {
                         compositeFieldScript.setDocument(docId);
@@ -61,7 +61,7 @@ public abstract class BooleanFieldScript extends AbstractFieldScript {
     public static final String[] PARAMETERS = {};
 
     public interface Factory extends ScriptFactory {
-        LeafFactory newFactory(String fieldName, Map<String, Object> params, SearchLookup searchLookup);
+        LeafFactory newFactory(String fieldName, Map<String, Object> params, SearchLookup searchLookup, boolean onErrorContinue);
     }
 
     public interface LeafFactory {
@@ -71,8 +71,14 @@ public abstract class BooleanFieldScript extends AbstractFieldScript {
     private int trues;
     private int falses;
 
-    public BooleanFieldScript(String fieldName, Map<String, Object> params, SearchLookup searchLookup, LeafReaderContext ctx) {
-        super(fieldName, params, searchLookup, ctx);
+    public BooleanFieldScript(
+        String fieldName,
+        Map<String, Object> params,
+        SearchLookup searchLookup,
+        LeafReaderContext ctx,
+        boolean onErrorContinue
+    ) {
+        super(fieldName, params, searchLookup, ctx, onErrorContinue);
     }
 
     @Override

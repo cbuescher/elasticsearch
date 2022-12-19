@@ -195,7 +195,7 @@ public class IndexTimeScriptTests extends MapperServiceTestCase {
             LeafReaderContext ctx,
             Consumer<TestLongFieldScript> executor
         ) {
-            super(fieldName, params, searchLookup, ctx);
+            super(fieldName, params, searchLookup, ctx, false);
             this.executor = executor;
         }
 
@@ -224,7 +224,7 @@ public class IndexTimeScriptTests extends MapperServiceTestCase {
             LeafReaderContext ctx,
             Consumer<TestDoubleFieldScript> executor
         ) {
-            super(fieldName, params, searchLookup, ctx);
+            super(fieldName, params, searchLookup, ctx, false);
             this.executor = executor;
         }
 

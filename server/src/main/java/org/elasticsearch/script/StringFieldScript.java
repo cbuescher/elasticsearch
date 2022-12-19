@@ -28,8 +28,8 @@ public abstract class StringFieldScript extends AbstractFieldScript {
 
     public static final StringFieldScript.Factory PARSE_FROM_SOURCE = new Factory() {
         @Override
-        public LeafFactory newFactory(String field, Map<String, Object> params, SearchLookup lookup) {
-            return ctx -> new StringFieldScript(field, params, lookup, ctx) {
+        public LeafFactory newFactory(String field, Map<String, Object> params, SearchLookup lookup, boolean onErrorContinue) {
+            return ctx -> new StringFieldScript(field, params, lookup, ctx, onErrorContinue) {
                 @Override
                 public void execute() {
                     emitFromSource();
@@ -44,11 +44,11 @@ public abstract class StringFieldScript extends AbstractFieldScript {
     };
 
     public static Factory leafAdapter(Function<SearchLookup, CompositeFieldScript.LeafFactory> parentFactory) {
-        return (leafFieldName, params, searchLookup) -> {
+        return (leafFieldName, params, searchLookup, onErrorContinue) -> {
             CompositeFieldScript.LeafFactory parentLeafFactory = parentFactory.apply(searchLookup);
             return (LeafFactory) ctx -> {
                 CompositeFieldScript compositeFieldScript = parentLeafFactory.newInstance(ctx);
-                return new StringFieldScript(leafFieldName, params, searchLookup, ctx) {
+                return new StringFieldScript(leafFieldName, params, searchLookup, ctx, onErrorContinue) {
                     @Override
                     public void setDocument(int docId) {
                         compositeFieldScript.setDocument(docId);
@@ -67,7 +67,7 @@ public abstract class StringFieldScript extends AbstractFieldScript {
     public static final String[] PARAMETERS = {};
 
     public interface Factory extends ScriptFactory {
-        LeafFactory newFactory(String fieldName, Map<String, Object> params, SearchLookup searchLookup);
+        LeafFactory newFactory(String fieldName, Map<String, Object> params, SearchLookup searchLookup, boolean onErrorContinue);
     }
 
     public interface LeafFactory {
@@ -77,8 +77,14 @@ public abstract class StringFieldScript extends AbstractFieldScript {
     private final List<String> results = new ArrayList<>();
     private long chars;
 
-    public StringFieldScript(String fieldName, Map<String, Object> params, SearchLookup searchLookup, LeafReaderContext ctx) {
-        super(fieldName, params, searchLookup, ctx);
+    public StringFieldScript(
+        String fieldName,
+        Map<String, Object> params,
+        SearchLookup searchLookup,
+        LeafReaderContext ctx,
+        boolean onErrorContinue
+    ) {
+        super(fieldName, params, searchLookup, ctx, onErrorContinue);
     }
 
     @Override

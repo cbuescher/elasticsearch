@@ -71,11 +71,10 @@ public final class LongScriptFieldType extends AbstractScriptFieldType<LongField
     ) {
         super(
             name,
-            searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup),
+            searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup, onErrorContinue),
             script,
             scriptFactory.isResultDeterministic(),
-            meta,
-            onErrorContinue
+            meta
         );
     }
 

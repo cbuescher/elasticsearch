@@ -605,7 +605,7 @@ public class RangeAggregatorTests extends AggregatorTestCase {
             new SourceLookup.ReaderSourceProvider(),
             new RuntimeExceptionHandler()
         );
-        StringFieldScript.LeafFactory scriptFactory = ctx -> new StringFieldScript("dummy", Map.of(), lookup, ctx) {
+        StringFieldScript.LeafFactory scriptFactory = ctx -> new StringFieldScript("dummy", Map.of(), lookup, ctx, false) {
             @Override
             public void execute() {
                 emit("cat");
@@ -647,7 +647,7 @@ public class RangeAggregatorTests extends AggregatorTestCase {
      */
     public void testRuntimeFieldRangesNotOptimized() throws IOException {
         long totalDocs = (long) RangeAggregator.DOCS_PER_RANGE_TO_USE_FILTERS * 4;
-        LongFieldScript.Factory scriptFactory = (fieldName, params, l) -> ctx -> new LongFieldScript(fieldName, Map.of(), l, ctx) {
+        LongFieldScript.Factory scriptFactory = (fieldName, params, l) -> ctx -> new LongFieldScript(fieldName, Map.of(), l, ctx, false) {
             @Override
             public void execute() {
                 emit((long) getDoc().get(NUMBER_FIELD_NAME).get(0));

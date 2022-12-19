@@ -76,11 +76,10 @@ public final class DoubleScriptFieldType extends AbstractScriptFieldType<DoubleF
     ) {
         super(
             name,
-            searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup),
+            searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup, onErrorContinue),
             script,
             scriptFactory.isResultDeterministic(),
-            meta,
-            onErrorContinue
+            meta
         );
     }
 

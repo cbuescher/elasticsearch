@@ -25,7 +25,7 @@ public class BooleanScriptMapperTests extends MapperScriptTestCase<BooleanFieldS
                 return new BooleanFieldScript.LeafFactory() {
                     @Override
                     public BooleanFieldScript newInstance(LeafReaderContext ctx) {
-                        return new BooleanFieldScript(fieldName, params, searchLookup, ctx) {
+                        return new BooleanFieldScript(fieldName, params, searchLookup, ctx, false) {
                             @Override
                             public void execute() {
                                 executor.accept(this);

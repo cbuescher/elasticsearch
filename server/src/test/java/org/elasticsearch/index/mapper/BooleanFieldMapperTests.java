@@ -258,7 +258,7 @@ public class BooleanFieldMapperTests extends MapperTestCase {
         return new IngestScriptSupport() {
             @Override
             protected BooleanFieldScript.Factory emptyFieldScript() {
-                return (fieldName, params, searchLookup) -> ctx -> new BooleanFieldScript(fieldName, params, searchLookup, ctx) {
+                return (fieldName, params, searchLookup) -> ctx -> new BooleanFieldScript(fieldName, params, searchLookup, ctx, false) {
                     @Override
                     public void execute() {}
                 };
@@ -266,7 +266,7 @@ public class BooleanFieldMapperTests extends MapperTestCase {
 
             @Override
             protected BooleanFieldScript.Factory nonEmptyFieldScript() {
-                return (fieldName, params, searchLookup) -> ctx -> new BooleanFieldScript(fieldName, params, searchLookup, ctx) {
+                return (fieldName, params, searchLookup) -> ctx -> new BooleanFieldScript(fieldName, params, searchLookup, ctx, false) {
                     @Override
                     public void execute() {
                         emit(true);

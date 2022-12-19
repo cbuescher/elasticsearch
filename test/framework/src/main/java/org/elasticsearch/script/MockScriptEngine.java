@@ -269,7 +269,7 @@ public class MockScriptEngine implements ScriptEngine {
             IntervalFilterScript.Factory factory = mockCompiled::createIntervalFilterScript;
             return context.factoryClazz.cast(factory);
         } else if (context.instanceClazz.equals(BooleanFieldScript.class)) {
-            BooleanFieldScript.Factory booleanFieldScript = (f, p, s) -> ctx -> new BooleanFieldScript(f, p, s, ctx) {
+            BooleanFieldScript.Factory booleanFieldScript = (f, p, s, e) -> ctx -> new BooleanFieldScript(f, p, s, ctx, e) {
                 @Override
                 public void execute() {
                     emit(true);
@@ -277,7 +277,7 @@ public class MockScriptEngine implements ScriptEngine {
             };
             return context.factoryClazz.cast(booleanFieldScript);
         } else if (context.instanceClazz.equals(StringFieldScript.class)) {
-            StringFieldScript.Factory stringFieldScript = (f, p, s) -> ctx -> new StringFieldScript(f, p, s, ctx) {
+            StringFieldScript.Factory stringFieldScript = (f, p, s, e) -> ctx -> new StringFieldScript(f, p, s, ctx, e) {
                 @Override
                 public void execute() {
                     emit("test");
@@ -285,7 +285,7 @@ public class MockScriptEngine implements ScriptEngine {
             };
             return context.factoryClazz.cast(stringFieldScript);
         } else if (context.instanceClazz.equals(LongFieldScript.class)) {
-            LongFieldScript.Factory longFieldScript = (f, p, s) -> ctx -> new LongFieldScript(f, p, s, ctx) {
+            LongFieldScript.Factory longFieldScript = (f, p, s, e) -> ctx -> new LongFieldScript(f, p, s, ctx, e) {
                 @Override
                 public void execute() {
                     emit(1L);
@@ -293,7 +293,7 @@ public class MockScriptEngine implements ScriptEngine {
             };
             return context.factoryClazz.cast(longFieldScript);
         } else if (context.instanceClazz.equals(DoubleFieldScript.class)) {
-            DoubleFieldScript.Factory doubleFieldScript = (f, p, s) -> ctx -> new DoubleFieldScript(f, p, s, ctx) {
+            DoubleFieldScript.Factory doubleFieldScript = (f, p, s, e) -> ctx -> new DoubleFieldScript(f, p, s, ctx, e) {
                 @Override
                 public void execute() {
                     emit(1.2D);
@@ -301,7 +301,7 @@ public class MockScriptEngine implements ScriptEngine {
             };
             return context.factoryClazz.cast(doubleFieldScript);
         } else if (context.instanceClazz.equals(DateFieldScript.class)) {
-            DateFieldScript.Factory dateFieldScript = (f, p, s, formatter) -> ctx -> new DateFieldScript(f, p, s, formatter, ctx) {
+            DateFieldScript.Factory dateFieldScript = (f, p, s, formatter, e) -> ctx -> new DateFieldScript(f, p, s, formatter, ctx, e) {
                 @Override
                 public void execute() {
                     emit(123L);
@@ -309,7 +309,7 @@ public class MockScriptEngine implements ScriptEngine {
             };
             return context.factoryClazz.cast(dateFieldScript);
         } else if (context.instanceClazz.equals(IpFieldScript.class)) {
-            IpFieldScript.Factory ipFieldScript = (f, p, s) -> ctx -> new IpFieldScript(f, p, s, ctx) {
+            IpFieldScript.Factory ipFieldScript = (f, p, s, e) -> ctx -> new IpFieldScript(f, p, s, ctx, e) {
                 @Override
                 public void execute() {
                     emit("127.0.0.1");
@@ -317,7 +317,7 @@ public class MockScriptEngine implements ScriptEngine {
             };
             return context.factoryClazz.cast(ipFieldScript);
         } else if (context.instanceClazz.equals(GeoPointFieldScript.class)) {
-            GeoPointFieldScript.Factory geoPointFieldScript = (f, p, s) -> ctx -> new GeoPointFieldScript(f, p, s, ctx) {
+            GeoPointFieldScript.Factory geoPointFieldScript = (f, p, s, e) -> ctx -> new GeoPointFieldScript(f, p, s, ctx, e) {
                 @Override
                 public void execute() {
                     emit(1.2D, 1.2D);
@@ -325,7 +325,7 @@ public class MockScriptEngine implements ScriptEngine {
             };
             return context.factoryClazz.cast(geoPointFieldScript);
         } else if (context.instanceClazz.equals(CompositeFieldScript.class)) {
-            CompositeFieldScript.Factory objectFieldScript = (f, p, s) -> ctx -> new CompositeFieldScript(f, p, s, ctx) {
+            CompositeFieldScript.Factory objectFieldScript = (f, p, s, e) -> ctx -> new CompositeFieldScript(f, p, s, ctx, false) {
                 @Override
                 public void execute() {
                     emit("field1", "value1");

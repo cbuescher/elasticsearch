@@ -36,7 +36,8 @@ public class IpFieldScriptTests extends FieldScriptTestCase<IpFieldScript.Factor
         fieldName,
         params,
         lookup,
-        ctx
+        ctx,
+        false
     ) {
         @Override
         public void execute() {
@@ -72,7 +73,8 @@ public class IpFieldScriptTests extends FieldScriptTestCase<IpFieldScript.Factor
                         new SourceLookup.ReaderSourceProvider(),
                         new RuntimeExceptionHandler()
                     ),
-                    reader.leaves().get(0)
+                    reader.leaves().get(0),
+                    false
                 ) {
                     @Override
                     public void execute() {

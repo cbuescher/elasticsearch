@@ -84,7 +84,8 @@ public class CompositeRuntimeField implements RuntimeField {
             Function<RuntimeField.Builder, RuntimeField> builder = b -> b.createChildRuntimeField(
                 parserContext,
                 name,
-                lookup -> factory.newFactory(name, script.get().getParams(), lookup)
+                // TODO check if this needs parameter wiring too
+                lookup -> factory.newFactory(name, script.get().getParams(), lookup, false)
             );
             Map<String, RuntimeField> runtimeFields = RuntimeField.parseRuntimeFields(
                 new HashMap<>(fields.getValue()),

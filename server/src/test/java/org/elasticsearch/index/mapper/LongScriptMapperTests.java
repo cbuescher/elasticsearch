@@ -25,7 +25,7 @@ public class LongScriptMapperTests extends MapperScriptTestCase<LongFieldScript.
                 return new LongFieldScript.LeafFactory() {
                     @Override
                     public LongFieldScript newInstance(LeafReaderContext ctx) {
-                        return new LongFieldScript(fieldName, params, searchLookup, ctx) {
+                        return new LongFieldScript(fieldName, params, searchLookup, ctx, false) {
                             @Override
                             public void execute() {
                                 executor.accept(this);

@@ -76,11 +76,10 @@ public final class BooleanScriptFieldType extends AbstractScriptFieldType<Boolea
     ) {
         super(
             name,
-            searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup),
+            searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup, onErrorContinue),
             script,
             scriptFactory.isResultDeterministic(),
-            meta,
-            onErrorContinue
+            meta
         );
     }
 

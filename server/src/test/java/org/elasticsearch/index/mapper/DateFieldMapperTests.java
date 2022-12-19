@@ -674,7 +674,8 @@ public class DateFieldMapperTests extends MapperTestCase {
                     params,
                     searchLookup,
                     formatter,
-                    ctx
+                    ctx,
+                    false
                 ) {
                     @Override
                     public void execute() {}
@@ -688,7 +689,8 @@ public class DateFieldMapperTests extends MapperTestCase {
                     params,
                     searchLookup,
                     formatter,
-                    ctx
+                    ctx,
+                    false
                 ) {
                     @Override
                     public void execute() {

@@ -28,7 +28,8 @@ public class BooleanFieldScriptTests extends FieldScriptTestCase<BooleanFieldScr
         fieldName,
         params,
         lookup,
-        ctx
+        ctx,
+        false
     ) {
         @Override
         public void execute() {
@@ -64,7 +65,8 @@ public class BooleanFieldScriptTests extends FieldScriptTestCase<BooleanFieldScr
                         new SourceLookup.ReaderSourceProvider(),
                         new RuntimeExceptionHandler()
                     ),
-                    reader.leaves().get(0)
+                    reader.leaves().get(0),
+                    false
                 ) {
                     @Override
                     public void execute() {

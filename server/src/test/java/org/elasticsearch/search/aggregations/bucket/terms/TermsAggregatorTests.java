@@ -2000,7 +2000,7 @@ public class TermsAggregatorTests extends AggregatorTestCase {
             new SourceLookup.ReaderSourceProvider(),
             new RuntimeExceptionHandler()
         );
-        StringFieldScript.LeafFactory scriptFactory = ctx -> new StringFieldScript("dummy", Map.of(), lookup, ctx) {
+        StringFieldScript.LeafFactory scriptFactory = ctx -> new StringFieldScript("dummy", Map.of(), lookup, ctx, false) {
             @Override
             public void execute() {
                 emit("cat");
@@ -2053,7 +2053,8 @@ public class TermsAggregatorTests extends AggregatorTestCase {
             fieldName,
             Map.of(),
             lookup,
-            ctx
+            ctx,
+            false
         ) {
             @Override
             public void execute() {

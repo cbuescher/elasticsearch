@@ -276,7 +276,7 @@ public class LongScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeTest
     private static LongFieldScript.Factory factory(Script script) {
         switch (script.getIdOrCode()) {
             case "read_foo":
-                return (fieldName, params, lookup) -> (ctx) -> new LongFieldScript(fieldName, params, lookup, ctx) {
+                return (fieldName, params, lookup) -> (ctx) -> new LongFieldScript(fieldName, params, lookup, ctx, false) {
                     @Override
                     public void execute() {
                         for (Object foo : (List<?>) lookup.source().source().get("foo")) {
@@ -285,7 +285,7 @@ public class LongScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeTest
                     }
                 };
             case "add_param":
-                return (fieldName, params, lookup) -> (ctx) -> new LongFieldScript(fieldName, params, lookup, ctx) {
+                return (fieldName, params, lookup) -> (ctx) -> new LongFieldScript(fieldName, params, lookup, ctx, false) {
                     @Override
                     public void execute() {
                         for (Object foo : (List<?>) lookup.source().source().get("foo")) {
@@ -296,7 +296,7 @@ public class LongScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeTest
             case "millis_ago":
                 // Painless actually call System.currentTimeMillis. We could mock the time but this works fine too.
                 long now = System.currentTimeMillis();
-                return (fieldName, params, lookup) -> (ctx) -> new LongFieldScript(fieldName, params, lookup, ctx) {
+                return (fieldName, params, lookup) -> (ctx) -> new LongFieldScript(fieldName, params, lookup, ctx, false) {
                     @Override
                     public void execute() {
                         for (Object timestamp : (List<?>) lookup.source().source().get("timestamp")) {
@@ -311,7 +311,7 @@ public class LongScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeTest
                     throw new IllegalStateException("shoud have thrown on the line above");
                 };
             case "error":
-                return (fieldName, params, lookup) -> ctx -> new LongFieldScript(fieldName, params, lookup, ctx) {
+                return (fieldName, params, lookup) -> ctx -> new LongFieldScript(fieldName, params, lookup, ctx, false) {
                     @Override
                     public void execute() {
                         throw new RuntimeException("test error");

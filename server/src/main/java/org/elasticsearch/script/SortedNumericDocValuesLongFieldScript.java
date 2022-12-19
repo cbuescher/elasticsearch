@@ -21,7 +21,7 @@ public class SortedNumericDocValuesLongFieldScript extends AbstractLongFieldScri
     final LongDocValuesField longDocValuesField;
 
     public SortedNumericDocValuesLongFieldScript(String fieldName, SearchLookup lookup, LeafReaderContext ctx) {
-        super(fieldName, Map.of(), lookup, ctx);
+        super(fieldName, Map.of(), lookup, ctx, false);
         try {
             longDocValuesField = new LongDocValuesField(DocValues.getSortedNumeric(ctx.reader(), fieldName), fieldName);
         } catch (IOException e) {

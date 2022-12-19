@@ -557,7 +557,8 @@ public class PainlessExecuteAction extends ActionType<PainlessExecuteAction.Resp
                     BooleanFieldScript.LeafFactory leafFactory = factory.newFactory(
                         BooleanFieldScript.CONTEXT.name,
                         request.getScript().getParams(),
-                        context.lookup()
+                        context.lookup(),
+                        false
                     );
                     BooleanFieldScript booleanFieldScript = leafFactory.newInstance(leafReaderContext);
                     List<Boolean> booleans = new ArrayList<>();
@@ -571,7 +572,8 @@ public class PainlessExecuteAction extends ActionType<PainlessExecuteAction.Resp
                         DateFieldScript.CONTEXT.name,
                         request.getScript().getParams(),
                         context.lookup(),
-                        DateFieldMapper.DEFAULT_DATE_TIME_FORMATTER
+                        DateFieldMapper.DEFAULT_DATE_TIME_FORMATTER,
+                        false
                     );
                     DateFieldScript dateFieldScript = leafFactory.newInstance(leafReaderContext);
                     List<String> dates = new ArrayList<>();
@@ -584,7 +586,8 @@ public class PainlessExecuteAction extends ActionType<PainlessExecuteAction.Resp
                     DoubleFieldScript.LeafFactory leafFactory = factory.newFactory(
                         DoubleFieldScript.CONTEXT.name,
                         request.getScript().getParams(),
-                        context.lookup()
+                        context.lookup(),
+                        false
                     );
                     DoubleFieldScript doubleFieldScript = leafFactory.newInstance(leafReaderContext);
                     List<Double> doubles = new ArrayList<>();
@@ -597,7 +600,8 @@ public class PainlessExecuteAction extends ActionType<PainlessExecuteAction.Resp
                     GeoPointFieldScript.LeafFactory leafFactory = factory.newFactory(
                         GeoPointFieldScript.CONTEXT.name,
                         request.getScript().getParams(),
-                        context.lookup()
+                        context.lookup(),
+                        false
                     );
                     GeoPointFieldScript geoPointFieldScript = leafFactory.newInstance(leafReaderContext);
                     List<GeoPoint> points = new ArrayList<>();
@@ -615,7 +619,8 @@ public class PainlessExecuteAction extends ActionType<PainlessExecuteAction.Resp
                     IpFieldScript.LeafFactory leafFactory = factory.newFactory(
                         IpFieldScript.CONTEXT.name,
                         request.getScript().getParams(),
-                        context.lookup()
+                        context.lookup(),
+                        false
                     );
                     IpFieldScript ipFieldScript = leafFactory.newInstance(leafReaderContext);
                     List<String> ips = new ArrayList<>();
@@ -634,7 +639,8 @@ public class PainlessExecuteAction extends ActionType<PainlessExecuteAction.Resp
                     LongFieldScript.LeafFactory leafFactory = factory.newFactory(
                         LongFieldScript.CONTEXT.name,
                         request.getScript().getParams(),
-                        context.lookup()
+                        context.lookup(),
+                        false
                     );
                     LongFieldScript longFieldScript = leafFactory.newInstance(leafReaderContext);
                     List<Long> longs = new ArrayList<>();
@@ -647,7 +653,8 @@ public class PainlessExecuteAction extends ActionType<PainlessExecuteAction.Resp
                     StringFieldScript.LeafFactory leafFactory = factory.newFactory(
                         StringFieldScript.CONTEXT.name,
                         request.getScript().getParams(),
-                        context.lookup()
+                        context.lookup(),
+                        false
                     );
                     StringFieldScript stringFieldScript = leafFactory.newInstance(leafReaderContext);
                     List<String> keywords = new ArrayList<>();
@@ -660,7 +667,8 @@ public class PainlessExecuteAction extends ActionType<PainlessExecuteAction.Resp
                     CompositeFieldScript.LeafFactory leafFactory = factory.newFactory(
                         CompositeFieldScript.CONTEXT.name,
                         request.getScript().getParams(),
-                        context.lookup()
+                        context.lookup(),
+                        false
                     );
                     CompositeFieldScript compositeFieldScript = leafFactory.newInstance(leafReaderContext);
                     compositeFieldScript.runForDoc(0);

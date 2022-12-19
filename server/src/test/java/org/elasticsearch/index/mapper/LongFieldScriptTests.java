@@ -35,7 +35,8 @@ public class LongFieldScriptTests extends FieldScriptTestCase<LongFieldScript.Fa
         fieldName,
         params,
         lookup,
-        ctx
+        ctx,
+        false
     ) {
         @Override
         public void execute() {
@@ -71,7 +72,8 @@ public class LongFieldScriptTests extends FieldScriptTestCase<LongFieldScript.Fa
                         new SourceLookup.ReaderSourceProvider(),
                         new RuntimeExceptionHandler()
                     ),
-                    reader.leaves().get(0)
+                    reader.leaves().get(0),
+                    false
                 ) {
                     @Override
                     public void execute() {

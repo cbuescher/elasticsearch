@@ -485,7 +485,8 @@ public class DateScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeTest
                 params,
                 lookup,
                 formatter,
-                ctx
+                ctx,
+                false
             ) {
                 @Override
                 public void execute() {
@@ -500,7 +501,8 @@ public class DateScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeTest
                 params,
                 lookup,
                 formatter,
-                ctx
+                ctx,
+                false
             ) {
                 @Override
                 public void execute() {
@@ -522,7 +524,8 @@ public class DateScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeTest
                 params,
                 lookup,
                 formatter,
-                ctx
+                ctx,
+                false
             ) {
                 @Override
                 public void execute() {

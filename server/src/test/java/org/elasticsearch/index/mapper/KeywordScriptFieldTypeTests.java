@@ -426,7 +426,7 @@ public class KeywordScriptFieldTypeTests extends AbstractScriptFieldTypeTestCase
 
     private static StringFieldScript.Factory factory(Script script) {
         return switch (script.getIdOrCode()) {
-            case "read_foo" -> (fieldName, params, lookup) -> ctx -> new StringFieldScript(fieldName, params, lookup, ctx) {
+            case "read_foo" -> (fieldName, params, lookup, e) -> ctx -> new StringFieldScript(fieldName, params, lookup, ctx, false) {
                 @Override
                 public void execute() {
                     for (Object foo : (List<?>) lookup.source().source().get("foo")) {
@@ -434,7 +434,7 @@ public class KeywordScriptFieldTypeTests extends AbstractScriptFieldTypeTestCase
                     }
                 }
             };
-            case "append_param" -> (fieldName, params, lookup) -> ctx -> new StringFieldScript(fieldName, params, lookup, ctx) {
+            case "append_param" -> (fieldName, params, lookup, e) -> ctx -> new StringFieldScript(fieldName, params, lookup, ctx, false) {
                 @Override
                 public void execute() {
                     for (Object foo : (List<?>) lookup.source().source().get("foo")) {
@@ -442,12 +442,12 @@ public class KeywordScriptFieldTypeTests extends AbstractScriptFieldTypeTestCase
                     }
                 }
             };
-            case "loop" -> (fieldName, params, lookup) -> {
+            case "loop" -> (fieldName, params, lookup, e) -> {
                 // Indicate that this script wants the field call "test", which *is* the name of this field
                 lookup.forkAndTrackFieldReferences("test");
                 throw new IllegalStateException("shoud have thrown on the line above");
             };
-            case "error" -> (fieldName, params, lookup) -> ctx -> new StringFieldScript(fieldName, params, lookup, ctx) {
+            case "error" -> (fieldName, params, lookup, e) -> ctx -> new StringFieldScript(fieldName, params, lookup, ctx, false) {
                 @Override
                 public void execute() {
                     throw new RuntimeException("test error");

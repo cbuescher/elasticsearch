@@ -420,7 +420,7 @@ public class BooleanScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeT
 
     private static BooleanFieldScript.Factory factory(Script script) {
         return switch (script.getIdOrCode()) {
-            case "read_foo" -> (fieldName, params, lookup) -> (ctx) -> new BooleanFieldScript(fieldName, params, lookup, ctx) {
+            case "read_foo" -> (fieldName, params, lookup) -> (ctx) -> new BooleanFieldScript(fieldName, params, lookup, ctx, false) {
                 @Override
                 public void execute() {
                     for (Object foo : (List<?>) lookup.source().source().get("foo")) {
@@ -428,7 +428,7 @@ public class BooleanScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeT
                     }
                 }
             };
-            case "xor_param" -> (fieldName, params, lookup) -> (ctx) -> new BooleanFieldScript(fieldName, params, lookup, ctx) {
+            case "xor_param" -> (fieldName, params, lookup) -> (ctx) -> new BooleanFieldScript(fieldName, params, lookup, ctx, false) {
                 @Override
                 public void execute() {
                     for (Object foo : (List<?>) lookup.source().source().get("foo")) {
@@ -441,7 +441,7 @@ public class BooleanScriptFieldTypeTests extends AbstractNonTextScriptFieldTypeT
                 lookup.forkAndTrackFieldReferences("test");
                 throw new IllegalStateException("should have thrown on the line above");
             };
-            case "error" -> (fieldName, params, lookup) -> ctx -> new BooleanFieldScript(fieldName, params, lookup, ctx) {
+            case "error" -> (fieldName, params, lookup) -> ctx -> new BooleanFieldScript(fieldName, params, lookup, ctx, false) {
                 @Override
                 public void execute() {
                     throw new RuntimeException("test error");

@@ -39,7 +39,8 @@ public class CompositeFieldScriptTests extends ESTestCase {
                         new SourceLookup.ReaderSourceProvider(),
                         new RuntimeExceptionHandler()
                     ),
-                    reader.leaves().get(0)
+                    reader.leaves().get(0),
+                    false
                 ) {
                     @Override
                     public void execute() {
@@ -75,7 +76,8 @@ public class CompositeFieldScriptTests extends ESTestCase {
                         new SourceLookup.ReaderSourceProvider(),
                         new RuntimeExceptionHandler()
                     ),
-                    reader.leaves().get(0)
+                    reader.leaves().get(0),
+                    false
                 ) {
                     @Override
                     public void execute() {
@@ -93,7 +95,8 @@ public class CompositeFieldScriptTests extends ESTestCase {
                         new SourceLookup.ReaderSourceProvider(),
                         new RuntimeExceptionHandler()
                     ),
-                    reader.leaves().get(0)
+                    reader.leaves().get(0),
+                    false
                 ) {
                     @Override
                     public void execute() {

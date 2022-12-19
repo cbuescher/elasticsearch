@@ -37,7 +37,8 @@ public class DateFieldScriptTests extends FieldScriptTestCase<DateFieldScript.Fa
         params,
         lookup,
         formatter,
-        ctx
+        ctx,
+        false
     ) {
         @Override
         public void execute() {
@@ -74,7 +75,8 @@ public class DateFieldScriptTests extends FieldScriptTestCase<DateFieldScript.Fa
                         new RuntimeExceptionHandler()
                     ),
                     DateFormatter.forPattern(randomDateFormatterPattern()).withLocale(randomLocale(random())),
-                    reader.leaves().get(0)
+                    reader.leaves().get(0),
+                    false
                 ) {
                     @Override
                     public void execute() {

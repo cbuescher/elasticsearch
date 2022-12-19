@@ -75,11 +75,10 @@ public final class GeoPointScriptFieldType extends AbstractScriptFieldType<GeoPo
     ) {
         super(
             name,
-            searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup),
+            searchLookup -> scriptFactory.newFactory(name, script.getParams(), searchLookup, onErrorContinue),
             script,
             scriptFactory.isResultDeterministic(),
-            meta,
-            onErrorContinue
+            meta
         );
     }
 
@@ -161,7 +160,7 @@ public final class GeoPointScriptFieldType extends AbstractScriptFieldType<GeoPo
     ) {
         return ctx -> {
             GeoPointFieldScript script = delegateLeafFactory.apply(ctx);
-            return new AbstractLongFieldScript(name, Map.of(), lookup, ctx) {
+            return new AbstractLongFieldScript(name, Map.of(), lookup, ctx, false) {
                 private int docId;
 
                 @Override
