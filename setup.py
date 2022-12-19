@@ -20,7 +20,7 @@ long_description = str_from_file("README.md")
 
 install_requires = [
     # required for night-rally fixtures and deploying ini files
-    "ansible==2.9.6",
+    "ansible==2.10.7",
     # License: Apache 2.0
     # transitive dependency urllib3: MIT
     "elasticsearch==7.14.0",

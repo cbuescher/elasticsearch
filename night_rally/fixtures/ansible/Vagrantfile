@@ -417,7 +417,7 @@ Vagrant.configure(2) do |config|
           sudo -iu jenkins bash -c 'cd night_rally; make install'
         EOF
 
-        node_config.vm.provision "shell", inline: install_ansible("2.9.6")
+        node_config.vm.provision "shell", inline: install_ansible("2.10.7")
         node_config.vm.provision "shell", inline: install_rally_ssh_key
       end
 
