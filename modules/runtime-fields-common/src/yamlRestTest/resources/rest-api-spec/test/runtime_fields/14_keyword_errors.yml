@@ -11,12 +11,12 @@ setup:
               first_char:
                 type: keyword
                 script: |
-                  emit(doc['name'].value.substring(0,1));
+                  for (s in doc['name']) { emit(s.substring(0,1));}
                 on_script_error: continue
               first_char_strict_error:
                 type: keyword
                 script: |
-                  emit(doc['name'].value.substring(0,1));
+                  for (s in doc['name']) { emit(s.substring(0,1));}
                 on_script_error: fail
             properties:
               name:
@@ -31,7 +31,10 @@ setup:
           {"name": "foo"}
           {"index":{}}
           {"name": ""}
-
+          {"index":{}}
+          {"name": ["bar", "goo"]}
+          {"index":{}}
+          {"name": ["bar", ""]}
 ---
 "Query rtf with on_script_error continue":
   - do:
@@ -46,6 +49,17 @@ setup:
   - match: { hits.hits.0.fields.name: [ foo ] }
   - match: { hits.hits.0.fields.first_char: [ f ] }
 
+  - do:
+      search:
+        index: testindex
+        body:
+          query:
+            match:
+              first_char: "b"
+          fields: [ name, first_char ]
+  - match: { hits.total.value: 1 }
+  - match: { hits.hits.0.fields.name: [ bar, goo ] }
+  - match: { hits.hits.0.fields.first_char: [ b, g ] }
 ---
 "Query rtf with on_script_error fail":
   - do:
@@ -68,8 +82,10 @@ setup:
             firstchar:
               terms:
                 field: first_char
-  - length: { aggregations.firstchar.buckets: 1 }
-  - match: { aggregations.firstchar.buckets.0.key: "f" }
+  - length: { aggregations.firstchar.buckets: 3 }
+  - match: { aggregations.firstchar.buckets.0.key: "b" }
+  - match: { aggregations.firstchar.buckets.1.key: "f" }
+  - match: { aggregations.firstchar.buckets.2.key: "g" }
 
 ---
 "Aggregate on rtf with on_script_error fail":
@@ -91,11 +107,17 @@ setup:
         body:
           query: { match_all: { } }
           fields: [ name, first_char ]
-  - match: { hits.total.value: 2 }
-  - match: { hits.hits.0.fields.name: [ foo ] }
-  - match: { hits.hits.0.fields.first_char: [ f ] }
-  - match: { hits.hits.1.fields.name: [ "" ] }
+          sort: ["name"]
+  - match: { hits.total.value: 4 }
+  - match: { hits.hits.0.fields.name: [ "" ] }
+  - is_false: hits.hits.0.fields.first_char
+  - match: { hits.hits.1.fields.name: [ bar, "" ] }
   - is_false: hits.hits.1.fields.first_char
+  - match: { hits.hits.2.fields.name: [ bar, goo ] }
+  - match: { hits.hits.2.fields.first_char: [ b, g ] }
+  - match: { hits.hits.3.fields.name: [ foo ] }
+  - match: { hits.hits.3.fields.first_char: [ f ] }
+
 
 ---
 "Fields retrieval with failing on error":
@@ -116,9 +138,11 @@ setup:
           query: { match_all: { } }
           fields: [ name ]
           sort: first_char
-  - match: { hits.total.value: 2 }
-  - match: { hits.hits.0.fields.name: [ foo ] }
-  - match: { hits.hits.1.fields.name: [ "" ] }
+  - match: { hits.total.value: 4 }
+  - match: { hits.hits.0.sort: [ b ] }
+  - match: { hits.hits.1.sort: [ f ] }
+  - match: { hits.hits.2.sort: [ null ] }
+  - match: { hits.hits.3.sort: [ null ] }
 
 ---
 "Sorting with with failing on error":
@@ -145,7 +169,7 @@ setup:
             first_char_search:
               type: keyword
               script: |
-                emit(doc['name'].value.substring(0,1));
+                for (s in doc['name']) { emit(s.substring(0,1));}
               on_script_error: continue
 
   - match: { hits.total.value: 1 }
@@ -167,7 +191,7 @@ setup:
             first_char_search:
               type: keyword
               script: |
-                emit(doc['name'].value.substring(0,1));
+                for (s in doc['name']) { emit(s.substring(0,1));}
               on_script_error: fail
 
 ---
@@ -181,7 +205,7 @@ setup:
             first_char_variant:
               type: keyword
               script: |
-                emit(doc['name'].value.substring(0,1));
+                for (s in doc['name']) { emit(s.substring(0,1));}
 
   - do:
       catch: /type=script_exception, reason=runtime error/
@@ -200,7 +224,7 @@ setup:
             first_char_variant:
               type: keyword
               script: |
-                emit(doc['name'].value.substring(0,1));
+                for (s in doc['name']) { emit(s.substring(0,1));}
               on_script_error: continue
 
   - do:
