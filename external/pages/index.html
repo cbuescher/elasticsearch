@@ -786,11 +786,11 @@ var charts = {
 
 <p>The track performs these steps:</p>
 <ol>
-    <li>Creates 14 datastreams with 250 primary shards & 0 replicas, totaling 3,500 shards</li>
+    <li>Creates 13 datastreams with 250 primary shards & 0 replicas, totaling 3,250 shards per cluster</li>
     <li>Indexes ~10GB worth of logging data spanning ~7 days to the 'local' cluster</li>
+    <li>Snapshots the datastreams on the 'local' cluster, and restores them to the 'remote' cluster</li>
     <li>In parallel:
       <ul>
-        <li>Replicates the datastreams via CCR to the 'remote' cluster. Meaning 3,500 shards per single node cluster, 7000 shards in total.</li>
         <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: true</code></li>
         <li>Performs the various <a href="https://github.com/elastic/rally-tracks/tree/master/elastic/logs/workflows">"workflow" tasks</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>ccs_minimize_roundtrips: false</code></li>
         <li>Performs calls to <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-field-caps.html#search-field-caps">the Field capabilities API</a> across the <code>logs-*,remote:logs-*</code> index patterns with <code>fields=*</code></li>
@@ -798,7 +798,7 @@ var charts = {
     </li>
 </ol>
 
-<p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/elastic/logs/challenges/cross-clusters-search.json">cross-clusters-search challenge in the elastic/logs Rally track</a>.</p>`,
+<p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/elastic/logs/challenges/cross-clusters-search-and-snapshot.json"><code>cross-clusters-search-and-snapshot</code> challenge in the elastic/logs Rally track</a>.</p>`,
           "nightly_dashboards": "ef5d6610-2343-11ed-920a-3b1141502d24",
         },
       ],
