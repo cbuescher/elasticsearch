@@ -524,6 +524,12 @@ var charts = {
             "so-transform",
           ]
         },
+        "profiling": {
+          "description": "Profiling",
+          "tracks": [
+            "universal-profiling"
+          ]
+        }
       },
       [
         {
@@ -801,6 +807,16 @@ var charts = {
 
 <p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/elastic/logs/challenges/cross-clusters-search-and-snapshot.json"><code>cross-clusters-search-and-snapshot</code> challenge in the elastic/logs Rally track</a>.</p>`,
           "nightly_dashboards": "ef5d6610-2343-11ed-920a-3b1141502d24",
+        },
+        {
+            "id": "universal-profiling",
+            "track": "Universal Profiling",
+            "description": "for evaluating the performance of Elastic Universal Profiling",
+            "info": `
+                  <h5>Description:</h5>
+                  <p>This track tests the performance of Elastic Universal Profiling by restoring a ~600GB test data set and then measuring the latency to retrieve the data for a flame graph.</p>
+             `,
+            "nightly_dashboards": "e663cc50-9320-11ed-94ae-7d2c9ea6dd87",
         },
       ],
       window.location.hash
