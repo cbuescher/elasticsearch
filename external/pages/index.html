@@ -766,7 +766,24 @@ var charts = {
         {
           "id": "security",
           "track": "Security",
-          "warning": "Security benchmarks are under active development and shouldn't be consulted for any calculations at this point",
+          "info": `
+                  <h5>Description:</h5>
+                  <p>This track tests performance of Elasticsearch when using Elastic's Endpoint integration via Elastic Agent.</p>
+
+                  <p>Elasticsearch runs on GCP using:</p>
+                  <ul>
+                    <li>1 three-node cluster. Each ES node is running on a <a href="https://cloud.google.com/compute/docs/general-purpose-machines#n2-custom-machine-types">custom n2 instance</a> with 4 vCPUs, 16GB RAM and 1x300GiB SSD disk.</li>
+                    <li>The node has minimum cpu platform pinned to <code>Ice Lake</code>.</li>
+                  </ul>
+
+                  <p>The track performs these steps:</p>
+                  <ol>
+                      <li>Installs the current Endpoint package listed in the <a href="https://epr-snapshot.elastic.co/search?package=endpoint">Snapshot Elastic Package repo</a>.</li>
+                      <li>Indexes data using 24 bulk indexing clients.</li>
+                      <li>Simulates navigating the Elastic Security application screens <code>Hosts</code>, <code>Overview</code>, and <code>Network</code>.</li>
+                  </ol>
+
+                  <p>For more details, see the <a href="https://github.com/elastic/rally-tracks/blob/master/elastic/security/">elastic/security Rally track</a>.</p>`,
           "description": "for evaluating the performance of Elastic's Security solution",
           "nightly_dashboards": "fea78d60-2a2a-11ed-920a-3b1141502d24",
         },
