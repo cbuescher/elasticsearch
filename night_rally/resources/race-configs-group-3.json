@@ -90,8 +90,8 @@
     "placement": 2,
     "configurations": [
       {
-        "name": "geoshape-append-defaults-1node",
-        "label": "add-defaults",
+        "name": "geoshape-append-4g-1node",
+        "label": "add-4g",
         "charts": [
           "query",
           "gc",
@@ -99,7 +99,7 @@
         ],
         "challenge": "append-no-conflicts",
         "node-count": 1,
-        "car": "defaults",
+        "car": "4gheap",
         "x-pack": [
           "security"
         ],
