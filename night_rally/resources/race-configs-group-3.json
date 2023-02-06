@@ -45,8 +45,8 @@
         ]
       },
       {
-        "name": "geopointshape-append-defaults-1node",
-        "label": "add-defaults",
+        "name": "geopointshape-append-4g-1node",
+        "label": "add-4g",
         "charts": [
           "indexing",
           "query",
@@ -54,18 +54,6 @@
           "io"
         ],
         "challenge": "append-no-conflicts",
-        "car": "defaults",
-        "x-pack": [
-          "security"
-        ]
-      },
-      {
-        "name": "geopointshape-append-4g-1node",
-        "label": "add-4g",
-        "charts": [
-          "indexing"
-        ],
-        "challenge": "append-no-conflicts-index-only",
         "car": "4gheap",
         "x-pack": [
           "security"
