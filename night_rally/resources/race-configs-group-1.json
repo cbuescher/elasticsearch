@@ -93,8 +93,8 @@
         "telemetry": ["disk-usage-stats"]
       },
       {
-        "name": "geopoint-append-defaults-1node",
-        "label": "add-defaults",
+        "name": "geopoint-append-4g-1node",
+        "label": "add-4g",
         "charts": [
           "indexing",
           "query",
@@ -102,22 +102,6 @@
           "io"
         ],
         "challenge": "append-no-conflicts",
-        "car": "defaults",
-        "x-pack": [
-          "security"
-        ],
-        "telemetry": ["disk-usage-stats"]
-      },
-      {
-        "name": "geopoint-append-4g-1node",
-        "label": "add-4g",
-        "charts": [
-          "indexing"
-        ],
-        "challenge": "append-no-conflicts-index-only",
-        "track-params": {
-          "number_of_replicas": 0
-        },
         "car": "4gheap",
         "x-pack": [
           "security"
