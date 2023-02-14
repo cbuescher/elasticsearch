@@ -1,0 +1,5 @@
+pr: 93756
+summary: Fix `rank_features` parsing for dots in feature name
+area: Mapping
+type: enhancement
+issues: []
