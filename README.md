@@ -26,13 +26,13 @@ Now you can invoke Night Rally regularly with the startup script `night_rally.sh
 
 #### Compare what has changed in Elasticsearch between two benchmarks
 
-Find the relevant revision One possibility is to run e.g. `night-rally-admin list races --environment=nightly --track=geonames --license=trial --from-date=20201207` which provides the following list:
+Find the relevant revision. One possibility is to run e.g. `esrally list races --configuration-name=nightly --track=geonames --from-date=20201207 --to-date=20201208` which provides the following list:
 
 ```
-Race Timestamp    Race Id                               Track     Challenge            Car                                               ES Version      Revision                                  Rally Version                       Track Revision    Team Revision    User Tags
-----------------  ------------------------------------  --------  -------------------  ------------------------------------------------  --------------  ----------------------------------------  ----------------------------------  ----------------  ---------------  ----------------------------------------------------------------------------------------------------------------------------
-20201208T200053Z  e83e9161-ed9c-44ee-8f29-17260e820bf3  geonames  append-no-conflicts  ['defaults', 'trial-license', 'x-pack-security']  8.0.0-SNAPSHOT  c76058d0b3ca1e14ce4126ff6eb2a68b741b90f0  2.0.3.dev0 (git revision: b143899)  47b7054           3d59034          license=trial, name=geonames-append-defaults-1node, race-configs-id=race-configs-group-1.json, setup=bare-basic, x-pack=true
-20201207T200113Z  f133d0f0-7d24-49d3-ab08-35209d6c2c5e  geonames  append-no-conflicts  ['defaults', 'trial-license', 'x-pack-security']  8.0.0-SNAPSHOT  5859c4d6e62606428c2e49a181c7f845cadabecb  2.0.3.dev0 (git revision: b143899)  47b7054           3d59034          license=trial, name=geonames-append-defaults-1node, race-configs-id=race-configs-group-1.json, setup=bare-basic, x-pack=true
+Race ID                               Race Timestamp    Track     Challenge            Car                                     ES Version      Revision                                  Rally Version                       Track Revision    Team Revision    User Tags
+------------------------------------  ----------------  --------  -------------------  --------------------------------------  --------------  ----------------------------------------  ----------------------------------  ----------------  ---------------  ----------------------------------------------------------------------------------------------------------------------------
+e83e9161-ed9c-44ee-8f29-17260e820bf3  20201208T200053Z  geonames  append-no-conflicts  defaults+trial-license+x-pack-security  8.0.0-SNAPSHOT  c76058d0b3ca1e14ce4126ff6eb2a68b741b90f0  2.0.3.dev0 (git revision: b143899)  47b7054           3d59034          license=trial, name=geonames-append-defaults-1node, race-configs-id=race-configs-group-1.json, setup=bare-basic, x-pack=true
+f133d0f0-7d24-49d3-ab08-35209d6c2c5e  20201207T200113Z  geonames  append-no-conflicts  defaults+trial-license+x-pack-security  8.0.0-SNAPSHOT  5859c4d6e62606428c2e49a181c7f845cadabecb  2.0.3.dev0 (git revision: b143899)  47b7054           3d59034          license=trial, name=geonames-append-defaults-1node, race-configs-id=race-configs-group-1.json, setup=bare-basic, x-pack=true```
 ```
 
 You can see the revisions `5859c4d6e62606428c2e49a181c7f845cadabecb` and `c76058d0b3ca1e14ce4126ff6eb2a68b741b90f0`. If you want to see which commits are included in between, open the Github compare view with https://github.com/elastic/elasticsearch/compare/5859c4d6e62606428c2e49a181c7f845cadabecb...c76058d0b3ca1e14ce4126ff6eb2a68b741b90f0.
@@ -40,16 +40,16 @@ You can see the revisions `5859c4d6e62606428c2e49a181c7f845cadabecb` and `c76058
 
 #### Add an annotation
 
-To add an annotation, use the admin tool. First find the correct race timestamp by issuing `night-rally-admin list races --environment=nightly`. You will need to specify it as `--race-timestamp`. Below are examples for common cases:
+To add an annotation, use the admin tool. First find the correct race timestamp by issuing `esrally list races --configuration-name=nightly`. You will need to specify it as `--race-timestamp`. Below are examples for common cases:
 
-* Add an annotation for all charts for a specific nightly benchmark race: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --message="Just a test annotation"`
-* Add an annotation for all charts of one track for a specific nightly benchmark race: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`
-* Add an annotation for a specific chart type of one track for a specific nightly benchmark race: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --track=geonames --chart-type=io --message="Just a test annotation"`
-* Add an annotation for a specific chart name for a specific nightly benchmark race: `night-rally-admin add annotation --environment=nightly --race-timestamp=20170502T220213Z --chart-name=nightly-basic-geonames-add-defaults-country_agg_uncached-latency --message="Just a test annotation"`
+* Add an annotation for all charts for a specific nightly benchmark race: `esrally add annotation --configuration-name=nightly --race-timestamp=20170502T220213Z --message="Just a test annotation"`
+* Add an annotation for all charts of one track for a specific nightly benchmark race: `esrally add annotation --configuration-name=nightly --race-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`
+* Add an annotation for a specific chart type of one track for a specific nightly benchmark race: `esrally add annotation --configuration-name=nightly --race-timestamp=20170502T220213Z --track=geonames --chart-type=io --message="Just a test annotation"`
+* Add an annotation for a specific chart name for a specific nightly benchmark race: `esrally add annotation --configuration-name=nightly --race-timestamp=20170502T220213Z --chart-name=nightly-basic-geonames-add-defaults-country_agg_uncached-latency --message="Just a test annotation"`
 
-For more details, please issue `night-rally-admin add annotation --help`.
+For more details, please issue `esrally add annotation --help`.
 
-**Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
+**Note:** The annotations subcommands also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
 
 **Note:** The new annotation will show up immediately.
 
@@ -57,19 +57,19 @@ For more details, please issue `night-rally-admin add annotation --help`.
 
 If you have made an error you can also remove specific annotations by id.
 
-1. Issue `night-rally-admin list annotations --environment=nightly` and find the right annotation. Note that only the 20 most recent annotations are shown. You can show more, by specifying `--limit=NUMBER`.
-2. Suppose the id of the annotation that we want to delete is `AVwM0jAA-dI09MVLDV39`. Then issue `night-rally-admin delete annotation --id=AVwM0jAA-dI09MVLDV39`.
+1. Issue `esrally list annotations --configuration-name=nightly` and find the right annotation. Note that only the 20 most recent annotations are shown. You can show more, by specifying `--limit=NUMBER`.
+2. Suppose the id of the annotation that we want to delete is `AVwM0jAA-dI09MVLDV39`. Then issue `esrally delete annotation --configuration-name=nightly --id=AVwM0jAA-dI09MVLDV39`.
 
-For more details, please issue `night-rally-admin delete annotation --help`.
+For more details, please issue `esrally delete annotation --help`.
 
 #### Remove a race
 
-Sometimes we need to redo a benchmark run and then we need to cleanup data from the prior run. In order to do so, `night-rally-admin` can delete all relevant data.
+Sometimes we need to redo a benchmark run and then we need to cleanup data from the prior run. In order to do so, `esrally` can delete all relevant data.
 
-1. Issue `night-rally-admin list races --environment=nightly` and find the race id of the race(s) you need to delete. Note that only the 20 most recent races are shown. You can show more, by specifying `--limit=NUMBER`.
-2. Suppose the id of the race that we want to delete is `53f37522-b761-4e46-9a5c-e7f0d9d9258f`. Then issue `night-rally-admin delete race --id=53f37522-b761-4e46-9a5c-e7f0d9d9258f`. This will remove all data about this race from the metrics store.
+1. Issue `esrally list races --configuration-name=nightly` and find the race id of the race(s) you need to delete. Note that only the 20 most recent races are shown. You can show more, by specifying `--limit=NUMBER`.
+2. Suppose the id of the race that we want to delete is `53f37522-b761-4e46-9a5c-e7f0d9d9258f`. Then issue `esrally delete race --configuration-name=nightly --id=53f37522-b761-4e46-9a5c-e7f0d9d9258f`. This will remove all data about this race from the metrics store.
 
-For more details, please issue `night-rally-admin delete race --help`.
+For more details, please issue `esrally delete race --help`.
 
 **Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
 
@@ -106,10 +106,10 @@ Therefore, we need to ensure we set the corresponding build parameter `EFFECTIVE
     1. Any leftover Elasticsearch processes: `ps -ef | grep -i java | grep -v swarm-client`. Note that on the load driver machines one Java process, the Jenkins swarm client, is running (and should keep running) so please make sure you don't terminate it accidentally.
     2. Any leftover Rally processes: `ps -ef | grep -i rally`
 
-2. Use `night-rally-admin` to determine the race ids of the failed races:
+2. Use `esrally` to determine the race ids of the failed races:
 
 ```
-night-rally-admin list races --environment=nightly
+esrally list races --configuration-name=nightly
 ```
 
 The output might look as follows (by default, the 20 most recent races are shown; use `--limit=N` to increase the limit or `--from-date=yyyyMMdd` / `--to-date=yyyyMMdd` to show only the relevant date range):
@@ -144,13 +144,13 @@ Race Timestamp    Race Id                               Track      Challenge    
 You can append `--dry-run` to test it first (in this example we show only one id for brevity):
 
 ```
-night-rally-admin delete race --environment=nightly --id="0afb2330-ba14-43f0-87d8-6c9d45aba057" --dry-run
+esrally delete race --configuration-name=nightly --id="0afb2330-ba14-43f0-87d8-6c9d45aba057" --dry-run
 ```
 
 after you've verified that the command is fine, remove `--dry-run` to actually delete the affected data:
 
 ```
-night-rally-admin delete race --environment=nightly --id="0afb2330-ba14-43f0-87d8-6c9d45aba057,818c8460-00e8-4652-acc8-2adfd74490fb,ce509f1a-97ed-43ea-80a9-d35fc8573f5c,cacdfca0-5d46-4710-9cb1-ae9f9c857b07,4915ad96-a45d-4ccb-af3b-cb4dc28bd7c2,b46314e6-98eb-46e8-a30f-91e75e65e7fc,7de0c6d5-cda6-4706-8eb6-890ea7e4a5b4,34b6e37e-67e8-4b65-928a-d498fe7360de,eb2103fb-6621-4fba-acff-e3048c40ccd6,b07deca5-5d8e-41bb-96ee-fb9a3908ceb5,d8bc7218-e371-473b-bd14-df88fdea8cff,c4af1ac2-540e-4382-9c27-d12f9f46aed9,f8210d48-d169-4adb-87fb-5a45768bd8c3,a0afbd05-ebfd-4cc3-b246-08253412bc21,aeff2a81-741e-4085-8cdc-fd1a7f4b2c07,70a8ab49-c0f5-463a-a911-9522d7612eaa"
+esrally delete race --configuration-name=nightly --id="0afb2330-ba14-43f0-87d8-6c9d45aba057,818c8460-00e8-4652-acc8-2adfd74490fb,ce509f1a-97ed-43ea-80a9-d35fc8573f5c,cacdfca0-5d46-4710-9cb1-ae9f9c857b07,4915ad96-a45d-4ccb-af3b-cb4dc28bd7c2,b46314e6-98eb-46e8-a30f-91e75e65e7fc,7de0c6d5-cda6-4706-8eb6-890ea7e4a5b4,34b6e37e-67e8-4b65-928a-d498fe7360de,eb2103fb-6621-4fba-acff-e3048c40ccd6,b07deca5-5d8e-41bb-96ee-fb9a3908ceb5,d8bc7218-e371-473b-bd14-df88fdea8cff,c4af1ac2-540e-4382-9c27-d12f9f46aed9,f8210d48-d169-4adb-87fb-5a45768bd8c3,a0afbd05-ebfd-4cc3-b246-08253412bc21,aeff2a81-741e-4085-8cdc-fd1a7f4b2c07,70a8ab49-c0f5-463a-a911-9522d7612eaa"
 ```
 
 4. Verify that the data points are gone (reissuing the command from step 2)
