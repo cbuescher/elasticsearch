@@ -1,0 +1,52 @@
+steps:
+  - input: "Build parameters"
+    if: build.source != "schedule"
+    fields:
+      - select: "MODE"
+        key: "MODE"
+        required: false
+        options:
+          - value: nightly
+          - value: adhoc
+        hint: "Whether to run a nightly benchmark (default) or a adhoc benchmark. If MODE contains `encryption-at-rest` a fixture with the same name will be applied too."
+      - text: "EFFECTIVE_START_DATE"
+        key: "EFFECTIVE_START_DATE"
+        default: ""
+        required: false
+        hint: "A UTC timestamp in the format 'YYYY-MM-DD HH:mm:SS' which specifies the timestamp that determines the revision to checkout and the date to use in result graphs."
+      - text: "RUNTIME_JDK"
+        key: "RUNTIME_JDK"
+        required: false
+        hint: "Controls the value of --runtime-jdk of Rally, which picks a JDK that has a major number matching this number, to be used for the execution of the benchmarks. Can be overwritten from a race config."
+        hint: "License override for adhoc-benchmarks. Applies ONLY when MODE starts with adhoc."
+      - text: "COORDINATING_NODES"
+        key: "COORDINATING_NODES"
+        required: false
+        hint: "A comma-separated list of the IP addresses of the coordinating machines driving the benchmark."
+      - text: "TARGET_HOSTS"
+        key: "TARGET_HOSTS"
+        required: false
+        hint: "A comma-separated list of the IP addresses of the machines that are targeted for the benchmark."
+      - text: "FIXTURES"
+        key: "FIXTURES"
+        required: false
+        hint: "A comma-separated string containing fixtures that should be run for this benchmark. Valid values are 'check-drive-health','initialize-data-disk','trim','drop-caches'."
+      - text: "RACE_CONFIGS"
+        key: "RACE_CONFIGS"
+        required: false
+        hint: "Path to json file containing race configs. If path is relative, base dir is /var/lib/jenkins/night_rally/night_rally. If unsure, keep the default."
+  - wait
+  - command: |
+      export MODE=$(buildkite-agent meta-data get MODE --default "nightly")
+      export VERSION="master"  # no release builds anymore
+      export RUNTIME_JDK=$(buildkite-agent meta-data get RUNTIME_JDK --default "bundled")
+      export RELEASE_LICENSE="trial"  # no basic license builds anymore
+      export TARGET_HOSTS=$(buildkite-agent meta-data get TARGET_HOSTS --default "192.168.14.3,192.168.14.4,192.168.14.5")
+      export FIXTURES=$(buildkite-agent meta-data get FIXTURES --default "check-drive-health,drop-caches,trim,initialize-data-disk")
+      export RACE_CONFIGS=$(buildkite-agent meta-data get RACE_CONFIGS --default "resources/race-configs-test.json")
+      export COORDINATING_NODES=$(buildkite-agent meta-data get COORDINATING_NODES --default "192.168.14.2")
+
+      echo --mode=$MODE --version=$VERSION --runtime-jdk=$RUNTIME_JDK --release-license=$RELEASE_LICENSE --target-hosts=$TARGET_HOSTS --fixtures=$FIXTURES --race-configs=$RACE_CONFIGS --coordinating-nodes=$COORDINATING_NODES
+    agents:
+      queue: old-night-rally
+      provider: "gcp"
