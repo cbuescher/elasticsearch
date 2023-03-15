@@ -23,7 +23,8 @@ install_requires = [
     "ansible==2.10.7",
     # License: Apache 2.0
     # transitive dependency urllib3: MIT
-    "elasticsearch==7.14.0",
+    "elasticsearch==8.6.1",
+    "elastic-transport==8.4.0",
     # required by hashi_vault ansible plugin
     "hvac==0.9.1",
     # License: MIT

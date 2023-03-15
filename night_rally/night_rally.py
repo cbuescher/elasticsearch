@@ -84,8 +84,8 @@ def wait_until_port_is_free(target_hosts, connector=socket, wait_time=5):
     port_free = True
     connect_result = None
 
-    from elasticsearch.client import _normalize_hosts
-    for node in _normalize_hosts(target_hosts):
+    from night_rally.client import normalize_hosts
+    for node in normalize_hosts(target_hosts):
         if "port" not in node:
             raise RemotePortNotDefined(
                 message="No port specified for target host: [{}]. Please check your target-host parameter.".format(node["host"]),
