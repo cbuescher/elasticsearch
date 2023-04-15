@@ -70,7 +70,7 @@
     src: '{{ data_device }}'
     name: '{{ data_disk_mount_point }}'
     fstype: '{{ default_linux_os_filesystem }}'
-    opts: 'defaults'
+    opts: '{% if default_linux_os_filesystem in default_filesystem_mount_options %}{{ default_filesystem_mount_options[default_linux_os_filesystem] }}{% else %}{{ default_filesystem_mount_options["other"] }}{% endif %}'
     dump: 0
     passno: 2
     state: mounted

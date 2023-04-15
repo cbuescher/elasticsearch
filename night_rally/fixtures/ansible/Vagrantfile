@@ -111,7 +111,7 @@ def disk_init_generator(disk_conf)
     chown -R jenkins:jenkins $basedir
     chmod -R 775 $basedir
     mkfs.ext4 #{disk_conf[:block_device]}
-    echo \"#{disk_conf[:block_device]} $mountdir ext4 defaults 0 #{disk_conf[:fsck_order]}\" >>/etc/fstab
+    echo \"#{disk_conf[:block_device]} $mountdir ext4 defaults,data=writeback 0 #{disk_conf[:fsck_order]}\" >>/etc/fstab
     mount $mountdir
     chown -R jenkins:jenkins $mountdir
     chmod -R 775 $mountdir

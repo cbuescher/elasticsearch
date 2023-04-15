@@ -2,6 +2,11 @@
 
 default_linux_os_filesystem: ext4
 
+# ESS to switch to writeback for BYOK on ext4: https://elastic.slack.com/archives/C0JGTNK0S/p1681116741005079?thread_ts=1680731399.174279&cid=C0JGTNK0S
+default_filesystem_mount_options:
+  ext4: 'defaults,data=writeback'
+  other: 'defaults'
+
 encrypted_mount_point: /var/lib/jenkins/.rally/benchmarks/races
 data_disk_mount_point: /var/lib/jenkins/.rally/benchmarks/races
 

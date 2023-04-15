@@ -36,6 +36,11 @@ The filesystem to be used for formatting the LUKS presented block device.
 
 Defaults to `ext4` for all OSes except for RHEL/CentOS >=7 where it's set to `xfs`.
 
+#### <kbd>default_filesystem_mount_options</kbd>
+
+A dict defining custom mount options per fs.
+Defaults to `defaults,data=writeback` for `ext4` and `defaults` for other filesystems.
+
 #### <kbd>encrypted\_mount\_point</kbd>
 
 The directory to mount the LUKS block device on.
