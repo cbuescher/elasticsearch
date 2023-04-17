@@ -25,6 +25,8 @@ datastore.port = {{ metrics_store['es_port'] }}
 datastore.secure = {{ metrics_store['es_secure'] }}
 datastore.user = {{ metrics_store['es_username'] }}
 datastore.password = {{ metrics_store['es_password'] }}
+datastore.number_of_shards = 3
+datastore.number_of_replicas = 1
 
 [tracks]
 default.url = https://github.com/elastic/rally-tracks
