@@ -1,6 +1,3 @@
-env:
-  VAULT_JWT=true
-
 steps:
   - input: "Build parameters"
     if: build.source != "schedule"
@@ -51,8 +48,8 @@ steps:
       export RACE_CONFIGS=$(buildkite-agent meta-data get RACE_CONFIGS --default "resources/race-configs-group-2.json")
       export COORDINATING_NODES=$(buildkite-agent meta-data get COORDINATING_NODES --default "192.168.20.31")
 
-      export RALLY_METRICS_STORE_CREDENTIAL_PATH=/secret/ci/elastic-night-rally/es-perf/cloud/vagrant-test-rally-metrics
-
       sudo -u jenkins --preserve-env bash .buildkite/run.sh
     agents:
-      queue: es-perf-night-rally-group-2
+      queue: es-perf-nightly-group-2
+    env:
+      VAULT_JWT: true

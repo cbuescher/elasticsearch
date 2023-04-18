@@ -271,7 +271,13 @@ To avoid tedious work that will potentially be removed in a few months and to go
         ```
    * Run `visudo -cf /etc/sudoers.d/buildkite-agent_user` to enable that configuration.
    * To check that it worked, use `sudo -iu buildkite-agent`, and then run `sudo -iu jenkins`. You should be dropped in a shell as the jenkins user.
-4. If needed, adjust the Buildkite pipelines using catalog-info.yaml and the pipelines files under .buildkite.
+4. Configure SSH access to allow buildkite-agent to clone night-rally
+    ```
+    $ sudo -u buildkite-agent mkdir /var/lib/buildkite-agent/.ssh
+    $ sudo cp /var/lib/jenkins/.ssh/{config,id_rsa,id_rsa.pub} /var/lib/buildkite-agent/.ssh
+    $ sudo chown buildkite-agent:buildkite-agent /var/lib/buildkite-agent/.ssh/*
+    ```
+5. If needed, adjust the Buildkite pipelines using catalog-info.yaml and the pipelines files under .buildkite.
 
 ## Common issues with the bare metal environments (Hetzner)
 
