@@ -191,7 +191,7 @@ def install_rally_ssh_key
   <<~EOF
   set -eo pipefail
   cd /var/lib/jenkins
-  sudo -iu jenkins bash -c "vault read -field=private-key /secret/performance/employees/ssh/rally >~/.ssh/id_rsa && chmod 0600 ~/.ssh/id_rsa && ssh-keyscan github.com >> ~/.ssh/known_hosts"
+  sudo -iu jenkins bash -c "vault read -field=private-key /secret/ci/elastic-night-rally/employees/ssh/rally >~/.ssh/id_rsa && chmod 0600 ~/.ssh/id_rsa && ssh-keyscan github.com >> ~/.ssh/known_hosts"
   EOF
 end
 
@@ -317,8 +317,8 @@ def pass_additional_jenkins_env_vars
   <<~EOF
     set +x -eo pipefail
     cat >>/var/lib/jenkins/.profile <<EOF2
-    export VAULT_ADDR=https://secrets.elastic.co:8200
-    export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-/secret/performance/es-perf/cloud/vagrant-test-rally-metrics}
+    export VAULT_ADDR=https://vault-ci-prod.elastic.dev
+    export RALLY_METRICS_STORE_CREDENTIAL_PATH=${RALLY_METRICS_STORE_CREDENTIAL_PATH:-/secret/ci/elastic-night-rally/es-perf/cloud/vagrant-test-rally-metrics}
     export IN_VAGRANT=YES
     EOF2
   EOF

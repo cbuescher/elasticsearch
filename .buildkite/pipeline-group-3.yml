@@ -1,3 +1,6 @@
+env:
+  VAULT_JWT=true
+
 steps:
   - input: "Build parameters"
     if: build.source != "schedule"
@@ -37,16 +40,19 @@ steps:
         hint: "Path to json file containing race configs. If path is relative, base dir is /var/lib/jenkins/night_rally/night_rally. If unsure, keep the default."
   - wait
   - command: |
+      set -eo pipefail
+
       export MODE=$(buildkite-agent meta-data get MODE --default "nightly")
       export VERSION="master"  # no release builds anymore
       export RUNTIME_JDK=$(buildkite-agent meta-data get RUNTIME_JDK --default "bundled")
       export RELEASE_LICENSE="trial"  # no basic license builds anymore
-      export TARGET_HOSTS=$(buildkite-agent meta-data get TARGET_HOSTS --default "192.168.14.3,192.168.14.4,192.168.14.5")
+      export TARGET_HOSTS=$(buildkite-agent meta-data get TARGET_HOSTS --default "192.168.14.77,192.168.14.78,192.168.14.89")
       export FIXTURES=$(buildkite-agent meta-data get FIXTURES --default "check-drive-health,drop-caches,trim,initialize-data-disk")
-      export RACE_CONFIGS=$(buildkite-agent meta-data get RACE_CONFIGS --default "resources/race-configs-test.json")
-      export COORDINATING_NODES=$(buildkite-agent meta-data get COORDINATING_NODES --default "192.168.14.2")
+      export RACE_CONFIGS=$(buildkite-agent meta-data get RACE_CONFIGS --default "resources/race-configs-group-3.json")
+      export COORDINATING_NODES=$(buildkite-agent meta-data get COORDINATING_NODES --default "192.168.14.76")
 
-      echo --mode=$MODE --version=$VERSION --runtime-jdk=$RUNTIME_JDK --release-license=$RELEASE_LICENSE --target-hosts=$TARGET_HOSTS --fixtures=$FIXTURES --race-configs=$RACE_CONFIGS --coordinating-nodes=$COORDINATING_NODES
+      export RALLY_METRICS_STORE_CREDENTIAL_PATH=/secret/ci/elastic-night-rally/es-perf/cloud/vagrant-test-rally-metrics
+
+      sudo -u jenkins --preserve-env bash .buildkite/run.sh
     agents:
-      queue: old-night-rally
-      provider: "gcp"
+      queue: es-perf-night-rally-group-3

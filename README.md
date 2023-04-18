@@ -162,12 +162,13 @@ Rally will run in [test mode](https://esrally.readthedocs.io/en/stable/command_l
 
 ##### Iterating on nightly benchmarks while testing changes to night-rally
 
-1. `cd night_rally/fixtures/ansible`
-2. `vagrant up`
-3. `vagrant ssh /coord/` # ssh'es to the coordinating node
-4. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
-5. `sudo -iu jenkins`
-6. Run `./test_nightly.sh`
+1. Export a `VAULT_TOKEN` environment variable that allows authenticating to the CI Vault at https://vault-ci-prod.elastic.dev.
+2. `cd night_rally/fixtures/ansible`
+3. `vagrant up`
+4. `vagrant ssh /coord/` # ssh'es to the coordinating node
+5. `./update_jenkins_night_rally.sh` # rsyncs night_rally to the jenkins user
+7. `sudo -iu jenkins`
+7. Run `./test_nightly.sh`
 
 To iterate on changes, always remember to re-run `./update_jenkins_night_rally.sh` as user `vagrant`, before re-running tests.
 
@@ -212,15 +213,15 @@ The Vagrant workflow retrieves credentials to the metrics store via Vault so ens
     "es_secure": "true"
     }
     ```
-    1.2 Add the key-value pairs to Vault. Please use `/secret/performance/es-perf/cloud` as the path prefix if you want this to be accessible by members of the es-pef team, or `/secret/performance/employees/cloud` if you want it to be readable by all employees:
+    1.2 Add the key-value pairs to Vault. Please use `/secret/ci/elastic-night-rally/` as the path prefix:
 
     ```
-    vault write /secret/performance/es-perf/cloud/your-metrics-cluster-name @cluster-creds.json
+    vault write /secret/ci/elastic-night-rally/es-perf/cloud/your-metrics-cluster-name @cluster-creds.json
     ```
     1.3 Check that the data are present
 
     ```
-    vault read /secret/performance/es-perf/cloud/your-metrics-cluster-name
+    vault read /secret/ci/elastic-night-rally/es-perf/cloud/your-metrics-cluster-name
     ```
 
     1.4 Delete the cluster properties file
@@ -244,6 +245,33 @@ export FIXTURES=drop-caches,trim,initialize-data-disk,encryption-at-rest
 ```
 
 and running `./test_nightly.sh` will cause all these fixtures to be executed, simulating the expected behavior from the Jenkins job.
+
+### Setting up Buildkite Agent on night-rally nodes
+
+night-rally is our legacy way of running nightly benchmarks, and we would like to migrate away from it. That said, we don't have any firm dates for migrating the jobs to esbench, so we want to migrate the night-rally jobs from Jenkins to Buildkite in order to not block the Jenkins migration.
+
+The correct way to do the migration would have been to update our Ansible scripts to work with Buildkite, but I don't know Ansible and don't know if the scripts still work. As many things were added over the time to /var/lib/jenkins, it's not clear if the Ansible scripts are enough today, even with Jenkins.
+
+To avoid tedious work that will potentially be removed in a few months and to go for a smoother migration, we have opted to reuse the /var/lib/jenkins directory with Buildkite. This document is here to explain the manual steps needed to do that.
+
+
+1. Install the Buildkite Agent as an Ubuntu package as documented in https://docs.elastic.dev/ci/buildkite-agent. Regarding configuration:
+  * Use the token stored in the production Vault at path `/secret/performance/es-perf/cloud/buildkite-agent-token`
+  * Each night-rally group needs its own queue. The current names are:
+    * es-perf-nightly-group-1
+    * es-perf-nightly-group-2
+    * es-perf-nightly-group-3
+  * To help differentiate between machines, I changed the name from `%hostname-%spawn` to `night-rally-5-%spawn`, as I think the SSH alias is clearer than the hostname.
+2. Start the Buildkite agent and check that it shows up in https://buildkite.com/organizations/elastic/agents?q=night-rally
+3. Configure sudo to allow the buildkite-agent to impersonate Jenkins.
+  * Add the following file under `/etc/sudoers.d/buildkite-agent_user`:
+        ```
+        Defaults:buildkite-agent !requiretty
+        buildkite-agent ALL = (jenkins) NOPASSWD: ALL
+        ```
+   * Run `visudo -cf /etc/sudoers.d/buildkite-agent_user` to enable that configuration.
+   * To check that it worked, use `sudo -iu buildkite-agent`, and then run `sudo -iu jenkins`. You should be dropped in a shell as the jenkins user.
+4. If needed, adjust the Buildkite pipelines using catalog-info.yaml and the pipelines files under .buildkite.
 
 ## Common issues with the bare metal environments (Hetzner)
 
