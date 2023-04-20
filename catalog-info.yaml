@@ -52,11 +52,11 @@ spec:
       provider_settings:
         trigger_mode: none
       repository: elastic/night-rally
-      # schedules:
-      #   Daily:
-      #     branch: master
-      #     cronline: 0 18 * * *
-      #     message: es-perf night-rally group-1 benchmarks
+      schedules:
+        Daily:
+          branch: master
+          cronline: 0 18 * * *
+          message: es-perf night-rally group-1 benchmarks
       teams:
         es-perf: {}
         everyone:
@@ -89,11 +89,11 @@ spec:
       provider_settings:
         trigger_mode: none
       repository: elastic/night-rally
-      # schedules:
-      #   Daily:
-      #     branch: master
-      #     cronline: 0 18 * * *
-      #     message: es-perf night-rally group-2 benchmarks
+      schedules:
+        Daily:
+          branch: master
+          cronline: 0 18 * * *
+          message: es-perf night-rally group-2 benchmarks
       teams:
         es-perf: {}
         everyone:
@@ -126,11 +126,11 @@ spec:
       provider_settings:
         trigger_mode: none
       repository: elastic/night-rally
-      # schedules:
-      #   Daily:
-      #     branch: master
-      #     cronline: 0 18 * * *
-      #     message: es-perf night-rally group-3 benchmarks
+      schedules:
+        Daily:
+          branch: master
+          cronline: 0 18 * * *
+          message: es-perf night-rally group-3 benchmarks
       teams:
         es-perf: {}
         everyone:
