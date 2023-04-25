@@ -40,6 +40,7 @@ steps:
       set -eo pipefail
 
       export MODE=$(buildkite-agent meta-data get MODE --default "nightly")
+      export EFFECTIVE_START_DATE=$(buildkite-agent meta-data get EFFECTIVE_START_DATE --default "")
       export VERSION="master"  # no release builds anymore
       export RUNTIME_JDK=$(buildkite-agent meta-data get RUNTIME_JDK --default "bundled")
       export RELEASE_LICENSE="trial"  # no basic license builds anymore
