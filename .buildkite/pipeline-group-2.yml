@@ -52,5 +52,3 @@ steps:
       sudo -u jenkins --preserve-env bash .buildkite/run.sh
     agents:
       queue: es-perf-nightly-group-2
-    env:
-      VAULT_JWT: true
