@@ -52,6 +52,8 @@ spec:
       provider_settings:
         trigger_mode: none
       repository: elastic/night-rally
+      tags:
+        - ":bar_chart: es-perf nightly benchmarks"
       schedules:
         Daily:
           branch: master
@@ -89,6 +91,8 @@ spec:
       provider_settings:
         trigger_mode: none
       repository: elastic/night-rally
+      tags:
+        - ":bar_chart: es-perf nightly benchmarks"
       schedules:
         Daily:
           branch: master
@@ -126,6 +130,8 @@ spec:
       provider_settings:
         trigger_mode: none
       repository: elastic/night-rally
+      tags:
+        - ":bar_chart: es-perf nightly benchmarks"
       schedules:
         Daily:
           branch: master
