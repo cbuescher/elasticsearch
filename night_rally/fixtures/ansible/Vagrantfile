@@ -301,7 +301,7 @@ def install_java(major_ver)
   <<~EOF
     set -eo pipefail
     echo "Installing Java version #{major_ver}"
-    jdk_url=$(#{curl_wrapper} https://jvm-catalog.elastic.co/jdk/latest_openjdk_#{major_ver}_linux | jq -r .url)
+    jdk_url=$(#{curl_wrapper(max_time=30,retry_max_time=200)} https://jvm-catalog.elastic.co/jdk/latest_openjdk_#{major_ver}_linux | jq -r .url)
     cd /var/lib/jenkins
     mkdir -p .java/openjdk#{major_ver}
     cd .java/openjdk#{major_ver}
