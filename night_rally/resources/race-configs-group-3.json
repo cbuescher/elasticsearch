@@ -87,7 +87,7 @@
         ],
         "challenge": "append-no-conflicts",
         "node-count": 1,
-        "car": "4gheap",
+        "car": "8gheap",
         "x-pack": [
           "security"
         ],
