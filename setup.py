@@ -61,7 +61,6 @@ setup(name="night_rally",
           "console_scripts": [
               # This should not clash with the shell script (which is symlinked as "night_rally" in our CI environment)!
               "es-night-rally=night_rally.night_rally:main",
-              "night-rally-admin=night_rally.admin:main"
           ],
       },
       classifiers=[

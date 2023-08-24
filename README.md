@@ -40,7 +40,7 @@ You can see the revisions `5859c4d6e62606428c2e49a181c7f845cadabecb` and `c76058
 
 #### Add an annotation
 
-To add an annotation, use the admin tool. First find the correct race timestamp by issuing `esrally list races --configuration-name=nightly`. You will need to specify it as `--race-timestamp`. Below are examples for common cases:
+To add an annotation, first find the correct race timestamp by issuing `esrally list races --configuration-name=nightly`. You will need to specify it as `--race-timestamp`. Below are examples for common cases:
 
 * Add an annotation for all charts for a specific nightly benchmark race: `esrally add annotation --configuration-name=nightly --race-timestamp=20170502T220213Z --message="Just a test annotation"`
 * Add an annotation for all charts of one track for a specific nightly benchmark race: `esrally add annotation --configuration-name=nightly --race-timestamp=20170502T220213Z --track=geonames --message="Just a test annotation for geonames"`
@@ -71,7 +71,7 @@ Sometimes we need to redo a benchmark run and then we need to cleanup data from 
 
 For more details, please issue `esrally delete race --help`.
 
-**Note:** The admin tool also supports a dry-run mode for all commands that would change the data store. Just append `--dry-run`.
+**Note:** All commands that would change the data store support a dry-run mode: append `--dry-run` to use it.
 
 #### Find logs, telemetry or heapdumps from older nightly runs
 
