@@ -6,14 +6,6 @@
       {
         "name": "dense_vector-index-and-search-4g-1node",
         "label": "add-4g-1node",
-        "charts": [
-          "indexing",
-          "query",
-          "gc",
-          "io",
-          "merge_count",
-          "merge_times"
-        ],
         "challenge": "index-and-search",
         "car": "4gheap",
         "node-count": 1,
@@ -30,9 +22,6 @@
       {
         "name": "geopointshape-append-4g-3nodes",
         "label": "add-4g-3nodes",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-no-conflicts-index-only",
         "track-params": {
           "number_of_replicas": 1,
@@ -47,12 +36,6 @@
       {
         "name": "geopointshape-append-4g-1node",
         "label": "add-4g",
-        "charts": [
-          "indexing",
-          "query",
-          "gc",
-          "io"
-        ],
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "x-pack": [
@@ -62,9 +45,6 @@
       {
         "name": "geopointshape-update-4g-1node",
         "label": "update-4g",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-fast-with-conflicts",
         "car": "4gheap",
         "x-pack": [
@@ -80,11 +60,6 @@
       {
         "name": "geoshape-append-4g-1node",
         "label": "add-4g",
-        "charts": [
-          "query",
-          "gc",
-          "io"
-        ],
         "challenge": "append-no-conflicts",
         "node-count": 1,
         "car": "8gheap",

@@ -7,9 +7,6 @@
         "#COMMENT": "We need to start with a configuration where we build all candidates on all machines as we skip the build step afterwards",
         "name": "geonames-append-4g-3nodes",
         "label": "add-4g-3nodes",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-no-conflicts-index-only",
         "track-params": {
           "number_of_replicas": 1
@@ -24,12 +21,6 @@
       {
         "name": "geonames-append-defaults-1node",
         "label": "add-defaults",
-        "charts": [
-          "indexing",
-          "query",
-          "gc",
-          "io"
-        ],
         "challenge": "append-no-conflicts",
         "track-params": {
           "max_num_segments": 1
@@ -43,9 +34,6 @@
       {
         "name": "geonames-append-4g-1node",
         "label": "add-4g",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-no-conflicts-index-only",
         "track-params": {
           "number_of_replicas": 0
@@ -59,9 +47,6 @@
       {
         "name": "geonames-update-4g-1node",
         "label": "update-4g",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-fast-with-conflicts",
         "car": "4gheap",
         "x-pack": [
@@ -78,9 +63,6 @@
       {
         "name": "geopoint-append-4g-3nodes",
         "label": "add-4g-3nodes",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-no-conflicts-index-only",
         "track-params": {
           "number_of_replicas": 1
@@ -95,12 +77,6 @@
       {
         "name": "geopoint-append-4g-1node",
         "label": "add-4g",
-        "charts": [
-          "indexing",
-          "query",
-          "gc",
-          "io"
-        ],
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "x-pack": [
@@ -111,9 +87,6 @@
       {
         "name": "geopoint-append-4g-1node-with-jfr",
         "label": "add-4g-jfr",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-no-conflicts-index-only",
         "track-params": {
           "number_of_replicas": 0
@@ -136,9 +109,6 @@
       {
         "name": "geopoint-update-4g-1node",
         "label": "update-4g",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-fast-with-conflicts",
         "car": "4gheap",
         "x-pack": [
@@ -155,11 +125,6 @@
       {
         "name": "percolator-append-4g-1node",
         "label": "add-4g",
-        "charts": [
-          "query",
-          "gc",
-          "io"
-        ],
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "x-pack": [
@@ -176,9 +141,6 @@
       {
         "name": "nyc_taxis-append-4g-3nodes",
         "label": "add-4g-3nodes",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-no-conflicts-index-only",
         "#COMMENT": "We need to be a bit more explicit here because nyc_taxis sets a bunch of other index settings as well which we don't want",
         "track-params": {
@@ -198,12 +160,6 @@
       {
         "name": "nyc_taxis-append-4g-1node",
         "label": "add-4g",
-        "charts": [
-          "indexing",
-          "query",
-          "gc",
-          "io"
-        ],
         "challenge": "append-no-conflicts",
         "car": "4gheap",
         "track-params": {
@@ -217,9 +173,6 @@
       {
         "name": "nyc_taxis-appendsorted-4g-1node",
         "label": "add-sorted-4g",
-        "charts": [
-          "indexing"
-        ],
         "challenge": "append-sorted-no-conflicts-index-only",
         "track-params": {
           "number_of_replicas": 0
@@ -234,9 +187,6 @@
       {
         "name": "nyc_taxis-ml-4g-1node",
         "label": "ml-4g",
-        "charts": [
-          "ml_processing_time"
-        ],
         "challenge": "append-ml",
         "car": "4gheap",
         "x-pack": [
@@ -251,11 +201,6 @@
       {
         "name": "nyc_taxis-aggs-defaults-1node",
         "label": "aggs-defaults",
-        "charts": [
-          "query",
-          "gc",
-          "io"
-        ],
         "challenge": "aggs",
         "car": "defaults",
         "x-pack": [
@@ -265,11 +210,6 @@
       {
         "name": "nyc_taxis-aggs-8g-1node",
         "label": "aggs-8g",
-        "charts": [
-          "query",
-          "gc",
-          "io"
-        ],
         "challenge": "aggs",
         "car": "8gheap",
         "x-pack": [
@@ -285,10 +225,6 @@
       {
         "name": "eql-16g-1node",
         "label": "add-16g",
-        "charts": [
-          "query",
-          "gc"
-        ],
         "challenge": "default",
         "car": "16gheap",
         "x-pack": [
@@ -299,10 +235,6 @@
       {
         "name": "eql-indexSorting-16g-1node",
         "label": "indexSorting-16g",
-        "charts": [
-          "query",
-          "gc"
-        ],
         "challenge": "index-sorting",
         "car": "16gheap",
         "x-pack": [

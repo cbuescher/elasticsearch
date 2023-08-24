@@ -106,21 +106,12 @@ class TestNightRally():
                     {
                         "name": "geonames-append-1node",
                         "label": "add-defaults",
-                        "charts": [
-                            "indexing",
-                            "query",
-                            "gc",
-                            "io"
-                        ],
                         "challenge": "append-no-conflicts",
                         "car": "defaults"
                     },
                     {
                         "name": "geonames-append-4g-1node",
                         "label": "add-4g",
-                        "charts": [
-                            "indexing"
-                        ],
                         "challenge": "append-no-conflicts-index-only",
                         "track-params": {
                             "number_of_replicas": 0
