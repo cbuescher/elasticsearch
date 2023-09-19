@@ -1064,7 +1064,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                 reader.indexShard().shardId(),
                 request.getClusterAlias()
             );
-            ExecutorService executor = this.enableSearchWorkerThreads ? threadPool.executor(Names.SEARCH_WORKER) : null;
+            ExecutorService executor = null;
             int maximumNumberOfSlices = executor instanceof ThreadPoolExecutor tpe
                 && supportsParallelCollection(resultsType, request.source()) ? tpe.getMaximumPoolSize() : 1;
             searchContext = new DefaultSearchContext(
