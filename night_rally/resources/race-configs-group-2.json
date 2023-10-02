@@ -10,7 +10,8 @@
         "car": "4gheap",
         "x-pack": [
           "security"
-        ]
+        ],
+        "telemetry": ["node-stats"]
       }
     ]
   },
