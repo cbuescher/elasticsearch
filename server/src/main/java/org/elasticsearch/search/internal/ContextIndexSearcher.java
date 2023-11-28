@@ -8,6 +8,8 @@
 
 package org.elasticsearch.search.internal;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.LeafReaderContext;
@@ -34,6 +36,7 @@ import org.apache.lucene.util.BitSet;
 import org.apache.lucene.util.BitSetIterator;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.SparseFixedBitSet;
+import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import org.elasticsearch.core.Releasable;
 import org.elasticsearch.lucene.util.CombinedBitSet;
@@ -56,11 +59,14 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Context-aware extension of {@link IndexSearcher}.
  */
 public class ContextIndexSearcher extends IndexSearcher implements Releasable {
+
+    private static final Logger logger = LogManager.getLogger(ContextIndexSearcher.class);
 
     /**
      * The interval at which we check for search cancellation when we cannot use
@@ -82,6 +88,34 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
 
     private final Set<Thread> timeoutOverwrites = ConcurrentCollections.newConcurrentSet();
     private volatile boolean timeExceeded = false;
+
+    record SlicesCounter(AtomicLong calls, AtomicLong singles, AtomicLong multiple, AtomicLong multipleSum) {
+        @Override
+        public String toString() {
+            long mulSum = multipleSum.get();
+            return Strings.format(
+                "Calls: %d, Single: %d, Multiple: %d, SumMultiple %d, AverageMultiple: %d",
+                calls.get(),
+                singles.get(),
+                multiple.get(),
+                mulSum,
+                mulSum == 0 ? 0 : mulSum / multiple.get()
+            );
+        }
+
+        public void count(LeafSlice[] leafSlices) {
+            int length = leafSlices.length;
+            calls.incrementAndGet();
+            if (length == 1) {
+                singles.incrementAndGet();
+            } else {
+                multiple.incrementAndGet();
+                multipleSum.addAndGet(length);
+            }
+        }
+    }
+
+    static SlicesCounter slicesCounter = new SlicesCounter(new AtomicLong(0), new AtomicLong(0), new AtomicLong(0), new AtomicLong(0));
 
     /** constructor for non-concurrent search */
     @SuppressWarnings("this-escape")
@@ -144,7 +178,12 @@ public class ContextIndexSearcher extends IndexSearcher implements Releasable {
     @Override
     protected LeafSlice[] slices(List<LeafReaderContext> leaves) {
         // we offload to the executor unconditionally, including requests that don't support concurrency
-        LeafSlice[] leafSlices = computeSlices(getLeafContexts(), maximumNumberOfSlices, minimumDocsPerSlice);
+        List<LeafReaderContext> leafContexts1 = getLeafContexts();
+        LeafSlice[] leafSlices = computeSlices(leafContexts1, maximumNumberOfSlices, minimumDocsPerSlice);
+        slicesCounter.count(leafSlices);
+        if (slicesCounter.calls.get() % 100 == 0) {
+            logger.info("--->  " + slicesCounter);
+        }
         assert leafSlices.length <= maximumNumberOfSlices : "more slices created than the maximum allowed";
         return leafSlices;
     }
