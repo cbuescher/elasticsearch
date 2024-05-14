@@ -7,6 +7,10 @@
 
 package org.elasticsearch.xpack.versionfield;
 
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest;
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse;
+import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsRequest;
+import org.elasticsearch.cluster.metadata.IndexMetadata;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
@@ -20,8 +24,10 @@ import org.elasticsearch.xpack.core.termsenum.action.TermsEnumAction;
 import org.elasticsearch.xpack.core.termsenum.action.TermsEnumRequest;
 import org.elasticsearch.xpack.core.termsenum.action.TermsEnumResponse;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertResponse;
 import static org.elasticsearch.xcontent.XContentFactory.jsonBuilder;
@@ -37,6 +43,23 @@ public class VersionFieldIT extends ESSingleNodeTestCase {
     @Override
     protected Settings nodeSettings() {
         return Settings.builder().put(XPackSettings.SECURITY_ENABLED.getKey(), "false").build();
+    }
+
+    public void testSettingsUpdate() throws IOException, ExecutionException, InterruptedException {
+        String indexName = "test";
+        createIndex(indexName, Settings.builder().put(IndexMetadata.INDEX_AUTO_EXPAND_REPLICAS_SETTING.getKey(), "0-1").build());
+        prepareIndex(indexName).setId("1").setSource(jsonBuilder().startObject().field("version", "3.11.5").endObject()).get();
+        indicesAdmin().prepareRefresh(indexName).get();
+
+
+        UpdateSettingsRequest request = new UpdateSettingsRequest(
+            Settings.builder().put(IndexMetadata.INDEX_NUMBER_OF_REPLICAS_SETTING.getKey(), 2).build(),
+            indexName
+        );
+        indicesAdmin().updateSettings(request);
+
+        GetSettingsResponse getSettingsResponse = indicesAdmin().getSettings(new GetSettingsRequest().indices(indexName)).get();
+        assertEquals(2, getSettingsResponse.getSetting(indexName, IndexMetadata.INDEX_NUMBER_OF_REPLICAS_SETTING.getKey()));
     }
 
     public void testTermsAggregation() throws Exception {
