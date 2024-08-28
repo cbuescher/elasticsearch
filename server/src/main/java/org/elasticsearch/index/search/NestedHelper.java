@@ -8,7 +8,7 @@
 
 package org.elasticsearch.index.search;
 
-import org.apache.lucene.index.PrefixCodedTerms;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
@@ -19,12 +19,19 @@ import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.PointRangeQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.QueryVisitor;
 import org.apache.lucene.search.TermInSetQuery;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.util.SetOnce;
+import org.apache.lucene.util.automaton.ByteRunAutomaton;
 import org.elasticsearch.index.mapper.NestedLookup;
 import org.elasticsearch.index.mapper.NestedObjectMapper;
+import org.elasticsearch.index.similarity.ScriptedSimilarity;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /** Utility class to filter parent and children clauses when building nested
  * queries. */
@@ -53,11 +60,9 @@ public final class NestedHelper {
             // cover a high majority of use-cases
             return mightMatchNestedDocs(((TermQuery) query).getTerm().field());
         } else if (query instanceof TermInSetQuery) {
-            PrefixCodedTerms terms = ((TermInSetQuery) query).getTermData();
-            if (terms.size() > 0) {
-                PrefixCodedTerms.TermIterator it = terms.iterator();
-                it.next();
-                return mightMatchNestedDocs(it.field());
+            Term term = getTermsInSetTerm((TermInSetQuery) query);
+            if (term != null) {
+                return mightMatchNestedDocs(term.field());
             } else {
                 return false;
             }
@@ -118,11 +123,9 @@ public final class NestedHelper {
         } else if (query instanceof TermQuery) {
             return mightMatchNonNestedDocs(((TermQuery) query).getTerm().field(), nestedPath);
         } else if (query instanceof TermInSetQuery) {
-            PrefixCodedTerms terms = ((TermInSetQuery) query).getTermData();
-            if (terms.size() > 0) {
-                PrefixCodedTerms.TermIterator it = terms.iterator();
-                it.next();
-                return mightMatchNonNestedDocs(it.field(), nestedPath);
+            Term term = getTermsInSetTerm((TermInSetQuery) query);
+            if (term != null) {
+                return mightMatchNonNestedDocs(term.field(), nestedPath);
             } else {
                 return false;
             }
@@ -178,4 +181,22 @@ public final class NestedHelper {
         return true;
     }
 
+    public static Term getTermsInSetTerm(TermInSetQuery tisQuery) {
+        try {
+            if (tisQuery.getTermsCount() == 1) {
+                final SetOnce<Term> collectedTerm = new SetOnce<>();
+                tisQuery.visit(new QueryVisitor() {
+                    @Override
+                    public void consumeTerms(Query query, Term... terms) {
+                        collectedTerm.set(terms[0]);
+                    }
+                });
+                return collectedTerm.get();
+            }
+            return null;
+        } catch (IOException e) {
+            // TODO should never happen, remove throwing IOException from TermInSetQuery in Lucene
+        }
+        return null;
+    }
 }
