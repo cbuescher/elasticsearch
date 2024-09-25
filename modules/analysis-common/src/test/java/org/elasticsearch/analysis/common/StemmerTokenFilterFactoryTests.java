@@ -8,6 +8,7 @@
  */
 package org.elasticsearch.analysis.common;
 
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.core.WhitespaceTokenizer;
@@ -16,6 +17,7 @@ import org.apache.lucene.analysis.snowball.SnowballFilter;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.env.Environment;
 import org.elasticsearch.index.IndexVersion;
+import org.elasticsearch.index.analysis.Analysis;
 import org.elasticsearch.index.analysis.AnalysisTestsHelper;
 import org.elasticsearch.index.analysis.IndexAnalyzers;
 import org.elasticsearch.index.analysis.NamedAnalyzer;
@@ -102,5 +104,36 @@ public class StemmerTokenFilterFactoryTests extends ESTokenStreamTestCase {
             () -> AnalysisTestsHelper.createTestAnalysisFromSettings(settings, PLUGIN)
         );
         assertEquals("Invalid stemmer class specified: [english, light_english]", e.getMessage());
+    }
+
+    public void testGermanVsGerman2Stemmer() throws IOException {
+        Analyzer analyzer = createGermanStemmer("german");
+        assertAnalyzesTo(analyzer, "Buecher Bücher", new String[] { "Buech", "Buch" });
+
+        analyzer = createGermanStemmer("german2");
+        assertAnalyzesTo(analyzer, "Buecher Bücher", new String[] { "Buch", "Buch"});
+    }
+
+    public Analyzer createGermanStemmer(String variant) throws IOException {
+        IndexVersion v = IndexVersionUtils.randomVersion(random());
+        Settings settings = Settings.builder()
+            .put("index.analysis.filter.my_german.type", "stemmer")
+            .put("index.analysis.filter.my_german.language", variant)
+            .put("index.analysis.analyzer.my_german.tokenizer", "whitespace")
+            .put("index.analysis.analyzer.my_german.filter", "my_german")
+            .put(SETTING_VERSION_CREATED, v)
+            .put(Environment.PATH_HOME_SETTING.getKey(), createTempDir().toString())
+            .build();
+
+        ESTestCase.TestAnalysis analysis = AnalysisTestsHelper.createTestAnalysisFromSettings(settings, PLUGIN);
+        TokenFilterFactory tokenFilter = analysis.tokenFilter.get("my_german");
+        assertThat(tokenFilter, instanceOf(StemmerTokenFilterFactory.class));
+        Tokenizer tokenizer = new WhitespaceTokenizer();
+        tokenizer.setReader(new StringReader("Buecher oder Bücher"));
+        TokenStream create = tokenFilter.create(tokenizer);
+        assertThat(create, instanceOf(SnowballFilter.class));
+        IndexAnalyzers indexAnalyzers = analysis.indexAnalyzers;
+        NamedAnalyzer analyzer = indexAnalyzers.get("my_german");
+        return analyzer;
     }
 }
