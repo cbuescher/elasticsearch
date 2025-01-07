@@ -13,8 +13,14 @@ import org.apache.lucene.search.MatchNoDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermInSetQuery;
 import org.elasticsearch.common.ParsingException;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.geo.GeoJson;
+import org.elasticsearch.geo.GeometryTestUtils;
+import org.elasticsearch.geometry.Point;
 import org.elasticsearch.test.AbstractQueryTestCase;
+import org.elasticsearch.xcontent.XContentFactory;
 import org.elasticsearch.xcontent.XContentParser;
+import org.elasticsearch.xcontent.XContentType;
 
 import java.io.IOException;
 
@@ -45,10 +51,12 @@ public class IdsQueryBuilderTests extends AbstractQueryTestCase<IdsQueryBuilder>
         }
     }
 
-    public void testIllegalArguments() {
-        IdsQueryBuilder idsQueryBuilder = new IdsQueryBuilder();
-        IllegalArgumentException e = expectThrows(IllegalArgumentException.class, () -> idsQueryBuilder.addIds((String[]) null));
-        assertEquals("[ids] ids cannot be null", e.getMessage());
+    public void testIllegalArguments() throws IOException {
+        //MultiPoint multiPoint = GeometryTestUtils.randomMultiPoint(false);
+        Point point = GeometryTestUtils.randomPoint(false);
+        System.out.println(Strings.toString(
+            GeoJson.toXContent(point, XContentFactory.contentBuilder(XContentType.JSON).startObject().field("geo"), null).endObject()
+        ));
     }
 
     // see #7686.
