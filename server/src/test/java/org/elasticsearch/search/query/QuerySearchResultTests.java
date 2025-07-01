@@ -68,7 +68,7 @@ public class QuerySearchResultTests extends ESTestCase {
             null
         );
         QuerySearchResult result = new QuerySearchResult(
-            new ShardSearchContextId(UUIDs.base64UUID(), randomLong()),
+            new ShardSearchContextId(UUIDs.base64UUID(), randomLong(), null),
             new SearchShardTarget("node", shardId, null),
             shardSearchRequest
         );

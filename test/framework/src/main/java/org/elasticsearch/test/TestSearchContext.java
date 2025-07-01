@@ -132,7 +132,7 @@ public class TestSearchContext extends SearchContext {
 
     @Override
     public ShardSearchContextId id() {
-        return new ShardSearchContextId("", 0);
+        return new ShardSearchContextId("", 0, null);
     }
 
     @Override

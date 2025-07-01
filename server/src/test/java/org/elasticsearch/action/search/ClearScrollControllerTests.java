@@ -80,17 +80,17 @@ public class ClearScrollControllerTests extends ESTestCase {
         DiscoveryNode node3 = DiscoveryNodeUtils.create("node_3");
         AtomicArray<SearchPhaseResult> array = new AtomicArray<>(3);
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult1 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId(UUIDs.randomBase64UUID(), 1),
+            new ShardSearchContextId(UUIDs.randomBase64UUID(), 1, null),
             node1
         );
         testSearchPhaseResult1.setSearchShardTarget(new SearchShardTarget("node_1", new ShardId("idx", "uuid1", 2), null));
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult2 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId(UUIDs.randomBase64UUID(), 12),
+            new ShardSearchContextId(UUIDs.randomBase64UUID(), 12, null),
             node2
         );
         testSearchPhaseResult2.setSearchShardTarget(new SearchShardTarget("node_2", new ShardId("idy", "uuid2", 42), null));
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult3 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId(UUIDs.randomBase64UUID(), 42),
+            new ShardSearchContextId(UUIDs.randomBase64UUID(), 42, null),
             node3
         );
         testSearchPhaseResult3.setSearchShardTarget(new SearchShardTarget("node_3", new ShardId("idy", "uuid2", 43), null));
@@ -147,17 +147,17 @@ public class ClearScrollControllerTests extends ESTestCase {
         DiscoveryNode node3 = DiscoveryNodeUtils.create("node_3");
         AtomicArray<SearchPhaseResult> array = new AtomicArray<>(3);
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult1 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId(UUIDs.randomBase64UUID(), 1),
+            new ShardSearchContextId(UUIDs.randomBase64UUID(), 1, null),
             node1
         );
         testSearchPhaseResult1.setSearchShardTarget(new SearchShardTarget("node_1", new ShardId("idx", "uuid1", 2), null));
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult2 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId(UUIDs.randomBase64UUID(), 12),
+            new ShardSearchContextId(UUIDs.randomBase64UUID(), 12, null),
             node2
         );
         testSearchPhaseResult2.setSearchShardTarget(new SearchShardTarget("node_2", new ShardId("idy", "uuid2", 42), null));
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult3 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId(UUIDs.randomBase64UUID(), 42),
+            new ShardSearchContextId(UUIDs.randomBase64UUID(), 42, null),
             node3
         );
         testSearchPhaseResult3.setSearchShardTarget(new SearchShardTarget("node_3", new ShardId("idy", "uuid2", 43), null));

@@ -113,7 +113,7 @@ public final class TransportSearchHelper {
         String[] split = RemoteClusterAware.splitIndexName(in.readString());
         String clusterAlias = split[0];
         String target = split[1];
-        return new SearchContextIdForNode(clusterAlias, target, new ShardSearchContextId(contextUUID, id));
+        return new SearchContextIdForNode(clusterAlias, target, new ShardSearchContextId(contextUUID, id, null));
     }
 
     /**

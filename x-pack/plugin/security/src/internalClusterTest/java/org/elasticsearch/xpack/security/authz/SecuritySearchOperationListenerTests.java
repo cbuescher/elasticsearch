@@ -66,7 +66,7 @@ public class SecuritySearchOperationListenerTests extends ESSingleNodeTestCase {
         when(shardSearchRequest.scroll()).thenReturn(TimeValue.timeValueMinutes(between(1, 10)));
         try (
             LegacyReaderContext readerContext = new LegacyReaderContext(
-                new ShardSearchContextId(UUIDs.randomBase64UUID(), 0L),
+                new ShardSearchContextId(UUIDs.randomBase64UUID(), 0L, null),
                 indexService,
                 shard,
                 shard.acquireSearcherSupplier(),
@@ -102,7 +102,7 @@ public class SecuritySearchOperationListenerTests extends ESSingleNodeTestCase {
         when(shardSearchRequest.scroll()).thenReturn(TimeValue.timeValueMinutes(between(1, 10)));
         try (
             LegacyReaderContext readerContext = new LegacyReaderContext(
-                new ShardSearchContextId(UUIDs.randomBase64UUID(), 0L),
+                new ShardSearchContextId(UUIDs.randomBase64UUID(), 0L, null),
                 indexService,
                 shard,
                 shard.acquireSearcherSupplier(),
@@ -243,7 +243,7 @@ public class SecuritySearchOperationListenerTests extends ESSingleNodeTestCase {
     public void testValidateResourceAccessCheck() throws Exception {
         final ShardSearchRequest shardSearchRequest = mock(ShardSearchRequest.class);
         when(shardSearchRequest.scroll()).thenReturn(TimeValue.timeValueMinutes(between(1, 10)));
-        final ShardSearchContextId shardSearchContextId = new ShardSearchContextId(UUIDs.randomBase64UUID(), randomLong());
+        final ShardSearchContextId shardSearchContextId = new ShardSearchContextId(UUIDs.randomBase64UUID(), randomLong(), null);
         try (
             LegacyReaderContext readerContext = new LegacyReaderContext(
                 shardSearchContextId,

@@ -21,11 +21,6 @@ public final class ShardSearchContextId implements Writeable {
     private final long id;
     private final String searcherId;
 
-    // TODO: Remove this constructor
-    public ShardSearchContextId(String sessionId, long id) {
-        this(sessionId, id, null);
-    }
-
     public ShardSearchContextId(String sessionId, long id, String searcherId) {
         this.sessionId = Objects.requireNonNull(sessionId);
         this.id = id;

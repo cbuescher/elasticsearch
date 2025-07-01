@@ -24,7 +24,7 @@ public class ParsedScrollIdTests extends ESTestCase {
             searchContextIdForNodes[i] = new SearchContextIdForNode(
                 clusterAlias,
                 "node_" + i,
-                new ShardSearchContextId(randomAlphaOfLength(8), randomLong())
+                new ShardSearchContextId(randomAlphaOfLength(8), randomLong(), null)
             );
         }
         final ParsedScrollId parsedScrollId = new ParsedScrollId(randomAlphaOfLength(8), searchContextIdForNodes);

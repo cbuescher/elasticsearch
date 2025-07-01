@@ -97,7 +97,7 @@ public class ShardSearchRequestTests extends AbstractSearchTestCase {
         ShardSearchContextId shardSearchContextId = null;
         TimeValue keepAlive = null;
         if (randomBoolean()) {
-            shardSearchContextId = new ShardSearchContextId(UUIDs.randomBase64UUID(), randomNonNegativeLong());
+            shardSearchContextId = new ShardSearchContextId(UUIDs.randomBase64UUID(), randomNonNegativeLong(), null);
             if (randomBoolean()) {
                 keepAlive = TimeValue.timeValueSeconds(randomIntBetween(0, 120));
             }

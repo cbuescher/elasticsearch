@@ -355,7 +355,7 @@ public class ExceptionSerializationTests extends ESTestCase {
     }
 
     public void testSearchContextMissingException() throws IOException {
-        ShardSearchContextId contextId = new ShardSearchContextId(UUIDs.randomBase64UUID(), randomLong());
+        ShardSearchContextId contextId = new ShardSearchContextId(UUIDs.randomBase64UUID(), randomLong(), null);
         TransportVersion version = TransportVersionUtils.randomCompatibleVersion(random());
         SearchContextMissingException ex = serialize(new SearchContextMissingException(contextId), version);
         assertThat(ex.contextId().getId(), equalTo(contextId.getId()));

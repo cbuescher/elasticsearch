@@ -1285,7 +1285,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         ReaderContext readerContext = null;
         Releasable decreaseScrollContexts = null;
         try {
-            final ShardSearchContextId id = new ShardSearchContextId(sessionId, idGenerator.incrementAndGet());
+            final ShardSearchContextId id = new ShardSearchContextId(sessionId, idGenerator.incrementAndGet(), null);
             if (request.scroll() != null) {
                 decreaseScrollContexts = openScrollContexts::decrementAndGet;
                 if (openScrollContexts.incrementAndGet() > maxOpenScrollContext) {
@@ -1386,7 +1386,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         final IndexService indexService = indicesService.indexServiceSafe(request.shardId().getIndex());
         final IndexShard indexShard = indexService.getShard(request.shardId().getId());
         final Engine.SearcherSupplier reader = indexShard.acquireSearcherSupplier();
-        final ShardSearchContextId id = new ShardSearchContextId(sessionId, idGenerator.incrementAndGet());
+        final ShardSearchContextId id = new ShardSearchContextId(sessionId, idGenerator.incrementAndGet(), null);
         try (ReaderContext readerContext = new ReaderContext(id, indexService, indexShard, reader, -1L, true)) {
             DefaultSearchContext searchContext = createSearchContext(readerContext, request, timeout, ResultsType.NONE);
             searchContext.addReleasable(readerContext.markAsUsed(0L));

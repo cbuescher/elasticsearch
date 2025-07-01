@@ -51,7 +51,7 @@ public class SearchScrollRequestTests extends ESTestCase {
         SearchScrollRequest searchScrollRequest = createSearchScrollRequest();
         InternalScrollSearchRequest internalScrollSearchRequest = new InternalScrollSearchRequest(
             searchScrollRequest,
-            new ShardSearchContextId(UUIDs.randomBase64UUID(), randomLong())
+            new ShardSearchContextId(UUIDs.randomBase64UUID(), randomLong(), null)
         );
         try (BytesStreamOutput output = new BytesStreamOutput()) {
             internalScrollSearchRequest.writeTo(output);

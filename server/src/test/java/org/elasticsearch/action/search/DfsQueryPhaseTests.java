@@ -66,11 +66,11 @@ public class DfsQueryPhaseTests extends ESTestCase {
         AtomicReference<AtomicArray<SearchPhaseResult>> responseRef = new AtomicReference<>();
         results.set(
             0,
-            newSearchResult(0, new ShardSearchContextId("", 1), new SearchShardTarget("node1", new ShardId("test", "na", 0), null))
+            newSearchResult(0, new ShardSearchContextId("", 1, null), new SearchShardTarget("node1", new ShardId("test", "na", 0), null))
         );
         results.set(
             1,
-            newSearchResult(1, new ShardSearchContextId("", 2), new SearchShardTarget("node2", new ShardId("test", "na", 0), null))
+            newSearchResult(1, new ShardSearchContextId("", 2, null), new SearchShardTarget("node2", new ShardId("test", "na", 0), null))
         );
         results.get(0).termsStatistics(new Term[0], new TermStatistics[0]);
         results.get(1).termsStatistics(new Term[0], new TermStatistics[0]);
@@ -85,7 +85,7 @@ public class DfsQueryPhaseTests extends ESTestCase {
             ) {
                 if (request.contextId().getId() == 1) {
                     QuerySearchResult queryResult = new QuerySearchResult(
-                        new ShardSearchContextId("", 123),
+                        new ShardSearchContextId("", 123, null),
                         new SearchShardTarget("node1", new ShardId("test", "na", 0), null),
                         null
                     );
@@ -104,7 +104,7 @@ public class DfsQueryPhaseTests extends ESTestCase {
                     }
                 } else if (request.contextId().getId() == 2) {
                     QuerySearchResult queryResult = new QuerySearchResult(
-                        new ShardSearchContextId("", 123),
+                        new ShardSearchContextId("", 123, null),
                         new SearchShardTarget("node2", new ShardId("test", "na", 0), null),
                         null
                     );
@@ -164,11 +164,11 @@ public class DfsQueryPhaseTests extends ESTestCase {
         AtomicReference<AtomicArray<SearchPhaseResult>> responseRef = new AtomicReference<>();
         results.set(
             0,
-            newSearchResult(0, new ShardSearchContextId("", 1), new SearchShardTarget("node1", new ShardId("test", "na", 0), null))
+            newSearchResult(0, new ShardSearchContextId("", 1, null), new SearchShardTarget("node1", new ShardId("test", "na", 0), null))
         );
         results.set(
             1,
-            newSearchResult(1, new ShardSearchContextId("", 2), new SearchShardTarget("node2", new ShardId("test", "na", 0), null))
+            newSearchResult(1, new ShardSearchContextId("", 2, null), new SearchShardTarget("node2", new ShardId("test", "na", 0), null))
         );
         results.get(0).termsStatistics(new Term[0], new TermStatistics[0]);
         results.get(1).termsStatistics(new Term[0], new TermStatistics[0]);
@@ -183,7 +183,7 @@ public class DfsQueryPhaseTests extends ESTestCase {
             ) {
                 if (request.contextId().getId() == 1) {
                     QuerySearchResult queryResult = new QuerySearchResult(
-                        new ShardSearchContextId("", 123),
+                        new ShardSearchContextId("", 123, null),
                         new SearchShardTarget("node1", new ShardId("test", "na", 0), null),
                         null
                     );
@@ -236,7 +236,7 @@ public class DfsQueryPhaseTests extends ESTestCase {
             assertEquals(1, mockSearchPhaseContext.failures.size());
             assertTrue(mockSearchPhaseContext.failures.get(0).getCause() instanceof MockDirectoryWrapper.FakeIOException);
             assertEquals(1, mockSearchPhaseContext.releasedSearchContexts.size());
-            assertTrue(mockSearchPhaseContext.releasedSearchContexts.contains(new ShardSearchContextId("", 2L)));
+            assertTrue(mockSearchPhaseContext.releasedSearchContexts.contains(new ShardSearchContextId("", 2L, null)));
             assertNull(responseRef.get().get(1));
             mockSearchPhaseContext.results.close();
         }
@@ -247,11 +247,11 @@ public class DfsQueryPhaseTests extends ESTestCase {
         AtomicReference<AtomicArray<SearchPhaseResult>> responseRef = new AtomicReference<>();
         results.set(
             0,
-            newSearchResult(0, new ShardSearchContextId("", 1), new SearchShardTarget("node1", new ShardId("test", "na", 0), null))
+            newSearchResult(0, new ShardSearchContextId("", 1, null), new SearchShardTarget("node1", new ShardId("test", "na", 0), null))
         );
         results.set(
             1,
-            newSearchResult(1, new ShardSearchContextId("", 2), new SearchShardTarget("node2", new ShardId("test", "na", 0), null))
+            newSearchResult(1, new ShardSearchContextId("", 2, null), new SearchShardTarget("node2", new ShardId("test", "na", 0), null))
         );
         results.get(0).termsStatistics(new Term[0], new TermStatistics[0]);
         results.get(1).termsStatistics(new Term[0], new TermStatistics[0]);
@@ -266,7 +266,7 @@ public class DfsQueryPhaseTests extends ESTestCase {
             ) {
                 if (request.contextId().getId() == 1) {
                     QuerySearchResult queryResult = new QuerySearchResult(
-                        new ShardSearchContextId("", 123),
+                        new ShardSearchContextId("", 123, null),
                         new SearchShardTarget("node1", new ShardId("test", "na", 0), null),
                         null
                     );

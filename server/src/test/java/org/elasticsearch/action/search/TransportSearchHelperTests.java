@@ -27,17 +27,17 @@ public class TransportSearchHelperTests extends ESTestCase {
         DiscoveryNode node2 = DiscoveryNodeUtils.create("node_2");
         DiscoveryNode node3 = DiscoveryNodeUtils.create("node_3");
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult1 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId("a", 1),
+            new ShardSearchContextId("a", 1, null),
             node1
         );
         testSearchPhaseResult1.setSearchShardTarget(new SearchShardTarget("node_1", new ShardId("idx", "uuid1", 2), "cluster_x"));
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult2 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId("b", 12),
+            new ShardSearchContextId("b", 12, null),
             node2
         );
         testSearchPhaseResult2.setSearchShardTarget(new SearchShardTarget("node_2", new ShardId("idy", "uuid2", 42), "cluster_y"));
         SearchAsyncActionTests.TestSearchPhaseResult testSearchPhaseResult3 = new SearchAsyncActionTests.TestSearchPhaseResult(
-            new ShardSearchContextId("c", 42),
+            new ShardSearchContextId("c", 42, null),
             node3
         );
         testSearchPhaseResult3.setSearchShardTarget(new SearchShardTarget("node_3", new ShardId("idy", "uuid2", 43), null));

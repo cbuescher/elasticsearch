@@ -50,7 +50,7 @@ public class CountedCollectorTests extends ESTestCase {
                         state.add(1);
                         executor.execute(() -> {
                             DfsSearchResult dfsSearchResult = new DfsSearchResult(
-                                new ShardSearchContextId(UUIDs.randomBase64UUID(), shardID),
+                                new ShardSearchContextId(UUIDs.randomBase64UUID(), shardID, null),
                                 null,
                                 null
                             );

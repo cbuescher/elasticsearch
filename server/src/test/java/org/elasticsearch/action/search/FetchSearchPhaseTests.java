@@ -192,7 +192,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
             int resultSetSize = randomIntBetween(2, 10);
             boolean profiled = randomBoolean();
 
-            ShardSearchContextId ctx1 = new ShardSearchContextId(UUIDs.base64UUID(), 123);
+            ShardSearchContextId ctx1 = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
             SearchShardTarget shard1Target = new SearchShardTarget("node1", new ShardId("test", "na", 0), null);
             SearchShardTarget shard2Target = new SearchShardTarget("node2", new ShardId("test", "na", 1), null);
             QuerySearchResult queryResult = new QuerySearchResult(ctx1, shard1Target, null);
@@ -213,7 +213,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
                 queryResult.decRef();
             }
 
-            final ShardSearchContextId ctx2 = new ShardSearchContextId(UUIDs.base64UUID(), 321);
+            final ShardSearchContextId ctx2 = new ShardSearchContextId(UUIDs.base64UUID(), 321, null);
             try {
                 queryResult = new QuerySearchResult(ctx2, shard2Target, null);
                 queryResult.topDocs(
@@ -305,7 +305,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
             int resultSetSize = randomIntBetween(2, 10);
             boolean profiled = randomBoolean();
 
-            final ShardSearchContextId ctx = new ShardSearchContextId(UUIDs.base64UUID(), 123);
+            final ShardSearchContextId ctx = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
             SearchShardTarget shard1Target = new SearchShardTarget("node1", new ShardId("test", "na", 0), null);
             QuerySearchResult queryResult = new QuerySearchResult(ctx, shard1Target, null);
             try {
@@ -325,7 +325,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
             }
 
             SearchShardTarget shard2Target = new SearchShardTarget("node2", new ShardId("test", "na", 1), null);
-            queryResult = new QuerySearchResult(new ShardSearchContextId("", 321), shard2Target, null);
+            queryResult = new QuerySearchResult(new ShardSearchContextId("", 321, null), shard2Target, null);
             try {
                 queryResult.topDocs(
                     new TopDocsAndMaxScore(
@@ -428,7 +428,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
             SearchShardTarget[] shardTargets = new SearchShardTarget[numHits];
             for (int i = 0; i < numHits; i++) {
                 shardTargets[i] = new SearchShardTarget("node1", new ShardId("test", "na", i), null);
-                QuerySearchResult queryResult = new QuerySearchResult(new ShardSearchContextId("", i), shardTargets[i], null);
+                QuerySearchResult queryResult = new QuerySearchResult(new ShardSearchContextId("", i, null), shardTargets[i], null);
                 try {
                     queryResult.topDocs(
                         new TopDocsAndMaxScore(
@@ -549,7 +549,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
 
             SearchShardTarget shard1Target = new SearchShardTarget("node1", new ShardId("test", "na", 0), null);
             SearchShardTarget shard2Target = new SearchShardTarget("node1", new ShardId("test", "na", 0), null);
-            QuerySearchResult queryResult = new QuerySearchResult(new ShardSearchContextId("", 123), shard1Target, null);
+            QuerySearchResult queryResult = new QuerySearchResult(new ShardSearchContextId("", 123, null), shard1Target, null);
             try {
                 queryResult.topDocs(
                     new TopDocsAndMaxScore(
@@ -565,7 +565,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
             } finally {
                 queryResult.decRef();
             }
-            queryResult = new QuerySearchResult(new ShardSearchContextId("", 321), shard2Target, null);
+            queryResult = new QuerySearchResult(new ShardSearchContextId("", 321, null), shard2Target, null);
             try {
                 queryResult.topDocs(
                     new TopDocsAndMaxScore(
@@ -661,7 +661,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
             int resultSetSize = 1;
             boolean profiled = randomBoolean();
 
-            final ShardSearchContextId ctx1 = new ShardSearchContextId(UUIDs.base64UUID(), 123);
+            final ShardSearchContextId ctx1 = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
             SearchShardTarget shard1Target = new SearchShardTarget("node1", new ShardId("test", "na", 0), null);
             QuerySearchResult queryResult = new QuerySearchResult(ctx1, shard1Target, null);
             try {
@@ -679,7 +679,7 @@ public class FetchSearchPhaseTests extends ESTestCase {
             } finally {
                 queryResult.decRef();
             }
-            final ShardSearchContextId ctx2 = new ShardSearchContextId(UUIDs.base64UUID(), 321);
+            final ShardSearchContextId ctx2 = new ShardSearchContextId(UUIDs.base64UUID(), 321, null);
             SearchShardTarget shard2Target = new SearchShardTarget("node2", new ShardId("test", "na", 1), null);
             queryResult = new QuerySearchResult(ctx2, shard2Target, null);
             try {

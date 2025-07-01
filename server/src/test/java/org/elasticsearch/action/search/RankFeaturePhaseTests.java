@@ -89,7 +89,7 @@ public class RankFeaturePhaseTests extends ESTestCase {
         MockSearchPhaseContext mockSearchPhaseContext = new MockSearchPhaseContext(1);
         mockSearchPhaseContext.getRequest().source(searchSourceBuilder);
         try (SearchPhaseResults<SearchPhaseResult> results = searchPhaseResults(controller, mockSearchPhaseContext)) {
-            final ShardSearchContextId ctx = new ShardSearchContextId(UUIDs.base64UUID(), 123);
+            final ShardSearchContextId ctx = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
             QuerySearchResult queryResult = new QuerySearchResult(ctx, shard1Target, null);
             try {
                 queryResult.setShardIndex(shard1Target.getShardId().getId());
@@ -179,9 +179,9 @@ public class RankFeaturePhaseTests extends ESTestCase {
         try (SearchPhaseResults<SearchPhaseResult> results = searchPhaseResults(controller, mockSearchPhaseContext)) {
             // generate the QuerySearchResults that the RankFeaturePhase would have received from QueryPhase
             // here we have 2 results, with doc ids 1 and 2 found on shards 0 and 1 respectively
-            final ShardSearchContextId ctxShard1 = new ShardSearchContextId(UUIDs.base64UUID(), 123);
-            final ShardSearchContextId ctxShard2 = new ShardSearchContextId(UUIDs.base64UUID(), 456);
-            final ShardSearchContextId ctxShard3 = new ShardSearchContextId(UUIDs.base64UUID(), 789);
+            final ShardSearchContextId ctxShard1 = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
+            final ShardSearchContextId ctxShard2 = new ShardSearchContextId(UUIDs.base64UUID(), 456, null);
+            final ShardSearchContextId ctxShard3 = new ShardSearchContextId(UUIDs.base64UUID(), 789, null);
 
             QuerySearchResult queryResultShard1 = new QuerySearchResult(ctxShard1, shard1Target, null);
             QuerySearchResult queryResultShard2 = new QuerySearchResult(ctxShard2, shard2Target, null);
@@ -305,8 +305,8 @@ public class RankFeaturePhaseTests extends ESTestCase {
         try (SearchPhaseResults<SearchPhaseResult> results = searchPhaseResults(controller, mockSearchPhaseContext)) {
             // generate the QuerySearchResults that the RankFeaturePhase would have received from QueryPhase
             // here we have 2 results, with doc ids 1 and 2 found on shards 0 and 1 respectively
-            final ShardSearchContextId ctxShard1 = new ShardSearchContextId(UUIDs.base64UUID(), 123);
-            final ShardSearchContextId ctxShard2 = new ShardSearchContextId(UUIDs.base64UUID(), 456);
+            final ShardSearchContextId ctxShard1 = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
+            final ShardSearchContextId ctxShard2 = new ShardSearchContextId(UUIDs.base64UUID(), 456, null);
 
             QuerySearchResult queryResultShard1 = new QuerySearchResult(ctxShard1, shard1Target, null);
             QuerySearchResult queryResultShard2 = new QuerySearchResult(ctxShard2, shard2Target, null);
@@ -409,7 +409,7 @@ public class RankFeaturePhaseTests extends ESTestCase {
         try (SearchPhaseResults<SearchPhaseResult> results = searchPhaseResults(controller, mockSearchPhaseContext)) {
             // generate the QuerySearchResults that the RankFeaturePhase would have received from QueryPhase
             // here we have 2 results, with doc ids 1 and 2
-            final ShardSearchContextId ctx = new ShardSearchContextId(UUIDs.base64UUID(), 123);
+            final ShardSearchContextId ctx = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
             QuerySearchResult queryResult = new QuerySearchResult(ctx, shard1Target, null);
             try {
                 queryResult.setShardIndex(shard1Target.getShardId().getId());
@@ -518,9 +518,9 @@ public class RankFeaturePhaseTests extends ESTestCase {
         try (SearchPhaseResults<SearchPhaseResult> results = searchPhaseResults(controller, mockSearchPhaseContext)) {
             // generate the QuerySearchResults that the RankFeaturePhase would have received from QueryPhase
             // here we have 4 results, with doc ids 1 and (11, 2, 200) found on shards 0 and 1 respectively
-            final ShardSearchContextId ctxShard1 = new ShardSearchContextId(UUIDs.base64UUID(), 123);
-            final ShardSearchContextId ctxShard2 = new ShardSearchContextId(UUIDs.base64UUID(), 456);
-            final ShardSearchContextId ctxShard3 = new ShardSearchContextId(UUIDs.base64UUID(), 789);
+            final ShardSearchContextId ctxShard1 = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
+            final ShardSearchContextId ctxShard2 = new ShardSearchContextId(UUIDs.base64UUID(), 456, null);
+            final ShardSearchContextId ctxShard3 = new ShardSearchContextId(UUIDs.base64UUID(), 789, null);
 
             QuerySearchResult queryResultShard1 = new QuerySearchResult(ctxShard1, shard1Target, null);
             QuerySearchResult queryResultShard2 = new QuerySearchResult(ctxShard2, shard2Target, null);
@@ -663,9 +663,9 @@ public class RankFeaturePhaseTests extends ESTestCase {
         try (SearchPhaseResults<SearchPhaseResult> results = searchPhaseResults(controller, mockSearchPhaseContext)) {
             // generate the QuerySearchResults that the RankFeaturePhase would have received from QueryPhase
             // here we have 3 results, with doc ids 1, and (11, 2) found on shards 0 and 1 respectively
-            final ShardSearchContextId ctxShard1 = new ShardSearchContextId(UUIDs.base64UUID(), 123);
-            final ShardSearchContextId ctxShard2 = new ShardSearchContextId(UUIDs.base64UUID(), 456);
-            final ShardSearchContextId ctxShard3 = new ShardSearchContextId(UUIDs.base64UUID(), 789);
+            final ShardSearchContextId ctxShard1 = new ShardSearchContextId(UUIDs.base64UUID(), 123, null);
+            final ShardSearchContextId ctxShard2 = new ShardSearchContextId(UUIDs.base64UUID(), 456, null);
+            final ShardSearchContextId ctxShard3 = new ShardSearchContextId(UUIDs.base64UUID(), 789, null);
 
             QuerySearchResult queryResultShard1 = new QuerySearchResult(ctxShard1, shard1Target, null);
             QuerySearchResult queryResultShard2 = new QuerySearchResult(ctxShard2, shard2Target, null);

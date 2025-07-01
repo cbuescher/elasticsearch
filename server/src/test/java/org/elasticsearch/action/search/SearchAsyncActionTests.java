@@ -127,7 +127,7 @@ public class SearchAsyncActionTests extends ESTestCase {
 
                 new Thread(() -> {
                     TestSearchPhaseResult testSearchPhaseResult = new TestSearchPhaseResult(
-                        new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet()),
+                        new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet(), null),
                         connection.getNode()
                     );
                     listener.onResponse(testSearchPhaseResult);
@@ -235,7 +235,7 @@ public class SearchAsyncActionTests extends ESTestCase {
                     new Thread(() -> {
                         safeAwait(awaitInitialRequests);
                         TestSearchPhaseResult testSearchPhaseResult = new TestSearchPhaseResult(
-                            new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet()),
+                            new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet(), null),
                             connection.getNode()
                         );
                         try {
@@ -346,7 +346,7 @@ public class SearchAsyncActionTests extends ESTestCase {
                     var shardId = shardIt.shardId();
                     assertTrue("shard: " + shardId + " has been queried twice", testResponse.queried.add(shardId));
                     TestSearchPhaseResult testSearchPhaseResult = new TestSearchPhaseResult(
-                        new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet()),
+                        new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet(), null),
                         connection.getNode()
                     );
                     Set<ShardSearchContextId> ids = nodeToContextMap.computeIfAbsent(connection.getNode(), (n) -> newConcurrentSet());
@@ -479,7 +479,7 @@ public class SearchAsyncActionTests extends ESTestCase {
                         testSearchPhaseResult = new TestSearchPhaseResult(null, connection.getNode());
                     } else {
                         testSearchPhaseResult = new TestSearchPhaseResult(
-                            new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet()),
+                            new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet(), null),
                             connection.getNode()
                         );
                         Set<ShardSearchContextId> ids = nodeToContextMap.computeIfAbsent(connection.getNode(), (n) -> newConcurrentSet());
@@ -588,7 +588,7 @@ public class SearchAsyncActionTests extends ESTestCase {
                     int numRetries = retries.incrementAndGet();
                     new Thread(() -> {
                         TestSearchPhaseResult testSearchPhaseResult = new TestSearchPhaseResult(
-                            new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet()),
+                            new ShardSearchContextId(UUIDs.randomBase64UUID(), contextIdGenerator.incrementAndGet(), null),
                             connection.getNode()
                         );
                         try {

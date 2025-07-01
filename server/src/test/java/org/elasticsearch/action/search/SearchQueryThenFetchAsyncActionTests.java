@@ -105,7 +105,7 @@ public class SearchQueryThenFetchAsyncActionTests extends ESTestCase {
                     numWithTopDocs.incrementAndGet();
                 }
                 QuerySearchResult queryResult = new QuerySearchResult(
-                    new ShardSearchContextId("N/A", 123),
+                    new ShardSearchContextId("N/A", 123, null),
                     new SearchShardTarget("node1", new ShardId("idx", "na", shardId), null),
                     null
                 );

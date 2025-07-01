@@ -1090,6 +1090,6 @@ public class DefaultSearchContextTests extends MapperServiceTestCase {
     }
 
     private ShardSearchContextId newContextId() {
-        return new ShardSearchContextId(UUIDs.randomBase64UUID(), randomNonNegativeLong());
+        return new ShardSearchContextId(UUIDs.randomBase64UUID(), randomNonNegativeLong(), null);
     }
 }

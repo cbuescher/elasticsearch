@@ -3690,7 +3690,7 @@ public class AuthorizationServiceTests extends ESTestCase {
 
     private static BytesReference createEncodedPIT(Index index) {
         DiscoveryNode node1 = DiscoveryNodeUtils.create("node_1");
-        TestSearchPhaseResult testSearchPhaseResult1 = new TestSearchPhaseResult(new ShardSearchContextId("a", 1), node1);
+        TestSearchPhaseResult testSearchPhaseResult1 = new TestSearchPhaseResult(new ShardSearchContextId("a", 1, null), node1);
         testSearchPhaseResult1.setSearchShardTarget(
             new SearchShardTarget("node_1", new ShardId(index.getName(), index.getUUID(), 0), null)
         );

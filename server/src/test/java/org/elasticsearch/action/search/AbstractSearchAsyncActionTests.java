@@ -251,7 +251,7 @@ public class AbstractSearchAsyncActionTests extends ESTestCase {
         ArraySearchPhaseResults<SearchPhaseResult> phaseResults = new ArraySearchPhaseResults<>(numResults + numFailures);
 
         for (int i = 0; i < numResults; i++) {
-            ShardSearchContextId contextId = new ShardSearchContextId(UUIDs.randomBase64UUID(), randomNonNegativeLong());
+            ShardSearchContextId contextId = new ShardSearchContextId(UUIDs.randomBase64UUID(), randomNonNegativeLong(), null);
             contextIds.add(contextId);
             SearchPhaseResult phaseResult = new PhaseResult(contextId);
             String resultClusterAlias = randomBoolean() ? null : randomAlphaOfLengthBetween(5, 10);

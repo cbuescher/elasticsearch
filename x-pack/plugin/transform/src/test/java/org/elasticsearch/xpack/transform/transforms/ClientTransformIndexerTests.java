@@ -636,7 +636,7 @@ public class ClientTransformIndexerTests extends ESTestCase {
                 // throw search context missing for the 4th run
                 if (searchRequest.pointInTimeBuilder() != null
                     && new BytesArray("the_pit_id+++").equals(searchRequest.pointInTimeBuilder().getEncodedId())) {
-                    listener.onFailure(new SearchContextMissingException(new ShardSearchContextId("sc_missing", 42)));
+                    listener.onFailure(new SearchContextMissingException(new ShardSearchContextId("sc_missing", 42, null)));
                 } else {
                     ActionListener.respondAndRelease(
                         listener,

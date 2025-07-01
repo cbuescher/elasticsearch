@@ -2231,13 +2231,15 @@ public class SearchServiceSingleNodeTests extends ESSingleNodeTestCase {
                 assertThat(searchService.getActiveContexts(), equalTo(contextIds.size()));
                 while (contextIds.isEmpty() == false) {
                     final ShardSearchContextId contextId = randomFrom(contextIds);
-                    assertFalse(searchService.freeReaderContext(new ShardSearchContextId(UUIDs.randomBase64UUID(), contextId.getId())));
+                    assertFalse(
+                        searchService.freeReaderContext(new ShardSearchContextId(UUIDs.randomBase64UUID(), contextId.getId(), null))
+                    );
                     assertThat(searchService.getActiveContexts(), equalTo(contextIds.size()));
                     if (randomBoolean()) {
                         assertTrue(searchService.freeReaderContext(contextId));
                     } else {
                         assertTrue(
-                            searchService.freeReaderContext((new ShardSearchContextId(contextId.getSessionId(), contextId.getId())))
+                            searchService.freeReaderContext((new ShardSearchContextId(contextId.getSessionId(), contextId.getId(), null)))
                         );
                     }
                     contextIds.remove(contextId);
@@ -2895,7 +2897,7 @@ public class SearchServiceSingleNodeTests extends ESSingleNodeTestCase {
 
     private static ReaderContext createReaderContext(IndexService indexService, IndexShard indexShard) {
         return new ReaderContext(
-            new ShardSearchContextId(UUIDs.randomBase64UUID(), randomNonNegativeLong()),
+            new ShardSearchContextId(UUIDs.randomBase64UUID(), randomNonNegativeLong(), null),
             indexService,
             indexShard,
             indexShard.acquireSearcherSupplier(),

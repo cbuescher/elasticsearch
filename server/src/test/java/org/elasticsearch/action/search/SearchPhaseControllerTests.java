@@ -447,7 +447,11 @@ public class SearchPhaseControllerTests extends ESTestCase {
         for (int shardIndex = 0; shardIndex < nShards; shardIndex++) {
             String clusterAlias = randomBoolean() ? null : "remote";
             SearchShardTarget searchShardTarget = new SearchShardTarget("", new ShardId("", "", shardIndex), clusterAlias);
-            QuerySearchResult querySearchResult = new QuerySearchResult(new ShardSearchContextId("", shardIndex), searchShardTarget, null);
+            QuerySearchResult querySearchResult = new QuerySearchResult(
+                new ShardSearchContextId("", shardIndex, null),
+                searchShardTarget,
+                null
+            );
             final TopDocs topDocs;
             float maxScore = 0;
             if (searchHitsSize == 0) {
@@ -544,7 +548,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
         for (int shardIndex = 0; shardIndex < shards.size(); shardIndex++) {
             float maxScore = -1F;
             SearchShardTarget shardTarget = shards.get(shardIndex);
-            FetchSearchResult fetchSearchResult = new FetchSearchResult(new ShardSearchContextId("", shardIndex), shardTarget);
+            FetchSearchResult fetchSearchResult = new FetchSearchResult(new ShardSearchContextId("", shardIndex, null), shardTarget);
             List<SearchHit> searchHits = new ArrayList<>();
             for (ScoreDoc scoreDoc : mergedSearchDocs) {
                 if (scoreDoc.shardIndex == shardIndex) {
@@ -627,7 +631,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
             }
 
             QuerySearchResult result = new QuerySearchResult(
-                new ShardSearchContextId("", 0),
+                new ShardSearchContextId("", 0, null),
                 new SearchShardTarget("node", new ShardId("a", "b", 0), null),
                 null
             );
@@ -644,7 +648,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
                 result.decRef();
             }
             result = new QuerySearchResult(
-                new ShardSearchContextId("", 1),
+                new ShardSearchContextId("", 1, null),
                 new SearchShardTarget("node", new ShardId("a", "b", 0), null),
                 null
             );
@@ -661,7 +665,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
                 result.decRef();
             }
             result = new QuerySearchResult(
-                new ShardSearchContextId("", 1),
+                new ShardSearchContextId("", 1, null),
                 new SearchShardTarget("node", new ShardId("a", "b", 0), null),
                 null
             );
@@ -744,7 +748,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
                 int number = randomIntBetween(1, 1000);
                 max.updateAndGet(prev -> Math.max(prev, number));
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId("", id),
+                    new ShardSearchContextId("", id, null),
                     new SearchShardTarget("node", new ShardId("a", "b", id), null),
                     null
                 );
@@ -807,7 +811,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
                 int number = randomIntBetween(1, 1000);
                 max.updateAndGet(prev -> Math.max(prev, number));
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId("", i),
+                    new ShardSearchContextId("", i, null),
                     new SearchShardTarget("node", new ShardId("a", "b", i), null),
                     null
                 );
@@ -869,7 +873,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
                 int number = randomIntBetween(1, 1000);
                 max.updateAndGet(prev -> Math.max(prev, number));
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId("", i),
+                    new ShardSearchContextId("", i, null),
                     new SearchShardTarget("node", new ShardId("a", "b", i), null),
                     null
                 );
@@ -933,7 +937,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
             CountDownLatch latch = new CountDownLatch(4);
             for (int i = 0; i < 4; i++) {
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId("", i),
+                    new ShardSearchContextId("", i, null),
                     new SearchShardTarget("node", new ShardId("a", "b", i), null),
                     null
                 );
@@ -996,7 +1000,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
                 FieldDoc[] fieldDocs = { new FieldDoc(0, Float.NaN, new Object[] { number }) };
                 TopDocs topDocs = new TopFieldDocs(new TotalHits(1, Relation.EQUAL_TO), fieldDocs, sortFields);
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId("", i),
+                    new ShardSearchContextId("", i, null),
                     new SearchShardTarget("node", new ShardId("a", "b", i), null),
                     null
                 );
@@ -1053,7 +1057,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
                 FieldDoc[] fieldDocs = { new FieldDoc(0, Float.NaN, values) };
                 TopDocs topDocs = new TopFieldGroups("field", new TotalHits(1, Relation.EQUAL_TO), fieldDocs, sortFields, values);
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId("", i),
+                    new ShardSearchContextId("", i, null),
                     new SearchShardTarget("node", new ShardId("a", "b", i), null),
                     null
                 );
@@ -1105,7 +1109,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
             CountDownLatch latch = new CountDownLatch(expectedNumResults);
             for (int i = 0; i < expectedNumResults; i++) {
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId("", i),
+                    new ShardSearchContextId("", i, null),
                     new SearchShardTarget("node", new ShardId("a", "b", i), null),
                     null
                 );
@@ -1251,7 +1255,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
                     int number = randomIntBetween(1, 1000);
                     max.updateAndGet(prev -> Math.max(prev, number));
                     QuerySearchResult result = new QuerySearchResult(
-                        new ShardSearchContextId("", id),
+                        new ShardSearchContextId("", id, null),
                         new SearchShardTarget("node", new ShardId("a", "b", id), null),
                         null
                     );
@@ -1330,7 +1334,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
             CountDownLatch latch = new CountDownLatch(numShards);
             runInParallel(numShards, index -> {
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId(UUIDs.randomBase64UUID(), index),
+                    new ShardSearchContextId(UUIDs.randomBase64UUID(), index, null),
                     new SearchShardTarget("node", new ShardId("a", "b", index), null),
                     null
                 );
@@ -1393,7 +1397,7 @@ public class SearchPhaseControllerTests extends ESTestCase {
             for (int i = 0; i < expectedNumResults; i++) {
                 final int index = i;
                 QuerySearchResult result = new QuerySearchResult(
-                    new ShardSearchContextId(UUIDs.randomBase64UUID(), index),
+                    new ShardSearchContextId(UUIDs.randomBase64UUID(), index, null),
                     new SearchShardTarget("node", new ShardId("a", "b", index), null),
                     null
                 );
