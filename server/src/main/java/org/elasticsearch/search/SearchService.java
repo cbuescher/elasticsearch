@@ -12,10 +12,15 @@ package org.elasticsearch.search;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexCommit;
+import org.apache.lucene.index.SegmentInfos;
+import org.apache.lucene.index.StandardDirectoryReader;
 import org.apache.lucene.search.FieldDoc;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.store.Directory;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.TransportVersion;
@@ -61,7 +66,12 @@ import org.elasticsearch.index.Index;
 import org.elasticsearch.index.IndexNotFoundException;
 import org.elasticsearch.index.IndexService;
 import org.elasticsearch.index.IndexSettings;
+import org.elasticsearch.index.IndexVersions;
 import org.elasticsearch.index.engine.Engine;
+import org.elasticsearch.index.engine.Engine.Searcher;
+import org.elasticsearch.index.engine.Engine.SearcherSupplier;
+import org.elasticsearch.index.engine.EngineConfig;
+import org.elasticsearch.index.engine.ReadOnlyEngine;
 import org.elasticsearch.index.query.CoordinatorRewriteContextProvider;
 import org.elasticsearch.index.query.InnerHitContextBuilder;
 import org.elasticsearch.index.query.InnerHitsRewriteContext;
@@ -159,6 +169,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.elasticsearch.TransportVersions.ERROR_TRACE_IN_TRANSPORT_HEADER;
 import static org.elasticsearch.common.Strings.format;
@@ -1822,6 +1833,59 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     public long getDefaultKeepAliveInMillis() {
         return defaultKeepAlive;
     }
+
+    public List<ReaderContext> getActiveContexts(ShardId shardId) {
+        return this.activeReaders.values()
+                .stream()
+                .filter(c -> c.singleSession() == false)
+                .filter(c -> c.indexShard().shardId().equals(shardId))
+                .collect(Collectors.toList());
+    }
+
+    public void reopenPitContexts(ShardId shardId, String segmentsFileName, long keepAlive) {
+        IndexService indexService = this.indicesService.indexServiceSafe(shardId.getIndex());
+        IndexShard shard = indexService.getShard(shardId.id());
+        try (Directory directory = shard.store().directory()) {
+            SegmentInfos segmentCommitInfos = SegmentInfos.readCommit(directory, segmentsFileName,
+                    IndexVersions.MINIMUM_READONLY_COMPATIBLE.luceneVersion().major);
+            IndexCommit indexCommit = Lucene.getIndexCommit(segmentCommitInfos, directory);
+            DirectoryReader open = StandardDirectoryReader.open(indexCommit);
+            EngineConfig engineConfig = shard.getEngineOrNull().getEngineConfig();
+
+
+            final Searcher searcher = new Searcher(
+                    "source",
+                    open,
+                    engineConfig.getSimilarity(),
+                    engineConfig.getQueryCache(),
+                    engineConfig.getQueryCachingPolicy(),
+                    () -> {
+                    }
+            );
+            String searcherId = ReadOnlyEngine.generateSearcherId(segmentCommitInfos);
+            final ShardSearchContextId shardSearchContextId = new ShardSearchContextId(
+                    sessionId,
+                    idGenerator.incrementAndGet(),
+                    searcherId
+            );
+            SearcherSupplier searchSupplier = new Engine.SearcherSupplier(Function.identity()) {
+
+                @Override
+                protected void doClose() {
+                    // TODO: implement closing logic
+                }
+
+                @Override
+                protected Searcher acquireSearcherInternal(String source) {
+                    return searcher;
+                }
+            };
+            ReaderContext readerContext = new ReaderContext(shardSearchContextId, indexService, shard, searchSupplier, keepAlive, false);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      * Used to indicate which result object should be instantiated when creating a search context
