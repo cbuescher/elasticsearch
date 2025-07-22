@@ -156,6 +156,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -371,7 +372,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
 
     private final AtomicLong idGenerator = new AtomicLong();
 
-    private final Map<Long, ReaderContext> activeReaders = ConcurrentCollections.newConcurrentMapWithAggressiveConcurrency();
+    private final Map<ReaderContextId, ReaderContext> activeReaders = ConcurrentCollections.newConcurrentMapWithAggressiveConcurrency();
 
     private final MultiBucketConsumerService multiBucketConsumerService;
 
@@ -550,19 +551,18 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     }
 
     protected void putReaderContext(ReaderContext context) {
-        final long id = context.id().getId();
-        final ReaderContext previous = activeReaders.put(id, context);
+        final ReaderContext previous = activeReaders.put(context.readerContextId(), context);
         assert previous == null;
         // ensure that if we race against afterIndexRemoved, we remove the context from the active list.
         // this is important to ensure store can be cleaned up, in particular if the search is a scroll with a long timeout.
         final Index index = context.indexShard().shardId().getIndex();
         if (indicesService.hasIndex(index) == false) {
-            removeReaderContext(id);
+            removeReaderContext(context.readerContextId());
             throw new IndexNotFoundException(index);
         }
     }
 
-    protected ReaderContext removeReaderContext(long id) {
+    protected ReaderContext removeReaderContext(ReaderContextId id) {
         if (logger.isTraceEnabled()) {
             logger.trace("removing reader context [{}]", id);
         }
@@ -1234,10 +1234,10 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         if (id.getSessionId().isEmpty()) {
             throw new IllegalArgumentException("Session id must be specified");
         }
-        if (sessionId.equals(id.getSessionId()) == false) {
-            throw new SearchContextMissingException(id);
-        }
-        final ReaderContext reader = activeReaders.get(id.getId());
+//        if (sessionId.equals(id.getSessionId()) == false) {
+//            throw new SearchContextMissingException(id);
+//        }
+        final ReaderContext reader = activeReaders.get(id.readerContextId());
         if (reader == null) {
             throw new SearchContextMissingException(id);
         }
@@ -1462,7 +1462,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     public boolean freeReaderContext(ShardSearchContextId contextId) {
         logger.trace("freeing reader context [{}]", contextId);
         if (sessionId.equals(contextId.getSessionId())) {
-            try (ReaderContext context = removeReaderContext(contextId.getId())) {
+            try (ReaderContext context = removeReaderContext(contextId.readerContextId())) {
                 return context != null;
             }
         }
@@ -1842,30 +1842,21 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                 .collect(Collectors.toList());
     }
 
-    public void reopenPitContexts(ShardId shardId, String segmentsFileName, long keepAlive) {
+    public void reopenPitContexts(ShardId shardId, String segmentsFileName, long keepAlive, String sessionId, long contextId) {
         IndexService indexService = this.indicesService.indexServiceSafe(shardId.getIndex());
-        IndexShard shard = indexService.getShard(shardId.id());
-        try (Directory directory = shard.store().directory()) {
+        final IndexShard shard = indexService.getShard(shardId.id());
+        ReaderContext readerContext = null;
+        try {
+            Directory directory = shard.store().directory();
             SegmentInfos segmentCommitInfos = SegmentInfos.readCommit(directory, segmentsFileName,
                     IndexVersions.MINIMUM_READONLY_COMPATIBLE.luceneVersion().major);
             IndexCommit indexCommit = Lucene.getIndexCommit(segmentCommitInfos, directory);
             DirectoryReader open = StandardDirectoryReader.open(indexCommit);
-            EngineConfig engineConfig = shard.getEngineOrNull().getEngineConfig();
 
-
-            final Searcher searcher = new Searcher(
-                    "source",
-                    open,
-                    engineConfig.getSimilarity(),
-                    engineConfig.getQueryCache(),
-                    engineConfig.getQueryCachingPolicy(),
-                    () -> {
-                    }
-            );
             String searcherId = ReadOnlyEngine.generateSearcherId(segmentCommitInfos);
             final ShardSearchContextId shardSearchContextId = new ShardSearchContextId(
                     sessionId,
-                    idGenerator.incrementAndGet(),
+                    contextId,
                     searcherId
             );
             SearcherSupplier searchSupplier = new Engine.SearcherSupplier(Function.identity()) {
@@ -1877,15 +1868,37 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
 
                 @Override
                 protected Searcher acquireSearcherInternal(String source) {
-                    return searcher;
+                    EngineConfig engineConfig = shard.getEngineOrNull().getEngineConfig();
+
+                    return new Searcher(
+                            "source",
+                            open,
+                            engineConfig.getSimilarity(),
+                            engineConfig.getQueryCache(),
+                            engineConfig.getQueryCachingPolicy(),
+                            () -> {
+                            }
+                    );
                 }
             };
-            ReaderContext readerContext = new ReaderContext(shardSearchContextId, indexService, shard, searchSupplier, keepAlive, false);
+            readerContext = new ReaderContext(shardSearchContextId, indexService, shard, searchSupplier, keepAlive, false);
+            final ReaderContext finalReaderContext = readerContext;
+            final SearchOperationListener searchOperationListener = shard.getSearchOperationListener();
+            searchOperationListener.onNewReaderContext(finalReaderContext);
+            if (finalReaderContext.scrollContext() != null) {
+                searchOperationListener.onNewScrollContext(finalReaderContext);
+                readerContext.addOnClose(() -> searchOperationListener.onFreeScrollContext(finalReaderContext));
+            }
+            readerContext.addOnClose(() -> searchOperationListener.onFreeReaderContext(finalReaderContext));
+            putReaderContext(finalReaderContext);
+            readerContext = null;
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            // TODO what do we need to close here?
+            // Releasables.close(searchSupplier, readerContext);
         }
     }
-
 
     /**
      * Used to indicate which result object should be instantiated when creating a search context
@@ -2231,5 +2244,28 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                 );
             }
         };
+    }
+
+    public static class ReaderContextId {
+        private final String sessionId;
+        private final long id;
+
+        public ReaderContextId(String sessionId, long id) {
+            this.sessionId = Objects.requireNonNull(sessionId);
+            this.id = id;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ReaderContextId that = (ReaderContextId) o;
+            return id == that.id && sessionId.equals(that.sessionId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(sessionId, id);
+        }
     }
 }

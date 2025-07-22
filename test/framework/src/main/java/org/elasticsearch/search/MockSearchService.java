@@ -110,7 +110,7 @@ public class MockSearchService extends SearchService {
     }
 
     @Override
-    protected ReaderContext removeReaderContext(long id) {
+    protected ReaderContext removeReaderContext(ReaderContextId id) {
         final ReaderContext removed = super.removeReaderContext(id);
         if (removed != null) {
             onRemoveContext.accept(removed);

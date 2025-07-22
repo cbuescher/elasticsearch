@@ -1908,6 +1908,14 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
                             targetNodes.add(perNode.getNode());
                         }
                         if (perNode.getSearchContextId().getSearcherId() != null) {
+                            // TODO I assume this branch is true for frozen indices only
+                            for (ShardRouting shard : shards) {
+                                if (shard.currentNodeId().equals(perNode.getNode()) == false) {
+                                    targetNodes.add(shard.currentNodeId());
+                                }
+                            }
+                        } else {
+                            // need to find the target nodes for the PIT
                             for (ShardRouting shard : shards) {
                                 if (shard.currentNodeId().equals(perNode.getNode()) == false) {
                                     targetNodes.add(shard.currentNodeId());
