@@ -540,7 +540,9 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
 
     protected void putReaderContext(ReaderContext context) {
         final long id = context.id().getId();
+        int size = activeReaders.size();
         final ReaderContext previous = activeReaders.put(id, context);
+        assert size + 1 == activeReaders.size() : "expected size to increase by 1 from " + size + " to " + (size + 1);
         assert previous == null;
         // ensure that if we race against afterIndexRemoved, we remove the context from the active list.
         // this is important to ensure store can be cleaned up, in particular if the search is a scroll with a long timeout.
@@ -552,10 +554,11 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     }
 
     protected ReaderContext removeReaderContext(long id) {
-        if (logger.isTraceEnabled()) {
-            logger.trace("removing reader context [{}]", id);
-        }
-        return activeReaders.remove(id);
+        ReaderContext remove = activeReaders.remove(id);
+//        if (logger.isTraceEnabled()) {
+            logger.info("---> removing reader context [{}]", remove);
+//        }
+        return remove;
     }
 
     @Override
@@ -1251,14 +1254,17 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     }
 
     final ReaderContext createOrGetReaderContext(ShardSearchRequest request) {
-        if (request.readerId() != null) {
+        ShardSearchContextId shardSearchContextId = request.readerId();
+        if (shardSearchContextId != null) {
             try {
-                return findReaderContext(request.readerId(), request);
+                return findReaderContext(shardSearchContextId, request);
             } catch (SearchContextMissingException e) {
-                final String searcherId = request.readerId().getSearcherId();
+                final String searcherId = shardSearchContextId.getSearcherId();
                 if (searcherId == null) {
                     throw e;
                 }
+                System.out.println("--->  searcherId: " + searcherId);
+                // we have a searcher id, we try to re-create the searcher
                 final IndexService indexService = indicesService.indexServiceSafe(request.shardId().getIndex());
                 final IndexShard shard = indexService.getShard(request.shardId().id());
                 final Engine.SearcherSupplier searcherSupplier = shard.acquireSearcherSupplier();
@@ -1266,7 +1272,17 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                     searcherSupplier.close();
                     throw e;
                 }
-                return createAndPutReaderContext(request, indexService, shard, searcherSupplier, defaultKeepAlive);
+                ReaderContext newContext = createAndPutReaderContext(
+                    request,
+                    indexService,
+                    shard,
+                    searcherSupplier,
+                    defaultKeepAlive,
+                    false
+                );
+                System.out.println("---> old context: " + shardSearchContextId);
+                System.out.println("---> created new context: " + newContext.id());
+                return newContext;
             }
         }
         final long keepAliveInMillis = getKeepAlive(request);
@@ -1276,16 +1292,27 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     }
 
     final ReaderContext createAndPutReaderContext(
+            ShardSearchRequest request,
+            IndexService indexService,
+            IndexShard shard,
+            Engine.SearcherSupplier reader,
+            long keepAliveInMillis
+    ) {
+        return createAndPutReaderContext(request, indexService, shard, reader, keepAliveInMillis, true);
+    }
+
+    final ReaderContext createAndPutReaderContext(
         ShardSearchRequest request,
         IndexService indexService,
         IndexShard shard,
         Engine.SearcherSupplier reader,
-        long keepAliveInMillis
+        long keepAliveInMillis,
+        boolean singleSession
     ) {
         ReaderContext readerContext = null;
         Releasable decreaseScrollContexts = null;
         try {
-            final ShardSearchContextId id = new ShardSearchContextId(sessionId, idGenerator.incrementAndGet());
+            final ShardSearchContextId id = new ShardSearchContextId(sessionId, idGenerator.incrementAndGet(), reader.getSearcherId());
             if (request.scroll() != null) {
                 decreaseScrollContexts = openScrollContexts::decrementAndGet;
                 if (openScrollContexts.incrementAndGet() > maxOpenScrollContext) {
@@ -1295,7 +1322,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                 readerContext.addOnClose(decreaseScrollContexts);
                 decreaseScrollContexts = null;
             } else {
-                readerContext = new ReaderContext(id, indexService, shard, reader, keepAliveInMillis, true);
+                readerContext = new ReaderContext(id, indexService, shard, reader, keepAliveInMillis, singleSession);
             }
             reader = null;
             final ReaderContext finalReaderContext = readerContext;
@@ -1460,7 +1487,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
     }
 
     public boolean freeReaderContext(ShardSearchContextId contextId) {
-        logger.trace("freeing reader context [{}]", contextId);
+        logger.info("freeing reader context [{}]", contextId);
         if (sessionId.equals(contextId.getSessionId())) {
             try (ReaderContext context = removeReaderContext(contextId.getId())) {
                 return context != null;
@@ -1821,6 +1848,10 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
      */
     public int getActiveContexts() {
         return this.activeReaders.size();
+    }
+
+    public Map<Long, ReaderContext> getActiveReaders() {
+        return this.activeReaders;
     }
 
     /**

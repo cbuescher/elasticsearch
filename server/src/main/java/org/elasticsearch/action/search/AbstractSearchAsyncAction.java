@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.util.SetOnce;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.ExceptionsHelper;
+import org.elasticsearch.TransportVersion;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.NoShardAvailableActionException;
 import org.elasticsearch.action.OriginalIndices;
@@ -93,6 +94,7 @@ abstract class AbstractSearchAsyncAction<Result extends SearchPhaseResult> exten
     private final Map<String, PendingExecutions> pendingExecutionsPerNode;
     private final AtomicBoolean requestCancelled = new AtomicBoolean();
     private final int skippedCount;
+    private final TransportVersion clusterMinTransportVersion;
 
     // protected for tests
     protected final SubscribableListener<Void> doneFuture = new SubscribableListener<>();
@@ -149,6 +151,7 @@ abstract class AbstractSearchAsyncAction<Result extends SearchPhaseResult> exten
         this.nodeIdToConnection = nodeIdToConnection;
         this.concreteIndexBoosts = concreteIndexBoosts;
         this.clusterStateVersion = clusterState.version();
+        this.clusterMinTransportVersion = clusterState.getMinTransportVersion();
         this.aliasFilter = aliasFilter;
         this.results = resultConsumer;
         // register the release of the query consumer to free up the circuit breaker memory
@@ -608,9 +611,17 @@ abstract class AbstractSearchAsyncAction<Result extends SearchPhaseResult> exten
 
     protected BytesReference buildSearchContextId(ShardSearchFailure[] failures) {
         var source = request.source();
-        return source != null && source.pointInTimeBuilder() != null && source.pointInTimeBuilder().singleSession() == false
-            ? source.pointInTimeBuilder().getEncodedId()
-            : null;
+        BytesReference id = source != null && source.pointInTimeBuilder() != null && source.pointInTimeBuilder()
+                .singleSession() == false
+                ? SearchContextId.encode(results.getAtomicArray().asList(), aliasFilter, clusterMinTransportVersion, failures)
+                : null;
+        System.out.println(
+            "---> build search context id: "
+                + SearchContextId.decode(namedWriteableRegistry, id)
+                + ", using "
+                + results.getAtomicArray().asList()
+        );
+        return id;
     }
 
     /**

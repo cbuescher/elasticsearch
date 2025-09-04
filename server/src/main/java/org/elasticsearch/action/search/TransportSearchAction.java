@@ -1908,6 +1908,9 @@ public class TransportSearchAction extends HandledTransportAction<SearchRequest,
                         if (projectState.cluster().nodes().nodeExists(perNode.getNode())) {
                             targetNodes.add(perNode.getNode());
                         }
+                        if (perNode.getSearchContextId() == null) {
+                            System.out.println("-->  " + perNode.getNode());
+                        }
                         if (perNode.getSearchContextId().getSearcherId() != null) {
                             for (ShardRouting shard : shards) {
                                 if (shard.currentNodeId().equals(perNode.getNode()) == false) {

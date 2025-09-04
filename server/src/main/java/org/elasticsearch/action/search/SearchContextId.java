@@ -57,8 +57,8 @@ public final class SearchContextId {
         return contextIds.contains(contextId);
     }
 
-    public static BytesReference encode(
-        List<SearchPhaseResult> searchPhaseResults,
+    public static <SPR extends SearchPhaseResult> BytesReference encode(
+        List<SPR> searchPhaseResults,
         Map<String, AliasFilter> aliasFilter,
         TransportVersion version,
         ShardSearchFailure[] shardFailures
@@ -141,5 +141,13 @@ public final class SearchContextId {
             }
         }
         return indices.toArray(String[]::new);
+    }
+
+    @Override
+    public String toString() {
+        return "SearchContextId{" +
+                "shards=" + shards +
+                ", aliasFilter=" + aliasFilter +
+                '}';
     }
 }
