@@ -1348,9 +1348,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
         ReaderContext readerContext = null;
         try {
             long newKey = idGenerator.incrementAndGet();
-            // Check that we don't already have a relocation mapping for this context id
-            final Long previous = activeReaders.generateRelocationMapping(contextId, newKey);
-            if (previous == null) {
+            logger.info("Here1");
                 readerContext = new ReaderContext(contextId, indexService, shard, reader, keepAliveInMillis, false);
                 reader = null;
                 final ReaderContext finalReaderContext = readerContext;
@@ -1358,6 +1356,15 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                 searchOperationListener.onNewReaderContext(finalReaderContext);
                 readerContext.addOnClose(() -> searchOperationListener.onFreeReaderContext(finalReaderContext));
                 activeReaders.putRelocatedReader(newKey, readerContext);
+                // Check that we don't already have a relocation mapping for this context id
+                final Long previous = activeReaders.generateRelocationMapping(contextId, newKey);
+                if (previous != null) {
+                    // another thread beat us creating the relocation mapping, clean up the context we just put and reuse the previous mapping
+                    ReaderContext removed = activeReaders.remove(new ShardSearchContextId(sessionId, newKey));
+                    removed.close();
+                    return activeReaders.get(contextId);
+                }
+
                 // ensure that if we race against afterIndexRemoved, we remove the context from the active list.
                 // this is important to ensure store can be cleaned up, in particular if the search is a scroll with a long timeout.
                 final Index index = readerContext.indexShard().shardId().getIndex();
@@ -1367,10 +1374,6 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                 }
                 readerContext = null;
                 return finalReaderContext;
-            } else {
-                // we already have a mapping for this context, dont add a new one and use the existing instead
-                return activeReaders.get(new ShardSearchContextId(sessionId, previous, contextId.getSearcherId()));
-            }
         } finally {
             Releasables.close(reader, readerContext);
         }
@@ -1885,6 +1888,13 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
      */
     public int getActiveContexts() {
         return this.activeReaders.size();
+    }
+
+    /**
+     * Returns the number of relocated context mappings in this SearchService
+     */
+    int getRelocationMapSize() {
+        return this.activeReaders.relocationMapSize();
     }
 
     /**
