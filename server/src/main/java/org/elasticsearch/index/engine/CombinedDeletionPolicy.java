@@ -330,7 +330,13 @@ public class CombinedDeletionPolicy extends ElasticsearchIndexDeletionPolicy {
      * Returns a description for a given {@link IndexCommit}. This should be only used for logging and debugging.
      */
     public static String commitDescription(IndexCommit commit) throws IOException {
-        return String.format(Locale.ROOT, "CommitPoint{segment[%s], userData[%s]}", commit.getSegmentsFileName(), commit.getUserData());
+        return String.format(
+            Locale.ROOT,
+            "CommitPoint{segment[%s], userData[%s], fileNames[%s]}",
+            commit.getSegmentsFileName(),
+            commit.getUserData(),
+            commit.getFileNames()
+        );
     }
 
     /**
