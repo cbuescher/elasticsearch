@@ -1598,8 +1598,10 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                 searchOperationListener.onNewReaderContext(readerContext);
                 readerContext.addOnClose(() -> searchOperationListener.onFreeReaderContext(finalReaderContext));
                 logger.debug(
-                    "Opening new reader context [{}] on node [{}]",
+                    "Opening new reader context [{}] for commit generation [{}], commit [{}] on node [{}]",
                     readerContext.id(),
+                    shard.getLastCommittedSegmentInfos().getGeneration(),
+                    shard.getLastCommittedSegmentInfos(),
                     clusterService.state().nodes().getLocalNode()
                 );
                 putReaderContext(readerContext);

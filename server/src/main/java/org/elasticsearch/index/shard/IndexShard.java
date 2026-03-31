@@ -1749,6 +1749,10 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
         return engine.acquireSearcherSupplier(this::wrapSearcher, scope, splitShardCountSummary);
     }
 
+    public SegmentInfos getLastCommittedSegmentInfos() {
+        return getEngine().getLastCommittedSegmentInfos();
+    }
+
     public Engine.Searcher acquireSearcher(String source) {
         readAllowed();
         markSearcherAccessed();
