@@ -1724,6 +1724,10 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
         return acquireSearcherSupplier(Engine.SearcherScope.EXTERNAL);
     }
 
+    public SegmentInfos getLastCommittedSegmentInfos() {
+        return getEngine().getLastCommittedSegmentInfos();
+    }
+
     /**
      * Acquires a point-in-time reader that can be used to create {@link Engine.Searcher}s on demand.
      * The supplier is aware of shard splits and will filter documents that have been moved to other shards
