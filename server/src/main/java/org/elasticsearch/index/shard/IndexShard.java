@@ -1830,6 +1830,10 @@ public class IndexShard extends AbstractIndexShardComponent implements IndicesCl
         globalCheckPointIfUnpromotable = globalCheckpoint;
     }
 
+    public SegmentInfos getLastCommittedSegmentInfos() {
+        return getEngine().getLastCommittedSegmentInfos();
+    }
+
     private static final class NonClosingReaderWrapper extends FilterDirectoryReader {
 
         private static final LeafReader[] EMPTY_LEAF_READERS = new LeafReader[0];
