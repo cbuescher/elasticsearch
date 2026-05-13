@@ -387,7 +387,7 @@ public class PITRelocationQATests extends ESTestCase {
                     // check that at some point the PIT ID was updated (which means that the search was redirected to a different node after
                     // relocation)
                     if (threadPitId != null && threadPitId.get().equals(updatedPitId) == false) {
-                        logger.info("---> PIT ID updated from {} to {}", pitId, threadPitId);
+                        logger.info("---> PIT ID updated from {} to {}", pitId, updatedPitId);
                         pitIdUpdated.set(true);
                     }
                     threadPitId.set(updatedPitId);
