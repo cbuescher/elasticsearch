@@ -11,6 +11,7 @@ package org.elasticsearch.action.search;
 
 import org.elasticsearch.TransportVersion;
 import org.elasticsearch.action.NoShardAvailableActionException;
+import org.elasticsearch.common.bytes.BytesArray;
 import org.elasticsearch.common.bytes.BytesReference;
 import org.elasticsearch.common.io.stream.NamedWriteableRegistry;
 import org.elasticsearch.common.util.concurrent.AtomicArray;
@@ -22,9 +23,11 @@ import org.elasticsearch.index.shard.ShardId;
 import org.elasticsearch.search.SearchPhaseResult;
 import org.elasticsearch.search.SearchShardTarget;
 import org.elasticsearch.search.internal.AliasFilter;
+import org.elasticsearch.search.internal.ShardSearchContextId;
 import org.elasticsearch.test.ESTestCase;
 import org.elasticsearch.test.TransportVersionUtils;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -139,6 +142,30 @@ public class SearchContextIdTests extends ESTestCase {
         assertThat(indices[0], equalTo("cluster_x:idx"));
         assertThat(indices[1], equalTo("cluster_y:idy"));
         assertThat(indices[2], equalTo("idy"));
+    }
+
+    public void testEndodeDecodeWithNullShardSearchContextId() {
+        Map<ShardId, SearchContextIdForNode> shards = new HashMap<>();
+        shards.put(
+            new ShardId("idx", "uuid1", 0),
+            new SearchContextIdForNode("cluster_x", "node_1", new ShardSearchContextId("sessionId", 1, "searcherId"))
+        );
+        shards.put(new ShardId("idx", "uuid1", 1), new SearchContextIdForNode("cluster_x", "node_1", null));
+        SearchContextId original = new SearchContextId(shards, Collections.emptyMap());
+        BytesReference pointInTimeId = SearchContextId.encode(
+            original.shards(),
+            original.aliasFilter(),
+            TransportVersion.current(),
+            ShardSearchFailure.EMPTY_ARRAY
+        );
+        String originalBase64Id = Base64.getUrlEncoder().encodeToString(BytesReference.toBytes(pointInTimeId));
+        System.out.println("original: " + originalBase64Id);
+        BytesReference reDecoded = new BytesArray(Base64.getUrlDecoder().decode(originalBase64Id));
+        SearchContextId decoded = SearchContextId.decode(new NamedWriteableRegistry(Collections.emptyList()), reDecoded);
+        assertThat(decoded.shards().size(), equalTo(2));
+        assertThat(decoded.shards().get(new ShardId("idx", "uuid1", 0)).getSearchContextId().getSearcherId(), equalTo("searcherId"));
+        assertThat(decoded.shards().get(new ShardId("idx", "uuid1", 1)).getSearchContextId(), equalTo(null));
+        assertEquals(original, decoded);
     }
 
     public void testDecodingWithUnknownTransportIdThrows() {
