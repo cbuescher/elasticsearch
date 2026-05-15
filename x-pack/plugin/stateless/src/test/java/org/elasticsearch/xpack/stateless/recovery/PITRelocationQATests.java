@@ -207,10 +207,7 @@ public class PITRelocationQATests extends ESTestCase {
                 String responseBody = EntityUtils.toString(response.getEntity());
                 System.out.println("---> initial GET /\n" + responseBody);
                 // use existing index, e.g. one filled with data from rally
-
-                // on d61bbf804ced451586888a6bb9f2f351c8c9b
-                // String indexName = "gradle-tasks";
-                String indexName = "nyc_taxis";
+                String indexName = "gradle-tasks";
 
                 boolean enablePITRelocation = true;
                 // configureDebugSettings(client, enablePITRelocation);
@@ -425,49 +422,35 @@ public class PITRelocationQATests extends ESTestCase {
         Request searchRequest;
         if (pitId != null) {
             searchRequest = new Request("POST", "/_search");
-            // on d61bbf804ced451586888a6bb9f2f351c8c9b
-//            searchRequest.setJsonEntity("""
-//                {
-//                    "pit": {
-//                        "id": "%s"
-//                    },
-//                    "track_total_hits": true,
-//                          "query": {
-//                              "range": {
-//                                "finished": {
-//                                  "gte": "2026-05-12T00:00:00.000Z"
-//                                }
-//                              }
-//                          }
-//                }
-//                """.formatted(pitId));
             searchRequest.setJsonEntity("""
                 {
                     "pit": {
                         "id": "%s"
                     },
-                    "track_total_hits": true
+                    "track_total_hits": true,
+                          "query": {
+                              "range": {
+                                "finished": {
+                                  "gte": "2026-05-12T00:00:00.000Z"
+                                }
+                              }
+                          }
                 }
                 """.formatted(pitId));
         } else {
             searchRequest = new Request("POST", "/" + indexName + "/_search");
-//            searchRequest.setJsonEntity("""
-//                {
-//                    "track_total_hits": true,
-//                    "query": {
-//                              "range": {
-//                                "finished": {
-//                                  "gte": "2026-05-12T00:00:00.000Z"
-//                                }
-//                              }
-//                          }
-//                }
-//                """);
             searchRequest.setJsonEntity("""
                 {
-                    "track_total_hits": true
+                    "track_total_hits": true,
+                    "query": {
+                              "range": {
+                                "finished": {
+                                  "gte": "2026-05-12T00:00:00.000Z"
+                                }
+                              }
+                          }
                 }
-                """.formatted(pitId));
+                """);
         }
         Response response = client.performRequest(searchRequest);
         Map<String, Object> stringObjectMap = entityAsMap(response.getEntity());
@@ -478,27 +461,19 @@ public class PITRelocationQATests extends ESTestCase {
         assert pitId != null;
         Request searchRequest = new Request("POST", "/_search");
         searchRequest.addParameter("allow_partial_search_results", "false");
-//        searchRequest.setJsonEntity("""
-//            {
-//                "pit": {
-//                    "id": "%s"
-//                },
-//                "track_total_hits": true,
-//                "query": {
-//                              "range": {
-//                                "finished": {
-//                                  "gte": "2026-05-12T00:00:00.000Z"
-//                                }
-//                              }
-//                          }
-//            }
-//            """.formatted(pitId));
         searchRequest.setJsonEntity("""
             {
                 "pit": {
                     "id": "%s"
                 },
-                "track_total_hits": true
+                "track_total_hits": true,
+                "query": {
+                              "range": {
+                                "finished": {
+                                  "gte": "2026-05-12T00:00:00.000Z"
+                                }
+                              }
+                          }
             }
             """.formatted(pitId));
         Response response = client.performRequest(searchRequest);
