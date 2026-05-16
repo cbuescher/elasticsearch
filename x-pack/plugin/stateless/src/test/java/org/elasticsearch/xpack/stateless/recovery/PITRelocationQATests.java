@@ -392,7 +392,7 @@ public class PITRelocationQATests extends ESTestCase {
                     }
                     threadPitId.set(updatedPitId);
                     searches.incrementAndGet();
-                    if (searches.get() % 500 == 0) {
+                    if (searches.get() % 100 == 0) {
                         System.out.println("---> PIT search iterations: " + searches);
                     }
                 } catch (Throwable e) {

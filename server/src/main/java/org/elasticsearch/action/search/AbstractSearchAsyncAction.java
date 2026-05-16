@@ -676,10 +676,20 @@ abstract class AbstractSearchAsyncAction<Result extends SearchPhaseResult> exten
                         updatedShardMap = new HashMap<>(original.shards());
                         contextsToClose = new ArrayList<>();
                     }
+                    if (result.getContextId() == null) {
+                        logger.info(
+                            "--->  we shouldnt get here, but result is targeting "
+                                + result.getSearchShardTarget()
+                                + ", "
+                                + result.getContextId()
+                                + ", "
+                                + result.getClass()
+                        );
+                    }
                     SearchContextIdForNode updatedId = new SearchContextIdForNode(
                         searchShardTarget.getClusterAlias(),
                         searchShardTarget.getNodeId(),
-                        result.getContextId()
+                        originalShard.getSearchContextId()
                     );
 
                     logger.debug("changing node for PIT shard id from [{}] to [{}]", originalShard, updatedId);
