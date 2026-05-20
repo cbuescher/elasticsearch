@@ -21,7 +21,9 @@ import org.elasticsearch.test.rest.ObjectPath;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -279,6 +281,152 @@ public class PITRelocationQATests extends ESTestCase {
                 // resetDebugSettings(client);
             }
         }
+    }
+
+    public void testPITNoNPE() throws IOException, InterruptedException {
+        try (RestClient client = buildRestClient()) {
+            AtomicReference<String> pitIdRef = null;
+            try {
+                Response response = client.performRequest(new Request("GET", "/"));
+                String responseBody = EntityUtils.toString(response.getEntity());
+                System.out.println("---> initial GET /\n" + responseBody);
+                String indexName = "testindex";
+
+                String[] indexNames = { "index1", "index2", "index3", "index4", "index5" };
+                dateIndexSetup(client, indexNames);
+                indexTestDataDatefield(client, indexNames);
+
+                boolean enablePITRelocation = true;
+                configureDebugSettings(client, enablePITRelocation);
+
+                Thread mainThread = Thread.currentThread();
+                AtomicReference<Boolean> pitSearchRunning = new AtomicReference<>(true);
+
+                String pitId = openPITAndReturnId(client, indexName);
+                pitIdRef = new AtomicReference<>(pitId);
+
+                int expectedDocs = getDocCount(client, indexName, pitId);
+                logger.info("---> PIT {} has {} docs", pitId, expectedDocs);
+
+                AtomicInteger searches = new AtomicInteger(0);
+                AtomicBoolean pitIdUpdated = new AtomicBoolean(false);
+
+
+                Thread pitSearchThread = createPITSearchThread(
+                    client,
+                    indexName,
+                    pitIdRef,
+                    expectedDocs,
+                    mainThread,
+                    pitSearchRunning,
+                    searches,
+                    pitIdUpdated
+                );
+                pitSearchThread.start();
+
+                System.out.println("-----------> Please manually trigger a rolling restart <----------->");
+                Scanner scanner = new Scanner(System.in);
+                System.out.println("Press SPACE and then ENTER to continue...");
+                String input = scanner.nextLine();
+                while (!input.contains(" ")) {
+                    System.out.println("Press SPACE and then ENTER to continue...");
+                    input = scanner.nextLine();
+                }
+
+                System.out.println("---> Done");
+                pitSearchRunning.set(false);
+                pitSearchThread.join();
+                if (enablePITRelocation) {
+                    assertThat(
+                        "PIT id wasn't updated. This indicates no PIT relocation took place. Please check you started a rolling-restart "
+                            + "and did the original search node terminate before the test ended?",
+                        pitIdUpdated.get(),
+                        equalTo(true)
+                    );
+                }
+
+            } finally {
+                tryClosePITs(client, List.of(new PitWithExpectedDocs(pitIdRef, 0)));
+                resetDebugSettings(client);
+            }
+        }
+    }
+
+    private void indexTestDataDatefield(RestClient client, String[] indexNames) throws IOException {
+
+        for (int i = 0; i < 5; i++) {
+            final int month = i + 1;
+            StringBuilder bulkBody = new StringBuilder();
+            for (int j = 0; j < 500; j++) {
+                String date = String.format(
+                    Locale.ROOT,
+                    "2025-%02d-%02dT%02d:%02d:%02d.000Z",
+                    month,
+                    // use 28 as maximum days in month since thats also true for February dates
+                    randomIntBetween(1, 28),
+                    randomIntBetween(0, 23),
+                    randomIntBetween(0, 59),
+                    randomIntBetween(0, 59)
+                );
+                bulkBody.append("{\"index\":{\"_index\":\"").append(indexNames[i]).append("\"}}\n");
+                bulkBody.append("{\"finished\":\"").append(date).append("\"}\n");
+            }
+            Request bulkRequest = new Request("POST", "/_bulk");
+            bulkRequest.setJsonEntity(bulkBody.toString());
+            Response response = client.performRequest(bulkRequest);
+            assertEquals(200, response.getStatusLine().getStatusCode());
+
+            Map<String, Object> responseMap = entityAsMap(response.getEntity());
+            Boolean errors = (Boolean) responseMap.get("errors");
+            if (errors != null && errors) {
+                throw new AssertionError("Bulk request had failures");
+            }
+        }
+
+        // Flush and refresh all indices
+        for (String indexName : indexNames) {
+            Request refreshRequest = new Request("POST", "/" + indexName + "/_refresh");
+            client.performRequest(refreshRequest);
+        }
+    }
+
+    private void dateIndexSetup(RestClient client, String[] indexNames) throws IOException, InterruptedException {
+        for (int i = 0; i < 5; i++) {
+            Request createIndexRequest = new Request("PUT", "/" + indexNames[i]);
+            createIndexRequest.setJsonEntity("""
+                {
+                    "settings": {
+                        "index": {
+                            "number_of_shards": 6,
+                            "number_of_replicas": 1
+                        }
+                    },
+                    "mappings": {
+                        "properties": {
+                            "finished": {
+                                "type": "date"
+                            }
+                        }
+                    }
+                }
+                """);
+            Response response = client.performRequest(createIndexRequest);
+            System.out.println("---> PUT /" + indexNames[i] + " response code: " + response.getStatusLine().getStatusCode());
+            assertEquals(200, response.getStatusLine().getStatusCode());
+        }
+
+        // Wait for green status on all indices
+        for (String indexName : indexNames) {
+            waitForGreenStatus(client, indexName);
+        }
+    }
+
+    private void waitForGreenStatus(RestClient client, String indexName) throws IOException {
+        Request healthRequest = new Request("GET", "/_cluster/health/" + indexName);
+        healthRequest.addParameter("wait_for_status", "green");
+        healthRequest.addParameter("timeout", "30s");
+        Response response = client.performRequest(healthRequest);
+        System.out.println("---> Cluster health for " + indexName + ": " + response.getStatusLine().getStatusCode());
     }
 
     private void tryClosePITs(RestClient client, List<PitWithExpectedDocs> pitsWithExpectedDocs) {
