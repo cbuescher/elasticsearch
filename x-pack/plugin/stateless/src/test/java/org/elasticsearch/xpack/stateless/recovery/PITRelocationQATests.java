@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -144,7 +143,6 @@ public class PITRelocationQATests extends ESTestCase {
                 for (PitWithExpectedDocs pit : pitsWithExpectedDocs) {
                     Thread pitSearchThread = createPITSearchThread(
                         client,
-                        indexName,
                         pit.pitId(),
                         pit.expectedDocs(),
                         mainThread,
@@ -238,7 +236,6 @@ public class PITRelocationQATests extends ESTestCase {
                 for (PitWithExpectedDocs pit : pitsWithExpectedDocs) {
                     Thread pitSearchThread = createPITSearchThread(
                         client,
-                        indexName,
                         pit.pitId(),
                         pit.expectedDocs(),
                         mainThread,
@@ -290,9 +287,13 @@ public class PITRelocationQATests extends ESTestCase {
                 Response response = client.performRequest(new Request("GET", "/"));
                 String responseBody = EntityUtils.toString(response.getEntity());
                 System.out.println("---> initial GET /\n" + responseBody);
-                String indexName = "testindex";
 
                 String[] indexNames = { "index1", "index2", "index3", "index4", "index5" };
+                try {
+                    response = client.performRequest(new Request("DELETE", "/" + String.join(",", indexNames) ));
+                    System.out.println("---> DELETE /" + String.join(",", indexNames) + " response code: " + response.getStatusLine().getStatusCode());
+                } catch (Exception e) {}
+
                 dateIndexSetup(client, indexNames);
                 indexTestDataDatefield(client, indexNames);
 
@@ -302,11 +303,16 @@ public class PITRelocationQATests extends ESTestCase {
                 Thread mainThread = Thread.currentThread();
                 AtomicReference<Boolean> pitSearchRunning = new AtomicReference<>(true);
 
-                String pitId = openPITAndReturnId(client, indexName);
+                String pitId = openPITAndReturnId(client, String.join(",",indexNames));
                 pitIdRef = new AtomicReference<>(pitId);
 
-                int expectedDocs = getDocCount(client, indexName, pitId);
+
+
+                int expectedDocs = getDocCount(client, String.join(",",indexNames), pitId);
                 logger.info("---> PIT {} has {} docs", pitId, expectedDocs);
+
+                // index more docs
+                indexTestDataDatefield(client, indexNames);
 
                 AtomicInteger searches = new AtomicInteger(0);
                 AtomicBoolean pitIdUpdated = new AtomicBoolean(false);
@@ -314,7 +320,6 @@ public class PITRelocationQATests extends ESTestCase {
 
                 Thread pitSearchThread = createPITSearchThread(
                     client,
-                    indexName,
                     pitIdRef,
                     expectedDocs,
                     mainThread,
@@ -325,12 +330,10 @@ public class PITRelocationQATests extends ESTestCase {
                 pitSearchThread.start();
 
                 System.out.println("-----------> Please manually trigger a rolling restart <----------->");
-                Scanner scanner = new Scanner(System.in);
-                System.out.println("Press SPACE and then ENTER to continue...");
-                String input = scanner.nextLine();
-                while (!input.contains(" ")) {
-                    System.out.println("Press SPACE and then ENTER to continue...");
-                    input = scanner.nextLine();
+                try {
+                    Thread.sleep(TimeUnit.MINUTES.toMillis(4));
+                } catch (InterruptedException e) {
+                    System.out.println("---> Main thread interrupted by worker thread exception");
                 }
 
                 System.out.println("---> Done");
@@ -345,6 +348,9 @@ public class PITRelocationQATests extends ESTestCase {
                     );
                 }
 
+            } catch (Exception e) {
+                logger.error("Exception while running test", e);
+                throw e;
             } finally {
                 tryClosePITs(client, List.of(new PitWithExpectedDocs(pitIdRef, 0)));
                 resetDebugSettings(client);
@@ -488,8 +494,8 @@ public class PITRelocationQATests extends ESTestCase {
                     "logger.org.elasticsearch.xpack.stateless.recovery.TransportStatelessUnpromotableRelocationAction": "DEBUG",
                     "logger.org.elasticsearch.search.SearchService" : "DEBUG",
                     "logger.org.elasticsearch.action.search" : "DEBUG",
-                    "logger.org.elasticsearch.xpack.stateless.recovery" : "DEBUG",
-                    "search.pit_relocation_enabled" : %s
+                    "logger.org.elasticsearch.xpack.stateless.recovery" : "DEBUG"
+                    // "search.pit_relocation_enabled" : %s
                 }
             }
             """.formatted(enablePITRelocation));
@@ -518,7 +524,6 @@ public class PITRelocationQATests extends ESTestCase {
 
     private Thread createPITSearchThread(
         RestClient client,
-        String indexName,
         AtomicReference<String> pitId,
         int expectedPITDocs,
         Thread mainThread,
@@ -527,18 +532,17 @@ public class PITRelocationQATests extends ESTestCase {
         AtomicBoolean pitIdUpdated
     ) {
         return new Thread(() -> {
-            AtomicReference<String> threadPitId = pitId;
 
             while (pitSearchRunning.get()) {
                 try {
-                    String updatedPitId = searchAndAssertDocs(client, indexName, expectedPITDocs, threadPitId.get());
+                    String updatedPitId = searchAndAssertDocs(client, expectedPITDocs, pitId.get());
                     // check that at some point the PIT ID was updated (which means that the search was redirected to a different node after
                     // relocation)
-                    if (threadPitId != null && threadPitId.get().equals(updatedPitId) == false) {
+                    if (pitId != null && pitId.get().equals(updatedPitId) == false) {
                         logger.info("---> PIT ID updated from {} to {}", pitId, updatedPitId);
                         pitIdUpdated.set(true);
                     }
-                    threadPitId.set(updatedPitId);
+                    pitId.set(updatedPitId);
                     searches.incrementAndGet();
                     if (searches.get() % 100 == 0) {
                         System.out.println("---> PIT search iterations: " + searches);
@@ -605,7 +609,7 @@ public class PITRelocationQATests extends ESTestCase {
         return ((Number) ObjectPath.evaluate(stringObjectMap, "hits.total.value")).intValue();
     }
 
-    private String searchAndAssertDocs(RestClient client, String index, int numdocs, String pitId) throws IOException {
+    private String searchAndAssertDocs(RestClient client, int numdocs, String pitId) throws IOException {
         assert pitId != null;
         Request searchRequest = new Request("POST", "/_search");
         searchRequest.addParameter("allow_partial_search_results", "false");
