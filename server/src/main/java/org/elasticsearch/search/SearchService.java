@@ -843,10 +843,7 @@ public class SearchService extends AbstractLifecycleComponent implements IndexEv
                     CanMatchContext canMatchContext = createCanMatchContext(clone);
                     CanMatchShardResponse canMatchResp = canMatch(canMatchContext, false);
                     if (canMatchResp.canMatch() == false) {
-                        logger.info(
-                            "---> canReturnNullResponseIfMatchNoDocs: returning nullInstance for shard [{}]",
-                            orig.shardId()
-                        );
+                        logger.info("---> canReturnNullResponseIfMatchNoDocs: returning nullInstance for shard [{}]", orig.shardId());
                         l.onResponse(QuerySearchResult.nullInstance());
                         return;
                     }

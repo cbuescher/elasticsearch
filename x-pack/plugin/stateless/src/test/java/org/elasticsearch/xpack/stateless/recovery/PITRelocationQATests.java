@@ -290,8 +290,10 @@ public class PITRelocationQATests extends ESTestCase {
 
                 String[] indexNames = { "index1", "index2", "index3", "index4", "index5" };
                 try {
-                    response = client.performRequest(new Request("DELETE", "/" + String.join(",", indexNames) ));
-                    System.out.println("---> DELETE /" + String.join(",", indexNames) + " response code: " + response.getStatusLine().getStatusCode());
+                    response = client.performRequest(new Request("DELETE", "/" + String.join(",", indexNames)));
+                    System.out.println(
+                        "---> DELETE /" + String.join(",", indexNames) + " response code: " + response.getStatusLine().getStatusCode()
+                    );
                 } catch (Exception e) {}
 
                 dateIndexSetup(client, indexNames);
@@ -303,12 +305,10 @@ public class PITRelocationQATests extends ESTestCase {
                 Thread mainThread = Thread.currentThread();
                 AtomicReference<Boolean> pitSearchRunning = new AtomicReference<>(true);
 
-                String pitId = openPITAndReturnId(client, String.join(",",indexNames));
+                String pitId = openPITAndReturnId(client, String.join(",", indexNames));
                 pitIdRef = new AtomicReference<>(pitId);
 
-
-
-                int expectedDocs = getDocCount(client, String.join(",",indexNames), pitId);
+                int expectedDocs = getDocCount(client, String.join(",", indexNames), pitId);
                 logger.info("---> PIT {} has {} docs", pitId, expectedDocs);
 
                 // index more docs
@@ -316,7 +316,6 @@ public class PITRelocationQATests extends ESTestCase {
 
                 AtomicInteger searches = new AtomicInteger(0);
                 AtomicBoolean pitIdUpdated = new AtomicBoolean(false);
-
 
                 Thread pitSearchThread = createPITSearchThread(
                     client,

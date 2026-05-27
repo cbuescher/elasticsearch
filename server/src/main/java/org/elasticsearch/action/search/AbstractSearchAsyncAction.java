@@ -698,7 +698,7 @@ abstract class AbstractSearchAsyncAction<Result extends SearchPhaseResult> exten
                         searchShardTarget.getShardId(),
                         originalShard,
                         updatedId
-                     );
+                    );
                     updatedShardMap.put(shardId, updatedId);
                     contextsToClose.add(original.shards().get(shardId));
 
