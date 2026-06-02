@@ -71,7 +71,7 @@ public class PITRelocationQATests extends ESTestCase {
                 System.out.println("---> PUT /tests-pit-relocation response code: " + response.getStatusLine().getStatusCode());
 
                 boolean enablePITRelocation = true;
-                // configureDebugSettings(client, enablePITRelocation);
+                configureDebugSettings(client, enablePITRelocation);
 
                 Thread mainThread = Thread.currentThread();
                 AtomicReference<Boolean> pitSearchRunning = new AtomicReference<>(true);
@@ -119,8 +119,12 @@ public class PITRelocationQATests extends ESTestCase {
                     }
                 });
                 bulkIndexThread.start();
-
-                waitForDocCount(client, indexName, 1000);
+                String query = """
+                    "query": {
+                              "match_all": {}
+                          }
+                    """;
+                waitForDocCount(client, indexName, 1000, query);
 
                 List<String> pitIds = new ArrayList<>();
                 for (int i = 0; i < 10; i++) {
@@ -131,7 +135,7 @@ public class PITRelocationQATests extends ESTestCase {
                 }
 
                 for (String pitId : pitIds) {
-                    int expectedDocs = getDocCount(client, indexName, pitId);
+                    int expectedDocs = getDocCount(client, indexName, pitId, query);
                     pitsWithExpectedDocs.add(new PitWithExpectedDocs(new AtomicReference<>(pitId), expectedDocs));
                     logger.info("---> PIT {} has {} docs", pitId, expectedDocs);
                 }
@@ -148,7 +152,8 @@ public class PITRelocationQATests extends ESTestCase {
                         mainThread,
                         pitSearchRunning,
                         searches,
-                        pitIdUpdated
+                        pitIdUpdated,
+                        query
                     );
                     pitSearchThreads.add(pitSearchThread);
                     pitSearchThread.start();
@@ -185,7 +190,7 @@ public class PITRelocationQATests extends ESTestCase {
 
             } finally {
                 tryClosePITs(client, pitsWithExpectedDocs);
-                // resetDebugSettings(client);
+                resetDebugSettings(client);
             }
         }
     }
@@ -208,6 +213,15 @@ public class PITRelocationQATests extends ESTestCase {
                 System.out.println("---> initial GET /\n" + responseBody);
                 // use existing index, e.g. one filled with data from rally
                 String indexName = "gradle-tasks";
+                String query = """
+                                    "query": {
+                                                  "range": {
+                                                    "finished": {
+                                                      "gte": "2026-05-22T00:00:00.000Z"
+                                                    }
+                                                  }
+                                              }
+                    """;
 
                 boolean enablePITRelocation = true;
                 // configureDebugSettings(client, enablePITRelocation);
@@ -224,7 +238,7 @@ public class PITRelocationQATests extends ESTestCase {
                 }
 
                 for (String pitId : pitIds) {
-                    int expectedDocs = getDocCount(client, indexName, pitId);
+                    int expectedDocs = getDocCount(client, indexName, pitId, query);
                     pitsWithExpectedDocs.add(new PitWithExpectedDocs(new AtomicReference<>(pitId), expectedDocs));
                     logger.info("---> PIT {} has {} docs", pitId, expectedDocs);
                 }
@@ -241,7 +255,8 @@ public class PITRelocationQATests extends ESTestCase {
                         mainThread,
                         pitSearchRunning,
                         searches,
-                        pitIdUpdated
+                        pitIdUpdated,
+                        query
                     );
                     pitSearchThreads.add(pitSearchThread);
                     pitSearchThread.start();
@@ -307,8 +322,17 @@ public class PITRelocationQATests extends ESTestCase {
 
                 String pitId = openPITAndReturnId(client, String.join(",", indexNames));
                 pitIdRef = new AtomicReference<>(pitId);
+                String query = """
+                                    "query": {
+                                                  "range": {
+                                                    "finished": {
+                                                      "gte": "2026-05-22T00:00:00.000Z"
+                                                    }
+                                                  }
+                                              }
+                    """;
 
-                int expectedDocs = getDocCount(client, String.join(",", indexNames), pitId);
+                int expectedDocs = getDocCount(client, String.join(",", indexNames), pitId, query);
                 logger.info("---> PIT {} has {} docs", pitId, expectedDocs);
 
                 // index more docs
@@ -324,7 +348,8 @@ public class PITRelocationQATests extends ESTestCase {
                     mainThread,
                     pitSearchRunning,
                     searches,
-                    pitIdUpdated
+                    pitIdUpdated,
+                    query
                 );
                 pitSearchThread.start();
 
@@ -528,13 +553,14 @@ public class PITRelocationQATests extends ESTestCase {
         Thread mainThread,
         AtomicReference<Boolean> pitSearchRunning,
         AtomicInteger searches,
-        AtomicBoolean pitIdUpdated
+        AtomicBoolean pitIdUpdated,
+        String query
     ) {
         return new Thread(() -> {
 
             while (pitSearchRunning.get()) {
                 try {
-                    String updatedPitId = searchAndAssertDocs(client, expectedPITDocs, pitId.get());
+                    String updatedPitId = searchAndAssertDocs(client, expectedPITDocs, pitId.get(), query);
                     // check that at some point the PIT ID was updated (which means that the search was redirected to a different node after
                     // relocation)
                     if (pitId != null && pitId.get().equals(updatedPitId) == false) {
@@ -558,9 +584,9 @@ public class PITRelocationQATests extends ESTestCase {
         });
     }
 
-    private void waitForDocCount(RestClient client, String indexName, int minDocs) throws InterruptedException, IOException {
+    private void waitForDocCount(RestClient client, String indexName, int minDocs, String query) throws InterruptedException, IOException {
         while (true) {
-            int count = getDocCount(client, indexName, null);
+            int count = getDocCount(client, indexName, null, query);
             if (count >= minDocs) {
                 System.out.println("---> Index has " + count + " documents (>= " + minDocs + ")");
                 return;
@@ -569,7 +595,7 @@ public class PITRelocationQATests extends ESTestCase {
         }
     }
 
-    private int getDocCount(RestClient client, String indexName, String pitId) throws IOException {
+    private int getDocCount(RestClient client, String indexName, String pitId, String query) throws IOException {
         Request searchRequest;
         if (pitId != null) {
             searchRequest = new Request("POST", "/_search");
@@ -579,36 +605,24 @@ public class PITRelocationQATests extends ESTestCase {
                         "id": "%s"
                     },
                     "track_total_hits": true,
-                          "query": {
-                              "range": {
-                                "finished": {
-                                  "gte": "2026-05-22T00:00:00.000Z"
-                                }
-                              }
-                          }
+                          %s
                 }
-                """.formatted(pitId));
+                """.formatted(pitId, query));
         } else {
             searchRequest = new Request("POST", "/" + indexName + "/_search");
             searchRequest.setJsonEntity("""
                 {
                     "track_total_hits": true,
-                    "query": {
-                              "range": {
-                                "finished": {
-                                  "gte": "2026-05-22T00:00:00.000Z"
-                                }
-                              }
-                          }
+                    %s
                 }
-                """);
+                """.formatted(query));
         }
         Response response = client.performRequest(searchRequest);
         Map<String, Object> stringObjectMap = entityAsMap(response.getEntity());
         return ((Number) ObjectPath.evaluate(stringObjectMap, "hits.total.value")).intValue();
     }
 
-    private String searchAndAssertDocs(RestClient client, int numdocs, String pitId) throws IOException {
+    private String searchAndAssertDocs(RestClient client, int numdocs, String pitId, String query) throws IOException {
         assert pitId != null;
         Request searchRequest = new Request("POST", "/_search");
         searchRequest.addParameter("allow_partial_search_results", "false");
@@ -618,15 +632,9 @@ public class PITRelocationQATests extends ESTestCase {
                     "id": "%s"
                 },
                 "track_total_hits": true,
-                "query": {
-                              "range": {
-                                "finished": {
-                                  "gte": "2026-05-22T00:00:00.000Z"
-                                }
-                              }
-                          }
+                %s
             }
-            """.formatted(pitId));
+            """.formatted(pitId, query));
         Response response = client.performRequest(searchRequest);
         Map<String, Object> stringObjectMap = entityAsMap(response.getEntity());
         assertThat(ObjectPath.evaluate(stringObjectMap, "hits.total.value"), equalTo(numdocs));
