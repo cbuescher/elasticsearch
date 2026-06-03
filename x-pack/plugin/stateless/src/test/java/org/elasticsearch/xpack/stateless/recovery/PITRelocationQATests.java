@@ -66,12 +66,12 @@ public class PITRelocationQATests extends ESTestCase {
                     System.out.println("---> DELETE /" + indexName + " response code: " + response.getStatusLine().getStatusCode());
                 } catch (Exception e) {}
 
+                boolean enablePITRelocation = true;
+                configureDebugSettings(client, enablePITRelocation);
+
                 Request createIndexRequest = new Request("PUT", "/" + indexName);
                 response = client.performRequest(createIndexRequest);
                 System.out.println("---> PUT /tests-pit-relocation response code: " + response.getStatusLine().getStatusCode());
-
-                boolean enablePITRelocation = true;
-                configureDebugSettings(client, enablePITRelocation);
 
                 Thread mainThread = Thread.currentThread();
                 AtomicReference<Boolean> pitSearchRunning = new AtomicReference<>(true);
