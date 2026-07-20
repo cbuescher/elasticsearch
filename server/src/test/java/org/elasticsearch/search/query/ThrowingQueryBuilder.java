@@ -31,6 +31,13 @@ public class ThrowingQueryBuilder extends LeafQueryBuilder<ThrowingQueryBuilder>
     private final RuntimeException failure;
     private final int shardId;
     private final String index;
+    /**
+     * Optional delay (in ms) applied to non-failing shards in {@link #doToQuery}. Use this in tests to slow down healthy shards so that
+     * task-cancellation races become deterministic. Set to 0 (the default) to disable.
+     *
+     * REVERT NOTE: this field and all references to it can be removed once the race-condition tests that rely on it are fixed/removed.
+     */
+    private final long delayMs;
 
     /**
      * Creates a {@link ThrowingQueryBuilder} with the provided <code>randomUID</code>.
@@ -40,11 +47,24 @@ public class ThrowingQueryBuilder extends LeafQueryBuilder<ThrowingQueryBuilder>
      * @param shardId what shardId to throw the exception. If shardId is less than 0, it will throw for all shards.
      */
     public ThrowingQueryBuilder(long randomUID, RuntimeException failure, int shardId) {
+        this(randomUID, failure, shardId, 0L);
+    }
+
+    /**
+     * Creates a {@link ThrowingQueryBuilder} with the provided <code>randomUID</code>.
+     *
+     * @param randomUID used solely for identification
+     * @param failure what exception to throw
+     * @param shardId what shardId to throw the exception. If shardId is less than 0, it will throw for all shards.
+     * @param delayMs milliseconds to sleep on non-failing shards before returning the weight; use to force cancellation races in tests.
+     */
+    public ThrowingQueryBuilder(long randomUID, RuntimeException failure, int shardId, long delayMs) {
         super();
         this.randomUID = randomUID;
         this.failure = failure;
         this.shardId = shardId;
         this.index = null;
+        this.delayMs = delayMs;
     }
 
     /**
@@ -60,6 +80,7 @@ public class ThrowingQueryBuilder extends LeafQueryBuilder<ThrowingQueryBuilder>
         this.failure = failure;
         this.shardId = Integer.MAX_VALUE;
         this.index = index;
+        this.delayMs = 0L;
     }
 
     public ThrowingQueryBuilder(StreamInput in) throws IOException {
@@ -68,6 +89,7 @@ public class ThrowingQueryBuilder extends LeafQueryBuilder<ThrowingQueryBuilder>
         this.failure = in.readException();
         this.shardId = in.readVInt();
         this.index = in.readOptionalString();
+        this.delayMs = in.readVLong();
     }
 
     @Override
@@ -76,6 +98,7 @@ public class ThrowingQueryBuilder extends LeafQueryBuilder<ThrowingQueryBuilder>
         out.writeException(failure);
         out.writeVInt(shardId);
         out.writeOptionalString(index);
+        out.writeVLong(delayMs);
     }
 
     @Override
@@ -92,6 +115,13 @@ public class ThrowingQueryBuilder extends LeafQueryBuilder<ThrowingQueryBuilder>
             public Weight createWeight(IndexSearcher searcher, ScoreMode scoreMode, float boost) throws IOException {
                 if (context.getShardId() == shardId || shardId < 0 || context.index().getName().equals(index)) {
                     throw failure;
+                }
+                if (delayMs > 0) {
+                    try {
+                        Thread.sleep(delayMs);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
                 return delegate.createWeight(searcher, scoreMode, boost);
             }
