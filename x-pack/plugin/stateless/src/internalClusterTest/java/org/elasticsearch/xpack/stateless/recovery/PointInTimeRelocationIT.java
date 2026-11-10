@@ -11,7 +11,9 @@ import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.store.FilterIndexInput;
 import org.apache.lucene.store.IOContext;
 import org.apache.lucene.store.IndexInput;
+import org.elasticsearch.ExceptionsHelper;
 import org.elasticsearch.action.admin.cluster.settings.ClusterUpdateSettingsRequest;
+import org.elasticsearch.action.admin.indices.stats.ShardStats;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.search.ClosePointInTimeRequest;
@@ -19,9 +21,13 @@ import org.elasticsearch.action.search.ClosePointInTimeResponse;
 import org.elasticsearch.action.search.OpenPointInTimeRequest;
 import org.elasticsearch.action.search.OpenPointInTimeResponse;
 import org.elasticsearch.action.search.SearchContextId;
+import org.elasticsearch.action.search.SearchPhaseExecutionException;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.action.search.TransportClosePointInTimeAction;
 import org.elasticsearch.action.search.TransportOpenPointInTimeAction;
 import org.elasticsearch.action.support.SubscribableListener;
+import org.elasticsearch.client.internal.Client;
 import org.elasticsearch.common.CheckedSupplier;
 import org.elasticsearch.common.blobstore.OperationPurpose;
 import org.elasticsearch.common.bytes.BytesReference;
@@ -36,6 +42,7 @@ import org.elasticsearch.index.store.PluggableDirectoryMetricsHolder;
 import org.elasticsearch.index.store.SelfAccountingIndexInput;
 import org.elasticsearch.index.store.StoreMetrics;
 import org.elasticsearch.plugins.Plugin;
+import org.elasticsearch.search.SearchContextMissingException;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchService;
 import org.elasticsearch.search.builder.PointInTimeBuilder;
@@ -64,11 +71,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -94,6 +103,7 @@ import static org.elasticsearch.xpack.stateless.commits.StatelessCommitService.S
 import static org.elasticsearch.xpack.stateless.recovery.TransportStatelessUnpromotableRelocationAction.START_HANDOFF_ACTION_NAME;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
@@ -105,6 +115,10 @@ import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 
 public class PointInTimeRelocationIT extends AbstractStatelessPluginIntegTestCase {
+
+    private static final TimeValue FALLBACK_PIT_KEEP_ALIVE = TimeValue.timeValueSeconds(20);
+    private static final int FALLBACK_PITS_TO_OPEN = 40;
+
     @Override
     protected boolean addMockFsRepository() {
         return false;
@@ -2061,5 +2075,206 @@ public class PointInTimeRelocationIT extends AbstractStatelessPluginIntegTestCas
         } while (searchAfter.get() != null);
         assertEquals(expectedNumDocs, totalHits.get());
         return nextPitId.get();
+    }
+
+    /** Two search copies, and the copy that is left behind has committed past the commit of the PIT, so it cannot rebuild the context. */
+    public void testTwoReplicasOtherCopyHasNewerCommit() throws Exception {
+        runScenario(2, true);
+    }
+
+    /** Control: two search copies, but nothing was written after the PIT, so the other copy can rebuild the context lazily. */
+    public void testTwoReplicasOtherCopyAtSameCommit() throws Exception {
+        runScenario(2, false);
+    }
+
+    /** Control: a single search copy, which is relocated, while the shard keeps committing: the handed-off copy is the only fallback. */
+    public void testOneReplicaNewerCommit() throws Exception {
+        runScenario(1, true);
+    }
+
+    /**
+     * A PIT search for a shard whose search copy was relocated first targets the node named in the PIT id, then the other searchable
+     * copies in random order ({@code TransportSearchAction#getLocalShardsIteratorFromPointInTime}). A copy that did not receive the
+     * handed-off context cannot find it and, if its latest commit differs from the one of the PIT, cannot rebuild it lazily, so it answers
+     * the non-retriable {@link SearchContextMissingException}. All PITs must still be answered by the relocation target.
+     */
+    private void runScenario(int replicas, boolean advanceCommitAfterPit) throws Exception {
+        final String indexNode = startMasterAndIndexNode(nodeSettings);
+        final Client indexNodeClient = client(indexNode);
+        final List<String> searchNodes = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            searchNodes.add(startSearchNode(nodeSettings));
+        }
+
+        final String indexName = randomIdentifier();
+        createIndex(indexName, indexSettings(1, replicas).build());
+        ensureGreen(indexName);
+        indexDocs(indexName, 300);
+        flushAndRefresh(indexName);
+
+        // Open many PITs (the PIT picks one of the search copies) and keep the ones on the copy that most PITs ended up on.
+        final Map<String, List<BytesReference>> pitsByNodeId = new HashMap<>();
+        final Map<String, String> pitSearcherIdByNodeId = new HashMap<>();
+        for (int i = 0; i < FALLBACK_PITS_TO_OPEN; i++) {
+            BytesReference pitId = indexNodeClient.execute(
+                TransportOpenPointInTimeAction.TYPE,
+                new OpenPointInTimeRequest(indexName).keepAlive(FALLBACK_PIT_KEEP_ALIVE)
+            ).actionGet().getPointInTimeId();
+            var perNode = new PointInTimeBuilder(pitId).getSearchContextId(writableRegistry()).shards().values().iterator().next();
+            pitsByNodeId.computeIfAbsent(perNode.getNode(), k -> new ArrayList<>()).add(pitId);
+            pitSearcherIdByNodeId.put(perNode.getNode(), perNode.getSearchContextId().getSearcherId());
+        }
+        final String sourceNodeId = pitsByNodeId.entrySet()
+            .stream()
+            .max(Map.Entry.comparingByValue((a, b) -> Integer.compare(a.size(), b.size())))
+            .get()
+            .getKey();
+        final List<BytesReference> pits = pitsByNodeId.get(sourceNodeId);
+        final String pitSearcherId = pitSearcherIdByNodeId.get(sourceNodeId);
+        final String sourceNodeName = internalCluster().clusterService().state().nodes().get(sourceNodeId).getName();
+        logger.info(
+            "PITs per node: {}, using [{}] PITs on source node [{}] ([{}]), PIT searcher id [{}]",
+            searchNodeNamesOf(pitsByNodeId),
+            pits.size(),
+            sourceNodeName,
+            sourceNodeId,
+            pitSearcherId
+        );
+        assertThat("need enough PITs on the same copy", pits.size(), greaterThanOrEqualTo(10));
+
+        if (advanceCommitAfterPit) {
+            // Move the latest commit of every search copy away from the commit of the PIT, so that no copy can lazily rebuild the context.
+            indexDocs(indexName, 200);
+            flushAndRefresh(indexName);
+            assertBusy(() -> {
+                int compared = 0;
+                for (ShardStats shardStats : indicesAdmin().prepareStats(indexName).get().getShards()) {
+                    if (shardStats.getCommitStats() == null) {
+                        continue;
+                    }
+                    compared++;
+                    logger.info(
+                        "copy on [{}] primary [{}] searchable [{}] latest commit id [{}]",
+                        shardStats.getShardRouting().currentNodeId(),
+                        shardStats.getShardRouting().primary(),
+                        shardStats.getShardRouting().isSearchable(),
+                        shardStats.getCommitStats().getId()
+                    );
+                    assertNotEquals(pitSearcherId, shardStats.getCommitStats().getId());
+                }
+                assertThat(compared, greaterThanOrEqualTo(1));
+            });
+        }
+
+        logger.info("copies before relocation: {}", internalCluster().nodesInclude(indexName));
+        // Relocate the copy the PITs are on to a node that does not hold a copy yet. The source node keeps running, without the shard.
+        assertAcked(
+            indicesAdmin().prepareUpdateSettings(indexName)
+                .setSettings(Settings.builder().put("index.routing.allocation.exclude._name", sourceNodeName))
+        );
+        ensureGreen(indexName);
+        final Collection<String> copiesAfter = internalCluster().nodesInclude(indexName);
+        logger.info("copies after relocation: {}", copiesAfter);
+        assertFalse(copiesAfter.contains(sourceNodeName));
+        for (String node : searchNodes) {
+            logger.info(
+                "node [{}] active PIT contexts [{}]",
+                node,
+                internalCluster().getInstance(SearchService.class, node).getActivePITContexts()
+            );
+        }
+
+        // Search every PIT once, like the next page of a reindex slice would. All of them must be answered.
+        final Map<String, Integer> answeredBy = new TreeMap<>();
+        final Map<String, Integer> missingContextOn = new TreeMap<>();
+        final List<String> otherFailures = new ArrayList<>();
+        final List<BytesReference> pitsToClose = new ArrayList<>();
+        for (BytesReference pitId : pits) {
+            try {
+                SearchResponse response = indexNodeClient.prepareSearch()
+                    .setPointInTime(new PointInTimeBuilder(pitId).setKeepAlive(FALLBACK_PIT_KEEP_ALIVE))
+                    .setAllowPartialSearchResults(false)
+                    .setSize(1)
+                    .get();
+                try {
+                    pitsToClose.add(response.pointInTimeId());
+                    var answeredNodeId = new PointInTimeBuilder(response.pointInTimeId()).getSearchContextId(writableRegistry())
+                        .shards()
+                        .values()
+                        .iterator()
+                        .next()
+                        .getNode();
+                    answeredBy.merge(searchNodeNameOf(answeredNodeId), 1, Integer::sum);
+                } finally {
+                    response.decRef();
+                }
+            } catch (SearchPhaseExecutionException e) {
+                pitsToClose.add(pitId);
+                for (ShardSearchFailure failure : e.shardFailures()) {
+                    if (ExceptionsHelper.unwrapCause(failure.getCause()) instanceof SearchContextMissingException) {
+                        String nodeId = failure.shard() == null ? "unknown" : failure.shard().getNodeId();
+                        missingContextOn.merge(searchNodeNameOf(nodeId), 1, Integer::sum);
+                    } else {
+                        otherFailures.add(failure.toString());
+                    }
+                }
+            } catch (Exception e) {
+                pitsToClose.add(pitId);
+                otherFailures.add(e.toString());
+            }
+        }
+        logger.info(
+            "RESULT replicas [{}] advanceCommit [{}] sourceNode [{}] searches [{}]: answered by {}, SearchContextMissing on {}, other failures {}",
+            replicas,
+            advanceCommitAfterPit,
+            sourceNodeName,
+            pits.size(),
+            answeredBy,
+            missingContextOn,
+            otherFailures
+        );
+
+        for (List<BytesReference> others : pitsByNodeId.values()) {
+            if (others != pits) {
+                pitsToClose.addAll(others);
+            }
+        }
+        for (BytesReference pitId : pitsToClose) {
+            try {
+                indexNodeClient.execute(TransportClosePointInTimeAction.TYPE, new ClosePointInTimeRequest(pitId)).actionGet();
+            } catch (Exception e) {
+                logger.info("failed to close PIT: {}", e.toString());
+            }
+        }
+
+        assertThat("searches failed with SearchContextMissingException on nodes " + missingContextOn, missingContextOn.size(), equalTo(0));
+        assertThat("searches failed for other reasons", otherFailures, empty());
+        assertThat("all searches answered", answeredBy.values().stream().mapToInt(Integer::intValue).sum(), equalTo(pits.size()));
+
+        // All PITs were closed above. Contexts that are still active now were not freed by closing the (rewritten) PIT ids, e.g. the
+        // handed-off context on the relocation target when another copy answered the search. They only go away with their keep-alive.
+        for (String node : searchNodes) {
+            logger.info(
+                "node [{}] active PIT contexts after closing all PITs [{}]",
+                node,
+                internalCluster().getInstance(SearchService.class, node).getActivePITContexts()
+            );
+        }
+        assertBusy(() -> {
+            for (String node : searchNodes) {
+                assertThat(internalCluster().getInstance(SearchService.class, node).getActivePITContexts(), equalTo(0L));
+            }
+        }, 60, TimeUnit.SECONDS);
+    }
+
+    private String searchNodeNameOf(String nodeId) {
+        var node = internalCluster().clusterService().state().nodes().get(nodeId);
+        return node == null ? nodeId : node.getName();
+    }
+
+    private Map<String, Integer> searchNodeNamesOf(Map<String, List<BytesReference>> pitsByNodeId) {
+        Map<String, Integer> result = new TreeMap<>();
+        pitsByNodeId.forEach((nodeId, pits) -> result.put(searchNodeNameOf(nodeId), pits.size()));
+        return result;
     }
 }
